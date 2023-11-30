@@ -97,23 +97,31 @@ class Renderer {
     this.mainRenderPass.addDrawable(shot);
   }
 
-  static async create() {
+  static async createParticipants(z: number, color: Vec4) {
     const players: Mesh[] = [];
     const numPlayers = 4;
     const spaceBetween = 12;
     const playerWidth = 4;
 
     for (let i = 0; i < numPlayers; i += 1 ) {
-      const player = await Mesh.create(box(playerWidth, Renderer.launcherHeight, playerWidth), 'lit')
+      const player = await Mesh.create(box(playerWidth, Renderer.launcherHeight, playerWidth, color), 'lit')
       player.translate[0] = (i - ((numPlayers - 1) / 2)) * spaceBetween + Math.random() * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
       player.translate[1] = Renderer.launcherHeight / 2;  
-      player.translate[2] = Math.random() * 10 - 5;
+      player.translate[2] = z + Math.random() * 10 - 5;
 
       players.push(player)
     }
 
+    return players;
+  }
+
+  static async create() {
+    const players = await Renderer.createParticipants(50, vec4.create(0, 0, 0.5, 1));
+
+    const opponenets = await Renderer.createParticipants(-50, vec4.create(0.5, 0, 0, 1));
+
     const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)), 'lit');
-    return new Renderer(players, shot);
+    return new Renderer([...players, ...opponenets], shot);
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
