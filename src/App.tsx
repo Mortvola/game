@@ -105,6 +105,9 @@ function App() {
       case 'S':
         renderer?.moveLeft(1)
         break;
+      case 'G':
+        renderer?.fire()
+        break;
     }
   }
 

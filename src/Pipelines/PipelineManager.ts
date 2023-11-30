@@ -2,7 +2,7 @@
 import CirclePipeline from "./CirclePipeline";
 // import DragHandlesPipeline from "./DragHandlesPipeline";
 import LinePipeline from "./LinePipeline";
-// import LitPipeline from "./LitPipeline";
+import LitPipeline from "./LitPipeline";
 // import Pipeline from "./Pipeline";
 import PipelineInterface from "./PipelineInterface";
 
@@ -21,7 +21,7 @@ class PipelineManager {
   private constructor() {
     this.pipelines = [];
 
-    // this.pipelines.push({ type: 'lit', pipeline: new LitPipeline() });
+    this.pipelines.push({ type: 'lit', pipeline: new LitPipeline() });
     // this.pipelines.push({ type: 'pipeline', pipeline: new Pipeline() })
     this.pipelines.push({ type: 'line', pipeline: new LinePipeline() });
     // this.pipelines.push({ type: 'billboard', pipeline: new BillboardPipeline() });

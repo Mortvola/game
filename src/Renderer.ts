@@ -1,7 +1,7 @@
-import { Vec4, mat4, quat, vec2, vec4 } from "wgpu-matrix";
+import { Vec2, Vec3, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import Camera from "./Camera";
 import Gpu from "./Gpu";
-import { degToRad, intersectionPlane } from "./Math";
+import { anglesOfLaunch, degToRad, gravity, minimumVelocity, radToDeg, timeToTarget } from "./Math";
 import ContainerNode from "./Drawables/ContainerNode";
 import BindGroups, { lightsStructure } from "./BindGroups";
 import Circle from "./Drawables/Circle";
@@ -9,6 +9,8 @@ import RenderPass from "./RenderPass";
 import Light, { isLight } from "./Drawables/LIght";
 import CartesianAxes from "./Drawables/CartesianAxes";
 import SceneNode from "./Drawables/SceneNode";
+import Mesh from "./Drawables/Mesh";
+import { box } from "./Drawables/Shapes/box";
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -16,6 +18,14 @@ const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
       task(timestamp);
     }, 0);
   });
+};
+
+type ShotData = {
+  velocityVector: Vec2,
+  startTime: number | null,
+  duration: number,
+  position: Vec4,
+  angle: number,
 };
 
 class Renderer {
@@ -53,7 +63,11 @@ class Renderer {
 
   backward = 0;
 
-  constructor() {
+  shots: ShotData[] = [];
+
+  shot: Mesh;
+
+  constructor(player: Mesh, shot: Mesh) {
     this.mainRenderPass.addDrawable(new CartesianAxes('line'));
 
     this.cursor = new Circle(2, 0.1, vec4.create(1, 0, 0, 1), 'circle');    
@@ -63,10 +77,21 @@ class Renderer {
 
     this.scene.addNode(this.cursor);
     this.mainRenderPass.addDrawable(this.cursor)
+
+    this.scene.addNode(player);
+    this.mainRenderPass.addDrawable(player);
+
+    this.shot = shot;
+    this.scene.addNode(shot);
+    this.mainRenderPass.addDrawable(shot);
   }
 
   static async create() {
-    return new Renderer();
+    const player = await Mesh.create(box(4, 1, 4), 'lit')
+    player.translate[1] = 1;
+
+    const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)), 'lit');
+    return new Renderer(player, shot);
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
@@ -107,6 +132,7 @@ class Renderer {
         // Update the fps display every second.
         const fpsElapsedTime = timestamp - this.startFpsTime;
 
+        // Update frames per second
         if (fpsElapsedTime > 1000) {
           const fps = this.framesRendered / (fpsElapsedTime * 0.001);
           this.onFpsChange && this.onFpsChange(fps);
@@ -121,19 +147,36 @@ class Renderer {
           // this.updateTimeOfDay(elapsedTime);
           this.camera.updatePosition(elapsedTime);
 
-          // if (this.fadePhoto && this.photoAlpha > 0) {
-          //   if (this.fadeSTartTime === null) {
-          //     this.fadeSTartTime = timestamp;
-          //   }
-          //   else {
-          //     const eTime = (timestamp - this.fadeSTartTime) * 0.001;
-          //     this.photoAlpha = 1 - eTime / this.photoFadeDuration;
-          //     if (this.photoAlpha < 0) {
-          //       this.photoAlpha = 0;
-          //       this.fadePhoto = false;
-          //     }
-          //   }
-          // }
+          // Update shot positions
+          for (let i = 0; i < this.shots.length; i += 1) {
+            const shot = this.shots[i];
+
+            if (shot.startTime === null) {
+              shot.startTime = timestamp;
+            }
+            else {
+              const shotElapsedTime = (timestamp - shot.startTime) * 0.001;
+
+              if (shotElapsedTime < shot.duration) {
+                shot.position = vec4.create(
+                  0,
+                  0 + shot.velocityVector[1] * shotElapsedTime + 0.5 * gravity * shotElapsedTime * shotElapsedTime,
+                  0 + shot.velocityVector[0] * shotElapsedTime,
+                  0
+                )
+                
+                vec4.transformMat4(shot.position, mat4.rotationY(shot.angle), shot.position);
+              }
+              else {
+                this.shots = [
+                  ...this.shots.slice(0, i),
+                  ...this.shots.slice(i + 1),
+                ]
+
+                i -= 1;
+              }
+            }
+          }
         }
 
         this.previousTimestamp = timestamp;
@@ -177,6 +220,12 @@ class Renderer {
 
     this.cursor.translate[0] = this.camera.position[0];
     this.cursor.translate[2] = this.camera.position[2];
+
+    if (this.shots.length > 0) {
+      this.shot.translate[0] = this.shots[0].position[0];
+      this.shot.translate[1] = this.shots[0].position[1];
+      this.shot.translate[2] = this.shots[0].position[2];
+    }
 
     this.scene.nodes.forEach((node) => {
       node.computeTransform()
@@ -237,6 +286,11 @@ class Renderer {
 
     // Update the light information
     lightsStructure.set({
+      directional: vec4.transformMat4(
+        vec4.create(1, 1, 1, 0),
+        inverseViewtransform,
+      ),
+      directionalColor: vec4.create(1, 1, 1, 1),
       count: lights.length,
       lights: lights.map((light) => ({
         position: vec4.transformMat4(
@@ -350,6 +404,36 @@ class Renderer {
       this.backward - this.forward,
       0,
     ))
+  }
+
+  fire() {
+    const distance = vec2.distance(vec2.create(0, 0), vec2.create(this.camera.position[0], this.camera.position[2]));
+
+    const minVelocity = minimumVelocity(distance, 0);
+
+    const velocity = Math.max(50, minVelocity);
+
+    const [lowAngle] = anglesOfLaunch(velocity, distance, 0);
+
+    const timeLow = timeToTarget(distance, velocity, lowAngle);
+    // const timeHigh = timeToTarget(distance, velocity, highAngle);
+
+    const data: ShotData = {
+      velocityVector: vec2.create(velocity * Math.cos(lowAngle), velocity * Math.sin(lowAngle)),
+      startTime: null, // start time will be assigned at the next frame.
+      duration: timeLow,
+      position: vec4.create(0, 0, 0, 1),
+      angle: Math.atan2(this.camera.position[0], this.camera.position[2]),
+    }
+
+    // console.log(`distance: ${distance}, duration: ${data.duration}, v: ${minVelocity}, angle: ${radToDeg(lowAngle)}`)
+
+    this.shots.push(data);
+    
+    // const rotationX = Math.atan2(this.camera.position[0], this.camera.position[2]); // Math.asin(this.camera.position[0] / distance);
+    // console.log(radToDeg(rotationX));
+
+    // console.log(`distance: ${distance}, velocity: ${velocity}, low angle: ${radToDeg(lowAngle)}, high angle: ${radToDeg(highAngle)}, time: ${timeLow}, ${timeHigh}`);
   }
 }
 

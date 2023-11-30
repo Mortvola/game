@@ -30,7 +30,7 @@ class Camera {
     const cameraQuat = quat.fromEuler(degToRad(0), degToRad(this.rotateY), degToRad(0), "yxz");
     const t = mat4.fromQuat(cameraQuat);
 
-    const direction = vec4.mulScalar(this.moveDirection, elapsedTime * 30);
+    const direction = vec4.mulScalar(this.moveDirection, elapsedTime * 20);
 
     const change = vec4.transformMat4(direction, t)
 

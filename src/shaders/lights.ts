@@ -5,6 +5,8 @@ struct PointLight {
 }
 
 struct Lights {
+  directional: vec4f,
+  directionalColor: vec4f,
   count: u32,
   lights: array<PointLight, 4>,
 }
