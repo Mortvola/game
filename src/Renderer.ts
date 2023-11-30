@@ -26,6 +26,7 @@ type ShotData = {
   duration: number,
   position: Vec4,
   angle: number,
+  player: Mesh,
 };
 
 class Renderer {
@@ -69,7 +70,11 @@ class Renderer {
 
   static launcherHeight = 2;
 
-  constructor(player: Mesh, shot: Mesh) {
+  players: Mesh[];
+
+  playerTurn =  0;
+
+  constructor(players: Mesh[], shot: Mesh) {
     this.mainRenderPass.addDrawable(new CartesianAxes('line'));
 
     this.cursor = new Circle(2, 0.1, vec4.create(1, 0, 0, 1), 'circle');    
@@ -80,8 +85,12 @@ class Renderer {
     this.scene.addNode(this.cursor);
     this.mainRenderPass.addDrawable(this.cursor)
 
-    this.scene.addNode(player);
-    this.mainRenderPass.addDrawable(player);
+    this.players = players;
+
+    for (const player of players) {
+      this.scene.addNode(player);
+      this.mainRenderPass.addDrawable(player);  
+    }
 
     this.shot = shot;
     this.scene.addNode(shot);
@@ -89,11 +98,22 @@ class Renderer {
   }
 
   static async create() {
-    const player = await Mesh.create(box(4, Renderer.launcherHeight, 4), 'lit')
-    player.translate[1] = Renderer.launcherHeight / 2;
+    const players: Mesh[] = [];
+    const numPlayers = 4;
+    const spaceBetween = 12;
+    const playerWidth = 4;
+
+    for (let i = 0; i < numPlayers; i += 1 ) {
+      const player = await Mesh.create(box(playerWidth, Renderer.launcherHeight, playerWidth), 'lit')
+      player.translate[0] = (i - ((numPlayers - 1) / 2)) * spaceBetween + Math.random() * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
+      player.translate[1] = Renderer.launcherHeight / 2;  
+      player.translate[2] = Math.random() * 10 - 5;
+
+      players.push(player)
+    }
 
     const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)), 'lit');
-    return new Renderer(player, shot);
+    return new Renderer(players, shot);
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
@@ -124,7 +144,7 @@ class Renderer {
     this.initialized = true;
   }
 
-  draw = (timestamp: number) => {
+  updateFrame = (timestamp: number) => {
     if (this.render) {
       if (timestamp !== this.previousTimestamp) {
         if (this.startFpsTime === null) {
@@ -160,14 +180,28 @@ class Renderer {
               const shotElapsedTime = (timestamp - shot.startTime) * 0.001;
 
               if (shotElapsedTime < shot.duration) {
+                const player = shot.player;
+
                 shot.position = vec4.create(
                   0,
                   Renderer.launcherHeight + shot.velocityVector[1] * shotElapsedTime + 0.5 * gravity * shotElapsedTime * shotElapsedTime,
                   0 + shot.velocityVector[0] * shotElapsedTime,
-                  0
+                  1
                 )
-                
-                vec4.transformMat4(shot.position, mat4.rotationY(shot.angle), shot.position);
+
+                const translate1 = mat4.translation(
+                  vec3.create(player.translate[0], 0, player.translate[2]),
+                );
+                const translate2 = mat4.translation(shot.position);
+
+                const rotate = mat4.rotationY(shot.angle);
+
+                const transform = mat4.identity();
+                mat4.multiply(transform, translate1, transform)
+                mat4.multiply(transform, rotate, transform)
+                mat4.multiply(transform, translate2, transform)
+            
+                vec4.transformMat4(vec4.create(0, 0, 0, 1), transform, shot.position)
               }
               else {
                 this.shots = [
@@ -188,7 +222,7 @@ class Renderer {
         this.framesRendered += 1;
       }
 
-      requestPostAnimationFrame(this.draw);
+      requestPostAnimationFrame(this.updateFrame);
     }
   };
 
@@ -197,7 +231,7 @@ class Renderer {
   start(): void {
     if (!this.started) {
       this.started = true;
-      requestPostAnimationFrame(this.draw);
+      requestPostAnimationFrame(this.updateFrame);
     }
   }
 
@@ -409,7 +443,12 @@ class Renderer {
   }
 
   fire() {
-    const distance = vec2.distance(vec2.create(0, 0), vec2.create(this.camera.position[0], this.camera.position[2]));
+    const player = this.players[this.playerTurn];
+
+    const distance = vec2.distance(
+      vec2.create(player.translate[0], player.translate[2]),
+      vec2.create(this.camera.position[0], this.camera.position[2]),
+    );
 
     // The endY is the negative height of the launcher.
     const minVelocity = minimumVelocity(distance, -Renderer.launcherHeight);
@@ -426,7 +465,8 @@ class Renderer {
       startTime: null, // start time will be assigned at the next frame.
       duration: timeLow,
       position: vec4.create(0, Renderer.launcherHeight, 0, 1),
-      angle: Math.atan2(this.camera.position[0], this.camera.position[2]),
+      angle: Math.atan2(this.camera.position[0] - player.translate[0], this.camera.position[2] - player.translate[2]),
+      player,
     }
 
     // console.log(`distance: ${distance}, duration: ${data.duration}, v: ${minVelocity}, angle: ${radToDeg(lowAngle)}`)
@@ -437,6 +477,8 @@ class Renderer {
     // console.log(radToDeg(rotationX));
 
     // console.log(`distance: ${distance}, velocity: ${velocity}, low angle: ${radToDeg(lowAngle)}, high angle: ${radToDeg(highAngle)}, time: ${timeLow}, ${timeHigh}`);
+
+    this.playerTurn = (this.playerTurn + 1) % this.players.length;
   }
 }
 
