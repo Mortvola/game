@@ -56,6 +56,8 @@ class Renderer {
 
   cursor: SceneNode;
 
+  turnIndicator: SceneNode;
+
   left = 0;
   
   right = 0;
@@ -82,8 +84,14 @@ class Renderer {
     this.cursor.postTransforms.push(mat4.fromQuat(q));
     this.cursor.translate = vec4.create(0, 0, 50);
 
+    this.turnIndicator = new Circle(4, 0.1, vec4.create(1, 1, 1, 1), 'circle');
+    this.turnIndicator.postTransforms.push(mat4.fromQuat(q));
+
     this.scene.addNode(this.cursor);
     this.mainRenderPass.addDrawable(this.cursor)
+
+    this.scene.addNode(this.turnIndicator);
+    this.mainRenderPass.addDrawable(this.turnIndicator)
 
     this.players = players;
 
@@ -487,6 +495,9 @@ class Renderer {
     // console.log(`distance: ${distance}, velocity: ${velocity}, low angle: ${radToDeg(lowAngle)}, high angle: ${radToDeg(highAngle)}, time: ${timeLow}, ${timeHigh}`);
 
     this.playerTurn = (this.playerTurn + 1) % this.players.length;
+
+    this.turnIndicator.translate = vec3.copy(this.players[this.playerTurn].translate);
+    this.turnIndicator.translate[1] = 0;
   }
 }
 
