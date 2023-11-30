@@ -67,6 +67,8 @@ class Renderer {
 
   shot: Mesh;
 
+  static launcherHeight = 2;
+
   constructor(player: Mesh, shot: Mesh) {
     this.mainRenderPass.addDrawable(new CartesianAxes('line'));
 
@@ -87,8 +89,8 @@ class Renderer {
   }
 
   static async create() {
-    const player = await Mesh.create(box(4, 1, 4), 'lit')
-    player.translate[1] = 1;
+    const player = await Mesh.create(box(4, Renderer.launcherHeight, 4), 'lit')
+    player.translate[1] = Renderer.launcherHeight / 2;
 
     const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)), 'lit');
     return new Renderer(player, shot);
@@ -160,7 +162,7 @@ class Renderer {
               if (shotElapsedTime < shot.duration) {
                 shot.position = vec4.create(
                   0,
-                  0 + shot.velocityVector[1] * shotElapsedTime + 0.5 * gravity * shotElapsedTime * shotElapsedTime,
+                  Renderer.launcherHeight + shot.velocityVector[1] * shotElapsedTime + 0.5 * gravity * shotElapsedTime * shotElapsedTime,
                   0 + shot.velocityVector[0] * shotElapsedTime,
                   0
                 )
@@ -409,11 +411,12 @@ class Renderer {
   fire() {
     const distance = vec2.distance(vec2.create(0, 0), vec2.create(this.camera.position[0], this.camera.position[2]));
 
-    const minVelocity = minimumVelocity(distance, 0);
+    // The endY is the negative height of the launcher.
+    const minVelocity = minimumVelocity(distance, -Renderer.launcherHeight);
 
     const velocity = Math.max(50, minVelocity);
 
-    const [lowAngle] = anglesOfLaunch(velocity, distance, 0);
+    const [lowAngle] = anglesOfLaunch(velocity, distance, -Renderer.launcherHeight);
 
     const timeLow = timeToTarget(distance, velocity, lowAngle);
     // const timeHigh = timeToTarget(distance, velocity, highAngle);
@@ -422,7 +425,7 @@ class Renderer {
       velocityVector: vec2.create(velocity * Math.cos(lowAngle), velocity * Math.sin(lowAngle)),
       startTime: null, // start time will be assigned at the next frame.
       duration: timeLow,
-      position: vec4.create(0, 0, 0, 1),
+      position: vec4.create(0, Renderer.launcherHeight, 0, 1),
       angle: Math.atan2(this.camera.position[0], this.camera.position[2]),
     }
 
