@@ -1,11 +1,9 @@
-import { gpu, bindGroups } from "../Renderer";
+import { bindGroups, gpu } from "../Renderer";
 import PipelineInterface from "./PipelineInterface";
-import { circleShader } from '../shaders/circle';
+import { lineShader } from '../shaders/line';
 import DrawableInterface from "../Drawables/DrawableInterface";
 
-const label = 'CirclePipeline';
-
-class CirclePipeline implements PipelineInterface {
+class LinePipeline implements PipelineInterface {
   pipeline: GPURenderPipeline;
 
   bindGroupLayouts: GPUBindGroupLayout[] = [];
@@ -16,48 +14,46 @@ class CirclePipeline implements PipelineInterface {
     }
 
     const shaderModule = gpu.device.createShaderModule({
-      label,
-      code: circleShader,
+      label: 'line',
+      code: lineShader,
     })
-    
-    this.bindGroupLayouts = [
-      gpu.device.createBindGroupLayout({
-        label,
-        entries: [
+
+    const pipelineLayout = gpu.device.createPipelineLayout({
+      label: 'line',
+      bindGroupLayouts: [
+        bindGroups.camera!.layout,
+      ],
+    });
+
+    const vertexBufferLayout: GPUVertexBufferLayout[] = [
+      {
+        attributes: [
           {
-            binding: 0,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {},
+            shaderLocation: 0, // position
+            offset: 0,
+            format: "float32x4" as GPUVertexFormat,
           },
           {
-            binding: 1,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {},
+            shaderLocation: 1, // color
+            offset: 16,
+            format: "float32x4" as GPUVertexFormat,
           },
-        ]
-      }),
-      
-      gpu.device.createBindGroupLayout({
-        label,
-        entries: [
-          {
-            binding: 0,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {},
-          },
-        ]
-      }),
-    ]
+        ],
+        arrayStride: 32,
+        stepMode: "vertex",
+      },
+    ];    
     
     const pipelineDescriptor: GPURenderPipelineDescriptor = {
-      label,
+      label: 'line',
       vertex: {
         module: shaderModule,
-        entryPoint: "vertex_circle",
+        entryPoint: "vertex_line",
+        buffers: vertexBufferLayout,
       },
       fragment: {
         module: shaderModule,
-        entryPoint: "fragment_circle",
+        entryPoint: "fragment_line",
         targets: [
           {
             format: navigator.gpu.getPreferredCanvasFormat(),
@@ -65,22 +61,15 @@ class CirclePipeline implements PipelineInterface {
         ],
       },
       primitive: {
-        topology: "triangle-list",
-        cullMode: "back",
-        frontFace: "ccw",
+        topology: "line-list",
+        cullMode: "none",
       },
       depthStencil: {
         depthWriteEnabled: true,
         depthCompare: "less",
         format: "depth24plus"
       },
-      layout: gpu.device.createPipelineLayout({
-        label,
-        bindGroupLayouts: [
-          bindGroups.camera!.layout,
-          ...this.bindGroupLayouts,
-        ]
-      }),
+      layout: pipelineLayout,
     };
     
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
@@ -99,4 +88,4 @@ class CirclePipeline implements PipelineInterface {
   }
 }
 
-export default CirclePipeline;
+export default LinePipeline;

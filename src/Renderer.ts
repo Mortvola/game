@@ -1,12 +1,14 @@
-import { mat4, vec4 } from "wgpu-matrix";
+import { Vec4, mat4, quat, vec2, vec4 } from "wgpu-matrix";
 import Camera from "./Camera";
 import Gpu from "./Gpu";
-import { degToRad } from "./Math";
+import { degToRad, intersectionPlane } from "./Math";
 import ContainerNode from "./Drawables/ContainerNode";
 import BindGroups, { lightsStructure } from "./BindGroups";
 import Circle from "./Drawables/Circle";
 import RenderPass from "./RenderPass";
 import Light, { isLight } from "./Drawables/LIght";
+import CartesianAxes from "./Drawables/CartesianAxes";
+import SceneNode from "./Drawables/SceneNode";
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -41,10 +43,26 @@ class Renderer {
 
   mainRenderPass = new RenderPass();
 
-  constructor() {
-    this.scene.addNode(new Circle(4, 1, 'circle'));
+  cursor: SceneNode;
 
-    this.mainRenderPass.addDrawables(this.scene)
+  left = 0;
+  
+  right = 0;
+
+  forward = 0;
+
+  backward = 0;
+
+  constructor() {
+    this.mainRenderPass.addDrawable(new CartesianAxes('line'));
+
+    this.cursor = new Circle(2, 0.1, vec4.create(1, 0, 0, 1), 'circle');    
+    const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
+    this.cursor.postTransforms.push(mat4.fromQuat(q));
+    this.cursor.translate = vec4.create(0, 0, 50);
+
+    this.scene.addNode(this.cursor);
+    this.mainRenderPass.addDrawable(this.cursor)
   }
 
   static async create() {
@@ -98,10 +116,10 @@ class Renderer {
 
         // Move the camera using the set velocity.
         if (this.previousTimestamp !== null) {
-          // const elapsedTime = (timestamp - this.previousTimestamp) * 0.001;
+          const elapsedTime = (timestamp - this.previousTimestamp) * 0.001;
 
           // this.updateTimeOfDay(elapsedTime);
-          // this.updateCameraPosition(elapsedTime);
+          this.camera.updatePosition(elapsedTime);
 
           // if (this.fadePhoto && this.photoAlpha > 0) {
           //   if (this.fadeSTartTime === null) {
@@ -156,6 +174,9 @@ class Renderer {
     }
 
     const lights: Light[] = [];
+
+    this.cursor.translate[0] = this.camera.position[0];
+    this.cursor.translate[2] = this.camera.position[2];
 
     this.scene.nodes.forEach((node) => {
       node.computeTransform()
@@ -277,11 +298,58 @@ class Renderer {
   }
 
   pointerMove(x: number, y: number) {
-
   }
 
   pointerUp(x: number, y: number) {
 
+  }
+
+  mouseWheel(deltaX: number, deltaY: number, x: number, y: number) {
+    this.camera.changeRotation(-deltaX * 0.2)
+  }
+
+  moveForward(v: number) {
+    this.forward = v;
+
+    this.camera.moveDirection = vec4.normalize(vec4.create(
+      this.right - this.left,
+      0,
+      this.backward - this.forward,
+      0,
+    ))
+  }
+
+  moveBackward(v: number) {
+    this.backward = v;
+
+    this.camera.moveDirection = vec4.normalize(vec4.create(
+      this.right - this.left,
+      0,
+      this.backward - this.forward,
+      0,
+    ))
+  }
+
+  moveRight(v: number) {
+    this.right = v;
+
+    this.camera.moveDirection = vec4.normalize(vec4.create(
+      this.right - this.left,
+      0,
+      this.backward - this.forward,
+      0,
+    ))
+  }
+
+  moveLeft(v: number) {
+    this.left = v;
+
+    this.camera.moveDirection = vec4.normalize(vec4.create(
+      this.right - this.left,
+      0,
+      this.backward - this.forward,
+      0,
+    ))
   }
 }
 

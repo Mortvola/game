@@ -17,6 +17,8 @@ class SceneNode {
 
   transform = mat4.identity();
 
+  postTransforms: Mat4[] = [];
+
   translate = vec3.create(0, 0, 0);
 
   qRotate = quat.fromEuler(0, 0, 0, rotationOrder);
@@ -62,16 +64,12 @@ class SceneNode {
   computeTransform(transform?: Mat4, prepend = true): Mat4 {
     this.transform = mat4.identity();
 
-    if (prepend && transform) {
-      this.transform = mat4.copy(transform);
-    }
-
     mat4.translate(this.transform, this.translate, this.transform);
     mat4.multiply(this.transform, this.getRotation(), this.transform);
     mat4.scale(this.transform, this.scale, this.transform);
 
-    if (!prepend && transform) {
-      mat4.multiply(this.transform, transform, this.transform);
+    for (const t of this.postTransforms) {
+      mat4.multiply(this.transform, t, this.transform)
     }
 
     return this.transform;

@@ -12,40 +12,52 @@ class Camera {
 
   viewTransform = mat4.identity();
 
-  position = vec4.create(0, 0, 25, 1);
+  offset = 30;
 
-  rotateX = 330;
+  position = vec4.create(0, 5, 50, 0);
 
-  rotateY = 45;
+  rotateX = -5;
+
+  rotateY = 0;
 
   near = 0.125;
   
   far = 2000;
 
-  changePosition(deltaX: number, deltaY: number) {
-    this.position[0] += deltaX;
-    this.position[2] += deltaY;
+  moveDirection = vec4.create(0, 0, 0, 0);
+
+  updatePosition(elapsedTime: number) {
+    const cameraQuat = quat.fromEuler(degToRad(0), degToRad(this.rotateY), degToRad(0), "yxz");
+    const t = mat4.fromQuat(cameraQuat);
+
+    const direction = vec4.mulScalar(this.moveDirection, elapsedTime * 30);
+
+    const change = vec4.transformMat4(direction, t)
+
+    this.position[0] += change[0];
+    this.position[2] += change[2];
 
     this.computeViewTransform();
   }
 
-  changeRotation(deltaX: number, deltaY: number) {
-    this.rotateX = normalizeDegrees(this.rotateX + deltaY);
-
-    if (this.rotateX > 90 && this.rotateX < 270) {
-      this.rotateY = normalizeDegrees(this.rotateY - deltaX);
-    }
-    else {
-      this.rotateY = normalizeDegrees(this.rotateY + deltaX);
-    }
+  changeRotation(deltaX: number) {
+    this.rotateY = normalizeDegrees(this.rotateY + deltaX);
 
     this.computeViewTransform();
   }
 
   computeViewTransform() {
-    const cameraQuat = quat.fromEuler(degToRad(this.rotateX), degToRad(this.rotateY), 0, "yxz");
+    this.viewTransform = mat4.identity();
+
+    const cameraQuat = quat.fromEuler(degToRad(this.rotateX), degToRad(this.rotateY), degToRad(0), "yxz");
     const t = mat4.fromQuat(cameraQuat);
-    this.viewTransform = mat4.translate(t, this.position)
+    
+    const translate1 = mat4.translation(this.position);
+    const translate2 = mat4.translation(vec4.create(0, 0, this.offset));
+
+    mat4.multiply(this.viewTransform, translate1, this.viewTransform)
+    mat4.multiply(this.viewTransform, t, this.viewTransform)
+    mat4.multiply(this.viewTransform, translate2, this.viewTransform)
   }
 
   ndcToCameraSpace(x: number, y: number) {

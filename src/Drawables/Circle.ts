@@ -8,9 +8,13 @@ class Circle extends Drawable {
 
   thickness: number;
 
+  color = new Float32Array(4);
+
   bindGroup: GPUBindGroup;
 
   uniformBuffer: GPUBuffer;
+
+  colorBuffer: GPUBuffer;
 
   bindGroup2: GPUBindGroup;
 
@@ -18,7 +22,7 @@ class Circle extends Drawable {
 
   uniformValues = new Float32Array(3);
 
-  constructor(radius: number, thickness: number, pipelineType: PipelineTypes) {
+  constructor(radius: number, thickness: number, color: Vec4, pipelineType: PipelineTypes) {
     super(pipelineType)
 
     if (!gpu) {
@@ -28,6 +32,11 @@ class Circle extends Drawable {
     this.radius= radius;
     this.thickness = thickness;
 
+    this.color[0] = color[0];
+    this.color[1] = color[1];
+    this.color[2] = color[2];
+    this.color[3] = color[3];
+    
     const bindGroupLayouts = this.pipeline.getBindGroupLayouts();
 
     this.uniformBuffer = gpu.device.createBuffer({
@@ -36,11 +45,18 @@ class Circle extends Drawable {
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
+    this.colorBuffer = gpu.device.createBuffer({
+      label: 'color',
+      size: 4 * Float32Array.BYTES_PER_ELEMENT,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
     this.bindGroup = gpu.device.createBindGroup({
       label: 'Circle',
       layout: bindGroupLayouts[0],
       entries: [
         { binding: 0, resource: { buffer: this.uniformBuffer }},
+        { binding: 1, resource: { buffer: this.colorBuffer }},
       ],
     });
 
@@ -64,11 +80,12 @@ class Circle extends Drawable {
       throw new Error('gpu device not set.')
     }
 
-    const numSegments = 16;
+    const numSegments = 64;
 
     this.uniformValues.set([this.radius, numSegments, this.thickness], 0);
 
     gpu.device.queue.writeBuffer(this.uniformBuffer, 0, this.getTransform() as Float32Array);
+    gpu.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
     gpu.device.queue.writeBuffer(this.uniformBuffer2, 0, this.uniformValues);
 
     passEncoder.setBindGroup(1, this.bindGroup);

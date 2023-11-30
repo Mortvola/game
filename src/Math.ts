@@ -1,4 +1,4 @@
-import { Quat, mat4 } from "wgpu-matrix";
+import { Quat, Vec4, mat4, vec4 } from "wgpu-matrix";
 
 export const degToRad = (d: number) => d * Math.PI / 180;
 export const radToDeg = (r: number) => (r /  Math.PI) * 180;
@@ -10,6 +10,21 @@ export const normalizeDegrees = (d: number) => {
   }
 
   return normalized;
+}
+
+export const intersectionPlane = (planePoint: Vec4, planeNormal: Vec4, origin: Vec4, ray: Vec4): Vec4 | null => {
+  const denom = vec4.dot(ray, planeNormal);
+
+  if (denom < -1e-6 || denom > 1e-6) {
+    const v = vec4.subtract(planePoint, origin);
+    const t = vec4.dot(v, planeNormal) / denom;
+
+    if (t >= 0) {
+      return vec4.add(origin, vec4.mulScalar(ray, t))
+    }
+  }
+
+  return null;
 }
 
 const clamp = (v: number, l: number, h: number): number => {

@@ -37,7 +37,7 @@ function App() {
 
       const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
       const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-      renderer?.pointerMove(clipX, clipY);  
+      renderer?.pointerMove(clipX, clipY);
     }
   }
 
@@ -55,12 +55,7 @@ function App() {
   }
 
   const handleWheel: React.WheelEventHandler<HTMLCanvasElement> = (event) => {
-    if (event.ctrlKey) {
-      renderer?.camera.changePosition(0, event.deltaY * 0.01);
-    }
-    else {
-      renderer?.camera.changeRotation(event.deltaX * 0.2, event.deltaY * 0.2)
-    }
+    renderer?.mouseWheel(event.deltaX, event.deltaY, event.clientX, event.clientY)
 
     event.stopPropagation();
   }
@@ -95,14 +90,53 @@ function App() {
     }
   }, []);
 
+  const handleKeyDown: React.KeyboardEventHandler<HTMLCanvasElement> = (event) => {
+    const upperKey = event.key.toUpperCase();
+    switch (upperKey) {
+      case 'E':
+        renderer?.moveForward(1)
+        break;
+      case 'D':
+        renderer?.moveBackward(1)
+        break;
+      case 'F':
+        renderer?.moveRight(1)
+        break;
+      case 'S':
+        renderer?.moveLeft(1)
+        break;
+    }
+  }
+
+  const handleKeyUp: React.KeyboardEventHandler<HTMLCanvasElement> = (event) => {
+    const upperKey = event.key.toUpperCase();
+    switch (upperKey) {
+      case 'E':
+        renderer?.moveForward(0)
+        break;
+      case 'D':
+        renderer?.moveBackward(0)
+        break;
+      case 'F':
+        renderer?.moveRight(0)
+        break;
+      case 'S':
+        renderer?.moveLeft(0)
+        break;
+    }
+  }
+
   return (
     <div className="App">
       <canvas
         ref={canvasRef}
+        tabIndex={0}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onWheel={handleWheel}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
       />
     </div>
   );
