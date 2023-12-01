@@ -21,6 +21,7 @@ sound.source.connect(sound.volume);
 sound.volume.connect(sound.panner);
 
 sound.panner.connect(mainVolume);
+sound.panner.panningModel = 'HRTF';
 
 var request = new XMLHttpRequest();
 // request.open("GET", "GunShot.wav", true);
