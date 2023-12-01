@@ -17,9 +17,9 @@ class Circle extends Drawable {
 
   bindGroup2: GPUBindGroup;
 
-  uniformBuffer2: GPUBuffer;
+  circleDataBuffer: GPUBuffer;
 
-  uniformValues = new Float32Array(3);
+  circleData = new Float32Array(3);
 
   constructor(radius: number, thickness: number, color: Vec4) {
     super()
@@ -57,7 +57,7 @@ class Circle extends Drawable {
       ],
     });
 
-    this.uniformBuffer2 = gpu.device.createBuffer({
+    this.circleDataBuffer = gpu.device.createBuffer({
       label: 'Circle',
       size: 3 * Float32Array.BYTES_PER_ELEMENT,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -67,7 +67,7 @@ class Circle extends Drawable {
       label: 'Circle',
       layout: bindGroups.bindGroupLayout2,
       entries: [
-        { binding: 0, resource: { buffer: this.uniformBuffer2 }},
+        { binding: 0, resource: { buffer: this.circleDataBuffer }},
       ],
     });
   }
@@ -79,11 +79,11 @@ class Circle extends Drawable {
 
     const numSegments = 64;
 
-    this.uniformValues.set([this.radius, numSegments, this.thickness], 0);
+    this.circleData.set([this.radius, numSegments, this.thickness], 0);
 
     gpu.device.queue.writeBuffer(this.uniformBuffer, 0, this.getTransform() as Float32Array);
     gpu.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
-    gpu.device.queue.writeBuffer(this.uniformBuffer2, 0, this.uniformValues);
+    gpu.device.queue.writeBuffer(this.circleDataBuffer, 0, this.circleData);
 
     passEncoder.setBindGroup(1, this.bindGroup);
     passEncoder.setBindGroup(2, this.bindGroup2);

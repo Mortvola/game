@@ -11,5 +11,5 @@ struct Lights {
   lights: array<PointLight, 4>,
 }
 
-@group(0) @binding(3) var<storage> pointLights: Lights;
+@group(0) @binding(4) var<storage> pointLights: Lights;
 `

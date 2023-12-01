@@ -6,8 +6,9 @@ import LitPipeline from "./LitPipeline";
 import OutlinePipeline from "./OutlinePipeline";
 // import Pipeline from "./Pipeline";
 import PipelineInterface from "./PipelineInterface";
+import ReticlePipeline from "./ReticlePipeline";
 
-export type PipelineTypes = 'lit' | 'pipeline' | 'line' | 'billboard' | 'drag-handles' | 'circle' | 'outline';
+export type PipelineTypes = 'lit' | 'pipeline' | 'line' | 'billboard' | 'drag-handles' | 'circle' | 'outline' | 'reticle';
 
 type Pipelines = {
   type: PipelineTypes,
@@ -29,6 +30,7 @@ class PipelineManager {
     // this.pipelines.push({ type: 'drag-handles', pipeline: new DragHandlesPipeline() });
     this.pipelines.push({ type: 'circle', pipeline: new CirclePipeline() });
     this.pipelines.push({ type: 'outline', pipeline: new OutlinePipeline() });
+    this.pipelines.push({ type: 'reticle', pipeline: new ReticlePipeline() });
   }
 
   public static getInstance(): PipelineManager {

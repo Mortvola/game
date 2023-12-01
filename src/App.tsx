@@ -9,6 +9,7 @@ function App() {
     const element = canvasRef.current;
 
     if (element) {
+      element.focus();
       (async () => {
         await renderer?.setCanvas(element);
         // renderer?.onSelect(handleSelect)

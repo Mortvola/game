@@ -12,6 +12,7 @@ import SceneNode from "./Drawables/SceneNode";
 import Mesh from "./Drawables/Mesh";
 import { box } from "./Drawables/Shapes/box";
 import DrawableInterface from "./Drawables/DrawableInterface";
+import Reticle from "./Drawables/Reticle";
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -45,6 +46,8 @@ class Renderer {
 
   camera = new Camera();
 
+  aspectRatio = new Float32Array(1);
+
   context: GPUCanvasContext | null = null;
 
   depthTextureView: GPUTextureView | null = null;
@@ -55,7 +58,7 @@ class Renderer {
 
   mainRenderPass = new RenderPass();
 
-  cursor: SceneNode;
+  // cursor: SceneNode;
 
   turnIndicator: SceneNode;
 
@@ -79,19 +82,20 @@ class Renderer {
 
   highlight: DrawableInterface | null = null
 
-  constructor(players: Mesh[], shot: Mesh) {
+  constructor(players: Mesh[], shot: Mesh, reticle: Reticle) {
+    this.aspectRatio[0] = 1.0;
     this.mainRenderPass.addDrawable(new CartesianAxes(), 'line');
 
-    this.cursor = new Circle(2, 0.1, vec4.create(1, 0, 0, 1));    
+    // this.cursor = new Circle(2, 0.1, vec4.create(1, 0, 0, 1));    
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
-    this.cursor.postTransforms.push(mat4.fromQuat(q));
-    this.cursor.translate = vec4.create(0, 0, 50);
+    // this.cursor.postTransforms.push(mat4.fromQuat(q));
+    // this.cursor.translate = vec4.create(0, 0, 50);
 
     this.turnIndicator = new Circle(4, 0.1, vec4.create(1, 1, 1, 1));
     this.turnIndicator.postTransforms.push(mat4.fromQuat(q));
 
-    this.scene.addNode(this.cursor);
-    this.mainRenderPass.addDrawable(this.cursor, 'circle')
+    // this.scene.addNode(this.cursor);
+    // this.mainRenderPass.addDrawable(this.cursor, 'circle')
 
     this.scene.addNode(this.turnIndicator);
     this.mainRenderPass.addDrawable(this.turnIndicator, 'circle')
@@ -109,6 +113,9 @@ class Renderer {
     this.shot = shot;
     this.scene.addNode(shot);
     this.mainRenderPass.addDrawable(shot, 'lit');
+
+    this.scene.addNode(reticle);
+    this.mainRenderPass.addDrawable(reticle, 'reticle');
   }
 
   static async createParticipants(z: number, color: Vec4) {
@@ -135,7 +142,10 @@ class Renderer {
     const opponenets = await Renderer.createParticipants(-50, vec4.create(0.5, 0, 0, 1));
 
     const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
-    return new Renderer([...players, ...opponenets], shot);
+
+    const reticle = await Reticle.create(0.05);
+  
+    return new Renderer([...players, ...opponenets], shot, reticle);
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
@@ -284,8 +294,8 @@ class Renderer {
 
     const lights: Light[] = [];
 
-    this.cursor.translate[0] = this.camera.position[0];
-    this.cursor.translate[2] = this.camera.position[2];
+    // this.cursor.translate[0] = this.camera.position[0];
+    // this.cursor.translate[2] = this.camera.position[2];
 
     if (this.shots.length > 0) {
       this.shot.translate[0] = this.shots[0].position[0];
@@ -311,11 +321,11 @@ class Renderer {
         });
         this.depthTextureView = depthTexture.createView();
 
-        const aspect = this.context.canvas.width / this.context.canvas.height;
+        this.aspectRatio[0] = this.context.canvas.width / this.context.canvas.height;
 
         this.camera.perspectiveTransform = mat4.perspective(
             degToRad(45), // settings.fieldOfView,
-            aspect,
+            this.aspectRatio[0],
             this.camera.near,  // zNear
             this.camera.far,   // zFar
         );
@@ -349,6 +359,7 @@ class Renderer {
 
     const cameraPosition = vec4.transformMat4(vec4.create(0, 0, 0, 1), this.camera.viewTransform);
     gpu.device.queue.writeBuffer(bindGroups.camera.buffer[2], 0, cameraPosition as Float32Array);
+    gpu.device.queue.writeBuffer(bindGroups.camera.buffer[3], 0, this.aspectRatio as Float32Array);
 
     // Update the light information
     lightsStructure.set({
@@ -367,7 +378,7 @@ class Renderer {
       })),
     });
 
-    gpu.device.queue.writeBuffer(bindGroups.camera.buffer[3], 0, lightsStructure.arrayBuffer);
+    gpu.device.queue.writeBuffer(bindGroups.camera.buffer[4], 0, lightsStructure.arrayBuffer);
 
     const commandEncoder = gpu.device.createCommandEncoder();
 
