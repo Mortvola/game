@@ -1,30 +1,23 @@
-export const audioContext = new AudioContext();
+import { audioContext, mainVolume } from "./Audio";
 
-export const mainVolume = audioContext.createGain();
-
-mainVolume.connect(audioContext.destination);
-
-export const sound: {
+const sound: {
   source: AudioBufferSourceNode,
   volume: GainNode,
-  panner: PannerNode,
   buffer: AudioBuffer | null,
 } = {
   source: audioContext.createBufferSource(),
   volume: audioContext.createGain(),
-  panner: audioContext.createPanner(),
   buffer: null,
 }
 
 sound.source.connect(sound.volume);
+sound.volume.connect(mainVolume);
 
-sound.volume.connect(sound.panner);
-
-sound.panner.connect(mainVolume);
+sound.source.loop = true;
 
 var request = new XMLHttpRequest();
 // request.open("GET", "GunShot.wav", true);
-request.open("GET", "GunShot.wav", true);
+request.open("GET", "outfoxing.mp3", true);
 request.responseType = "arraybuffer";
 request.onload = function(e) {
 
@@ -34,6 +27,7 @@ request.onload = function(e) {
 
     // Make the sound source use the buffer and start playing it.
     sound.source.buffer = sound.buffer;
+    sound.source.start(audioContext.currentTime);
   }, function onFailure() {
     alert("Decoding the audio buffer failed");
   });

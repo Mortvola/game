@@ -536,14 +536,39 @@ class Renderer {
       vec2.create(this.camera.position[0], this.camera.position[2]),
     );
 
-    const viewSpacePosition = vec4.transformMat4(
-      vec4.create(player.translate[0], player.translate[1], player.translate[2], 1),
-      mat4.inverse(this.camera.viewTransform),
+    // Transforms the position to world space.
+    const emitterPosition = vec4.transformMat4(
+      vec4.create(0, 0, 0, 1),
+      player.transform,
     );
 
-    sound.panner.positionX.value = viewSpacePosition[0];
-    sound.panner.positionY.value = viewSpacePosition[1];
-    sound.panner.positionZ.value = viewSpacePosition[2];
+    sound.panner.positionX.value = emitterPosition[0];
+    sound.panner.positionY.value = emitterPosition[1];
+    sound.panner.positionZ.value = emitterPosition[2];
+
+    const listener = audioContext.listener;
+
+    const listenerPosition = vec4.transformMat4(
+      vec4.create(0, 0, 0, 1),
+      this.camera.viewTransform,
+    )
+
+    listener.positionX.value = listenerPosition[0];
+    listener.positionY.value = listenerPosition[1];
+    listener.positionZ.value = listenerPosition[2];
+
+    const listenerOrientation = vec4.transformMat4(
+      vec4.create(0, 0, -1, 0),
+      this.camera.viewTransform,
+    )
+
+    listener.forwardX.value = listenerOrientation[0];
+    listener.forwardY.value = listenerOrientation[1];
+    listener.forwardZ.value = listenerOrientation[2];
+
+    listener.upX.value = 0;
+    listener.upY.value = 1;
+    listener.upZ.value = 0;
 
     sound.source = audioContext.createBufferSource();
     sound.source.connect(sound.volume);
