@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.scss';
 import { gpu, renderer } from './Renderer';
+import { audioContext } from './Audio';
 
 function App() {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -106,9 +107,10 @@ function App() {
       case 'S':
         renderer?.moveLeft(1)
         break;
-      case 'G':
+      case 'G': {
         renderer?.fire()
         break;
+      }
     }
   }
 
@@ -130,8 +132,16 @@ function App() {
     }
   }
 
+  const handlePlayClick = () => {
+    // Check if context is in suspended state (autoplay policy)
+    if (audioContext.state === "suspended") {
+      audioContext.resume();
+    }
+  }
+
   return (
     <div className="App">
+      <button type="button" onClick={handlePlayClick}>play</button>
       <canvas
         ref={canvasRef}
         tabIndex={0}

@@ -45,13 +45,10 @@ class RenderPass {
       const index = pipelineEntry.drawables.findIndex((d) => d === drawable)
 
       if (index !== -1) {
-        console.log('found drawable to remove');
         pipelineEntry.drawables = [
           ...pipelineEntry.drawables.slice(0, index),
           ...pipelineEntry.drawables.slice(index + 1),
         ]
-
-        console.log(`number using ${pipelineType}: ${pipelineEntry.drawables.length}`)
       }
     }
   }

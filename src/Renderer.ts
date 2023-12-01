@@ -13,6 +13,7 @@ import Mesh from "./Drawables/Mesh";
 import { box } from "./Drawables/Shapes/box";
 import DrawableInterface from "./Drawables/DrawableInterface";
 import Reticle from "./Drawables/Reticle";
+import { audioContext, sound } from "./Audio";
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -534,6 +535,20 @@ class Renderer {
       vec2.create(player.translate[0], player.translate[2]),
       vec2.create(this.camera.position[0], this.camera.position[2]),
     );
+
+    const viewSpacePosition = vec4.transformMat4(
+      vec4.create(player.translate[0], player.translate[1], player.translate[2], 1),
+      mat4.inverse(this.camera.viewTransform),
+    );
+
+    sound.panner.positionX.value = viewSpacePosition[0];
+    sound.panner.positionY.value = viewSpacePosition[1];
+    sound.panner.positionZ.value = viewSpacePosition[2];
+
+    sound.source = audioContext.createBufferSource();
+    sound.source.connect(sound.volume);
+    sound.source.buffer = sound.buffer;
+    sound.source.start(audioContext.currentTime)
 
     // The endY is the negative height of the launcher.
     const minVelocity = minimumVelocity(distance, -Renderer.launcherHeight);
