@@ -1,9 +1,11 @@
-import { bindGroups, gpu } from "../Renderer";
+import { gpu, bindGroups } from "../Renderer";
 import PipelineInterface from "./PipelineInterface";
-import { lineShader } from '../shaders/line';
+import { outlineShader } from '../shaders/outline';
 import DrawableInterface from "../Drawables/DrawableInterface";
 
-class LinePipeline implements PipelineInterface {
+const label = 'outline';
+
+class OutlinePipeline implements PipelineInterface {
   pipeline: GPURenderPipeline;
 
   constructor() {
@@ -12,46 +14,53 @@ class LinePipeline implements PipelineInterface {
     }
 
     const shaderModule = gpu.device.createShaderModule({
-      label: 'line',
-      code: lineShader,
+      label,
+      code: outlineShader,
     })
 
     const pipelineLayout = gpu.device.createPipelineLayout({
-      label: 'line',
       bindGroupLayouts: [
         bindGroups.bindGroupLayout0,
+        bindGroups.bindGroupLayout1,
+        bindGroups.bindGroupLayout2,
       ],
     });
-
+    
     const vertexBufferLayout: GPUVertexBufferLayout[] = [
       {
         attributes: [
           {
             shaderLocation: 0, // position
             offset: 0,
-            format: "float32x4" as GPUVertexFormat,
-          },
-          {
-            shaderLocation: 1, // color
-            offset: 16,
-            format: "float32x4" as GPUVertexFormat,
+            format: "float32x4",
           },
         ],
-        arrayStride: 32,
+        arrayStride: 16,
         stepMode: "vertex",
       },
-    ];    
+      {
+        attributes: [
+          {
+            shaderLocation: 1, // normal
+            offset: 0,
+            format: "float32x4",
+          }
+        ],
+        arrayStride: 16,
+        stepMode: "vertex",
+      }
+    ];
     
     const pipelineDescriptor: GPURenderPipelineDescriptor = {
-      label: 'line',
+      label,
       vertex: {
         module: shaderModule,
-        entryPoint: "vertex_line",
+        entryPoint: "vs",
         buffers: vertexBufferLayout,
       },
       fragment: {
         module: shaderModule,
-        entryPoint: "fragment_line",
+        entryPoint: "fs",
         targets: [
           {
             format: navigator.gpu.getPreferredCanvasFormat(),
@@ -59,8 +68,9 @@ class LinePipeline implements PipelineInterface {
         ],
       },
       primitive: {
-        topology: "line-list",
-        cullMode: "none",
+        topology: "triangle-list",
+        cullMode: "front",
+        frontFace: "ccw",
       },
       depthStencil: {
         depthWriteEnabled: true,
@@ -82,4 +92,4 @@ class LinePipeline implements PipelineInterface {
   }
 }
 
-export default LinePipeline;
+export default OutlinePipeline;

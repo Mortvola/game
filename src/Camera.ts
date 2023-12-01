@@ -14,9 +14,9 @@ class Camera {
 
   offset = 30;
 
-  position = vec4.create(0, 5, 50, 0);
+  position = vec4.create(0, 0, 50, 1);
 
-  rotateX = -5;
+  rotateX = -15;
 
   rotateY = 0;
 

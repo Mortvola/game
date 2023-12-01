@@ -1,8 +1,7 @@
 import { mat4, vec4, Vec4 } from 'wgpu-matrix';
-import { gpu } from "../Renderer";
+import { bindGroups, gpu } from "../Renderer";
 import SurfaceMesh from "./SurfaceMesh";
 import Drawable from './Drawable';
-import { PipelineTypes } from '../Pipelines/PipelineManager';
 
 class Mesh extends Drawable {
   mesh: SurfaceMesh;
@@ -23,8 +22,8 @@ class Mesh extends Drawable {
 
   indexFormat: GPUIndexFormat = "uint16";
 
-  private constructor(mesh: SurfaceMesh, pipelineType: PipelineTypes, vertices: number[], normals: number[], indices: number[]) {
-    super(pipelineType)
+  private constructor(mesh: SurfaceMesh, vertices: number[], normals: number[], indices: number[]) {
+    super()
   
     if (!gpu) {
       throw new Error('device is not set')
@@ -88,8 +87,6 @@ class Mesh extends Drawable {
       }  
     }
 
-    const bindGroupLayouts = this.pipeline.getBindGroupLayouts();
-
     this.uniformBuffer = gpu.device.createBuffer({
       label: 'model Matrix',
       size: 16 * Float32Array.BYTES_PER_ELEMENT,
@@ -104,7 +101,7 @@ class Mesh extends Drawable {
 
     this.bindGroup = gpu.device.createBindGroup({
       label: 'bind group for model matrix',
-      layout: bindGroupLayouts[0],
+      layout: bindGroups.bindGroupLayout1,
       entries: [
         { binding: 0, resource: { buffer: this.uniformBuffer }},
         { binding: 1, resource: { buffer: this.colorBuffer }},
@@ -112,10 +109,10 @@ class Mesh extends Drawable {
     });
   }
 
-  static async create(mesh: SurfaceMesh, pipelineType: PipelineTypes) {
+  static async create(mesh: SurfaceMesh) {
     const { vertices, normals, indices } = await mesh.generateBuffers();
 
-    return new Mesh(mesh, pipelineType, vertices, normals, indices);
+    return new Mesh(mesh, vertices, normals, indices);
   }
 
   setColor(color: Vec4) {
@@ -147,8 +144,8 @@ class Mesh extends Drawable {
   }
 
   hitTest(origin: Vec4, vector: Vec4): { point: Vec4, t: number, drawable: Drawable} | null {
+    // Transform origin and ray into model space.
     const inverseTransform = mat4.inverse(this.getTransform());
-
     const localVector = vec4.transformMat4(vector, inverseTransform);
     const localOrigin = vec4.transformMat4(origin, inverseTransform);
 

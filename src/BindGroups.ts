@@ -7,7 +7,6 @@ import { lights } from "./shaders/lights";
 
 type BindGroup = {
   bindGroup: GPUBindGroup,
-  layout: GPUBindGroupLayout,
   buffer: GPUBuffer[],
 }
 
@@ -17,40 +16,77 @@ export const lightsStructure = makeStructuredView(defs.structs.Lights);
 class BindGroups {
   camera: BindGroup | null = null;
 
+  bindGroupLayout0: GPUBindGroupLayout;
+
+  bindGroupLayout1: GPUBindGroupLayout;
+
+  bindGroupLayout2: GPUBindGroupLayout;
+
   constructor() {
+    if (!gpu) {
+      throw new Error('gpu not set')
+    }
+
+    this.bindGroupLayout0 = gpu.device.createBindGroupLayout({
+      label: 'camera',
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: {},
+        },
+        {
+          binding: 1,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: {},
+        },
+        {
+          binding: 2,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: {},
+        },
+        {
+          binding: 3,
+          visibility: GPUShaderStage.FRAGMENT,
+          buffer: {
+            type: "read-only-storage",
+          },
+        },
+      ]
+    })
+  
+    this.bindGroupLayout1 = gpu.device.createBindGroupLayout({
+      label: 'group1',
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: {},
+        },
+        {
+          binding: 1,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: {},
+        },
+      ]
+    });
+      
+    this.bindGroupLayout2 = gpu.device.createBindGroupLayout({
+      label: 'group1',
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: {},
+        },
+      ]
+    });
+
     this.createCameraBindGroups()
   }
 
   createCameraBindGroups() {
     if (gpu) {
-      const bindGroupLayout = gpu.device.createBindGroupLayout({
-        label: 'camera',
-        entries: [
-          {
-            binding: 0,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {},
-          },
-          {
-            binding: 1,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {},
-          },
-          {
-            binding: 2,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {},
-          },
-          {
-            binding: 3,
-            visibility: GPUShaderStage.FRAGMENT,
-            buffer: {
-              type: "read-only-storage",
-            },
-          },
-        ]
-      })
-    
       const matrixBufferSize = 16 * Float32Array.BYTES_PER_ELEMENT;
 
       const projectionTransformBuffer = gpu.device.createBuffer({
@@ -79,7 +115,7 @@ class BindGroups {
 
       const cameraBindGroup = gpu.device.createBindGroup({
         label: 'camera',
-        layout: bindGroupLayout,
+        layout: this.bindGroupLayout0,
         entries: [
           { binding: 0, resource: { buffer: projectionTransformBuffer }},
           { binding: 1, resource: { buffer: viewTransformBuffer }},
@@ -90,7 +126,6 @@ class BindGroups {
 
       this.camera = {
         bindGroup: cameraBindGroup,
-        layout: bindGroupLayout,
         buffer: [
             projectionTransformBuffer,
             viewTransformBuffer,

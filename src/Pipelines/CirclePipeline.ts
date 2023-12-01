@@ -8,8 +8,6 @@ const label = 'CirclePipeline';
 class CirclePipeline implements PipelineInterface {
   pipeline: GPURenderPipeline;
 
-  bindGroupLayouts: GPUBindGroupLayout[] = [];
-
   constructor() {
     if (!gpu) {
       throw new Error('device is not set')
@@ -19,35 +17,6 @@ class CirclePipeline implements PipelineInterface {
       label,
       code: circleShader,
     })
-    
-    this.bindGroupLayouts = [
-      gpu.device.createBindGroupLayout({
-        label,
-        entries: [
-          {
-            binding: 0,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {},
-          },
-          {
-            binding: 1,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {},
-          },
-        ]
-      }),
-      
-      gpu.device.createBindGroupLayout({
-        label,
-        entries: [
-          {
-            binding: 0,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {},
-          },
-        ]
-      }),
-    ]
     
     const pipelineDescriptor: GPURenderPipelineDescriptor = {
       label,
@@ -77,17 +46,14 @@ class CirclePipeline implements PipelineInterface {
       layout: gpu.device.createPipelineLayout({
         label,
         bindGroupLayouts: [
-          bindGroups.camera!.layout,
-          ...this.bindGroupLayouts,
+          bindGroups.bindGroupLayout0,
+          bindGroups.bindGroupLayout1,
+          bindGroups.bindGroupLayout2,
         ]
       }),
     };
     
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
-  }
-
-  getBindGroupLayouts(): GPUBindGroupLayout[] {
-    return this.bindGroupLayouts;
   }
 
   render(passEncoder: GPURenderPassEncoder, drawables: DrawableInterface[]) {

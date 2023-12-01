@@ -1,14 +1,12 @@
 import { Vec4 } from 'wgpu-matrix';
 import { gpu } from "../Renderer";
 import DrawableInterface from "./DrawableInterface";
-import PipelineManager, { PipelineTypes } from "../Pipelines/PipelineManager";
-import PipelineInterface from "../Pipelines/PipelineInterface";
 import SceneNode from "./SceneNode";
 
 class CartesianAxes extends SceneNode implements DrawableInterface {
+  drawable = true;
+  
   vertexBuffer: GPUBuffer;
-
-  pipeline: PipelineInterface;
 
   tag = '';
 
@@ -26,20 +24,12 @@ class CartesianAxes extends SceneNode implements DrawableInterface {
     0, 1, 0, 1,    
   ];
 
-  constructor(pipelineType: PipelineTypes) {
+  constructor() {
     super();
     
     if (!gpu) {
       throw new Error('gepu device not set')
     }
-
-    const pipeline = PipelineManager.getInstance().getPipeline(pipelineType);
-
-    if (!pipeline) {
-      throw new Error(`pipeline ${pipelineType} not found`)
-    }
-  
-    this.pipeline = pipeline;
 
     const gridLineColor = [0.3, 0.3, 0.3, 1];
 

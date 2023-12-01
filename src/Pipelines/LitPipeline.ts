@@ -6,8 +6,6 @@ import DrawableInterface from "../Drawables/DrawableInterface";
 class LitPipeline implements PipelineInterface {
   pipeline: GPURenderPipeline;
 
-  bindGroupLayouts: GPUBindGroupLayout[] = [];
-
   constructor() {
     if (!gpu) {
       throw new Error('device is not set')
@@ -18,28 +16,10 @@ class LitPipeline implements PipelineInterface {
       code: litShader,
     })
     
-    this.bindGroupLayouts = [
-      gpu.device.createBindGroupLayout({
-        label: 'lit',
-        entries: [
-          {
-            binding: 0,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {},
-          },
-          {
-            binding: 1,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {},
-          },
-        ]
-      }),
-    ]
-
     const pipelineLayout = gpu.device.createPipelineLayout({
       bindGroupLayouts: [
-        bindGroups.camera!.layout,
-        ...this.bindGroupLayouts,
+        bindGroups.bindGroupLayout0,
+        bindGroups.bindGroupLayout1,
       ],
     });
     
@@ -97,10 +77,6 @@ class LitPipeline implements PipelineInterface {
     };
     
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
-  }
-
-  getBindGroupLayouts(): GPUBindGroupLayout[] {
-    return this.bindGroupLayouts;
   }
 
   render(passEncoder: GPURenderPassEncoder, drawables: DrawableInterface[]) {

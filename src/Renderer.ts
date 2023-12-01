@@ -1,7 +1,7 @@
-import { Vec2, Vec3, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
+import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import Camera from "./Camera";
 import Gpu from "./Gpu";
-import { anglesOfLaunch, degToRad, gravity, minimumVelocity, radToDeg, timeToTarget } from "./Math";
+import { anglesOfLaunch, degToRad, gravity, minimumVelocity, timeToTarget } from "./Math";
 import ContainerNode from "./Drawables/ContainerNode";
 import BindGroups, { lightsStructure } from "./BindGroups";
 import Circle from "./Drawables/Circle";
@@ -11,6 +11,7 @@ import CartesianAxes from "./Drawables/CartesianAxes";
 import SceneNode from "./Drawables/SceneNode";
 import Mesh from "./Drawables/Mesh";
 import { box } from "./Drawables/Shapes/box";
+import DrawableInterface from "./Drawables/DrawableInterface";
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -76,33 +77,38 @@ class Renderer {
 
   playerTurn =  0;
 
-  constructor(players: Mesh[], shot: Mesh) {
-    this.mainRenderPass.addDrawable(new CartesianAxes('line'));
+  highlight: DrawableInterface | null = null
 
-    this.cursor = new Circle(2, 0.1, vec4.create(1, 0, 0, 1), 'circle');    
+  constructor(players: Mesh[], shot: Mesh) {
+    this.mainRenderPass.addDrawable(new CartesianAxes(), 'line');
+
+    this.cursor = new Circle(2, 0.1, vec4.create(1, 0, 0, 1));    
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
     this.cursor.postTransforms.push(mat4.fromQuat(q));
     this.cursor.translate = vec4.create(0, 0, 50);
 
-    this.turnIndicator = new Circle(4, 0.1, vec4.create(1, 1, 1, 1), 'circle');
+    this.turnIndicator = new Circle(4, 0.1, vec4.create(1, 1, 1, 1));
     this.turnIndicator.postTransforms.push(mat4.fromQuat(q));
 
     this.scene.addNode(this.cursor);
-    this.mainRenderPass.addDrawable(this.cursor)
+    this.mainRenderPass.addDrawable(this.cursor, 'circle')
 
     this.scene.addNode(this.turnIndicator);
-    this.mainRenderPass.addDrawable(this.turnIndicator)
+    this.mainRenderPass.addDrawable(this.turnIndicator, 'circle')
 
     this.players = players;
 
     for (const player of players) {
       this.scene.addNode(player);
-      this.mainRenderPass.addDrawable(player);  
+      this.mainRenderPass.addDrawable(player, 'lit');  
     }
+
+    this.playerTurn = this.players.length - 1;
+    this.nextTurn();
 
     this.shot = shot;
     this.scene.addNode(shot);
-    this.mainRenderPass.addDrawable(shot);
+    this.mainRenderPass.addDrawable(shot, 'lit');
   }
 
   static async createParticipants(z: number, color: Vec4) {
@@ -112,7 +118,7 @@ class Renderer {
     const playerWidth = 4;
 
     for (let i = 0; i < numPlayers; i += 1 ) {
-      const player = await Mesh.create(box(playerWidth, Renderer.launcherHeight, playerWidth, color), 'lit')
+      const player = await Mesh.create(box(playerWidth, Renderer.launcherHeight, playerWidth, color))
       player.translate[0] = (i - ((numPlayers - 1) / 2)) * spaceBetween + Math.random() * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
       player.translate[1] = Renderer.launcherHeight / 2;  
       player.translate[2] = z + Math.random() * 10 - 5;
@@ -128,7 +134,7 @@ class Renderer {
 
     const opponenets = await Renderer.createParticipants(-50, vec4.create(0.5, 0, 0, 1));
 
-    const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)), 'lit');
+    const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
     return new Renderer([...players, ...opponenets], shot);
   }
 
@@ -158,6 +164,13 @@ class Renderer {
     this.start();
 
     this.initialized = true;
+  }
+
+  nextTurn() {
+    this.playerTurn = (this.playerTurn + 1) % this.players.length;
+
+    this.turnIndicator.translate = vec3.copy(this.players[this.playerTurn].translate);
+    this.turnIndicator.translate[1] = 0;
   }
 
   updateFrame = (timestamp: number) => {
@@ -226,6 +239,7 @@ class Renderer {
                 ]
 
                 i -= 1;
+                this.nextTurn();
               }
             }
           }
@@ -410,8 +424,44 @@ class Renderer {
 
   }
 
+  checkHighligh() {
+    // Transform camera position (not including offset0) to camera space
+    let ray = vec4.normalize(vec4.transformMat4(this.camera.position, mat4.inverse(this.camera.viewTransform)));
+    ray[3] = 0;
+    let origin = vec4.create(0, 0, 0, 1);
+
+    // Transform from camera to world
+    ray = vec4.transformMat4(ray, this.camera.viewTransform);
+    origin = vec4.transformMat4(origin, this.camera.viewTransform);
+
+    // console.log(`origin: ${origin}, ray: ${ray}`)
+
+    const result = this.scene.modelHitTest(origin, ray);
+
+    if (result) {
+      if (!this.highlight || this.highlight !== result.drawable) {
+        if (this.highlight) {
+          this.mainRenderPass.removeDrawable(this.highlight,  'outline');
+
+          this.highlight = null;    
+        }
+
+        this.highlight = result.drawable;
+
+        this.mainRenderPass.addDrawable(this.highlight, 'outline');
+      }
+    }
+    else if (this.highlight) {
+      this.mainRenderPass.removeDrawable(this.highlight,  'outline');
+
+      this.highlight = null;
+    }
+  }
+
   mouseWheel(deltaX: number, deltaY: number, x: number, y: number) {
     this.camera.changeRotation(-deltaX * 0.2)
+
+    this.checkHighligh();
   }
 
   moveForward(v: number) {
@@ -423,6 +473,8 @@ class Renderer {
       this.backward - this.forward,
       0,
     ))
+
+    this.checkHighligh();
   }
 
   moveBackward(v: number) {
@@ -434,6 +486,8 @@ class Renderer {
       this.backward - this.forward,
       0,
     ))
+
+    this.checkHighligh();
   }
 
   moveRight(v: number) {
@@ -445,6 +499,8 @@ class Renderer {
       this.backward - this.forward,
       0,
     ))
+
+    this.checkHighligh();
   }
 
   moveLeft(v: number) {
@@ -456,6 +512,8 @@ class Renderer {
       this.backward - this.forward,
       0,
     ))
+
+    this.checkHighligh();
   }
 
   fire() {
@@ -493,11 +551,6 @@ class Renderer {
     // console.log(radToDeg(rotationX));
 
     // console.log(`distance: ${distance}, velocity: ${velocity}, low angle: ${radToDeg(lowAngle)}, high angle: ${radToDeg(highAngle)}, time: ${timeLow}, ${timeHigh}`);
-
-    this.playerTurn = (this.playerTurn + 1) % this.players.length;
-
-    this.turnIndicator.translate = vec3.copy(this.players[this.playerTurn].translate);
-    this.turnIndicator.translate[1] = 0;
   }
 }
 

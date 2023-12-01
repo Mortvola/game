@@ -1,17 +1,18 @@
 import { Vec4, Vec3, Mat4, Quat } from 'wgpu-matrix';
-import PipelineInterface from "../Pipelines/PipelineInterface";
 import { AllowedTransformations } from './SceneNode';
 
 interface DrawableInterface {
+  drawable: boolean;
+
   uuid: string;
 
   name: string;
 
   render(passEncoder: GPURenderPassEncoder): void;
 
-  pipeline: PipelineInterface;
-
   transform: Mat4;
+
+  postTransforms: Mat4[];
 
   translate: Vec3;
 
@@ -47,7 +48,7 @@ interface DrawableInterface {
 }
 
 export const isDrawableInterface = (r: unknown): r is DrawableInterface => (
-  (r as DrawableInterface).pipeline !== undefined
+  (r as DrawableInterface).drawable !== undefined
 )
 
 export default DrawableInterface;
