@@ -1,7 +1,7 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import Camera from "./Camera";
 import Gpu from "./Gpu";
-import { anglesOfLaunch, degToRad, gravity, minimumVelocity, timeToTarget } from "./Math";
+import { anglesOfLaunch, degToRad, gravity, intersectionPlane, minimumVelocity, timeToTarget } from "./Math";
 import ContainerNode from "./Drawables/ContainerNode";
 import BindGroups, { lightsStructure } from "./BindGroups";
 import Circle from "./Drawables/Circle";
@@ -11,9 +11,10 @@ import CartesianAxes from "./Drawables/CartesianAxes";
 import SceneNode from "./Drawables/SceneNode";
 import Mesh from "./Drawables/Mesh";
 import { box } from "./Drawables/Shapes/box";
-import DrawableInterface from "./Drawables/DrawableInterface";
+import { isDrawableInterface } from "./Drawables/DrawableInterface";
 import Reticle from "./Drawables/Reticle";
 import { audioContext, sound } from "./Audio";
+import Actor from "./Actor";
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -29,7 +30,7 @@ type ShotData = {
   duration: number,
   position: Vec4,
   angle: number,
-  player: Mesh,
+  player: Actor,
 };
 
 class Renderer {
@@ -59,8 +60,6 @@ class Renderer {
 
   mainRenderPass = new RenderPass();
 
-  // cursor: SceneNode;
-
   turnIndicator: SceneNode;
 
   left = 0;
@@ -77,13 +76,13 @@ class Renderer {
 
   static launcherHeight = 2;
 
-  players: Mesh[];
+  players: Actor[];
 
   playerTurn =  0;
 
-  highlight: DrawableInterface | null = null
+  focused: Actor | null = null
 
-  constructor(players: Mesh[], shot: Mesh, reticle: Reticle) {
+  constructor(players: Actor[], shot: Mesh, reticle: Reticle) {
     this.aspectRatio[0] = 1.0;
     this.mainRenderPass.addDrawable(new CartesianAxes(), 'line');
 
@@ -104,8 +103,8 @@ class Renderer {
     this.players = players;
 
     for (const player of players) {
-      this.scene.addNode(player);
-      this.mainRenderPass.addDrawable(player, 'lit');  
+      this.scene.addNode(player.mesh);
+      this.mainRenderPass.addDrawable(player.mesh, 'lit');  
     }
 
     this.playerTurn = this.players.length - 1;
@@ -119,28 +118,30 @@ class Renderer {
     this.mainRenderPass.addDrawable(reticle, 'reticle');
   }
 
-  static async createParticipants(z: number, color: Vec4) {
-    const players: Mesh[] = [];
+  static async createParticipants(z: number, color: Vec4): Promise<Actor[]> {
+    const actors: Actor[] = [];
     const numPlayers = 4;
     const spaceBetween = 12;
     const playerWidth = 4;
 
     for (let i = 0; i < numPlayers; i += 1 ) {
-      const player = await Mesh.create(box(playerWidth, Renderer.launcherHeight, playerWidth, color))
-      player.translate[0] = (i - ((numPlayers - 1) / 2)) * spaceBetween + Math.random() * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
-      player.translate[1] = Renderer.launcherHeight / 2;  
-      player.translate[2] = z + Math.random() * 10 - 5;
+      const player = await Actor.create(color, this.launcherHeight);
+      player.mesh.translate[0] = (i - ((numPlayers - 1) / 2))
+        * spaceBetween + Math.random()
+        * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
+      player.mesh.translate[1] = Renderer.launcherHeight / 2;  
+      player.mesh.translate[2] = z + Math.random() * 10 - 5;
 
-      players.push(player)
+      actors.push(player)
     }
 
-    return players;
+    return actors;
   }
 
   static async create() {
-    const players = await Renderer.createParticipants(50, vec4.create(0, 0, 0.5, 1));
+    const players: Actor[] = await Renderer.createParticipants(50, vec4.create(0, 0, 0.5, 1));
 
-    const opponenets = await Renderer.createParticipants(-50, vec4.create(0.5, 0, 0, 1));
+    const opponenets: Actor[] = await Renderer.createParticipants(-50, vec4.create(0.5, 0, 0, 1));
 
     const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
 
@@ -178,10 +179,12 @@ class Renderer {
   }
 
   nextTurn() {
-    this.playerTurn = (this.playerTurn + 1) % this.players.length;
+    if (this.players.length > 0) {
+      this.playerTurn = (this.playerTurn + 1) % this.players.length;
 
-    this.turnIndicator.translate = vec3.copy(this.players[this.playerTurn].translate);
-    this.turnIndicator.translate[1] = 0;
+      this.turnIndicator.translate = vec3.copy(this.players[this.playerTurn].mesh.translate);
+      this.turnIndicator.translate[1] = 0;  
+    }
   }
 
   updateFrame = (timestamp: number) => {
@@ -230,7 +233,7 @@ class Renderer {
                 )
 
                 const translate1 = mat4.translation(
-                  vec3.create(player.translate[0], 0, player.translate[2]),
+                  vec3.create(player.mesh.translate[0], 0, player.mesh.translate[2]),
                 );
                 const translate2 = mat4.translation(shot.position);
 
@@ -251,6 +254,46 @@ class Renderer {
 
                 i -= 1;
                 this.nextTurn();
+              }
+            }
+          }
+
+          // Move actors
+          for (const actor of this.players) {
+            if (actor.moveTo) {
+              const distanceToTarget = vec2.distance(
+                vec2.create(
+                  actor.mesh.translate[0],
+                  actor.mesh.translate[2],
+                ),
+                actor.moveTo,
+              );
+
+              if (actor.speed * elapsedTime > distanceToTarget) {
+                actor.mesh.translate[0] = actor.moveTo[0];
+                actor.mesh.translate[2] = actor.moveTo[1];
+                
+                this.turnIndicator.translate = vec3.copy(actor.mesh.translate);
+                this.turnIndicator.translate[1] = 0;  
+          
+                actor.moveTo = null;
+              }
+              else {
+                let v = vec3.create(
+                  actor.moveTo[0] - actor.mesh.translate[0],
+                  0,
+                  actor.moveTo[1] - actor.mesh.translate[2],
+                );
+  
+                v = vec3.normalize(v);
+  
+                v = vec3.mulScalar(v, elapsedTime * actor.speed);
+  
+                actor.mesh.translate[0] += v[0];
+                actor.mesh.translate[2] += v[2];  
+
+                this.turnIndicator.translate = vec3.copy(actor.mesh.translate);
+                this.turnIndicator.translate[1] = 0;  
               }
             }
           }
@@ -433,7 +476,6 @@ class Renderer {
   }
 
   pointerUp(x: number, y: number) {
-
   }
 
   checkHighligh() {
@@ -448,25 +490,45 @@ class Renderer {
 
     // console.log(`origin: ${origin}, ray: ${ray}`)
 
-    const result = this.scene.modelHitTest(origin, ray);
+    let best: {
+      actor: Actor
+      t: number,
+    } | null = null;
 
-    if (result) {
-      if (!this.highlight || this.highlight !== result.drawable) {
-        if (this.highlight) {
-          this.mainRenderPass.removeDrawable(this.highlight,  'outline');
-
-          this.highlight = null;    
-        }
-
-        this.highlight = result.drawable;
-
-        this.mainRenderPass.addDrawable(this.highlight, 'outline');
+    for (let actor of this.players) {
+      if (isDrawableInterface(actor.mesh)) {
+        const result = actor.mesh.hitTest(origin, ray)
+        
+        if (result) {
+          if (best === null || result.t < best.t) {
+            best = {
+              actor,
+              t: result.t,
+            }
+          }
+        }    
       }
     }
-    else if (this.highlight) {
-      this.mainRenderPass.removeDrawable(this.highlight,  'outline');
 
-      this.highlight = null;
+    // const result = this.scene.modelHitTest(origin, ray);
+
+    if (best) {
+      if (!this.focused || this.focused !== best.actor) {
+        if (this.focused) {
+          this.mainRenderPass.removeDrawable(this.focused.mesh,  'outline');
+
+          this.focused = null;    
+        }
+
+        this.focused = best.actor;
+
+        this.mainRenderPass.addDrawable(this.focused.mesh, 'outline');
+      }
+    }
+    else if (this.focused) {
+      this.mainRenderPass.removeDrawable(this.focused.mesh,  'outline');
+
+      this.focused = null;
     }
   }
 
@@ -531,77 +593,110 @@ class Renderer {
   fire() {
     const player = this.players[this.playerTurn];
 
-    const distance = vec2.distance(
-      vec2.create(player.translate[0], player.translate[2]),
-      vec2.create(this.camera.position[0], this.camera.position[2]),
-    );
+    if (this.focused && this.focused !== player) {
+      // Transforms the position to world space.
+      const target = vec4.transformMat4(
+        vec4.create(0, Renderer.launcherHeight / 2, 0, 1),
+        this.focused.mesh.transform,
+      );
+      
+      console.log(`target: ${target}`)
+      // const target = this.focused.computeCentroid();
 
-    // Transforms the position to world space.
-    const emitterPosition = vec4.transformMat4(
-      vec4.create(0, 0, 0, 1),
-      player.transform,
-    );
+      const distance = vec2.distance(
+        vec2.create(player.mesh.translate[0], player.mesh.translate[2]),
+        // vec2.create(this.camera.position[0], this.camera.position[2]),
+        vec2.create(target[0], target[2]),
+      );
 
-    sound.panner.positionX.value = emitterPosition[0];
-    sound.panner.positionY.value = emitterPosition[1];
-    sound.panner.positionZ.value = emitterPosition[2];
+      // Transforms the position to world space.
+      const emitterPosition = vec4.transformMat4(
+        vec4.create(0, Renderer.launcherHeight, 0, 1),
+        player.mesh.transform,
+      );
 
-    const listener = audioContext.listener;
+      sound.panner.positionX.value = emitterPosition[0];
+      sound.panner.positionY.value = emitterPosition[1];
+      sound.panner.positionZ.value = emitterPosition[2];
 
-    const listenerPosition = vec4.transformMat4(
-      vec4.create(0, 0, 0, 1),
-      this.camera.viewTransform,
-    )
+      const listener = audioContext.listener;
 
-    listener.positionX.value = listenerPosition[0];
-    listener.positionY.value = listenerPosition[1];
-    listener.positionZ.value = listenerPosition[2];
+      const listenerPosition = vec4.transformMat4(
+        vec4.create(0, 0, 0, 1),
+        this.camera.viewTransform,
+      )
 
-    const listenerOrientation = vec4.transformMat4(
-      vec4.create(0, 0, -1, 0),
-      this.camera.viewTransform,
-    )
+      listener.positionX.value = listenerPosition[0];
+      listener.positionY.value = listenerPosition[1];
+      listener.positionZ.value = listenerPosition[2];
 
-    listener.forwardX.value = listenerOrientation[0];
-    listener.forwardY.value = listenerOrientation[1];
-    listener.forwardZ.value = listenerOrientation[2];
+      const listenerOrientation = vec4.transformMat4(
+        vec4.create(0, 0, -1, 0),
+        this.camera.viewTransform,
+      )
 
-    listener.upX.value = 0;
-    listener.upY.value = 1;
-    listener.upZ.value = 0;
+      listener.forwardX.value = listenerOrientation[0];
+      listener.forwardY.value = listenerOrientation[1];
+      listener.forwardZ.value = listenerOrientation[2];
 
-    sound.source = audioContext.createBufferSource();
-    sound.source.connect(sound.volume);
-    sound.source.buffer = sound.buffer;
-    sound.source.start(audioContext.currentTime)
+      listener.upX.value = 0;
+      listener.upY.value = 1;
+      listener.upZ.value = 0;
 
-    // The endY is the negative height of the launcher.
-    const minVelocity = minimumVelocity(distance, -Renderer.launcherHeight);
+      sound.source = audioContext.createBufferSource();
+      sound.source.connect(sound.volume);
+      sound.source.buffer = sound.buffer;
+      sound.source.start(audioContext.currentTime)
 
-    const velocity = Math.max(50, minVelocity);
+      // The endY is the negative height of the launcher.
+      const minVelocity = minimumVelocity(distance, -Renderer.launcherHeight);
 
-    const [lowAngle] = anglesOfLaunch(velocity, distance, -Renderer.launcherHeight);
+      const velocity = Math.max(50, minVelocity);
 
-    const timeLow = timeToTarget(distance, velocity, lowAngle);
-    // const timeHigh = timeToTarget(distance, velocity, highAngle);
+      const [lowAngle] = anglesOfLaunch(velocity, distance, -Renderer.launcherHeight);
 
-    const data: ShotData = {
-      velocityVector: vec2.create(velocity * Math.cos(lowAngle), velocity * Math.sin(lowAngle)),
-      startTime: null, // start time will be assigned at the next frame.
-      duration: timeLow,
-      position: vec4.create(0, Renderer.launcherHeight, 0, 1),
-      angle: Math.atan2(this.camera.position[0] - player.translate[0], this.camera.position[2] - player.translate[2]),
-      player,
+      const timeLow = timeToTarget(distance, velocity, lowAngle);
+      // const timeHigh = timeToTarget(distance, velocity, highAngle);
+
+      const data: ShotData = {
+        velocityVector: vec2.create(velocity * Math.cos(lowAngle), velocity * Math.sin(lowAngle)),
+        startTime: null, // start time will be assigned at the next frame.
+        duration: timeLow,
+        position: vec4.create(0, Renderer.launcherHeight, 0, 1),
+        angle: Math.atan2(target[0] - player.mesh.translate[0], target[2] - player.mesh.translate[2]),
+        player,
+      }
+
+      // console.log(`distance: ${distance}, duration: ${data.duration}, v: ${minVelocity}, angle: ${radToDeg(lowAngle)}`)
+
+      this.shots.push(data);
+      
+      // const rotationX = Math.atan2(this.camera.position[0], this.camera.position[2]);
+      // Math.asin(this.camera.position[0] / distance);
+      // console.log(radToDeg(rotationX));
+
+      // console.log(`distance: ${distance}, velocity: ${velocity}, low angle: ${radToDeg(lowAngle)},
+      // high angle: ${radToDeg(highAngle)}, time: ${timeLow}, ${timeHigh}`);
     }
+    else {
+      const { origin, ray} = this.camera.computeHitTestRay(0, 0);
 
-    // console.log(`distance: ${distance}, duration: ${data.duration}, v: ${minVelocity}, angle: ${radToDeg(lowAngle)}`)
+      const point = intersectionPlane(vec4.create(0, 0, 0, 1), vec4.create(0, 1, 0, 0), origin, ray);
 
-    this.shots.push(data);
-    
-    // const rotationX = Math.atan2(this.camera.position[0], this.camera.position[2]); // Math.asin(this.camera.position[0] / distance);
-    // console.log(radToDeg(rotationX));
+      if (point) {
+        player.moveTo = vec2.create(point[0], point[2]);
 
-    // console.log(`distance: ${distance}, velocity: ${velocity}, low angle: ${radToDeg(lowAngle)}, high angle: ${radToDeg(highAngle)}, time: ${timeLow}, ${timeHigh}`);
+        const distance = vec2.distance(
+          vec2.create(player.mesh.translate[0], player.mesh.translate[2]),
+          player.moveTo,
+        )
+
+        // Travel the distance in one second.
+        // This is purely for playability. It's no fun watching an actor dilly-dally as it moves
+        // to its target location.
+        player.speed = distance;
+      }
+    }
   }
 }
 
