@@ -1,5 +1,6 @@
 import { vec4, mat4, quat, Vec4, Mat4 } from 'wgpu-matrix';
 import { normalizeDegrees, degToRad } from './Math';
+import { audioContext } from './Audio';
 
 export type ProjectionType = 'Perspective' | 'Orthographic';
 
@@ -58,6 +59,34 @@ class Camera {
     mat4.multiply(this.viewTransform, translate1, this.viewTransform)
     mat4.multiply(this.viewTransform, t, this.viewTransform)
     mat4.multiply(this.viewTransform, translate2, this.viewTransform)
+
+    this.updateListener();
+  }
+
+  updateListener() {
+    const listener = audioContext.listener;
+
+    const listenerPosition = vec4.transformMat4(
+      vec4.create(0, 0, 0, 1),
+      this.viewTransform,
+    )
+
+    listener.positionX.value = listenerPosition[0];
+    listener.positionY.value = listenerPosition[1];
+    listener.positionZ.value = listenerPosition[2];
+
+    const listenerOrientation = vec4.transformMat4(
+      vec4.create(0, 0, -1, 0),
+      this.viewTransform,
+    )
+
+    listener.forwardX.value = listenerOrientation[0];
+    listener.forwardY.value = listenerOrientation[1];
+    listener.forwardZ.value = listenerOrientation[2];
+
+    listener.upX.value = 0;
+    listener.upY.value = 1;
+    listener.upZ.value = 0;
   }
 
   ndcToCameraSpace(x: number, y: number) {
