@@ -2,9 +2,23 @@ import React from 'react';
 import './App.scss';
 import { gpu, renderer } from './Renderer';
 import { audioContext } from './Audio';
+import { vec4 } from 'wgpu-matrix';
+
+type DiretionKeys = {
+  left: number,
+  right: number,
+  forward: number,
+  backward: number,
+}
 
 function App() {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const movement = React.useRef<DiretionKeys>({
+    left: 0,
+    right: 0,
+    forward: 0,
+    backward: 0,
+  })
 
   React.useEffect(() => {
     const element = canvasRef.current;
@@ -92,20 +106,35 @@ function App() {
     }
   }, []);
 
+  const updateDirection = () => {
+    const direction = vec4.normalize(vec4.create(
+      movement.current.right - movement.current.left,
+      0,
+      movement.current.backward - movement.current.forward,
+      0,
+    ))
+
+    renderer?.updateDirection(direction);
+  }
+
   const handleKeyDown: React.KeyboardEventHandler<HTMLCanvasElement> = (event) => {
     const upperKey = event.key.toUpperCase();
     switch (upperKey) {
       case 'E':
-        renderer?.moveForward(1)
+        movement.current.forward = 1;
+        updateDirection()
         break;
       case 'D':
-        renderer?.moveBackward(1)
+        movement.current.backward = 1;
+        updateDirection()
         break;
       case 'F':
-        renderer?.moveRight(1)
+        movement.current.right = 1;
+        updateDirection()
         break;
       case 'S':
-        renderer?.moveLeft(1)
+        movement.current.left = 1;
+        updateDirection()
         break;
       case 'G': {
         renderer?.takeAction()
@@ -121,16 +150,20 @@ function App() {
     const upperKey = event.key.toUpperCase();
     switch (upperKey) {
       case 'E':
-        renderer?.moveForward(0)
+        movement.current.forward = 0;
+        updateDirection()
         break;
       case 'D':
-        renderer?.moveBackward(0)
+        movement.current.backward = 0;
+        updateDirection()
         break;
       case 'F':
-        renderer?.moveRight(0)
+        movement.current.right = 0;
+        updateDirection()
         break;
       case 'S':
-        renderer?.moveLeft(0)
+        movement.current.left = 0;
+        updateDirection()
         break;
     }
   }

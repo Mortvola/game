@@ -351,6 +351,8 @@ class Renderer {
 
           // Move actors
           this.moveActors(elapsedTime)
+
+          this.checkHighlight();
         }
 
         this.previousTimestamp = timestamp;
@@ -532,7 +534,7 @@ class Renderer {
   pointerUp(x: number, y: number) {
   }
 
-  checkHighligh() {
+  checkHighlight() {
     const activeActor = this.actors[this.playerTurn];
 
     // Transform camera position (not including offset0) to camera space
@@ -636,60 +638,10 @@ class Renderer {
 
   mouseWheel(deltaX: number, deltaY: number, x: number, y: number) {
     this.camera.changeRotation(-deltaX * 0.2)
-
-    this.checkHighligh();
   }
 
-  moveForward(v: number) {
-    this.forward = v;
-
-    this.camera.moveDirection = vec4.normalize(vec4.create(
-      this.right - this.left,
-      0,
-      this.backward - this.forward,
-      0,
-    ))
-
-    this.checkHighligh();
-  }
-
-  moveBackward(v: number) {
-    this.backward = v;
-
-    this.camera.moveDirection = vec4.normalize(vec4.create(
-      this.right - this.left,
-      0,
-      this.backward - this.forward,
-      0,
-    ))
-
-    this.checkHighligh();
-  }
-
-  moveRight(v: number) {
-    this.right = v;
-
-    this.camera.moveDirection = vec4.normalize(vec4.create(
-      this.right - this.left,
-      0,
-      this.backward - this.forward,
-      0,
-    ))
-
-    this.checkHighligh();
-  }
-
-  moveLeft(v: number) {
-    this.left = v;
-
-    this.camera.moveDirection = vec4.normalize(vec4.create(
-      this.right - this.left,
-      0,
-      this.backward - this.forward,
-      0,
-    ))
-
-    this.checkHighligh();
+  updateDirection(direction: Vec4) {
+    this.camera.moveDirection = direction;
   }
 
   computeShotData(actor: Actor, targetActor: Actor) {

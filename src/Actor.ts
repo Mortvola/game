@@ -51,7 +51,7 @@ class Actor {
 
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
-    this.circle = new Circle(1, 0.1, color);
+    this.circle = new Circle(1, 0.025, color);
     this.circle.postTransforms.push(mat4.fromQuat(q));
 
     this.strength = this.abilityRoll();

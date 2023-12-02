@@ -27,16 +27,25 @@ class Camera {
 
   moveDirection = vec4.create(0, 0, 0, 0);
 
+  currentVelocity = vec4.create(0, 0, 0, 0);
+
+  maxVelocity = 10;
+
   updatePosition(elapsedTime: number) {
     const cameraQuat = quat.fromEuler(degToRad(0), degToRad(this.rotateY), degToRad(0), "yxz");
-    const t = mat4.fromQuat(cameraQuat);
+    const rotationMatrix = mat4.fromQuat(cameraQuat);
 
-    const direction = vec4.mulScalar(this.moveDirection, elapsedTime * 20);
+    const deltaVector = vec4.subtract(vec4.mulScalar(this.moveDirection, this.maxVelocity), this.currentVelocity);
 
-    const change = vec4.transformMat4(direction, t)
+    // const direction = vec4.mulScalar(this.moveDirection, elapsedTime * this.maxVelocity);
+    this.currentVelocity = vec4.add(this.currentVelocity, vec4.mulScalar(deltaVector, elapsedTime * 6));
 
-    this.position[0] += change[0];
-    this.position[2] += change[2];
+    const change = vec4.mulScalar(this.currentVelocity, elapsedTime);
+
+    const direction = vec4.transformMat4(change, rotationMatrix)
+
+    this.position[0] += direction[0];
+    this.position[2] += direction[2];
 
     this.computeViewTransform();
   }
