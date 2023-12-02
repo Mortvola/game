@@ -8,7 +8,13 @@ import Circle from "./Drawables/Circle";
 class Actor {
   moveTo: Vec2 | null = null;
 
-  speed = 20;
+  hitPoints = 100;
+
+  metersPerSecond = 2;
+
+  actionsLeft = 0;
+
+  distanceLeft = 0;
 
   mesh: SceneNode;
 
@@ -30,6 +36,20 @@ class Actor {
     mesh.translate[1] = launcherHeight / 2;  
 
     return new Actor(mesh, teamColor);
+  }
+
+  getWorldPosition() {
+    // Transforms the position to world space.
+    return vec4.transformMat4(
+      vec4.create(0, 0, 0, 1),
+      this.mesh.transform,
+    );    
+  }
+
+  startTurn() {
+    this.actionsLeft = 1;
+
+    this.distanceLeft = this.metersPerSecond * 10;
   }
 }
 

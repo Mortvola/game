@@ -1,4 +1,4 @@
-import { Vec2, Vec3, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
+import { Vec2, Vec3, Vec4, mat4, vec2, vec3, vec4 } from "wgpu-matrix";
 import Camera from "./Camera";
 import Gpu from "./Gpu";
 import { anglesOfLaunch, degToRad, gravity, intersectionPlane, minimumVelocity, timeToTarget } from "./Math";
@@ -14,6 +14,7 @@ import Reticle from "./Drawables/Reticle";
 import { playShot } from "./Audio";
 import Actor from "./Actor";
 import Trajectory from "./Drawables/Trajectory";
+import Line from "./Drawables/Line";
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -82,6 +83,8 @@ class Renderer {
 
   trajectory: Trajectory | null = null;
 
+  path: Line | null = null;
+
   constructor(players: Actor[], shot: Mesh, reticle: Reticle) {
     this.aspectRatio[0] = 1.0;
     this.mainRenderPass.addDrawable(new CartesianAxes(), 'line');
@@ -95,12 +98,12 @@ class Renderer {
       this.mainRenderPass.addDrawable(actor.circle, 'circle')
     }
 
-    this.playerTurn = this.players.length - 1;
-    this.nextTurn();
+    this.playerTurn = 0;
+
+    this.players[0].startTurn();
 
     this.shot = shot;
     this.scene.addNode(shot);
-    this.mainRenderPass.addDrawable(shot, 'lit');
 
     this.scene.addNode(reticle);
     this.mainRenderPass.addDrawable(reticle, 'reticle');
@@ -169,9 +172,11 @@ class Renderer {
     this.initialized = true;
   }
 
-  nextTurn() {
+  endTurn() {
     if (this.players.length > 0) {
       this.playerTurn = (this.playerTurn + 1) % this.players.length;
+
+      this.players[this.playerTurn].startTurn();
     }
   }
 
@@ -186,7 +191,7 @@ class Renderer {
           actor.moveTo,
         );
 
-        if (actor.speed * elapsedTime > distanceToTarget) {
+        if (actor.metersPerSecond * elapsedTime > distanceToTarget) {
           actor.mesh.translate[0] = actor.moveTo[0];
           actor.mesh.translate[2] = actor.moveTo[1];
           
@@ -204,7 +209,7 @@ class Renderer {
 
           v = vec3.normalize(v);
 
-          v = vec3.mulScalar(v, elapsedTime * actor.speed);
+          v = vec3.mulScalar(v, elapsedTime * actor.metersPerSecond);
 
           actor.mesh.translate[0] += v[0];
           actor.mesh.translate[2] += v[2];  
@@ -214,6 +219,42 @@ class Renderer {
         }
       }
     }
+  }
+
+  detectCollision(p1 : Vec4, p2: Vec4, filter?: (actor: Actor) => boolean): { actor: Actor, point: Vec4 } | null {
+    const ray = vec4.subtract(p2, p1);
+    let best: {
+      actor: Actor,
+      t: number,
+    } | null = null;
+
+    for (const actor of this.players) {
+      if (filter && !filter(actor)) {
+        continue;
+      }
+      
+      if (isDrawableInterface(actor.mesh)) {
+        const result = actor.mesh.hitTest(p1, ray);
+
+        if (result && result.t <= 1) {
+          if (best === null || best.t > result.t) {
+            best = {
+              actor: actor,
+              t: result.t,
+            }
+          }
+        }
+      }
+    }
+
+    if (best) {
+      return {
+        actor: best.actor,
+        point: vec4.add(p1, vec4.mulScalar(ray, best.t)),
+      }
+    }
+
+    return null;
   }
 
   moveShots(elapsedTime: number, timestamp: number) {
@@ -232,12 +273,36 @@ class Renderer {
 
           const xz = vec4.mulScalar(shot.orientation, xPos)
 
-          shot.position = vec4.create(
+          const newPosition = vec4.create(
             shot.startPos[0] + xz[0],
             shot.startPos[1] + shot.velocityVector[1] * shotElapsedTime + 0.5 * gravity * shotElapsedTime * shotElapsedTime,
             shot.startPos[2] + xz[2],
             1
           )
+
+          const result = this.detectCollision(shot.position, newPosition, (actor: Actor) => actor !== shot.actor);
+
+          if (result) {
+            shot.position = result.point;
+
+            result.actor.hitPoints -= 10;
+
+            if (result.actor.hitPoints <= 0) {
+              console.log('actor destroyed')
+            }
+
+            this.shots = [
+              ...this.shots.slice(0, i),
+              ...this.shots.slice(i + 1),
+            ]
+  
+            this.mainRenderPass.removeDrawable(this.shot, 'lit');
+
+            i -= 1;  
+          }
+          else {
+            shot.position = newPosition;
+          }
         }
         else {
           this.shots = [
@@ -245,8 +310,9 @@ class Renderer {
             ...this.shots.slice(i + 1),
           ]
 
+          this.mainRenderPass.removeDrawable(this.shot, 'lit');
+
           i -= 1;
-          this.nextTurn();
         }
       }
     }
@@ -463,6 +529,8 @@ class Renderer {
   }
 
   checkHighligh() {
+    const activeActor = this.players[this.playerTurn];
+
     // Transform camera position (not including offset0) to camera space
     let ray = vec4.normalize(vec4.transformMat4(this.camera.position, mat4.inverse(this.camera.viewTransform)));
     ray[3] = 0;
@@ -472,15 +540,15 @@ class Renderer {
     ray = vec4.transformMat4(ray, this.camera.viewTransform);
     origin = vec4.transformMat4(origin, this.camera.viewTransform);
 
-    // console.log(`origin: ${origin}, ray: ${ray}`)
-
+    // Determine if an actor should be highlighted but
+    // don't check the active actor.
     let best: {
       actor: Actor
       t: number,
     } | null = null;
 
     for (let actor of this.players) {
-      if (isDrawableInterface(actor.mesh)) {
+      if (actor !== activeActor && isDrawableInterface(actor.mesh)) {
         const result = actor.mesh.hitTest(origin, ray)
         
         if (result) {
@@ -510,27 +578,50 @@ class Renderer {
 
         this.mainRenderPass.addDrawable(this.focused.mesh, 'outline');
 
-        const actor = this.players[this.playerTurn];
-        const result = this.computeShotData(actor, this.focused);
+        // If the active actor has actions left then
+        // render a trajectory from it to the highlighted actor.
+        if (activeActor.actionsLeft > 0) {
+          const result = this.computeShotData(activeActor, this.focused);
 
-        this.trajectory = new Trajectory({
-          velocityVector: result.velocityVector,
-          duration: result.duration,
-          startPos: result.startPos,
-          orientation: result.orientation,
-          distance: result.distance,
-        })
-
-        this.mainRenderPass.addDrawable(this.trajectory, 'trajectory')
+          this.trajectory = new Trajectory({
+            velocityVector: result.velocityVector,
+            duration: result.duration,
+            startPos: result.startPos,
+            orientation: result.orientation,
+            distance: result.distance,
+          })
+  
+          this.mainRenderPass.addDrawable(this.trajectory, 'trajectory')  
+        }
       }
     }
-    else if (this.focused) {
-      this.mainRenderPass.removeDrawable(this.focused.mesh,  'outline');
-      this.focused = null;
+    else { 
+      if (this.focused) {
+        this.mainRenderPass.removeDrawable(this.focused.mesh,  'outline');
+        this.focused = null;
 
-      if (this.trajectory) {
-        this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory')
-        this.trajectory = null;
+        if (this.trajectory) {
+          this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory')
+          this.trajectory = null;
+        }
+      }
+
+      // Draw path to destination
+
+      if (this.path) {
+        this.mainRenderPass.removeDrawable(this.path, 'line');
+      }
+
+      if (activeActor.distanceLeft > 0) {
+        const { start, target } = this.computePath(activeActor, this.camera.position);
+
+        this.path = new Line(
+          start,
+          target,
+          vec4.create(1, 1, 1, 1),
+        )
+  
+        this.mainRenderPass.addDrawable(this.path, 'line')  
       }
     }
   }
@@ -623,7 +714,7 @@ class Renderer {
     const rotate = mat4.rotationY(angle);
 
     const orientation = vec3.normalize(vec4.transformMat4(vec4.create(0, 0, 1, 0), rotate))
-    orientation[3] = 0;   
+    orientation[3] = 0;
    
     return ({
       velocityVector: vec2.create(velocity * Math.cos(lowAngle), velocity * Math.sin(lowAngle)),
@@ -658,7 +749,40 @@ class Renderer {
       );
 
       playShot(emitterPosition);
+
+      this.mainRenderPass.addDrawable(this.shot, 'lit');
+
+      // Remove any previously drawn trajectory.
+      if (this.trajectory) {
+        this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory')
+        this.trajectory = null;
+      }
+
+      actor.actionsLeft -= 1;
     }
+  }
+
+  computePath(actor: Actor, dest: Vec4): { start: Vec4, target: Vec4, distance: number } {
+    let target = vec2.create(dest[0], dest[2]);
+
+    const position = actor.getWorldPosition();
+
+    const start = vec2.create(position[0], position[2]);
+
+    let distance = vec2.distance(start, target)
+
+    if (distance > actor.distanceLeft) {
+      distance = actor.distanceLeft;
+
+      const ray = vec2.normalize(vec2.subtract(target, start));
+      vec2.add(start, vec2.mulScalar(ray, distance), target);
+    }
+
+    return {
+      start: position,
+      target: vec4.create(target[0], 0, target[1], 1),
+      distance,
+    };
   }
 
   moveActor(actor: Actor) {
@@ -667,21 +791,23 @@ class Renderer {
     const point = intersectionPlane(vec4.create(0, 0, 0, 1), vec4.create(0, 1, 0, 0), origin, ray);
 
     if (point) {
-      actor.moveTo = vec2.create(point[0], point[2]);
+      const { target, distance } = this.computePath(actor, point);
 
-      const distance = vec2.distance(
-        vec2.create(actor.mesh.translate[0], actor.mesh.translate[2]),
-        actor.moveTo,
-      )
+      actor.moveTo = vec2.create(target[0], target[2]);
+      actor.distanceLeft -= distance;
 
       // Travel the distance in one second.
       // This is purely for playability. It's no fun watching an actor dilly-dally as it moves
       // to its target location.
-      actor.speed = distance;
+      actor.metersPerSecond = distance;
+
+      if (this.path) {
+        this.mainRenderPass.removeDrawable(this.path, 'line');
+      }
     }
   }
 
-  fire() {
+  takeAction() {
     const actor = this.players[this.playerTurn];
 
     if (this.focused) {

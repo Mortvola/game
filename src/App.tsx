@@ -108,8 +108,11 @@ function App() {
         renderer?.moveLeft(1)
         break;
       case 'G': {
-        renderer?.fire()
+        renderer?.takeAction()
         break;
+      }
+      case 'N': {
+        renderer.endTurn();
       }
     }
   }
