@@ -1,3 +1,5 @@
+import { Vec3 } from "wgpu-matrix";
+
 export const audioContext = new AudioContext();
 
 export const mainVolume = audioContext.createGain();
@@ -41,3 +43,14 @@ request.onload = function(e) {
 };
 
 request.send();
+
+export const playShot = (emitterPosition: Vec3) => {
+  sound.panner.positionX.value = emitterPosition[0];
+  sound.panner.positionY.value = emitterPosition[1];
+  sound.panner.positionZ.value = emitterPosition[2];
+
+  sound.source = audioContext.createBufferSource();
+  sound.source.connect(sound.volume);
+  sound.source.buffer = sound.buffer;
+  sound.source.start(audioContext.currentTime)
+}
