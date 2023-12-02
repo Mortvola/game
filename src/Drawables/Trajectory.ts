@@ -56,7 +56,7 @@ class Trajectory extends Drawable {
       throw new Error('gpu device not set.')
     }
 
-    const numSegments = this.trajectoryData.distance;
+    const numSegments = this.trajectoryData.distance * 4;
 
     // Update the trajectory information
     this.trajectoryStructure.set({

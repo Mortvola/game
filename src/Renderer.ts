@@ -650,13 +650,13 @@ class Renderer {
       vec4.create(0, 0, 0, 1),
       targetActor.mesh.transform,
     );
-    target[1] = targetActor.shoulderHeight;
+    target[1] = targetActor.chestHeight;
 
     const startPos = vec4.transformMat4(
       vec4.create(0, 0, 0, 1),
       actor.mesh.transform,
     )
-    startPos[1] = actor.shoulderHeight;
+    startPos[1] = actor.chestHeight;
 
     const distance = vec2.distance(
       vec2.create(startPos[0], startPos[2]),
@@ -706,7 +706,7 @@ class Renderer {
       
       // Transforms the position to world space.
       const emitterPosition = vec4.transformMat4(
-        vec4.create(0, actor.shoulderHeight, 0, 1),
+        vec4.create(0, actor.chestHeight, 0, 1),
         actor.mesh.transform,
       );
 

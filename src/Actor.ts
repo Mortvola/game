@@ -23,7 +23,7 @@ class Actor {
 
   height = 1.75;
 
-  shoulderHeight = 1.45;
+  chestHeight = 1.45;
 
   mesh: SceneNode;
 
@@ -47,7 +47,7 @@ class Actor {
     this.name = name;
     this.mesh = mesh;
     this.height = height;
-    this.shoulderHeight = height - 0.3;
+    this.chestHeight = height - 0.5;
 
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
