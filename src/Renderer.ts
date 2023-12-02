@@ -73,8 +73,6 @@ class Renderer {
 
   shot: Mesh;
 
-  static launcherHeight = 2;
-
   players: Actor[];
 
   playerTurn =  0;
@@ -116,11 +114,10 @@ class Renderer {
     const playerWidth = 4;
 
     for (let i = 0; i < numPlayers; i += 1 ) {
-      const actor = await Actor.create(color, teamColor, this.launcherHeight);
+      const actor = await Actor.create(color, teamColor);
       actor.mesh.translate[0] = (i - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()
         * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
-      actor.mesh.translate[1] = Renderer.launcherHeight / 2;  
       actor.mesh.translate[2] = z + Math.random() * 10 - 5;
 
       actor.circle.translate = vec3.copy(actor.mesh.translate);
@@ -133,9 +130,9 @@ class Renderer {
   }
 
   static async create() {
-    const players: Actor[] = await Renderer.createParticipants(50, vec4.create(0, 0, 0.5, 1), vec4.create(0, 0.6, 0, 1));
+    const players: Actor[] = await Renderer.createParticipants(10, vec4.create(0, 0, 0.5, 1), vec4.create(0, 0.6, 0, 1));
 
-    const opponenets: Actor[] = await Renderer.createParticipants(-50, vec4.create(0.5, 0, 0, 1), vec4.create(1, 0, 0, 1));
+    const opponenets: Actor[] = await Renderer.createParticipants(-10, vec4.create(0.5, 0, 0, 1), vec4.create(1, 0, 0, 1));
 
     const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
 
@@ -687,14 +684,16 @@ class Renderer {
   computeShotData(actor: Actor, targetActor: Actor) {
     // Transforms the position to world space.
     const target = vec4.transformMat4(
-      vec4.create(0, Renderer.launcherHeight / 2, 0, 1),
+      vec4.create(0, 0, 0, 1),
       targetActor.mesh.transform,
     );
+    target[1] = targetActor.shoulderHeight;
 
     const startPos = vec4.transformMat4(
-      vec4.create(0, Renderer.launcherHeight / 2, 0, 1),
+      vec4.create(0, 0, 0, 1),
       actor.mesh.transform,
     )
+    startPos[1] = actor.shoulderHeight;
 
     const distance = vec2.distance(
       vec2.create(startPos[0], startPos[2]),
@@ -702,11 +701,11 @@ class Renderer {
     );
 
     // The endY is the negative height of the launcher.
-    const minVelocity = minimumVelocity(distance, -Renderer.launcherHeight);
+    const minVelocity = minimumVelocity(distance, target[1] - startPos[1]);
 
     const velocity = Math.max(50, minVelocity);
 
-    const [lowAngle] = anglesOfLaunch(velocity, distance, -Renderer.launcherHeight);
+    const [lowAngle] = anglesOfLaunch(velocity, distance, target[1] - startPos[1]);
 
     const timeLow = timeToTarget(distance, velocity, lowAngle);
 
@@ -744,7 +743,7 @@ class Renderer {
       
       // Transforms the position to world space.
       const emitterPosition = vec4.transformMat4(
-        vec4.create(0, Renderer.launcherHeight, 0, 1),
+        vec4.create(0, actor.shoulderHeight, 0, 1),
         actor.mesh.transform,
       );
 
@@ -777,6 +776,8 @@ class Renderer {
       const ray = vec2.normalize(vec2.subtract(target, start));
       vec2.add(start, vec2.mulScalar(ray, distance), target);
     }
+
+    position[1] = 0;
 
     return {
       start: position,

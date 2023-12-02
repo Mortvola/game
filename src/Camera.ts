@@ -13,7 +13,7 @@ class Camera {
 
   viewTransform = mat4.identity();
 
-  offset = 30;
+  offset = 10;
 
   position = vec4.create(0, 0, 50, 1);
 

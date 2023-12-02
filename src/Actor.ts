@@ -16,26 +16,35 @@ class Actor {
 
   distanceLeft = 0;
 
+  turnDuration = 6;
+
+  height = 1.75;
+
+  shoulderHeight = 1.45;
+
   mesh: SceneNode;
 
   circle: SceneNode;
 
-  private constructor(mesh: SceneNode, color: Vec4) {
+  private constructor(mesh: SceneNode, height: number, color: Vec4) {
     this.mesh = mesh;
+    this.height = height;
+    this.shoulderHeight = height - 0.3;
 
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
-    this.circle = new Circle(4, 0.1, color);
+    this.circle = new Circle(1, 0.1, color);
     this.circle.postTransforms.push(mat4.fromQuat(q));
   }
 
-  static async create(color: Vec4, teamColor: Vec4, launcherHeight: number) {
-    const playerWidth = 4;
+  static async create(color: Vec4, teamColor: Vec4) {
+    const playerWidth = 1;
+    const playerHeight = 1.75;
 
-    const mesh = await Mesh.create(box(playerWidth, launcherHeight, playerWidth, color))
-    mesh.translate[1] = launcherHeight / 2;  
+    const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, color))
+    mesh.translate[1] = playerHeight / 2;  
 
-    return new Actor(mesh, teamColor);
+    return new Actor(mesh, playerHeight, teamColor);
   }
 
   getWorldPosition() {
@@ -49,7 +58,7 @@ class Actor {
   startTurn() {
     this.actionsLeft = 1;
 
-    this.distanceLeft = this.metersPerSecond * 10;
+    this.distanceLeft = this.metersPerSecond * this.turnDuration;
   }
 }
 
