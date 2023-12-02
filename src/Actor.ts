@@ -4,8 +4,11 @@ import { box } from "./Drawables/Shapes/box";
 import SceneNode from "./Drawables/SceneNode";
 import { degToRad } from "./Math";
 import Circle from "./Drawables/Circle";
+import { diceRoll } from "./Dice";
 
 class Actor {
+  name: string;
+
   moveTo: Vec2 | null = null;
 
   hitPoints = 100;
@@ -26,7 +29,22 @@ class Actor {
 
   circle: SceneNode;
 
-  private constructor(mesh: SceneNode, height: number, color: Vec4) {
+  strength: number;
+
+  dexterity: number;
+
+  constitution: number;
+  
+  intelligence: number;
+
+  wisdom: number;
+
+  charisma: number;
+
+  initiativeRoll = 0;
+
+  private constructor(name: string, mesh: SceneNode, height: number, color: Vec4) {
+    this.name = name;
     this.mesh = mesh;
     this.height = height;
     this.shoulderHeight = height - 0.3;
@@ -35,16 +53,48 @@ class Actor {
 
     this.circle = new Circle(1, 0.1, color);
     this.circle.postTransforms.push(mat4.fromQuat(q));
+
+    this.strength = this.abilityRoll();
+    this.dexterity = this.abilityRoll();
+    this.constitution = this.abilityRoll();
+    this.intelligence = this.abilityRoll();
+    this.wisdom = this.abilityRoll();
+    this.charisma = this.abilityRoll();
   }
 
-  static async create(color: Vec4, teamColor: Vec4) {
+  static async create(name: string, color: Vec4, teamColor: Vec4) {
     const playerWidth = 1;
     const playerHeight = 1.75;
 
     const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, color))
     mesh.translate[1] = playerHeight / 2;  
 
-    return new Actor(mesh, playerHeight, teamColor);
+    return new Actor(name, mesh, playerHeight, teamColor);
+  }
+
+  abilityRoll(): number {
+    const rolls = [
+      diceRoll(6),
+      diceRoll(6),
+      diceRoll(6),
+      diceRoll(6),
+    ];
+
+    rolls.sort((a: number, b: number) => b - a);
+
+    return rolls[0] + rolls[1] + rolls[2];
+  }
+
+  abilityModifier(score: number): number {
+    if (score === 1) {
+      return -5
+    }
+
+    if (score === 30) {
+      return 10;
+    }
+
+    return Math.trunc((score - 2) / 2 - 4);
   }
 
   getWorldPosition() {

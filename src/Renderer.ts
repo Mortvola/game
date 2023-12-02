@@ -15,6 +15,7 @@ import { playShot } from "./Audio";
 import Actor from "./Actor";
 import Trajectory from "./Drawables/Trajectory";
 import Line from "./Drawables/Line";
+import { diceRoll } from "./Dice";
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -73,7 +74,7 @@ class Renderer {
 
   shot: Mesh;
 
-  players: Actor[];
+  actors: Actor[];
 
   playerTurn =  0;
 
@@ -87,7 +88,7 @@ class Renderer {
     this.aspectRatio[0] = 1.0;
     this.mainRenderPass.addDrawable(new CartesianAxes(), 'line');
 
-    this.players = players;
+    this.actors = players;
 
     for (const actor of players) {
       this.scene.addNode(actor.mesh);
@@ -96,9 +97,15 @@ class Renderer {
       this.mainRenderPass.addDrawable(actor.circle, 'circle')
     }
 
+    for (const actor of this.actors) {
+      actor.initiativeRoll = diceRoll(20) + actor.abilityModifier(actor.dexterity)
+    }
+
+    this.actors.sort((a, b) => a.initiativeRoll - b.initiativeRoll);
+
     this.playerTurn = 0;
 
-    this.players[0].startTurn();
+    this.actors[0].startTurn();
 
     this.shot = shot;
     this.scene.addNode(shot);
@@ -110,11 +117,11 @@ class Renderer {
   static async createParticipants(z: number, color: Vec4, teamColor: Vec4): Promise<Actor[]> {
     const actors: Actor[] = [];
     const numPlayers = 4;
-    const spaceBetween = 12;
+    const spaceBetween = 4;
     const playerWidth = 4;
 
     for (let i = 0; i < numPlayers; i += 1 ) {
-      const actor = await Actor.create(color, teamColor);
+      const actor = await Actor.create(i.toString(), color, teamColor);
       actor.mesh.translate[0] = (i - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()
         * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
@@ -170,15 +177,15 @@ class Renderer {
   }
 
   endTurn() {
-    if (this.players.length > 0) {
-      this.playerTurn = (this.playerTurn + 1) % this.players.length;
+    if (this.actors.length > 0) {
+      this.playerTurn = (this.playerTurn + 1) % this.actors.length;
 
-      this.players[this.playerTurn].startTurn();
+      this.actors[this.playerTurn].startTurn();
     }
   }
 
   moveActors(elapsedTime: number) {
-    for (const actor of this.players) {
+    for (const actor of this.actors) {
       if (actor.moveTo) {
         const distanceToTarget = vec2.distance(
           vec2.create(
@@ -225,7 +232,7 @@ class Renderer {
       t: number,
     } | null = null;
 
-    for (const actor of this.players) {
+    for (const actor of this.actors) {
       if (filter && !filter(actor)) {
         continue;
       }
@@ -526,7 +533,7 @@ class Renderer {
   }
 
   checkHighligh() {
-    const activeActor = this.players[this.playerTurn];
+    const activeActor = this.actors[this.playerTurn];
 
     // Transform camera position (not including offset0) to camera space
     let ray = vec4.normalize(vec4.transformMat4(this.camera.position, mat4.inverse(this.camera.viewTransform)));
@@ -544,7 +551,7 @@ class Renderer {
       t: number,
     } | null = null;
 
-    for (let actor of this.players) {
+    for (let actor of this.actors) {
       if (actor !== activeActor && isDrawableInterface(actor.mesh)) {
         const result = actor.mesh.hitTest(origin, ray)
         
@@ -589,6 +596,10 @@ class Renderer {
           })
   
           this.mainRenderPass.addDrawable(this.trajectory, 'trajectory')  
+
+          if (this.path) {
+            this.mainRenderPass.removeDrawable(this.path, 'line');
+          }    
         }
       }
     }
@@ -809,7 +820,7 @@ class Renderer {
   }
 
   takeAction() {
-    const actor = this.players[this.playerTurn];
+    const actor = this.actors[this.playerTurn];
 
     if (this.focused) {
       if (this.focused !== actor) {
