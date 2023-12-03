@@ -13,11 +13,11 @@ class Camera {
 
   viewTransform = mat4.identity();
 
-  offset = 8;
+  offset = 18;
 
   position = vec4.create(0, 0, 20, 1);
 
-  rotateX = -15;
+  rotateX = -35;
 
   rotateY = 0;
 

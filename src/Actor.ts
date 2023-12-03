@@ -9,6 +9,8 @@ import { diceRoll } from "./Dice";
 class Actor {
   name: string;
 
+  automated: boolean;
+
   moveTo: Vec2 | null = null;
 
   hitPoints = 100;
@@ -27,7 +29,9 @@ class Actor {
 
   mesh: SceneNode;
 
-  circle: SceneNode;
+  circle: Circle;
+
+  teamColor: Vec4;
 
   strength: number;
 
@@ -43,11 +47,13 @@ class Actor {
 
   initiativeRoll = 0;
 
-  private constructor(name: string, mesh: SceneNode, height: number, color: Vec4) {
+  private constructor(name: string, mesh: SceneNode, height: number, color: Vec4, automated: boolean) {
     this.name = name;
+    this.automated = automated;
     this.mesh = mesh;
     this.height = height;
     this.chestHeight = height - 0.5;
+    this.teamColor = color;
 
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
@@ -62,14 +68,14 @@ class Actor {
     this.charisma = this.abilityRoll();
   }
 
-  static async create(name: string, color: Vec4, teamColor: Vec4) {
+  static async create(name: string, color: Vec4, teamColor: Vec4, automated: boolean) {
     const playerWidth = 1;
     const playerHeight = 1.75;
 
     const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, color))
     mesh.translate[1] = playerHeight / 2;  
 
-    return new Actor(name, mesh, playerHeight, teamColor);
+    return new Actor(name, mesh, playerHeight, teamColor, automated);
   }
 
   abilityRoll(): number {
@@ -109,6 +115,18 @@ class Actor {
     this.actionsLeft = 1;
 
     this.distanceLeft = this.metersPerSecond * this.turnDuration;
+
+    this.circle.color[0] = 1;
+    this.circle.color[1] = 1;
+    this.circle.color[2] = 1;
+    this.circle.color[3] = 1;
+  }
+
+  endTurn() {
+    this.circle.color[0] = this.teamColor[0];
+    this.circle.color[1] = this.teamColor[1];
+    this.circle.color[2] = this.teamColor[2];
+    this.circle.color[3] = this.teamColor[3];
   }
 }
 

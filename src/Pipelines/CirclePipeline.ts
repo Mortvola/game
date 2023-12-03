@@ -35,7 +35,7 @@ class CirclePipeline implements PipelineInterface {
       },
       primitive: {
         topology: "triangle-list",
-        cullMode: "back",
+        cullMode: "none",
         frontFace: "ccw",
       },
       depthStencil: {

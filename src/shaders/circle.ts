@@ -12,9 +12,8 @@ struct Circle {
   radius: f32,
   numSegments: f32,
   thickness: f32,
+  color: vec4f,
 }
-
-@group(1) @binding(1) var<uniform> color: vec4f;
 
 @group(2) @binding(0) var<uniform> circle: Circle;
 
@@ -56,15 +55,7 @@ fn vertex_circle(@builtin(vertex_index) vertexIndex : u32) -> VertexOut
 
   output.position = projectionMatrix * viewMatrix * modelMatrix * vec4f(x, y, 0, 1);
 
-  // output.position.z = 0;
-  // if (segmentVertIndex < 3) {
-  //   output.color = vec4f(1.0, 0.0, 0.0, 1.0);
-  // }
-  // else {
-  //   output.color = vec4f(0.0, 0.0, 1.0, 1.0);
-  // }
-
-  output.color = color;
+  output.color = circle.color;
 
   return output;
 }

@@ -1,6 +1,10 @@
 import { Vec4, Mat4 } from 'wgpu-matrix';
 import Drawable from './Drawable';
 import { bindGroups, gpu } from '../Renderer';
+import { circleShader } from '../shaders/circle';
+import { makeShaderDataDefinitions, makeStructuredView } from 'webgpu-utils';
+
+const defs = makeShaderDataDefinitions(circleShader);
 
 class Circle extends Drawable {
   radius: number;
@@ -8,6 +12,8 @@ class Circle extends Drawable {
   thickness: number;
 
   color = new Float32Array(4);
+
+  circleStructure = makeStructuredView(defs.structs.Circle);
 
   bindGroup: GPUBindGroup;
 
@@ -19,7 +25,7 @@ class Circle extends Drawable {
 
   circleDataBuffer: GPUBuffer;
 
-  circleData = new Float32Array(3);
+  circleData = new Float32Array(4);
 
   constructor(radius: number, thickness: number, color: Vec4) {
     super()
@@ -59,7 +65,7 @@ class Circle extends Drawable {
 
     this.circleDataBuffer = gpu.device.createBuffer({
       label: 'Circle',
-      size: 3 * Float32Array.BYTES_PER_ELEMENT,
+      size: this.circleStructure.arrayBuffer.byteLength,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
@@ -79,11 +85,15 @@ class Circle extends Drawable {
 
     const numSegments = 64;
 
-    this.circleData.set([this.radius, numSegments, this.thickness], 0);
+    this.circleStructure.set({
+      radius: this.radius,
+      numSegments: numSegments,
+      thickness: this.thickness,
+      color: this.color,
+    });
 
     gpu.device.queue.writeBuffer(this.uniformBuffer, 0, this.getTransform() as Float32Array);
-    gpu.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
-    gpu.device.queue.writeBuffer(this.circleDataBuffer, 0, this.circleData);
+    gpu.device.queue.writeBuffer(this.circleDataBuffer, 0, this.circleStructure.arrayBuffer);
 
     passEncoder.setBindGroup(1, this.bindGroup);
     passEncoder.setBindGroup(2, this.bindGroup2);
@@ -93,24 +103,6 @@ class Circle extends Drawable {
   }
 
   hitTest(p: Vec4, viewTransform: Mat4): { point: Vec4, t: number, drawable: Drawable} | null {
-    // Transform point from model space to world space to camera space.
-    // let t = mat4.multiply(mat4.inverse(viewTransform), this.getTransform());
-
-    // let point = vec4.create(t[12], t[13], t[14], t[15])
-
-    // const p2 = intersectionPlane(point, vec4.create(0, 0, 1, 0), vec4.create(0, 0, 0, 1), p);
-  
-    // if (p2) {
-    //   const d = vec2.distance(point, p2)
-
-    //   if (d < Math.abs(this.radius[0] * t[14])) {
-    //     // Transform point to world space
-    //     const wp = vec4.transformMat4(p2, viewTransform);
-
-    //     return { point: wp, t: 1.0, drawable: this };
-    //   }
-    // }
-
     return null;
   }
 }

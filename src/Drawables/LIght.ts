@@ -7,14 +7,6 @@ class Light extends SceneNode {
 
   allowedTransformations = AllowedTransformations.Translation;
 
-  // constructor() {
-  //   super();
-
-  //   // makeObservable(this, {
-  //   //   translate: observable,
-  //   // })
-  // }
-
   computeCentroid(): Vec4 {
     return vec4.create(0, 0, 0, 1);
   }
