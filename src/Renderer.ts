@@ -80,6 +80,8 @@ class Renderer {
 
   actorTurn =  0;
 
+  activeActor: Actor;
+
   living: Actor[][] = [];
 
   focused: Actor | null = null
@@ -91,6 +93,10 @@ class Renderer {
   automationStart: number | null = null;
 
   reticle: Reticle;
+
+  reticlePosition = vec2.create(0, 0);
+
+  inputMode: 'Mouse' | 'Controller' = 'Mouse';
 
   constructor(players: Actor[], opponents: Actor[], shot: Mesh, reticle: Reticle) {
     this.reticle = reticle;
@@ -118,6 +124,7 @@ class Renderer {
     this.actors.sort((a, b) => a.initiativeRoll - b.initiativeRoll);
 
     this.actorTurn = 0;
+    this.activeActor = this.actors[this.actorTurn];
 
     this.shot = shot;
     this.scene.addNode(shot);
@@ -232,20 +239,20 @@ class Renderer {
   }
 
   startTurn() {
-    const activeActor =  this.actors[this.actorTurn];
+    this.activeActor =  this.actors[this.actorTurn];
 
-    if (activeActor.automated) {
-      console.log('remove reticle')
+    if (this.activeActor.automated) {
       this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
     }
     else {
-      console.log('add reticle')
-      this.mainRenderPass.addDrawable(this.reticle, 'reticle');
+      if (this.inputMode === 'Controller') {
+        this.mainRenderPass.addDrawable(this.reticle, 'reticle');
+      }
     }
 
-    activeActor.startTurn();
+    this.activeActor.startTurn();
 
-    const point = activeActor.getWorldPosition();
+    const point = this.activeActor.getWorldPosition();
 
     this.camera.moveCameraTo = point;
     this.camera.moveCameraStartTime = null;
@@ -657,84 +664,141 @@ class Renderer {
   }
 
   pointerMove(x: number, y: number) {
+    // Pan the view if the mouse is near the edge of the window.
+    if (this.inputMode === 'Mouse') {
+      this.reticlePosition[0] = x;
+      this.reticlePosition[1] = y;
+
+      let panVector = vec4.create(0, 0, 0, 0);
+
+      const borderBoundary = 0.85;
+
+      if (y > borderBoundary) {
+        if (x > borderBoundary) {
+          panVector = vec4.create(1, 0, -1, 0)
+        }
+        else if (x < -borderBoundary) {
+          panVector = vec4.create(-1, 0, -1, 0)
+        }
+        else {
+          panVector = vec4.create(0, 0, -1, 0)
+        }
+      }
+      else if (y < -borderBoundary) {
+        if (x > borderBoundary) {
+          panVector = vec4.create(1, 0, 1, 0)
+        }
+        else if (x < -borderBoundary) {
+          panVector = vec4.create(-1, 0, 1, 0)
+        }
+        else {
+          panVector = vec4.create(0, 0, 1, 0)
+        }
+      }
+      else {
+        if (x > borderBoundary) {
+          panVector = vec4.create(1, 0, 0, 0)
+        }
+        else if (x < -borderBoundary) {
+          panVector = vec4.create(-1, 0, 0, 0)
+        }
+      }
+
+      this.camera.moveDirection = vec4.normalize(panVector);
+    }
+  }
+
+  pointerLeft() {
+    this.camera.moveDirection = vec4.create(0, 0, 0, 0);
   }
 
   pointerUp(x: number, y: number) {
+  }
+
+  cameraHitTest(): { actor?: Actor, point?: Vec4 } {
+    const { origin, ray } = this.camera.computeHitTestRay(this.reticlePosition[0], this.reticlePosition[1]);
+
+    // Determine if an actor should be highlighted but
+    // don't check the active actor.
+    let best: {
+      actor: Actor
+      t: number,
+    } | null = null;
+
+    for (let actor of this.actors) {
+      if (isDrawableInterface(actor.mesh)) {
+        const result = actor.mesh.hitTest(origin, ray)
+        
+        if (result) {
+          if (best === null || result.t < best.t) {
+            best = {
+              actor,
+              t: result.t,
+            }
+          }
+        }    
+      }
+    }
+
+    if (best) {
+      return { actor: best.actor}
+    }
+
+    const point = intersectionPlane(vec4.create(0, 0, 0, 1), vec4.create(0, 1, 0, 0), origin, ray);
+
+    if (point) {
+      return { point }
+    }
+
+    return {}
   }
 
   checkActorFocus() {
     const activeActor = this.actors[this.actorTurn];
 
     if (!activeActor.automated) {
-      // Transform camera position (not including offset0) to camera space
-      let ray = vec4.normalize(vec4.transformMat4(this.camera.position, mat4.inverse(this.camera.viewTransform)));
-      ray[3] = 0;
-      let origin = vec4.create(0, 0, 0, 1);
+      const { actor, point } = this.cameraHitTest();
 
-      // Transform from camera to world
-      ray = vec4.transformMat4(ray, this.camera.viewTransform);
-      origin = vec4.transformMat4(origin, this.camera.viewTransform);
-
-      // Determine if an actor should be highlighted but
-      // don't check the active actor.
-      let best: {
-        actor: Actor
-        t: number,
-      } | null = null;
-
-      for (let actor of this.actors) {
-        if (actor !== activeActor && isDrawableInterface(actor.mesh)) {
-          const result = actor.mesh.hitTest(origin, ray)
-          
-          if (result) {
-            if (best === null || result.t < best.t) {
-              best = {
-                actor,
-                t: result.t,
-              }
+      if (actor) {
+        if (actor !== this.activeActor) {
+          if (!this.focused || this.focused !== actor) {
+            if (this.focused) {
+              this.mainRenderPass.removeDrawable(this.focused.mesh,  'outline');
+              this.focused = null;           
             }
-          }    
-        }
-      }
 
-      if (best) {
-        if (!this.focused || this.focused !== best.actor) {
-          if (this.focused) {
-            this.mainRenderPass.removeDrawable(this.focused.mesh,  'outline');
-            this.focused = null;           
-          }
+            if (this.trajectory) {
+              this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory')
+              this.trajectory = null;
+            }  
 
-          if (this.trajectory) {
-            this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory')
-            this.trajectory = null;
-          }  
+            this.focused = actor;
 
-          this.focused = best.actor;
+            this.mainRenderPass.addDrawable(this.focused.mesh, 'outline');
 
-          this.mainRenderPass.addDrawable(this.focused.mesh, 'outline');
+            // If the active actor has actions left then
+            // render a trajectory from it to the highlighted actor.
+            if (activeActor.actionsLeft > 0) {
+              const result = this.computeShotData(activeActor, this.focused);
 
-          // If the active actor has actions left then
-          // render a trajectory from it to the highlighted actor.
-          if (activeActor.actionsLeft > 0) {
-            const result = this.computeShotData(activeActor, this.focused);
+              this.trajectory = new Trajectory({
+                velocityVector: result.velocityVector,
+                duration: result.duration,
+                startPos: result.startPos,
+                orientation: result.orientation,
+                distance: result.distance,
+              })
+      
+              this.mainRenderPass.addDrawable(this.trajectory, 'trajectory')  
 
-            this.trajectory = new Trajectory({
-              velocityVector: result.velocityVector,
-              duration: result.duration,
-              startPos: result.startPos,
-              orientation: result.orientation,
-              distance: result.distance,
-            })
-    
-            this.mainRenderPass.addDrawable(this.trajectory, 'trajectory')  
-
-            if (this.path) {
-              this.mainRenderPass.removeDrawable(this.path, 'line');
-            }    
+              if (this.path) {
+                this.mainRenderPass.removeDrawable(this.path, 'line');
+              }    
+            }
           }
         }
       }
-      else { 
+      else if (point) { 
         if (this.focused) {
           this.mainRenderPass.removeDrawable(this.focused.mesh,  'outline');
           this.focused = null;
@@ -752,7 +816,7 @@ class Renderer {
         }
 
         if (activeActor.distanceLeft > 0) {
-          const { start, target } = this.computePath(activeActor, this.camera.position);
+          const { start, target } = this.computePath(activeActor, point);
 
           this.path = new Line(
             start,
@@ -760,7 +824,7 @@ class Renderer {
             vec4.create(1, 1, 1, 1),
           )
     
-          this.mainRenderPass.addDrawable(this.path, 'line')  
+          this.mainRenderPass.addDrawable(this.path, 'line')    
         }
       }
     }
@@ -882,8 +946,7 @@ class Renderer {
   }
 
   moveActor(actor: Actor) {
-    const { origin, ray} = this.camera.computeHitTestRay(0, 0);
-
+    const { origin, ray } = this.camera.computeHitTestRay(this.reticlePosition[0], this.reticlePosition[1]);
     const point = intersectionPlane(vec4.create(0, 0, 0, 1), vec4.create(0, 1, 0, 0), origin, ray);
 
     if (point) {
@@ -916,6 +979,38 @@ class Renderer {
       else {
         this.moveActor(actor);
       }  
+    }
+  }
+
+  centerOn(x: number, y: number) {
+    this.reticlePosition[0] = x;
+    this.reticlePosition[1] = y;
+
+    let { actor, point } = this.cameraHitTest();
+
+    if (actor) {
+      point = actor.getWorldPosition();
+    }
+
+    if (point) {
+      this.camera.moveCameraTo = point;
+      this.camera.moveCameraStartTime = null;
+    }
+  }
+
+  toggleInputMode() {
+    this.inputMode = this.inputMode === 'Mouse' ? 'Controller' : 'Mouse';
+
+    if (this.inputMode === 'Controller') {
+      this.reticlePosition[0] = 0;
+      this.reticlePosition[1] = 0;
+
+      if (!this.activeActor.automated) {
+        this.mainRenderPass.addDrawable(this.reticle, 'reticle');
+      }
+    }
+    else {
+      this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
     }
   }
 }

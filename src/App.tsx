@@ -12,6 +12,7 @@ type DiretionKeys = {
 }
 
 function App() {
+  const [hasFocus, setHasFocus] = React.useState<boolean>(false); 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const movement = React.useRef<DiretionKeys>({
     left: 0,
@@ -37,13 +38,18 @@ function App() {
 
     if (element) {
       element.setPointerCapture(event.pointerId);
-      // const rect = element.getBoundingClientRect();
+      const rect = element.getBoundingClientRect();
 
-      // const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
-      // const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
+      const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
+      const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
       // renderer?.pointerDown(clipX, clipY);
 
-      renderer?.interact()
+      if (event.metaKey) {
+        renderer?.centerOn(clipX, clipY)
+      }
+      else {
+        renderer?.interact()
+      }
     }
   }
 
@@ -59,12 +65,16 @@ function App() {
     }
   }
 
+  const handlePointerLeave: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
+    renderer?.pointerLeft();
+  }
+
   const handlePointerUp: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
 
     if (element) {
-      element.releasePointerCapture(event.pointerId);
-      // const rect = element.getBoundingClientRect();
+      // element.releasePointerCapture(event.pointerId);
+      // // const rect = element.getBoundingClientRect();
 
       // const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
       // const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
@@ -173,18 +183,71 @@ function App() {
     }
   }
 
+  const [inputMode, setInputMode] = React.useState('Mouse');
+
+  const handleInputModeClick = () => {
+    renderer.toggleInputMode();
+    setInputMode((prev) => prev === 'Controller' ? 'Mouse' : 'Controller')
+  }
+
+  // const [showOverlay, setShowOverlay] = React.useState<boolean>(false);
+
+  // const handleFocus: React.FocusEventHandler<HTMLCanvasElement> = (event) => {
+  //   setHasFocus(true);
+  // }
+
+  // const handleBlur = () => {
+  //   setHasFocus(false);
+  //   setShowOverlay(true);
+  // }
+
+  // const handleBlurredClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
+  //   event.stopPropagation();
+  //   setShowOverlay(false);
+    
+  //   const element = canvasRef.current;
+
+  //   if (element) {
+  //     element.focus();
+  //   }
+  // }
+
+  const refocus = () => {
+    // setShowOverlay(false);
+    const element = canvasRef.current;
+
+    if (element) {
+      element.focus();
+    }
+  }
+
   return (
     <div className="App">
       <button type="button" onClick={handlePlayClick}>play</button>
+      <button type="button" onClick={handleInputModeClick} onFocus={(refocus)}>
+        {
+          inputMode === 'Mouse'
+            ? 'Mouse & Keyboard'
+            : 'Controller'
+        }
+      </button>
+      {
+        // showOverlay
+        //   ? <div className="blurred-overlay" onClick={handleBlurredClick} />
+        //   : null
+      }
       <canvas
         ref={canvasRef}
         tabIndex={0}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerLeave}
         onWheel={handleWheel}
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
+        // onFocus={handleFocus}
+        // onBlur={handleBlur}
       />
     </div>
   );

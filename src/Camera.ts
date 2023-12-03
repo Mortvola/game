@@ -80,7 +80,7 @@ class Camera {
   computeViewTransform() {
     this.viewTransform = mat4.identity();
 
-    const cameraQuat = quat.fromEuler(degToRad(this.rotateX), degToRad(this.rotateY), degToRad(0), "yxz");
+    const cameraQuat = quat.fromEuler(degToRad(this.rotateX), degToRad(this.rotateY), degToRad(0), "zyx");
     const t = mat4.fromQuat(cameraQuat);
     
     const translate1 = mat4.translation(this.position);
