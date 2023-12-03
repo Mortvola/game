@@ -37,11 +37,13 @@ function App() {
 
     if (element) {
       element.setPointerCapture(event.pointerId);
-      const rect = element.getBoundingClientRect();
+      // const rect = element.getBoundingClientRect();
 
-      const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
-      const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-      renderer?.pointerDown(clipX, clipY);  
+      // const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
+      // const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
+      // renderer?.pointerDown(clipX, clipY);
+
+      renderer?.interact()
     }
   }
 
@@ -62,11 +64,11 @@ function App() {
 
     if (element) {
       element.releasePointerCapture(event.pointerId);
-      const rect = element.getBoundingClientRect();
+      // const rect = element.getBoundingClientRect();
 
-      const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
-      const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-      renderer?.pointerUp(clipX, clipY);
+      // const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
+      // const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
+      // renderer?.pointerUp(clipX, clipY);
     }
   }
 
@@ -136,11 +138,7 @@ function App() {
         movement.current.left = 1;
         updateDirection()
         break;
-      case 'G': {
-        renderer?.takeAction()
-        break;
-      }
-      case 'N': {
+      case ' ': {
         renderer.endTurn();
       }
     }

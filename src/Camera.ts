@@ -31,14 +31,22 @@ class Camera {
 
   maxVelocity = 10;
 
-  updatePosition(elapsedTime: number) {
+  moveCameraTo: Vec4 | null = null;
+
+  moveCameraStartTime: number | null = null;
+
+  updatePosition(elapsedTime: number, timestamp: number) {
+    if (this.moveCameraTo !== null && this.moveCameraStartTime === null) {
+      this.moveCameraStartTime = timestamp;
+    }
+  
     const cameraQuat = quat.fromEuler(degToRad(0), degToRad(this.rotateY), degToRad(0), "yxz");
     const rotationMatrix = mat4.fromQuat(cameraQuat);
 
     const deltaVector = vec4.subtract(vec4.mulScalar(this.moveDirection, this.maxVelocity), this.currentVelocity);
 
     // const direction = vec4.mulScalar(this.moveDirection, elapsedTime * this.maxVelocity);
-    this.currentVelocity = vec4.add(this.currentVelocity, vec4.mulScalar(deltaVector, elapsedTime * 6));
+    this.currentVelocity = vec4.add(this.currentVelocity, vec4.mulScalar(deltaVector, elapsedTime * 10));
 
     const change = vec4.mulScalar(this.currentVelocity, elapsedTime);
 
@@ -46,6 +54,19 @@ class Camera {
 
     this.position[0] += direction[0];
     this.position[2] += direction[2];
+
+    if (this.moveCameraTo) {
+      const direction = vec4.normalize(vec4.subtract(this.moveCameraTo, this.position));
+
+      const change = vec4.mulScalar(direction, elapsedTime * 30);
+
+      this.position[0] += change[0];
+      this.position[2] += change[2];
+
+      if (this.moveCameraStartTime === null || timestamp - this.moveCameraStartTime > 2000) {
+        this.moveCameraTo = null;
+      } 
+    }
 
     this.computeViewTransform();
   }

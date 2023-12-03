@@ -5,7 +5,7 @@ import { anglesOfLaunch, degToRad, gravity, intersectionPlane, minimumVelocity, 
 import ContainerNode from "./Drawables/ContainerNode";
 import BindGroups, { lightsStructure } from "./BindGroups";
 import RenderPass from "./RenderPass";
-import Light, { isLight } from "./Drawables/LIght";
+import Light, { isLight } from "./Drawables/Light";
 import CartesianAxes from "./Drawables/CartesianAxes";
 import Mesh from "./Drawables/Mesh";
 import { box } from "./Drawables/Shapes/box";
@@ -74,6 +74,8 @@ class Renderer {
 
   shot: Mesh;
 
+  lights: Light[] = [];
+
   actors: Actor[];
 
   actorTurn =  0;
@@ -88,7 +90,11 @@ class Renderer {
 
   automationStart: number | null = null;
 
+  reticle: Reticle;
+
   constructor(players: Actor[], opponents: Actor[], shot: Mesh, reticle: Reticle) {
+    this.reticle = reticle;
+
     this.aspectRatio[0] = 1.0;
     this.mainRenderPass.addDrawable(new CartesianAxes(), 'line');
 
@@ -113,13 +119,12 @@ class Renderer {
 
     this.actorTurn = 0;
 
-    this.actors[0].startTurn();
-
     this.shot = shot;
     this.scene.addNode(shot);
 
-    this.scene.addNode(reticle);
-    this.mainRenderPass.addDrawable(reticle, 'reticle');
+    this.updateTransforms();
+
+    this.startTurn();
   }
 
   static async createParticipants(z: number, color: Vec4, teamColor: Vec4, automated: boolean): Promise<Actor[]> {
@@ -204,6 +209,8 @@ class Renderer {
         this.mainRenderPass.removeDrawable(this.path, 'line');
       }
 
+      this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
+
       this.focused = null;
 
       for (;;) {
@@ -215,11 +222,33 @@ class Renderer {
         }
 
         if (this.actors[this.actorTurn].hitPoints > 0) {
-          this.actors[this.actorTurn].startTurn();
+          
+          this.startTurn();
+
           break;
         }  
       }
     }
+  }
+
+  startTurn() {
+    const activeActor =  this.actors[this.actorTurn];
+
+    if (activeActor.automated) {
+      console.log('remove reticle')
+      this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
+    }
+    else {
+      console.log('add reticle')
+      this.mainRenderPass.addDrawable(this.reticle, 'reticle');
+    }
+
+    activeActor.startTurn();
+
+    const point = activeActor.getWorldPosition();
+
+    this.camera.moveCameraTo = point;
+    this.camera.moveCameraStartTime = null;
   }
 
   endTurn() {
@@ -441,8 +470,7 @@ class Renderer {
         if (this.previousTimestamp !== null) {
           const elapsedTime = (timestamp - this.previousTimestamp) * 0.001;
 
-          // this.updateTimeOfDay(elapsedTime);
-          this.camera.updatePosition(elapsedTime);
+          this.camera.updatePosition(elapsedTime, timestamp);
 
           this.moveShots(elapsedTime, timestamp);
 
@@ -478,6 +506,22 @@ class Renderer {
     this.render = false;
   }
 
+  updateTransforms() {
+    if (this.shots.length > 0) {
+      this.shot.translate[0] = this.shots[0].position[0];
+      this.shot.translate[1] = this.shots[0].position[1];
+      this.shot.translate[2] = this.shots[0].position[2];
+    }
+
+    this.scene.nodes.forEach((node) => {
+      node.computeTransform()
+
+      if (isLight(node)) {
+        this.lights.push(node);
+      }
+    })
+  }
+
   drawScene() {
     if (!gpu) {
       throw new Error('device is not set')
@@ -491,24 +535,10 @@ class Renderer {
       throw new Error('uniformBuffer is not set');
     }
 
-    const lights: Light[] = [];
-
     // this.cursor.translate[0] = this.camera.position[0];
     // this.cursor.translate[2] = this.camera.position[2];
 
-    if (this.shots.length > 0) {
-      this.shot.translate[0] = this.shots[0].position[0];
-      this.shot.translate[1] = this.shots[0].position[1];
-      this.shot.translate[2] = this.shots[0].position[2];
-    }
-
-    this.scene.nodes.forEach((node) => {
-      node.computeTransform()
-
-      if (isLight(node)) {
-        lights.push(node);
-      }
-    })
+    this.updateTransforms();
 
     if (this.context.canvas.width !== this.renderedDimensions[0]
       || this.context.canvas.height !== this.renderedDimensions[1]
@@ -567,8 +597,8 @@ class Renderer {
         inverseViewtransform,
       ),
       directionalColor: vec4.create(1, 1, 1, 1),
-      count: lights.length,
-      lights: lights.map((light) => ({
+      count: this.lights.length,
+      lights: this.lights.map((light) => ({
         position: vec4.transformMat4(
           vec4.create(light.translate[0], light.translate[1], light.translate[2], 1),
           inverseViewtransform,
@@ -873,7 +903,7 @@ class Renderer {
     }
   }
 
-  takeAction() {
+  interact() {
     const actor = this.actors[this.actorTurn];
 
     if (!actor.automated)

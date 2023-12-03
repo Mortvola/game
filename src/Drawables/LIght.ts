@@ -1,5 +1,4 @@
 import { vec4, Vec4 } from 'wgpu-matrix';
-// import { makeObservable, observable } from 'mobx';
 import SceneNode, { AllowedTransformations } from './SceneNode';
 
 class Light extends SceneNode {
