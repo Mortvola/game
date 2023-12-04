@@ -38,6 +38,7 @@ type ShotData = {
   startPos: Vec3,
   orientation: Vec4,
   actor: Actor,
+  onFinish: (() => void) | null,
 };
 
 class Renderer {
@@ -343,6 +344,11 @@ class Renderer {
   }
 
   removeShot(i: number) {
+    const shot = this.shots[i];
+    if (shot.onFinish) {
+      shot.onFinish();      
+    }
+
     this.shots = [
       ...this.shots.slice(0, i),
       ...this.shots.slice(i + 1),
@@ -433,8 +439,6 @@ class Renderer {
             this.attack(this.activeActor, otherTeam[index]);
   
             this.automationStart = null;
-  
-            this.endTurn2();  
           }
         }
       }
@@ -870,7 +874,14 @@ class Renderer {
       position: result.startPos,
       startTime: null, // start time will be assigned at the next frame.
       actor,
+      onFinish: null,
     };
+
+    if (actor.automated) {
+      data.onFinish = () => {   
+        this.endTurn2();  
+      }
+    }
 
     this.shots.push(data);
 
