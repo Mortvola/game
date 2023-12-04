@@ -729,6 +729,16 @@ class Renderer implements WorldInterface {
       this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
     }
   }
+
+  zoomOut() {
+    this.camera.offset += 1;
+    this.camera.rotateX -= 1;
+  }
+
+  zoomIn() {
+    this.camera.offset -= 1;
+    this.camera.rotateX += 1;
+  }
 }
 
 export const gpu = await Gpu.create();

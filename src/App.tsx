@@ -148,9 +148,17 @@ function App() {
         movement.current.left = 1;
         updateDirection()
         break;
-      case ' ': {
+      case ' ':
         renderer.endTurn();
-      }
+        break;
+      case 'ARROWDOWN':
+        renderer.zoomOut();
+        break;
+      case 'ARROWUP':
+        renderer.zoomIn();
+        break;
+      default:
+        console.log(upperKey)
     }
   }
 
