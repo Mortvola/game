@@ -342,6 +342,15 @@ class Renderer {
     return null;
   }
 
+  removeShot(i: number) {
+    this.shots = [
+      ...this.shots.slice(0, i),
+      ...this.shots.slice(i + 1),
+    ];
+
+    this.mainRenderPass.removeDrawable(this.shot, 'lit');
+  }
+
   moveShots(elapsedTime: number, timestamp: number) {
     // Update shot positions
     for (let i = 0; i < this.shots.length; i += 1) {
@@ -385,26 +394,17 @@ class Renderer {
             }
 
             this.mainRenderPass.removeDrawable(result.actor.mesh, 'lit');
+            this.mainRenderPass.removeDrawable(result.actor.circle, 'circle');
 
             console.log('actor destroyed');
           }
 
-          this.shots = [
-            ...this.shots.slice(0, i),
-            ...this.shots.slice(i + 1),
-          ];
-
-          this.mainRenderPass.removeDrawable(this.shot, 'lit');
+          this.removeShot(i);
 
           i -= 1;
         } else if (newPosition[1] < 0) {
           // The shot hit the ground
-          this.shots = [
-            ...this.shots.slice(0, i),
-            ...this.shots.slice(i + 1),
-          ];
-
-          this.mainRenderPass.removeDrawable(this.shot, 'lit');
+          this.removeShot(i);
 
           i -= 1;
         } else {
