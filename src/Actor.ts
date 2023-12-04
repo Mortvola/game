@@ -9,6 +9,8 @@ import { abilityRoll } from "./Dice";
 class Actor {
   name: string;
 
+  team: number;
+
   automated: boolean;
 
   moveTo: Vec2 | null = null;
@@ -47,8 +49,9 @@ class Actor {
 
   initiativeRoll = 0;
 
-  private constructor(name: string, mesh: SceneNode, height: number, color: Vec4, automated: boolean) {
+  private constructor(name: string, mesh: SceneNode, height: number, color: Vec4, team: number, automated: boolean) {
     this.name = name;
+    this.team = team;
     this.automated = automated;
     this.mesh = mesh;
     this.height = height;
@@ -68,14 +71,14 @@ class Actor {
     this.charisma = abilityRoll();
   }
 
-  static async create(name: string, color: Vec4, teamColor: Vec4, automated: boolean) {
+  static async create(name: string, color: Vec4, teamColor: Vec4, team: number, automated: boolean) {
     const playerWidth = 1;
     const playerHeight = 1.75;
 
     const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, color))
     mesh.translate[1] = playerHeight / 2;  
 
-    return new Actor(name, mesh, playerHeight, teamColor, automated);
+    return new Actor(name, mesh, playerHeight, teamColor, team, automated);
   }
 
   getWorldPosition() {
