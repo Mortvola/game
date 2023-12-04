@@ -4,7 +4,7 @@ import { box } from "./Drawables/Shapes/box";
 import SceneNode from "./Drawables/SceneNode";
 import { degToRad } from "./Math";
 import Circle from "./Drawables/Circle";
-import { diceRoll } from "./Dice";
+import { abilityRoll } from "./Dice";
 
 class Actor {
   name: string;
@@ -60,12 +60,12 @@ class Actor {
     this.circle = new Circle(1, 0.025, color);
     this.circle.postTransforms.push(mat4.fromQuat(q));
 
-    this.strength = this.abilityRoll();
-    this.dexterity = this.abilityRoll();
-    this.constitution = this.abilityRoll();
-    this.intelligence = this.abilityRoll();
-    this.wisdom = this.abilityRoll();
-    this.charisma = this.abilityRoll();
+    this.strength = abilityRoll();
+    this.dexterity = abilityRoll();
+    this.constitution = abilityRoll();
+    this.intelligence = abilityRoll();
+    this.wisdom = abilityRoll();
+    this.charisma = abilityRoll();
   }
 
   static async create(name: string, color: Vec4, teamColor: Vec4, automated: boolean) {
@@ -76,31 +76,6 @@ class Actor {
     mesh.translate[1] = playerHeight / 2;  
 
     return new Actor(name, mesh, playerHeight, teamColor, automated);
-  }
-
-  abilityRoll(): number {
-    const rolls = [
-      diceRoll(6),
-      diceRoll(6),
-      diceRoll(6),
-      diceRoll(6),
-    ];
-
-    rolls.sort((a: number, b: number) => b - a);
-
-    return rolls[0] + rolls[1] + rolls[2];
-  }
-
-  abilityModifier(score: number): number {
-    if (score === 1) {
-      return -5
-    }
-
-    if (score === 30) {
-      return 10;
-    }
-
-    return Math.trunc((score - 2) / 2 - 4);
   }
 
   getWorldPosition() {

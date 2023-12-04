@@ -1,21 +1,26 @@
-import { Vec2, Vec3, Vec4, mat4, vec2, vec3, vec4 } from "wgpu-matrix";
-import Camera from "./Camera";
-import Gpu from "./Gpu";
-import { anglesOfLaunch, degToRad, gravity, intersectionPlane, minimumVelocity, timeToTarget } from "./Math";
-import ContainerNode from "./Drawables/ContainerNode";
-import BindGroups, { lightsStructure } from "./BindGroups";
-import RenderPass from "./RenderPass";
-import Light, { isLight } from "./Drawables/Light";
-import CartesianAxes from "./Drawables/CartesianAxes";
-import Mesh from "./Drawables/Mesh";
-import { box } from "./Drawables/Shapes/box";
-import { isDrawableInterface } from "./Drawables/DrawableInterface";
-import Reticle from "./Drawables/Reticle";
-import { playShot } from "./Audio";
-import Actor from "./Actor";
-import Trajectory from "./Drawables/Trajectory";
-import Line from "./Drawables/Line";
-import { diceRoll } from "./Dice";
+/* eslint-disable no-restricted-syntax */
+import {
+  Vec2, Vec3, Vec4, mat4, vec2, vec3, vec4,
+} from 'wgpu-matrix';
+import Camera from './Camera';
+import Gpu from './Gpu';
+import {
+  anglesOfLaunch, degToRad, gravity, intersectionPlane, minimumVelocity, timeToTarget,
+} from './Math';
+import ContainerNode from './Drawables/ContainerNode';
+import BindGroups, { lightsStructure } from './BindGroups';
+import RenderPass from './RenderPass';
+import Light, { isLight } from './Drawables/Light';
+import CartesianAxes from './Drawables/CartesianAxes';
+import Mesh from './Drawables/Mesh';
+import { box } from './Drawables/Shapes/box';
+import { isDrawableInterface } from './Drawables/DrawableInterface';
+import Reticle from './Drawables/Reticle';
+import { playShot } from './Audio';
+import Actor from './Actor';
+import Trajectory from './Drawables/Trajectory';
+import Line from './Drawables/Line';
+import { abilityModifier, diceRoll } from './Dice';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -63,7 +68,7 @@ class Renderer {
   mainRenderPass = new RenderPass();
 
   left = 0;
-  
+
   right = 0;
 
   forward = 0;
@@ -78,13 +83,13 @@ class Renderer {
 
   actors: Actor[];
 
-  actorTurn =  0;
+  actorTurn = 0;
 
   activeActor: Actor;
 
   living: Actor[][] = [];
 
-  focused: Actor | null = null
+  focused: Actor | null = null;
 
   trajectory: Trajectory | null = null;
 
@@ -112,13 +117,13 @@ class Renderer {
     for (const actor of this.actors) {
       this.scene.addNode(actor.mesh);
       this.scene.addNode(actor.circle);
-      this.mainRenderPass.addDrawable(actor.mesh, 'lit'); 
-      this.mainRenderPass.addDrawable(actor.circle, 'circle')
+      this.mainRenderPass.addDrawable(actor.mesh, 'lit');
+      this.mainRenderPass.addDrawable(actor.circle, 'circle');
     }
 
     // Determine order of turns
     for (const actor of this.actors) {
-      actor.initiativeRoll = diceRoll(20) + actor.abilityModifier(actor.dexterity)
+      actor.initiativeRoll = diceRoll(20) + abilityModifier(actor.dexterity);
     }
 
     this.actors.sort((a, b) => a.initiativeRoll - b.initiativeRoll);
@@ -140,7 +145,7 @@ class Renderer {
     const spaceBetween = 4;
     const playerWidth = 4;
 
-    for (let i = 0; i < numPlayers; i += 1 ) {
+    for (let i = 0; i < numPlayers; i += 1) {
       const actor = await Actor.create(i.toString(), color, teamColor, automated);
       actor.mesh.translate[0] = (i - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()
@@ -148,9 +153,9 @@ class Renderer {
       actor.mesh.translate[2] = z + Math.random() * 10 - 5;
 
       actor.circle.translate = vec3.copy(actor.mesh.translate);
-      actor.circle.translate[1] = 0;  
+      actor.circle.translate[1] = 0;
 
-      actors.push(actor)
+      actors.push(actor);
     }
 
     return actors;
@@ -164,7 +169,7 @@ class Renderer {
     const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
 
     const reticle = await Reticle.create(0.05);
-  
+
     return new Renderer(players, opponents, shot, reticle);
   }
 
@@ -177,8 +182,8 @@ class Renderer {
       this.context.unconfigure();
     }
 
-    this.context = canvas.getContext("webgpu");
-    
+    this.context = canvas.getContext('webgpu');
+
     if (!this.context) {
       throw new Error('context is null');
     }
@@ -186,9 +191,9 @@ class Renderer {
     this.context.configure({
       device: gpu.device,
       format: navigator.gpu.getPreferredCanvasFormat(),
-      alphaMode: "opaque",
+      alphaMode: 'opaque',
     });
-    
+
     this.camera.computeViewTransform();
 
     this.start();
@@ -203,14 +208,14 @@ class Renderer {
       this.actors[this.actorTurn].endTurn();
 
       if (this.focused) {
-        this.mainRenderPass.removeDrawable(this.focused.mesh,  'outline');
-        this.focused = null;           
+        this.mainRenderPass.removeDrawable(this.focused.mesh, 'outline');
+        this.focused = null;
       }
 
       if (this.trajectory) {
-        this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory')
+        this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
         this.trajectory = null;
-      }  
+      }
 
       if (this.path) {
         this.mainRenderPass.removeDrawable(this.path, 'line');
@@ -229,25 +234,21 @@ class Renderer {
         }
 
         if (this.actors[this.actorTurn].hitPoints > 0) {
-          
           this.startTurn();
 
           break;
-        }  
+        }
       }
     }
   }
 
   startTurn() {
-    this.activeActor =  this.actors[this.actorTurn];
+    this.activeActor = this.actors[this.actorTurn];
 
     if (this.activeActor.automated) {
       this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
-    }
-    else {
-      if (this.inputMode === 'Controller') {
-        this.mainRenderPass.addDrawable(this.reticle, 'reticle');
-      }
+    } else if (this.inputMode === 'Controller') {
+      this.mainRenderPass.addDrawable(this.reticle, 'reticle');
     }
 
     this.activeActor.startTurn();
@@ -261,8 +262,7 @@ class Renderer {
   endTurn() {
     const actor = this.actors[this.actorTurn];
 
-    if (!actor.automated)
-    {
+    if (!actor.automated) {
       this.endTurn2();
     }
   }
@@ -281,13 +281,12 @@ class Renderer {
         if (actor.metersPerSecond * elapsedTime > distanceToTarget) {
           actor.mesh.translate[0] = actor.moveTo[0];
           actor.mesh.translate[2] = actor.moveTo[1];
-          
+
           actor.circle.translate = vec3.copy(actor.mesh.translate);
-          actor.circle.translate[1] = 0;  
-    
+          actor.circle.translate[1] = 0;
+
           actor.moveTo = null;
-        }
-        else {
+        } else {
           let v = vec3.create(
             actor.moveTo[0] - actor.mesh.translate[0],
             0,
@@ -299,10 +298,10 @@ class Renderer {
           v = vec3.mulScalar(v, elapsedTime * actor.metersPerSecond);
 
           actor.mesh.translate[0] += v[0];
-          actor.mesh.translate[2] += v[2];  
+          actor.mesh.translate[2] += v[2];
 
           actor.circle.translate = vec3.copy(actor.mesh.translate);
-          actor.circle.translate[1] = 0;  
+          actor.circle.translate[1] = 0;
         }
       }
     }
@@ -319,16 +318,16 @@ class Renderer {
       if (filter && !filter(actor)) {
         continue;
       }
-      
+
       if (isDrawableInterface(actor.mesh)) {
         const result = actor.mesh.hitTest(p1, ray);
 
         if (result && result.t <= 1) {
           if (best === null || best.t > result.t) {
             best = {
-              actor: actor,
+              actor,
               t: result.t,
-            }
+            };
           }
         }
       }
@@ -338,7 +337,7 @@ class Renderer {
       return {
         actor: best.actor,
         point: vec4.add(p1, vec4.mulScalar(ray, best.t)),
-      }
+      };
     }
 
     return null;
@@ -351,21 +350,20 @@ class Renderer {
 
       if (shot.startTime === null) {
         shot.startTime = timestamp;
-      }
-      else {
+      } else {
         const shotElapsedTime = (timestamp - shot.startTime) * 0.001;
 
         if (shotElapsedTime < shot.duration) {
           const xPos = shot.velocityVector[0] * shotElapsedTime;
 
-          const xz = vec4.mulScalar(shot.orientation, xPos)
+          const xz = vec4.mulScalar(shot.orientation, xPos);
 
           const newPosition = vec4.create(
             shot.startPos[0] + xz[0],
             shot.startPos[1] + shot.velocityVector[1] * shotElapsedTime + 0.5 * gravity * shotElapsedTime * shotElapsedTime,
             shot.startPos[2] + xz[2],
-            1
-          )
+            1,
+          );
 
           const result = this.detectCollision(shot.position, newPosition, (actor: Actor) => actor !== shot.actor);
 
@@ -378,49 +376,46 @@ class Renderer {
               result.actor.hitPoints = 0;
 
               if (result.actor.automated) {
-                const index = this.living[1].findIndex((actor) => actor === result.actor)
+                const index = this.living[1].findIndex((actor) => actor === result.actor);
 
                 if (index !== -1) {
                   this.living[1] = [
                     ...this.living[1].slice(0, index),
                     ...this.living[1].slice(index + 1),
-                  ]
+                  ];
                 }
-              }
-              else {
-                const index = this.living[0].findIndex((actor) => actor === result.actor)
+              } else {
+                const index = this.living[0].findIndex((actor) => actor === result.actor);
 
                 if (index !== -1) {
                   this.living[0] = [
                     ...this.living[0].slice(0, index),
                     ...this.living[0].slice(index + 1),
-                  ]
+                  ];
                 }
               }
 
               this.mainRenderPass.removeDrawable(result.actor.mesh, 'lit');
 
-              console.log('actor destroyed')
+              console.log('actor destroyed');
             }
 
             this.shots = [
               ...this.shots.slice(0, i),
               ...this.shots.slice(i + 1),
-            ]
-  
+            ];
+
             this.mainRenderPass.removeDrawable(this.shot, 'lit');
 
-            i -= 1;  
-          }
-          else {
+            i -= 1;
+          } else {
             shot.position = newPosition;
           }
-        }
-        else {
+        } else {
           this.shots = [
             ...this.shots.slice(0, i),
             ...this.shots.slice(i + 1),
-          ]
+          ];
 
           this.mainRenderPass.removeDrawable(this.shot, 'lit');
 
@@ -445,7 +440,7 @@ class Renderer {
           // Attack a random opponent
           const index = Math.trunc(Math.random() * this.living[0].length);
 
-          this.attack(activeActor, this.living[0][index])
+          this.attack(activeActor, this.living[0][index]);
 
           this.automationStart = null;
 
@@ -482,7 +477,7 @@ class Renderer {
           this.moveShots(elapsedTime, timestamp);
 
           // Move actors
-          this.moveActors(elapsedTime)
+          this.moveActors(elapsedTime);
 
           this.runAutomation(elapsedTime, timestamp);
 
@@ -521,17 +516,17 @@ class Renderer {
     }
 
     this.scene.nodes.forEach((node) => {
-      node.computeTransform()
+      node.computeTransform();
 
       if (isLight(node)) {
         this.lights.push(node);
       }
-    })
+    });
   }
 
   drawScene() {
     if (!gpu) {
-      throw new Error('device is not set')
+      throw new Error('device is not set');
     }
 
     if (!this.context) {
@@ -550,42 +545,42 @@ class Renderer {
     if (this.context.canvas.width !== this.renderedDimensions[0]
       || this.context.canvas.height !== this.renderedDimensions[1]
     ) {
-        const depthTexture = gpu.device!.createTexture({
-          size: {width: this.context.canvas.width, height: this.context.canvas.height},
-          format: "depth24plus",
-          usage: GPUTextureUsage.RENDER_ATTACHMENT,
-        });
-        this.depthTextureView = depthTexture.createView();
+      const depthTexture = gpu.device!.createTexture({
+        size: { width: this.context.canvas.width, height: this.context.canvas.height },
+        format: 'depth24plus',
+        usage: GPUTextureUsage.RENDER_ATTACHMENT,
+      });
+      this.depthTextureView = depthTexture.createView();
 
-        this.aspectRatio[0] = this.context.canvas.width / this.context.canvas.height;
+      this.aspectRatio[0] = this.context.canvas.width / this.context.canvas.height;
 
-        this.camera.perspectiveTransform = mat4.perspective(
-            degToRad(45), // settings.fieldOfView,
-            this.aspectRatio[0],
-            this.camera.near,  // zNear
-            this.camera.far,   // zFar
-        );
+      this.camera.perspectiveTransform = mat4.perspective(
+        degToRad(45), // settings.fieldOfView,
+        this.aspectRatio[0],
+        this.camera.near, // zNear
+        this.camera.far, // zFar
+      );
 
-        this.camera.orthographicTransform = mat4.ortho(
-          -this.context.canvas.width / 80,
-          this.context.canvas.width / 80,
-          -this.context.canvas.height / 80,
-          this.context.canvas.height/ 80,
-          // this.near, this.far,
-          -200, 200,
-        );
-    
-        this.renderedDimensions = [this.context.canvas.width, this.context.canvas.height]
+      this.camera.orthographicTransform = mat4.ortho(
+        -this.context.canvas.width / 80,
+        this.context.canvas.width / 80,
+        -this.context.canvas.height / 80,
+        this.context.canvas.height / 80,
+        // this.near, this.far,
+        -200,
+
+        200,
+      );
+
+      this.renderedDimensions = [this.context.canvas.width, this.context.canvas.height];
     }
-
 
     const view = this.context.getCurrentTexture().createView();
 
     if (this.camera.projection === 'Perspective') {
-      gpu.device.queue.writeBuffer(bindGroups.camera.buffer[0], 0, this.camera.perspectiveTransform as Float32Array);      
-    }
-    else {
-      gpu.device.queue.writeBuffer(bindGroups.camera.buffer[0], 0, this.camera.orthographicTransform as Float32Array);      
+      gpu.device.queue.writeBuffer(bindGroups.camera.buffer[0], 0, this.camera.perspectiveTransform as Float32Array);
+    } else {
+      gpu.device.queue.writeBuffer(bindGroups.camera.buffer[0], 0, this.camera.orthographicTransform as Float32Array);
     }
 
     const inverseViewtransform = mat4.inverse(this.camera.viewTransform);
@@ -618,14 +613,14 @@ class Renderer {
 
     const commandEncoder = gpu.device.createCommandEncoder();
 
-    this.mainRenderPass.render(view, this.depthTextureView!, commandEncoder)
+    this.mainRenderPass.render(view, this.depthTextureView!, commandEncoder);
 
     // if (this.selected.selection.length > 0) {
     //   // Transform camera position to world space.
     //   const origin = vec4.transformMat4(vec4.create(0, 0, 0, 1), this.camera.viewTransform);
     //   const centroid = this.selected.getCentroid();
 
-    //   // We want to make the drag handles appear to be the same distance away 
+    //   // We want to make the drag handles appear to be the same distance away
     //   // from the camera no matter how far the centroid is from the camera.
     //   const apparentDistance = 25;
     //   let actualDistance = vec3.distance(origin, centroid);
@@ -653,11 +648,11 @@ class Renderer {
     //   if (this.selected.selection[0].node.allowedTransformations & AllowedTransformations.Rotation) {
     //     this.dragHandlesPass.addDrawables(this.transformer.rotator);
     //   }
-    
+
     //   this.dragHandlesPass.render(view, this.depthTextureView!, commandEncoder);
     // }
-  
-    gpu.device.queue.submit([commandEncoder.finish()]);  
+
+    gpu.device.queue.submit([commandEncoder.finish()]);
   }
 
   pointerDown(x: number, y: number) {
@@ -675,33 +670,24 @@ class Renderer {
 
       if (y > borderBoundary) {
         if (x > borderBoundary) {
-          panVector = vec4.create(1, 0, -1, 0)
+          panVector = vec4.create(1, 0, -1, 0);
+        } else if (x < -borderBoundary) {
+          panVector = vec4.create(-1, 0, -1, 0);
+        } else {
+          panVector = vec4.create(0, 0, -1, 0);
         }
-        else if (x < -borderBoundary) {
-          panVector = vec4.create(-1, 0, -1, 0)
-        }
-        else {
-          panVector = vec4.create(0, 0, -1, 0)
-        }
-      }
-      else if (y < -borderBoundary) {
+      } else if (y < -borderBoundary) {
         if (x > borderBoundary) {
-          panVector = vec4.create(1, 0, 1, 0)
+          panVector = vec4.create(1, 0, 1, 0);
+        } else if (x < -borderBoundary) {
+          panVector = vec4.create(-1, 0, 1, 0);
+        } else {
+          panVector = vec4.create(0, 0, 1, 0);
         }
-        else if (x < -borderBoundary) {
-          panVector = vec4.create(-1, 0, 1, 0)
-        }
-        else {
-          panVector = vec4.create(0, 0, 1, 0)
-        }
-      }
-      else {
-        if (x > borderBoundary) {
-          panVector = vec4.create(1, 0, 0, 0)
-        }
-        else if (x < -borderBoundary) {
-          panVector = vec4.create(-1, 0, 0, 0)
-        }
+      } else if (x > borderBoundary) {
+        panVector = vec4.create(1, 0, 0, 0);
+      } else if (x < -borderBoundary) {
+        panVector = vec4.create(-1, 0, 0, 0);
       }
 
       this.camera.moveDirection = vec4.normalize(panVector);
@@ -725,32 +711,32 @@ class Renderer {
       t: number,
     } | null = null;
 
-    for (let actor of this.actors) {
+    for (const actor of this.actors) {
       if (isDrawableInterface(actor.mesh)) {
-        const result = actor.mesh.hitTest(origin, ray)
-        
+        const result = actor.mesh.hitTest(origin, ray);
+
         if (result) {
           if (best === null || result.t < best.t) {
             best = {
               actor,
               t: result.t,
-            }
+            };
           }
-        }    
+        }
       }
     }
 
     if (best) {
-      return { actor: best.actor}
+      return { actor: best.actor };
     }
 
     const point = intersectionPlane(vec4.create(0, 0, 0, 1), vec4.create(0, 1, 0, 0), origin, ray);
 
     if (point) {
-      return { point }
+      return { point };
     }
 
-    return {}
+    return {};
   }
 
   checkActorFocus() {
@@ -763,14 +749,14 @@ class Renderer {
         if (actor !== this.activeActor) {
           if (!this.focused || this.focused !== actor) {
             if (this.focused) {
-              this.mainRenderPass.removeDrawable(this.focused.mesh,  'outline');
-              this.focused = null;           
+              this.mainRenderPass.removeDrawable(this.focused.mesh, 'outline');
+              this.focused = null;
             }
 
             if (this.trajectory) {
-              this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory')
+              this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
               this.trajectory = null;
-            }  
+            }
 
             this.focused = actor;
 
@@ -787,25 +773,24 @@ class Renderer {
                 startPos: result.startPos,
                 orientation: result.orientation,
                 distance: result.distance,
-              })
-      
-              this.mainRenderPass.addDrawable(this.trajectory, 'trajectory')  
+              });
+
+              this.mainRenderPass.addDrawable(this.trajectory, 'trajectory');
 
               if (this.path) {
                 this.mainRenderPass.removeDrawable(this.path, 'line');
-              }    
+              }
             }
           }
         }
-      }
-      else if (point) { 
+      } else if (point) {
         if (this.focused) {
-          this.mainRenderPass.removeDrawable(this.focused.mesh,  'outline');
+          this.mainRenderPass.removeDrawable(this.focused.mesh, 'outline');
           this.focused = null;
         }
 
         if (this.trajectory) {
-          this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory')
+          this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
           this.trajectory = null;
         }
 
@@ -822,20 +807,19 @@ class Renderer {
             start,
             target,
             vec4.create(1, 1, 1, 1),
-          )
-    
-          this.mainRenderPass.addDrawable(this.path, 'line')    
+          );
+
+          this.mainRenderPass.addDrawable(this.path, 'line');
         }
       }
-    }
-    else if (this.focused) {
-      this.mainRenderPass.removeDrawable(this.focused.mesh,  'outline');
+    } else if (this.focused) {
+      this.mainRenderPass.removeDrawable(this.focused.mesh, 'outline');
       this.focused = null;
     }
   }
 
   mouseWheel(deltaX: number, deltaY: number, x: number, y: number) {
-    this.camera.changeRotation(-deltaX * 0.2)
+    this.camera.changeRotation(-deltaX * 0.2);
   }
 
   updateDirection(direction: Vec4) {
@@ -853,7 +837,7 @@ class Renderer {
     const startPos = vec4.transformMat4(
       vec4.create(0, 0, 0, 1),
       actor.mesh.transform,
-    )
+    );
     startPos[1] = actor.chestHeight;
 
     const distance = vec2.distance(
@@ -873,9 +857,9 @@ class Renderer {
     const angle = Math.atan2(target[0] - actor.mesh.translate[0], target[2] - actor.mesh.translate[2]);
     const rotate = mat4.rotationY(angle);
 
-    const orientation = vec3.normalize(vec4.transformMat4(vec4.create(0, 0, 1, 0), rotate))
+    const orientation = vec3.normalize(vec4.transformMat4(vec4.create(0, 0, 1, 0), rotate));
     orientation[3] = 0;
-   
+
     return ({
       velocityVector: vec2.create(velocity * Math.cos(lowAngle), velocity * Math.sin(lowAngle)),
       startTime: null, // start time will be assigned at the next frame.
@@ -883,7 +867,7 @@ class Renderer {
       startPos,
       orientation,
       distance,
-    })
+    });
   }
 
   attack(actor: Actor, targetActor: Actor) {
@@ -897,10 +881,10 @@ class Renderer {
       position: result.startPos,
       startTime: null, // start time will be assigned at the next frame.
       actor,
-    }
+    };
 
     this.shots.push(data);
-    
+
     // Transforms the position to world space.
     const emitterPosition = vec4.transformMat4(
       vec4.create(0, actor.chestHeight, 0, 1),
@@ -913,7 +897,7 @@ class Renderer {
 
     // Remove any previously drawn trajectory.
     if (this.trajectory) {
-      this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory')
+      this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
       this.trajectory = null;
     }
 
@@ -921,13 +905,13 @@ class Renderer {
   }
 
   computePath(actor: Actor, dest: Vec4): { start: Vec4, target: Vec4, distance: number } {
-    let target = vec2.create(dest[0], dest[2]);
+    const target = vec2.create(dest[0], dest[2]);
 
     const position = actor.getWorldPosition();
 
     const start = vec2.create(position[0], position[2]);
 
-    let distance = vec2.distance(start, target)
+    let distance = vec2.distance(start, target);
 
     if (distance > actor.distanceLeft) {
       distance = actor.distanceLeft;
@@ -969,16 +953,14 @@ class Renderer {
   interact() {
     const actor = this.actors[this.actorTurn];
 
-    if (!actor.automated)
-    {
+    if (!actor.automated) {
       if (this.focused) {
         if (this.focused !== actor && actor.actionsLeft > 0) {
-          this.attack(actor, this.focused)
+          this.attack(actor, this.focused);
         }
-      }
-      else {
+      } else {
         this.moveActor(actor);
-      }  
+      }
     }
   }
 
@@ -1008,8 +990,7 @@ class Renderer {
       if (!this.activeActor.automated) {
         this.mainRenderPass.addDrawable(this.reticle, 'reticle');
       }
-    }
-    else {
+    } else {
       this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
     }
   }
@@ -1020,4 +1001,3 @@ export const bindGroups = new BindGroups();
 export const renderer = await Renderer.create();
 
 export default Renderer;
-
