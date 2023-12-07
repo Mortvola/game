@@ -1,5 +1,6 @@
 import { ActorInterface } from "./ActorInterface";
 import Collidees from "./Collidees";
+import ContainerNode from "./Drawables/ContainerNode";
 import Mesh from "./Drawables/Mesh";
 import Participants from "./Participants";
 
@@ -19,6 +20,8 @@ export interface WorldInterface {
   shot: Mesh;
 
   delays: Delay[];
+
+  scene: ContainerNode;
 
   endTurn2(timestamp: number): void;
 }

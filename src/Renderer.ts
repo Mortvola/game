@@ -20,7 +20,7 @@ import Actor from './Actor';
 import Trajectory from './Drawables/Trajectory';
 import Line from './Drawables/Line';
 import Collidees from './Collidees';
-import Participants from './Participants';
+import Participants, { ParticipantsState } from './Participants';
 import { ActorInterface } from './ActorInterface';
 import { Delay, WorldInterface } from './WorldInterface';
 
@@ -73,7 +73,7 @@ class Renderer implements WorldInterface {
 
   lights: Light[] = [];
 
-  participants: Participants;
+  participants = new Participants();
 
   focused: Actor | null = null;
 
@@ -91,69 +91,45 @@ class Renderer implements WorldInterface {
 
   collidees = new Collidees();
 
-  constructor(shot: Mesh, reticle: Reticle, participants: Participants) {
+  scoreCallback: ((score: { red: number, blue: number }) => void) | null = null;
+
+  score: { red: number, blue: number } = { red: 0, blue: 0 };
+
+  constructor(shot: Mesh, reticle: Reticle) {
     this.reticle = reticle;
 
     this.aspectRatio[0] = 1.0;
     this.mainRenderPass.addDrawable(new CartesianAxes(), 'line');
 
-    this.participants = participants;
+    // this.participants = participants;
 
-    this.participants.initiativeRolls();
+    // this.participants.initiativeRolls();
 
-    for (const actor of this.participants.turns) {
-      this.scene.addNode(actor.mesh);
-      this.scene.addNode(actor.circle);
-      actor.addToScene(this.mainRenderPass);
-      this.collidees.actors.push(actor);
-      this.actors.push(actor);
-    }
+    // for (const actor of this.participants.turns) {
+    //   this.scene.addNode(actor.mesh);
+    //   this.scene.addNode(actor.circle);
+    //   actor.addToScene(this.mainRenderPass);
+    //   this.collidees.actors.push(actor);
+    //   this.actors.push(actor);
+    // }
 
     this.shot = shot;
     this.scene.addNode(shot);
 
     this.updateTransforms();
 
-    this.startTurn(0);
-  }
-
-  static async createParticipants(z: number, color: Vec4, teamColor: Vec4, team: number, automated: boolean): Promise<Actor[]> {
-    const actors: Actor[] = [];
-    const numPlayers = 4;
-    const spaceBetween = 4;
-    const playerWidth = 4;
-
-    for (let i = 0; i < numPlayers; i += 1) {
-      const actor = await Actor.create(i.toString(), color, teamColor, team, automated);
-      actor.mesh.translate[0] = (i - ((numPlayers - 1) / 2))
-        * spaceBetween + Math.random()
-        * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
-      actor.mesh.translate[2] = z + Math.random() * 10 - 5;
-
-      actor.circle.translate = vec3.copy(actor.mesh.translate);
-      actor.circle.translate[1] = 0;
-
-      actors.push(actor);
-    }
-
-    return actors;
+    // this.startTurn(0);
   }
 
   static async create() {
-    const participants = new Participants();
-
-    const players: Actor[] = await Renderer.createParticipants(10, vec4.create(0, 0, 0.5, 1), vec4.create(0, 0.6, 0, 1), 0, true);
-
-    const opponents: Actor[] = await Renderer.createParticipants(-10, vec4.create(0.5, 0, 0, 1), vec4.create(1, 0, 0, 1), 1, true);
-
-    participants.participants.push(players);
-    participants.participants.push(opponents);
+    // const participants = new Participants();
+    // participants.createTeams();
 
     const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
 
     const reticle = await Reticle.create(0.05);
 
-    return new Renderer(shot, reticle, participants);
+    return new Renderer(shot, reticle);
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
@@ -185,18 +161,20 @@ class Renderer implements WorldInterface {
   }
 
   startTurn(timestamp: number) {
-    if (this.participants.activeActor.automated) {
-      this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
-    } else if (this.inputMode === 'Controller') {
-      this.mainRenderPass.addDrawable(this.reticle, 'reticle');
+    if (this.participants.activeActor) {
+      if (this.participants.activeActor.automated) {
+        this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
+      } else if (this.inputMode === 'Controller') {
+        this.mainRenderPass.addDrawable(this.reticle, 'reticle');
+      }
+
+      this.participants.activeActor.startTurn(timestamp, this);
+
+      const point = this.participants.activeActor.getWorldPosition();
+
+      this.camera.moveCameraTo = point;
+      this.camera.moveCameraStartTime = null;
     }
-
-    this.participants.activeActor.startTurn(timestamp);
-
-    const point = this.participants.activeActor.getWorldPosition();
-
-    this.camera.moveCameraTo = point;
-    this.camera.moveCameraStartTime = null;
   }
 
   endTurn2(timestamp: number) {
@@ -259,24 +237,36 @@ class Renderer implements WorldInterface {
     }
   }
 
-  updateDelays(timestamp: number) {
-    for (let i = 0; i < this.delays.length; i += 1) {
-      const delay = this.delays[i];
+  async prepareTeams() {
+    // Remove any current participants
+    for (const actor of this.participants.turns) {
+      this.scene.removeNode(actor.mesh);
+      this.scene.removeNode(actor.circle);
+      actor.removeFromScene();
 
-      if (delay.startTime + delay.duration < timestamp) {
-        if (delay.onFinish) {
-          delay.onFinish(timestamp)
-        }
-
-        this.delays = [
-          ...this.delays.slice(0, i),
-          ...this.delays.slice(i + 1),
-        ]
-      }
+      this.collidees.remove(actor);
+      this.actors.push(actor);
     }
+
+    this.actors = [];
+
+    // Set up teams.
+    await this.participants.createTeams();
+
+    this.participants.initiativeRolls();
+
+    for (const actor of this.participants.turns) {
+      this.scene.addNode(actor.mesh);
+      this.scene.addNode(actor.circle);
+      actor.addToScene(this.mainRenderPass);
+      this.collidees.actors.push(actor);
+      this.actors.push(actor);
+    }
+
+    this.startTurn(0);
   }
 
-  updateFrame = (timestamp: number) => {
+  updateFrame = async (timestamp: number) => {
     if (this.render) {
       if (timestamp !== this.previousTimestamp) {
         if (this.startFpsTime === null) {
@@ -298,7 +288,28 @@ class Renderer implements WorldInterface {
         if (this.previousTimestamp !== null) {
           const elapsedTime = (timestamp - this.previousTimestamp) * 0.001;
 
-          this.updateDelays(timestamp);
+          if (this.participants.state === ParticipantsState.needsPrep) {
+            this.participants.state = ParticipantsState.preparing;
+            this.prepareTeams()
+          }
+          else if (this.participants.state === ParticipantsState.ready) {
+            if (this.participants.participants[0].length === 0 || this.participants.participants[1].length === 0) {
+              if (this.participants.participants[0].length === 0) {
+                // console.log('Red won')
+                this.score.red += 1;
+              }
+              else {
+                // console.log('Blue won');
+                this.score.blue += 1;
+              }
+              
+              if (this.scoreCallback) {
+                this.scoreCallback(this.score)
+              }
+
+              this.participants.state = ParticipantsState.needsPrep;
+            }  
+          }
 
           this.camera.updatePosition(elapsedTime, timestamp);
 
@@ -738,6 +749,10 @@ class Renderer implements WorldInterface {
   zoomIn() {
     this.camera.offset -= 1;
     this.camera.rotateX += 1;
+  }
+
+  setScoreCallback(callback: (score: { red: number, blue: number }) => void) {
+    this.scoreCallback = callback;
   }
 }
 

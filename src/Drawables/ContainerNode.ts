@@ -26,6 +26,17 @@ class ContainerNode extends SceneNode {
     // })
   }
 
+  removeNode(node: SceneNode) {
+    const index = this.nodes.findIndex((n) => n === node);
+
+    if (index !== -1) {
+      this.nodes = [
+        ...this.nodes.slice(0, index),
+        ...this.nodes.slice(index + 1, 0)
+      ]
+    }
+  }
+
   updateTransforms(mat: Mat4) {
     this.nodes.forEach((drawable) => {
       if (isDrawableInterface(drawable)) {

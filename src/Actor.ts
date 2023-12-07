@@ -10,6 +10,7 @@ import { ActorInterface } from "./ActorInterface";
 import Shot, { ShotData } from "./Shot";
 import { playShot } from "./Audio";
 import { WorldInterface } from "./WorldInterface";
+import QStore from "./QStore";
 
 enum States {
   idle,
@@ -22,6 +23,9 @@ type Pause = {
   startTime: number,
   duration: number,
 }
+
+const qStore = new QStore();
+
 
 class Actor implements ActorInterface {
   name: string;
@@ -67,8 +71,6 @@ class Actor implements ActorInterface {
   initiativeRoll = 0;
 
   renderPass: RenderPass | null = null;
-
-  automationStart: number | null = null;
 
   state = States.idle;
 
@@ -123,7 +125,7 @@ class Actor implements ActorInterface {
     );    
   }
 
-  startTurn(timestamp: number) {
+  startTurn(timestamp: number, world: WorldInterface) {
     this.actionsLeft = 1;
 
     this.distanceLeft = this.metersPerSecond * this.turnDuration;
@@ -135,10 +137,6 @@ class Actor implements ActorInterface {
 
     this.state = States.waitingForCamera;
     this.pause = { startTime: timestamp, duration: 3000 }
-  }
-
-  actionCompleted(timestamp: number) {
-
   }
 
   endTurn() {
@@ -205,12 +203,133 @@ class Actor implements ActorInterface {
     }
   }
 
+  chooseAction(timestamp: number, world: WorldInterface): Actor[] {
+    let removedActors: Actor[] = [];
+  
+    // const teamSum = world.participants.participants[this.team].reduce((accum, a) => {
+    //   return accum + a.hitPoints;
+    // }, 0)
+
+    const otherTeam = world.participants.participants[this.team ^ 1];
+    const otherTeamSum = otherTeam.reduce((accum, a) => {
+      return accum + a.hitPoints;
+    }, 0)
+
+    // console.log(`${this.team} to ${this.team ^ 1} ratio: ${teamSum / 400}, ${otherTeamSum / 400}`)
+    
+    // Attack a random opponent
+    if (otherTeam.length > 0) {
+      // Have team 0 stick with random shots while team 1 learns.
+      if (this.team === 0) {
+        const target = otherTeam[
+          Math.trunc(Math.random() * otherTeam.length)
+        ];
+
+        const result = this.attack(target, timestamp, world);
+        removedActors = result.removedActors;
+      }
+      else {
+        enum ActionType {
+          Random,
+          LowestHitPoints,
+          HitPointAttackRaio,
+        }
+
+        const state = Math.trunc((otherTeamSum / 400) * 1000);
+
+        let actionType: ActionType | null;
+
+        actionType = qStore.getBestAction(state);
+
+        const rho = 0.2;
+
+        if (actionType === null || Math.random() < rho) {
+          actionType = Math.trunc(Math.random() * 2);
+        }
+
+        let reward = 0;
+        let newState = 0;
+
+        switch (actionType) {
+          case ActionType.Random: {
+            const target = otherTeam[
+              Math.trunc(Math.random() * otherTeam.length)
+            ];
+
+            const result = this.attack(target, timestamp, world);
+
+            reward = result.reward;
+            newState = result.newState;
+            removedActors = result.removedActors;
+
+            break;
+          }
+
+          case ActionType.LowestHitPoints: {
+            const target = otherTeam.reduce((prev, actor) => (
+              prev.hitPoints < actor.hitPoints ? prev : actor
+            ), otherTeam[0]);
+
+            const result = this.attack(target, timestamp, world);
+
+            reward = result.reward;
+            newState = result.newState;
+            removedActors = result.removedActors;
+
+            break;
+          }
+
+          case ActionType.HitPointAttackRaio: {
+            const target = otherTeam.reduce((prev, actor) => (
+              prev.hitPoints / 10 < actor.hitPoints / 10 ? prev : actor
+            ), otherTeam[0]);
+
+            const result = this.attack(target, timestamp, world);
+
+            reward = result.reward;
+            newState = result.newState;
+            removedActors = result.removedActors;
+
+            break;
+          }
+        }
+
+        let q = qStore.getValue(state, actionType);
+
+        const alpha = 0.3;
+        const gamma = 0.5;
+
+        const bestAction = qStore.getBestAction(newState);
+        let maxQ = 0;
+
+        if (bestAction) {
+          maxQ = qStore.getValue(newState, bestAction);
+        }
+
+        q = (1 - alpha) * q + alpha * (reward + gamma * maxQ);
+
+        qStore.setValue(state, actionType, q);  
+      }
+    }
+
+    return removedActors;
+  }
+
   update(elapsedTime: number, timestamp: number, world: WorldInterface): ActorInterface[] {
+    let removedActors: ActorInterface[] = [];
+
     this.move(elapsedTime)
 
     if (world.participants.activeActor === this) {
-      if (this.pause && this.pause.startTime + this.pause.duration > timestamp) {
-        return [];
+      // if (this.pause && this.pause.startTime + this.pause.duration > timestamp) {
+      //   return [];
+      // }
+
+
+      if (this.actionsLeft) {
+        removedActors = this.chooseAction(timestamp, world);
+        this.state = States.attacking;
+        world.endTurn2(timestamp);  
       }
 
       switch (this.state) {
@@ -219,22 +338,13 @@ class Actor implements ActorInterface {
 
         case States.waitingForCamera:
           if (this.actionsLeft) {
-            // Attack a random opponent
-            const otherTeam = world.participants.participants[this.team ^ 1];
-  
-            if (otherTeam.length > 0) {
-              // Select opponent to attack
-              const targetActor = otherTeam[
-                Math.trunc(Math.random() * otherTeam.length)
-              ];
-  
-              this.attack(targetActor, timestamp, world);
-  
-              this.automationStart = null;
-            }
+
+            removedActors = this.chooseAction(timestamp, world);
+            this.state = States.attacking;
           }
-          
-          this.state = States.attacking;
+          else {
+            this.state = States.idle;
+          }
 
           break;
 
@@ -247,43 +357,43 @@ class Actor implements ActorInterface {
       }
     }
 
-    return [];
+    return removedActors;
   }
 
-  attack(targetActor: Actor, timestamp: number, world: WorldInterface) {
-    const result = this.computeShotData(targetActor);
+  attack(targetActor: Actor, timestamp: number, world: WorldInterface): { reward: number, newState: number, removedActors: Actor[] } {
+    // const result = this.computeShotData(targetActor);
 
-    const data: ShotData = {
-      velocityVector: result.velocityVector,
-      orientation: result.orientation,
-      startPos: result.startPos,
-      position: result.startPos,
-      startTime: timestamp,
-    };
+    // const data: ShotData = {
+    //   velocityVector: result.velocityVector,
+    //   orientation: result.orientation,
+    //   startPos: result.startPos,
+    //   position: result.startPos,
+    //   startTime: timestamp,
+    // };
 
-    let onFinish = (timestamp: number) => {}
+    // let onFinish = (timestamp: number) => {}
 
-    if (this.automated) {
-      onFinish = (timestamp: number) => {
-        this.state = States.postAttack;
-        this.pause = { startTime: timestamp, duration: 3000 }
-      }
-    }
+    // if (this.automated) {
+    //   onFinish = (timestamp: number) => {
+    //     this.state = States.postAttack;
+    //     this.pause = { startTime: timestamp, duration: 3000 }
+    //   }
+    // }
 
-    const shot = new Shot(timestamp, onFinish, world.shot, this, data);
-    world.actors.push(shot);
+    // const shot = new Shot(timestamp, onFinish, world.shot, this, data);
+    // world.actors.push(shot);
 
-    if (this.renderPass) {
-      shot.addToScene(this.renderPass);
-    }
+    // if (this.renderPass) {
+    //   shot.addToScene(this.renderPass);
+    // }
 
-    // Transforms the position to world space.
-    const emitterPosition = vec4.transformMat4(
-      vec4.create(0, this.chestHeight, 0, 1),
-      this.mesh.transform,
-    );
+    // // Transforms the position to world space.
+    // const emitterPosition = vec4.transformMat4(
+    //   vec4.create(0, this.chestHeight, 0, 1),
+    //   this.mesh.transform,
+    // );
 
-    playShot(emitterPosition);
+    // playShot(emitterPosition);
 
     // Remove any previously drawn trajectory.
     // if (this.trajectory) {
@@ -292,6 +402,32 @@ class Actor implements ActorInterface {
     // }
 
     this.actionsLeft -= 1;
+
+    const removedActors: Actor[] = [];
+
+    targetActor.hitPoints -= 10;
+
+    if (targetActor.hitPoints <= 0) {
+      targetActor.hitPoints = 0;
+
+      world.participants.remove(targetActor);
+      removedActors.push(targetActor);
+      world.collidees.remove(targetActor);
+      targetActor.removeFromScene();
+      world.scene.removeNode(targetActor.mesh);
+      world.scene.removeNode(targetActor.circle);    
+    }
+
+    const otherTeam = world.participants.participants[this.team ^ 1];
+    const otherTeamSum = otherTeam.reduce((accum, a) => {
+      return accum + a.hitPoints;
+    }, 0)
+
+    return {
+      reward: otherTeamSum ? 0 : 1,
+      newState: Math.trunc((otherTeamSum / 400) * 1000),
+      removedActors,
+    }
   }
 
   computeShotData(targetActor: Actor) {

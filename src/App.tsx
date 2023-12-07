@@ -27,11 +27,27 @@ function App() {
     if (element) {
       element.focus();
       (async () => {
-        await renderer?.setCanvas(element);
-        // renderer?.onSelect(handleSelect)
+        await renderer.setCanvas(element);
       })()  
     }
   }, [])
+
+  const [score, setScore] = React.useState<{ red: number, blue: number}>({ red: 0, blue: 0});
+
+  const scoreCallback = React.useCallback((score: { red: number, blue: number }) => {
+    setScore(score);
+  }, []);
+
+  React.useEffect(() => {
+    const element = canvasRef.current;
+
+    if (element) {
+      element.focus();
+      (async () => {
+        renderer.setScoreCallback(scoreCallback)
+      })()  
+    }
+  }, [scoreCallback])
 
   const handlePointerDown: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -157,8 +173,8 @@ function App() {
       case 'ARROWUP':
         renderer.zoomIn();
         break;
-      default:
-        console.log(upperKey)
+      // default:
+      //   console.log(upperKey)
     }
   }
 
@@ -244,6 +260,11 @@ function App() {
         //   ? <div className="blurred-overlay" onClick={handleBlurredClick} />
         //   : null
       }
+      <div className="score">
+        {
+          `Red: ${((score.red / (score.red + score.blue)) * 100).toFixed(0)} Blue: ${((score.blue / (score.red + score.blue)) * 100).toFixed(0)}`
+        }
+      </div>
       <canvas
         ref={canvasRef}
         tabIndex={0}
