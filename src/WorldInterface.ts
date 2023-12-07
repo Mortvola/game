@@ -23,5 +23,7 @@ export interface WorldInterface {
 
   scene: ContainerNode;
 
+  animate: boolean;
+  
   endTurn2(timestamp: number): void;
 }

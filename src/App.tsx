@@ -262,7 +262,8 @@ function App() {
       }
       <div className="score">
         {
-          `Red: ${((score.red / (score.red + score.blue)) * 100).toFixed(0)} Blue: ${((score.blue / (score.red + score.blue)) * 100).toFixed(0)}`
+          // `Red: ${((score.red / (score.red + score.blue)) * 100).toFixed(0)} Blue: ${((score.blue / (score.red + score.blue)) * 100).toFixed(0)}`
+          `Red: ${score.red} Blue: ${score.blue}`
         }
       </div>
       <canvas

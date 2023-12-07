@@ -95,30 +95,18 @@ class Renderer implements WorldInterface {
 
   score: { red: number, blue: number } = { red: 0, blue: 0 };
 
+  animate = false;
+
   constructor(shot: Mesh, reticle: Reticle) {
     this.reticle = reticle;
 
     this.aspectRatio[0] = 1.0;
     this.mainRenderPass.addDrawable(new CartesianAxes(), 'line');
 
-    // this.participants = participants;
-
-    // this.participants.initiativeRolls();
-
-    // for (const actor of this.participants.turns) {
-    //   this.scene.addNode(actor.mesh);
-    //   this.scene.addNode(actor.circle);
-    //   actor.addToScene(this.mainRenderPass);
-    //   this.collidees.actors.push(actor);
-    //   this.actors.push(actor);
-    // }
-
     this.shot = shot;
     this.scene.addNode(shot);
 
     this.updateTransforms();
-
-    // this.startTurn(0);
   }
 
   static async create() {
@@ -266,6 +254,8 @@ class Renderer implements WorldInterface {
     this.startTurn(0);
   }
 
+  iterations = 2000;
+
   updateFrame = async (timestamp: number) => {
     if (this.render) {
       if (timestamp !== this.previousTimestamp) {
@@ -295,16 +285,23 @@ class Renderer implements WorldInterface {
           else if (this.participants.state === ParticipantsState.ready) {
             if (this.participants.participants[0].length === 0 || this.participants.participants[1].length === 0) {
               if (this.participants.participants[0].length === 0) {
-                // console.log('Red won')
                 this.score.red += 1;
               }
               else {
-                // console.log('Blue won');
                 this.score.blue += 1;
               }
               
               if (this.scoreCallback) {
                 this.scoreCallback(this.score)
+              }
+
+              if (this.iterations > 0) {
+                this.iterations -= 1;
+
+                if (this.iterations === 0) {
+                  this.score.blue = 0;
+                  this.score.red = 0;
+                }
               }
 
               this.participants.state = ParticipantsState.needsPrep;
