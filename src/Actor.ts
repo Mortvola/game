@@ -10,7 +10,7 @@ import { ActorInterface } from "./ActorInterface";
 import Shot, { ShotData } from "./Shot";
 import { playShot } from "./Audio";
 import { WorldInterface } from "./WorldInterface";
-import { qStore } from "./QLearn";
+import { qLearn, qStore } from "./QLearn";
 
 enum States {
   idle,
@@ -22,13 +22,6 @@ enum States {
 type Pause = {
   startTime: number,
   duration: number,
-}
-
-enum ActionType {
-  // Random,
-  LowestHitPoints,
-  // HitPointAttackRatio,
-  HighestHitPoints,
 }
 
 class Actor implements ActorInterface {
@@ -209,145 +202,60 @@ class Actor implements ActorInterface {
   }
 
   playAction(
-    actionType: ActionType | null, otherTeam: Actor[], timestamp: number, world: WorldInterface,
-  ): { removedActors: Actor[], reward: number, newState: number, actionType: ActionType } {
-    let removedActors: Actor[] = [];
-
-    const rho = 0.1; // Math.max(0.7 - (qStore.iteration * 0.0006), 0.1);
-
-    if (actionType === null || Math.random() < rho) {
-      actionType = Math.trunc(Math.random() * 2);
-      console.log(`selected random action: ${actionType}`)
-    }
-    else {
-      console.log(`using best action: ${actionType}`)
+    action: number | null, otherTeam: Actor[], timestamp: number, world: WorldInterface,
+  ): { removedActors: Actor[], reward: number, finished: boolean, action: number } {
+    if (action === null || Math.random() < qLearn.rho) {
+      action = Math.trunc(Math.random() * otherTeam.length);
     }
 
-    let reward = 0;
-    let newState = 0;
+    const sortedActors = otherTeam.map((a) => a).sort((a, b) => a.hitPoints - b.hitPoints);
 
-    switch (actionType) {
-      // case ActionType.Random: {
-      //   const target = otherTeam[
-      //     Math.trunc(Math.random() * otherTeam.length)
-      //   ];
-
-      //   const result = this.attack(target, timestamp, world);
-
-      //   reward = result.reward;
-      //   newState = result.newState;
-      //   removedActors = result.removedActors;
-
-      //   break;
-      // }
-
-      case ActionType.LowestHitPoints: {
-        const target = otherTeam.reduce((prev, actor) => (
-          prev.hitPoints < actor.hitPoints ? prev : actor
-        ), otherTeam[0]);
-
-        console.log(`lowest hitpoints: ${target.hitPoints}`);
-
-        const result = this.attack(target, timestamp, world);
-
-        reward = result.reward;
-        newState = result.newState;
-        removedActors = result.removedActors;
-
-        break;
-      }
-
-      // case ActionType.HitPointAttackRatio: {
-      //   const target = otherTeam.reduce((prev, actor) => (
-      //     prev.hitPoints / 10 < actor.hitPoints / 10 ? prev : actor
-      //   ), otherTeam[0]);
-
-      //   console.log(`hitpoint/attack ratio: ${target.hitPoints / 10}`);
-
-      //   const result = this.attack(target, timestamp, world);
-
-      //   reward = result.reward;
-      //   newState = result.newState;
-      //   removedActors = result.removedActors;
-
-      //   break;
-      // }
-
-      case ActionType.HighestHitPoints: {
-        const target = otherTeam.reduce((prev, actor) => (
-          prev.hitPoints > actor.hitPoints ? prev : actor
-        ), otherTeam[0]);
-
-        console.log(`highest hitpoints: ${target.hitPoints}`);
-
-        const result = this.attack(target, timestamp, world);
-
-        reward = result.reward;
-        newState = result.newState;
-        removedActors = result.removedActors;
-
-        break;
-      }
-    }
+    const target = sortedActors[action];
+    const result = this.attack(target, timestamp, world);
 
     return {
-      removedActors,
-      reward,
-      newState,
-      actionType,
+      ...result,
+      action,
     }
   }
 
   chooseAction(timestamp: number, world: WorldInterface): Actor[] {
     let removedActors: Actor[] = [];
   
-    // const teamSum = world.participants.participants[this.team].reduce((accum, a) => {
-    //   return accum + a.hitPoints;
-    // }, 0)
-
     const otherTeam = world.participants.participants[this.team ^ 1];
-    const otherTeamSum = otherTeam.reduce((accum, a) => {
-      return accum + a.hitPoints;
-    }, 0)
-
-    // console.log(`${this.team} to ${this.team ^ 1} ratio: ${teamSum / 400}, ${otherTeamSum / 400}`)
     
-    const alpha = 0.7;
     const gamma = 0.9;
 
     // Attack a random opponent
     if (otherTeam.length > 0) {
       // Have team 0 stick with random shots while team 1 learns.
+    
       if (this.team === 0) {
         const result = this.playAction(null, otherTeam, timestamp, world);
 
-        // if (result.reward !== 0) {
-        //   q = (1 - alpha) * q + alpha * (result.reward + gamma * maxQ);
-
-        //   qStore.setValue(state, actionType, q);    
-        // }
-
         removedActors = result.removedActors;
+
+        qLearn.finished = result.finished;
       }
       else {
-        const state = Math.trunc((otherTeamSum / 400) * 1000);
+        // const state = Math.trunc((otherTeamSum / 400) * 1000);
+        const state = {
+          opponents: otherTeam.map((t) => t.hitPoints),
+        };
 
-        let actionType: ActionType | null;
+        let action = qStore.getBestAction(state);
 
-        actionType = qStore.getBestAction(state);
-
-        const result = this.playAction(actionType, otherTeam, timestamp, world);
+        const result = this.playAction(action, otherTeam, timestamp, world);
 
         removedActors = result.removedActors;
         const reward = result.reward;
-        const newState = result.newState
-        actionType = result.actionType;
+        const newState = { opponents: world.participants.participants[this.team ^ 1].map((t) => t.hitPoints) };
+        action = result.action;
+        qLearn.finished = result.finished;
 
-        if (reward !== 0) {
-          qStore.iteration += 1;
-        }
+        qLearn.actionHistory.push(action);
       
-        let q = qStore.getValue(state, actionType);
+        let q = qStore.getValue(state, action);
 
         const bestAction = qStore.getBestAction(newState);
         let maxQ = 0;
@@ -356,9 +264,37 @@ class Actor implements ActorInterface {
           maxQ = qStore.getValue(newState, bestAction);
         }
 
-        q += alpha * (reward + gamma * maxQ - q);
+        // const oldQ = q;
 
-        qStore.setValue(state, actionType, q);  
+        qLearn.totalReward += reward;
+        if (reward > qLearn.maxReward) {
+          console.log(`changed max reward from ${qLearn.maxReward} to ${reward}`)
+          qLearn.maxReward = reward
+        }  
+  
+        // if (reward !== 0 && reward === maxReward) {
+        //   console.log(`state: ${JSON.stringify(state.opponents)}/${actionType}, alpha: ${alpha}, reward: ${reward}, gamma: ${gamma}, maxQ: ${maxQ}, q: ${q}`)
+        // }
+
+        const newQ = q + qLearn.alpha * (reward + gamma * maxQ - q);
+        const qDelta = newQ - q;
+
+        if (qLearn.maxQDelta === null || qDelta > qLearn.maxQDelta ) {
+          qLearn.maxQDelta = qDelta;
+        }
+      
+        q = newQ;
+
+        // if (newQ !== oldQ) {
+        //   console.log(`change ${JSON.stringify(state.opponents)}/${actionType} from ${oldQ} to ${newQ}}`)
+        // }
+        
+        qStore.setValue(state, action, q);  
+      }
+
+      if (qLearn.finished) {
+        console.log(`${JSON.stringify(qLearn.actionHistory)}, ${qLearn.actionHistory.length}`)
+        console.log(`iteration: ${qLearn.iteration}, rho: ${qLearn.rho}, alpha: ${qLearn.alpha}, qDelta: ${qLearn.maxQDelta}, reward: ${qLearn.totalReward}`);
       }
     }
 
@@ -453,7 +389,7 @@ class Actor implements ActorInterface {
     // }
   }
 
-  attack(targetActor: Actor, timestamp: number, world: WorldInterface): { reward: number, newState: number, removedActors: Actor[] } {
+  attack(targetActor: Actor, timestamp: number, world: WorldInterface): { reward: number, finished: boolean, removedActors: Actor[] } {
     if (world.animate) {
       this.addShot(targetActor, timestamp, world)
     }
@@ -488,8 +424,9 @@ class Actor implements ActorInterface {
     }, 0)
 
     return {
-      reward: otherTeamSum === 0 ? teamSum : 0,
-      newState: Math.trunc((otherTeamSum / 400) * 1000),
+      reward: otherTeamSum === 0 ? teamSum * 100 : -1,
+      finished: otherTeamSum === 0,
+      // newState: Math.trunc((otherTeamSum / 400) * 1000),
       removedActors,
     }
   }

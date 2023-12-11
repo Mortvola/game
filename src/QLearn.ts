@@ -1,16 +1,46 @@
-import Participants from "./Participants";
 import QStore from "./QStore";
 
 export const qStore = new QStore();
 
+export type EpisodeInfo = {
+  iteration: number,
+  winningTeam: number,
+  alpha: number,
+  rho: number,
+  totalRewards: number,
+}
+
 class QLearn {
-  participants = new Participants()
+  maxReward = 0;
+  rho = 1.0;
+  epsilonDecay = 0.9999;
+  minRho = 0.02;
+  
+  alpha = 0.9;
+  alphaDecay = 0.9999;
+  minAlpha = 0.02;
+  
+  actionHistory: number[] = [];
+  
+  maxQDelta: number | null = null;
 
-  learn(iterations: number) {
+  iteration = 0;
 
-    for (let i = 0; i < iterations; i += 1) {
-    }
+  totalReward = 0;
+
+  finished = false;
+
+  next() {
+    this.iteration += 1;
+    this.actionHistory = [];
+    this.rho = Math.max(this.rho * this.epsilonDecay, this.minRho);
+    this.alpha = Math.max(this.alpha * this.alphaDecay, this.minAlpha);
+    this.maxQDelta = null;
+    this.totalReward = 0;
+    this.finished = false;
   }
 }
+
+export const qLearn = new QLearn();
 
 export default QLearn;

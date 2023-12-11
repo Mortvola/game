@@ -1,11 +1,11 @@
 /* eslint-disable no-restricted-syntax */
 import {
-  Vec4, mat4, vec2, vec3, vec4,
+  Vec4, mat4, vec2, vec4,
 } from 'wgpu-matrix';
 import Camera from './Camera';
 import Gpu from './Gpu';
 import {
-  anglesOfLaunch, degToRad, intersectionPlane, minimumVelocity, timeToTarget,
+  degToRad, intersectionPlane,
 } from './Math';
 import ContainerNode from './Drawables/ContainerNode';
 import BindGroups, { lightsStructure } from './BindGroups';
@@ -23,6 +23,7 @@ import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
 import { ActorInterface } from './ActorInterface';
 import { Delay, WorldInterface } from './WorldInterface';
+import { EpisodeInfo, qLearn } from './QLearn';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -91,11 +92,11 @@ class Renderer implements WorldInterface {
 
   collidees = new Collidees();
 
-  scoreCallback: ((score: { red: number, blue: number }) => void) | null = null;
-
-  score: { red: number, blue: number } = { red: 0, blue: 0 };
+  scoreCallback: ((episode: EpisodeInfo) => void) | null = null;
 
   animate = false;
+
+  followActiveCharacter = true;
 
   constructor(shot: Mesh, reticle: Reticle) {
     this.reticle = reticle;
@@ -160,8 +161,10 @@ class Renderer implements WorldInterface {
 
       const point = this.participants.activeActor.getWorldPosition();
 
-      this.camera.moveCameraTo = point;
-      this.camera.moveCameraStartTime = null;
+      if (this.animate && this.followActiveCharacter) {
+        this.camera.moveCameraTo = point;
+        this.camera.moveCameraStartTime = null;  
+      }
     }
   }
 
@@ -282,35 +285,33 @@ class Renderer implements WorldInterface {
             this.participants.state = ParticipantsState.preparing;
             this.prepareTeams()
           }
-          else if (this.participants.state === ParticipantsState.ready) {
-            if (this.participants.participants[0].length === 0 || this.participants.participants[1].length === 0) {
-              if (this.participants.participants[0].length === 0) {
-                this.score.red += 1;
-              }
-              else {
-                this.score.blue += 1;
-              }
-              
-              if (this.scoreCallback) {
-                this.scoreCallback(this.score)
-              }
-
-              if (this.iterations > 0) {
-                this.iterations -= 1;
-
-                if (this.iterations === 0) {
-                  this.score.blue = 0;
-                  this.score.red = 0;
-                }
-              }
-
-              this.participants.state = ParticipantsState.needsPrep;
-            }  
-          }
 
           this.camera.updatePosition(elapsedTime, timestamp);
 
           this.updateActors(elapsedTime, timestamp);
+
+          if (qLearn.finished) {
+            let winningTeam = 0;
+            if (this.participants.participants[0].length === 0) {
+              winningTeam = 1;
+            }
+            
+            const episode: EpisodeInfo = {
+              iteration: qLearn.iteration,
+              winningTeam,
+              rho: qLearn.rho,
+              alpha: qLearn.alpha,
+              totalRewards: qLearn.totalReward,
+          }
+
+            if (this.scoreCallback) {
+              this.scoreCallback(episode);
+            }  
+
+            this.participants.state = ParticipantsState.needsPrep;
+
+            qLearn.next();
+          }  
 
           this.checkActorFocus();
         }
@@ -486,36 +487,36 @@ class Renderer implements WorldInterface {
   pointerMove(x: number, y: number) {
     // Pan the view if the mouse is near the edge of the window.
     if (this.inputMode === 'Mouse') {
-      this.reticlePosition[0] = x;
-      this.reticlePosition[1] = y;
+      // this.reticlePosition[0] = x;
+      // this.reticlePosition[1] = y;
 
-      let panVector = vec4.create(0, 0, 0, 0);
+      // let panVector = vec4.create(0, 0, 0, 0);
 
-      const borderBoundary = 0.85;
+      // const borderBoundary = 0.85;
 
-      if (y > borderBoundary) {
-        if (x > borderBoundary) {
-          panVector = vec4.create(1, 0, -1, 0);
-        } else if (x < -borderBoundary) {
-          panVector = vec4.create(-1, 0, -1, 0);
-        } else {
-          panVector = vec4.create(0, 0, -1, 0);
-        }
-      } else if (y < -borderBoundary) {
-        if (x > borderBoundary) {
-          panVector = vec4.create(1, 0, 1, 0);
-        } else if (x < -borderBoundary) {
-          panVector = vec4.create(-1, 0, 1, 0);
-        } else {
-          panVector = vec4.create(0, 0, 1, 0);
-        }
-      } else if (x > borderBoundary) {
-        panVector = vec4.create(1, 0, 0, 0);
-      } else if (x < -borderBoundary) {
-        panVector = vec4.create(-1, 0, 0, 0);
-      }
+      // if (y > borderBoundary) {
+      //   if (x > borderBoundary) {
+      //     panVector = vec4.create(1, 0, -1, 0);
+      //   } else if (x < -borderBoundary) {
+      //     panVector = vec4.create(-1, 0, -1, 0);
+      //   } else {
+      //     panVector = vec4.create(0, 0, -1, 0);
+      //   }
+      // } else if (y < -borderBoundary) {
+      //   if (x > borderBoundary) {
+      //     panVector = vec4.create(1, 0, 1, 0);
+      //   } else if (x < -borderBoundary) {
+      //     panVector = vec4.create(-1, 0, 1, 0);
+      //   } else {
+      //     panVector = vec4.create(0, 0, 1, 0);
+      //   }
+      // } else if (x > borderBoundary) {
+      //   panVector = vec4.create(1, 0, 0, 0);
+      // } else if (x < -borderBoundary) {
+      //   panVector = vec4.create(-1, 0, 0, 0);
+      // }
 
-      this.camera.moveDirection = vec4.normalize(panVector);
+      // this.camera.moveDirection = vec4.normalize(panVector);
     }
   }
 
@@ -748,7 +749,7 @@ class Renderer implements WorldInterface {
     this.camera.rotateX += 1;
   }
 
-  setScoreCallback(callback: (score: { red: number, blue: number }) => void) {
+  setScoreCallback(callback: (episode: EpisodeInfo) => void) {
     this.scoreCallback = callback;
   }
 }

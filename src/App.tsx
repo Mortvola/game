@@ -3,6 +3,8 @@ import './App.scss';
 import { gpu, renderer } from './Renderer';
 import { audioContext } from './Audio';
 import { vec4 } from 'wgpu-matrix';
+import { EpisodeInfo } from './QLearn';
+import RewardChart from './Chart';
 
 type DiretionKeys = {
   left: number,
@@ -10,6 +12,8 @@ type DiretionKeys = {
   forward: number,
   backward: number,
 }
+
+let wins: number[] = []
 
 function App() {
   const [hasFocus, setHasFocus] = React.useState<boolean>(false); 
@@ -33,9 +37,42 @@ function App() {
   }, [])
 
   const [score, setScore] = React.useState<{ red: number, blue: number}>({ red: 0, blue: 0});
+  const [percentWins, setPercentWins] = React.useState(0);
+  const [episodeInfo, setEpisodeInfo] = React.useState<EpisodeInfo | null>(null);
+  const [rewards, setRewards] = React.useState<unknown[]>([["episode", "reward"]]);
 
-  const scoreCallback = React.useCallback((score: { red: number, blue: number }) => {
-    setScore(score);
+  const scoreCallback = React.useCallback((episode: EpisodeInfo) => {
+    wins.push(episode.winningTeam);
+
+    if (wins.length > 1000) {
+      wins = wins.slice(1)
+    }
+
+    const numWins = wins.reduce((accum, entry) => (
+      accum + entry
+    ), 0)
+
+    setPercentWins(numWins / wins.length);
+
+    setScore((prev) => ({ red: prev.red + episode.winningTeam, blue: prev.blue + (episode.winningTeam === 0 ? 1 : 0)}));
+
+    setEpisodeInfo(episode);
+
+    setRewards((prev) => {
+        let rewards = [
+          ...prev,
+          [episode.iteration, episode.totalRewards]
+        ];
+
+        if (rewards.length > 1000) {
+          rewards = [
+            rewards[0],
+            ...rewards.slice(2)
+          ]
+        }
+
+        return rewards;
+    })
   }, []);
 
   React.useEffect(() => {
@@ -245,26 +282,61 @@ function App() {
     }
   }
 
+  const handleAnimateClick = () => {
+    renderer.animate = !renderer.animate
+  }
+
+  const handleFollowClick = () => {
+    renderer.followActiveCharacter = !renderer.followActiveCharacter
+  }
+
   return (
     <div className="App">
-      <button type="button" onClick={handlePlayClick}>play</button>
-      <button type="button" onClick={handleInputModeClick} onFocus={(refocus)}>
+      <div className="upper-left">
+        <button type="button" onClick={handlePlayClick}>play</button>
+        <button type="button" onClick={handleInputModeClick} onFocus={(refocus)}>
+          {
+            inputMode === 'Mouse'
+              ? 'Mouse & Keyboard'
+              : 'Controller'
+          }
+        </button>
         {
-          inputMode === 'Mouse'
-            ? 'Mouse & Keyboard'
-            : 'Controller'
+          // showOverlay
+          //   ? <div className="blurred-overlay" onClick={handleBlurredClick} />
+          //   : null
         }
-      </button>
-      {
-        // showOverlay
-        //   ? <div className="blurred-overlay" onClick={handleBlurredClick} />
-        //   : null
-      }
+        <button onClick={handleAnimateClick}>animate</button>
+        <button onClick={handleFollowClick}>
+          {
+            renderer.followActiveCharacter
+              ? 'unfollow'
+              : 'follow'
+          }
+        </button>
+      </div>
       <div className="score">
-        {
-          // `Red: ${((score.red / (score.red + score.blue)) * 100).toFixed(0)} Blue: ${((score.blue / (score.red + score.blue)) * 100).toFixed(0)}`
-          `Red: ${score.red} Blue: ${score.blue}`
-        }
+        <div>{`Iterations: ${score.red + score.blue}`}</div>
+        <div>
+          {
+            `Red: ${score.red} Blue: ${score.blue}`
+          }
+        </div>
+        <div>
+          {
+            `Wins: ${(percentWins * 100).toFixed(2)}%`
+          }
+        </div>
+        <div>
+          {
+            `Alpha: ${(episodeInfo?.alpha ?? 0).toFixed(3)}`
+          }
+        </div>
+        <div>
+          {
+            `Epsilon: ${(episodeInfo?.rho ?? 0).toFixed(3)}`
+          }
+        </div>
       </div>
       <canvas
         ref={canvasRef}
@@ -279,6 +351,11 @@ function App() {
         // onFocus={handleFocus}
         // onBlur={handleBlur}
       />
+      <div className="lower-left">
+        <div className="chart">
+          <RewardChart data={rewards} />
+        </div>
+      </div>
     </div>
   );
 }
