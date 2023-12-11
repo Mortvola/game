@@ -3,7 +3,7 @@ import './App.scss';
 import { gpu, renderer } from './Renderer';
 import { audioContext } from './Audio';
 import { vec4 } from 'wgpu-matrix';
-import { EpisodeInfo } from './QLearn';
+import { EpisodeInfo, worker } from './QLearn';
 import RewardChart from './Chart';
 
 type DiretionKeys = {
@@ -290,6 +290,10 @@ function App() {
     renderer.followActiveCharacter = !renderer.followActiveCharacter
   }
 
+  const handleTestClick = () => {
+    worker.postMessage('start');
+  }
+
   return (
     <div className="App">
       <div className="upper-left">
@@ -314,6 +318,7 @@ function App() {
               : 'follow'
           }
         </button>
+        <button onClick={handleTestClick}>test</button>
       </div>
       <div className="score">
         <div>{`Iterations: ${score.red + score.blue}`}</div>

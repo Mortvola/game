@@ -268,7 +268,7 @@ class Actor implements ActorInterface {
 
         qLearn.totalReward += reward;
         if (reward > qLearn.maxReward) {
-          console.log(`changed max reward from ${qLearn.maxReward} to ${reward}`)
+          // console.log(`changed max reward from ${qLearn.maxReward} to ${reward}`)
           qLearn.maxReward = reward
         }  
   
@@ -293,8 +293,8 @@ class Actor implements ActorInterface {
       }
 
       if (qLearn.finished) {
-        console.log(`${JSON.stringify(qLearn.actionHistory)}, ${qLearn.actionHistory.length}`)
-        console.log(`iteration: ${qLearn.iteration}, rho: ${qLearn.rho}, alpha: ${qLearn.alpha}, qDelta: ${qLearn.maxQDelta}, reward: ${qLearn.totalReward}`);
+        // console.log(`${JSON.stringify(qLearn.actionHistory)}, ${qLearn.actionHistory.length}`)
+        // console.log(`iteration: ${qLearn.iteration}, rho: ${qLearn.rho}, alpha: ${qLearn.alpha}, qDelta: ${qLearn.maxQDelta}, reward: ${qLearn.totalReward}`);
       }
     }
 

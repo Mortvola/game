@@ -48,7 +48,7 @@ class QStore {
       s.set(action, value)
     }
     else {
-      console.log('adding new state');
+      // console.log('adding new state');
       // for (let i = 0; i < 4; i += 1) {
       //   this.store.set(key, (new Map<number, number>()).set(i, 0))
       // }

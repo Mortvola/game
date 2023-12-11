@@ -2,6 +2,12 @@ import QStore from "./QStore";
 
 export const qStore = new QStore();
 
+export const worker = new Worker("/worker.js");
+
+worker.addEventListener("message", evt => {
+  console.log("message:", evt.data);
+});
+
 export type EpisodeInfo = {
   iteration: number,
   winningTeam: number,
