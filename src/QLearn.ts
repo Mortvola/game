@@ -4,9 +4,19 @@ export const qStore = new QStore();
 
 export const worker = new Worker("/worker.js");
 
-worker.addEventListener("message", evt => {
-  console.log("message:", evt.data);
-});
+export type QTable = Map<string, Map<number, number>>;
+
+export type WorkerMessage = {
+  type: 'Rewards' | 'QTable',
+  rewards?: number[][],
+  qtable?: QTable,
+}
+
+worker.addEventListener('message', (evt: MessageEvent<WorkerMessage>) => {
+  if (evt.data.type === 'QTable' && evt.data.qtable) {
+    qStore.store = evt.data.qtable;
+  }
+})
 
 export type EpisodeInfo = {
   iteration: number,
@@ -18,11 +28,11 @@ export type EpisodeInfo = {
 
 class QLearn {
   maxReward = 0;
-  rho = 1.0;
+  rho = 0.02;
   epsilonDecay = 0.9999;
   minRho = 0.02;
   
-  alpha = 0.9;
+  alpha = 0.02;
   alphaDecay = 0.9999;
   minAlpha = 0.02;
   

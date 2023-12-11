@@ -2,8 +2,10 @@ export type Key = {
   opponents: number[],
 }
 
+export type QTable = Map<string, Map<number, number>>;
+
 class QStore {
-  store: Map<string, Map<number, number>> = new Map();
+  store: QTable = new Map();
 
   static makeKey(state: Key) {
     return JSON.stringify(

@@ -3,7 +3,7 @@ import './App.scss';
 import { gpu, renderer } from './Renderer';
 import { audioContext } from './Audio';
 import { vec4 } from 'wgpu-matrix';
-import { EpisodeInfo, worker } from './QLearn';
+import { EpisodeInfo, WorkerMessage, worker } from './QLearn';
 import RewardChart from './Chart';
 
 type DiretionKeys = {
@@ -57,21 +57,37 @@ function App() {
     setScore((prev) => ({ red: prev.red + episode.winningTeam, blue: prev.blue + (episode.winningTeam === 0 ? 1 : 0)}));
 
     setEpisodeInfo(episode);
+  }, []);
 
-    setRewards((prev) => {
-        let rewards = [
-          ...prev,
-          [episode.iteration, episode.totalRewards]
-        ];
+  React.useEffect(() => {
+    const listener = (evt: MessageEvent<WorkerMessage>) => {
+      if (evt.data.type === 'Rewards' && evt.data.rewards) {
+        const newRewards = evt.data.rewards;
 
-        if (rewards.length > 1000) {
-          rewards = [
-            rewards[0],
-            ...rewards.slice(2)
-          ]
-        }
+        setRewards((prev) => {
+          let rewards = [
+            ...prev,
+            ...newRewards,
+          ];
 
-        return rewards;
+          const maxLength = 1000;
+
+          if (rewards.length > maxLength) {
+            rewards = [
+              rewards[0],
+              ...rewards.slice(rewards.length - maxLength + 2)
+            ]
+          }
+
+          return rewards;
+        })
+      }
+    }
+
+    worker.addEventListener("message", listener);
+    
+    return (() => {
+      worker.removeEventListener('message', listener);
     })
   }, []);
 
@@ -318,10 +334,9 @@ function App() {
               : 'follow'
           }
         </button>
-        <button onClick={handleTestClick}>test</button>
+        <button onClick={handleTestClick}>Learn</button>
       </div>
       <div className="score">
-        <div>{`Iterations: ${score.red + score.blue}`}</div>
         <div>
           {
             `Red: ${score.red} Blue: ${score.blue}`
@@ -330,16 +345,6 @@ function App() {
         <div>
           {
             `Wins: ${(percentWins * 100).toFixed(2)}%`
-          }
-        </div>
-        <div>
-          {
-            `Alpha: ${(episodeInfo?.alpha ?? 0).toFixed(3)}`
-          }
-        </div>
-        <div>
-          {
-            `Epsilon: ${(episodeInfo?.rho ?? 0).toFixed(3)}`
           }
         </div>
       </div>

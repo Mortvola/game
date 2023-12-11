@@ -1,8 +1,6 @@
 /* eslint-disable no-restricted-globals */
 
 self.onmessage = (event: MessageEvent<string>) => {
-  console.log(event.data)
-
   if (event.data === 'start') {
     learn();
   }
@@ -43,8 +41,10 @@ type Key = {
   opponents: number[],
 }
 
+type QTable = Map<string, Map<number, number>>;
+
 class QStore {
-  store: Map<string, Map<number, number>> = new Map();
+  store: QTable = new Map();
 
   static makeKey(state: Key) {
     return JSON.stringify(
@@ -301,6 +301,8 @@ let blue = 0;
 const learn = () => {
   const environment = new Environment();
 
+  let rewards: number[][] = [];
+
   for (let iteration = 0; iteration < 100000; iteration += 1) {
     // console.log(`running iteration ${iteration} `)
     let finished = false;
@@ -359,16 +361,22 @@ const learn = () => {
       }
     }
 
+    rewards.push([iteration, qLearn.totalReward]);
+
+    if (rewards.length >= 100) {
+      postMessage({
+        type: 'Rewards',
+        rewards,
+      });
+
+      rewards = [];
+    }
+
     qLearn.next();
   }
   
-  qStore.store.forEach((_, key) => {
-      console.log(key);
+  postMessage({
+    type: 'QTable',
+    qtable: qStore.store,
   })
-
-  console.log(qStore.store.size)
-  console.log(`red: ${red}, blue: ${blue}`)
-  console.log(`alpha: ${qLearn.alpha}, epsilon: ${qLearn.rho}`)
 }
-
-// learn();
