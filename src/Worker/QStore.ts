@@ -50,29 +50,14 @@ class QStore {
       s.set(action, value)
     }
     else {
+      // console.log('adding new state');
+      // for (let i = 0; i < 4; i += 1) {
+      //   this.store.set(key, (new Map<number, number>()).set(i, 0))
+      // }
+
       this.store.set(key, (new Map<number, number>()).set(action, value))
     }
   }
-}
-
-export const qStore = new QStore();
-
-export const worker = new Worker(new URL("./Worker/worker.ts", import.meta.url));
-
-export type WorkerMessage = {
-  type: 'Rewards' | 'QTable',
-  rewards?: number[][],
-  qtable?: QTable,
-}
-
-worker.addEventListener('message', (evt: MessageEvent<WorkerMessage>) => {
-  if (evt.data.type === 'QTable' && evt.data.qtable) {
-    qStore.store = evt.data.qtable;
-  }
-})
-
-export type EpisodeInfo = {
-  winningTeam: number,
 }
 
 export default QStore;

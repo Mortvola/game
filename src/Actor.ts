@@ -35,6 +35,8 @@ class Actor implements ActorInterface {
 
   hitPoints = 100;
 
+  weaponStrength = 10;
+
   metersPerSecond = 2;
 
   actionsLeft = 0;
@@ -337,7 +339,7 @@ class Actor implements ActorInterface {
 
     const removedActors: Actor[] = [];
 
-    targetActor.hitPoints -= 10;
+    targetActor.hitPoints -= this.weaponStrength;
 
     if (targetActor.hitPoints <= 0) {
       targetActor.hitPoints = 0;
