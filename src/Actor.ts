@@ -4,7 +4,7 @@ import { box } from "./Drawables/Shapes/box";
 import SceneNode from "./Drawables/SceneNode";
 import { anglesOfLaunch, degToRad, minimumVelocity, timeToTarget } from "./Math";
 import Circle from "./Drawables/Circle";
-import { abilityRoll } from "./Dice";
+import { abilityRoll, attackRoll } from "./Dice";
 import RenderPass from "./RenderPass";
 import { ActorInterface } from "./ActorInterface";
 import Shot, { ShotData } from "./Shot";
@@ -360,18 +360,28 @@ class Actor implements ActorInterface {
 
     const removedActors: Actor[] = [];
 
-    targetActor.hitPoints -= this.weapon.damage;
+    const roll = attackRoll(5);
 
-    if (targetActor.hitPoints <= 0) {
-      targetActor.hitPoints = 0;
+    if (roll === 'Hit' || roll === 'Critical') {
+      let damage = this.weapon.damage;
 
-      if (!world.animate) {
-        world.participants.remove(targetActor);
-        removedActors.push(targetActor);
-        world.collidees.remove(targetActor);
-        targetActor.removeFromScene();
-        world.scene.removeNode(targetActor.mesh);
-        world.scene.removeNode(targetActor.circle);    
+      if (roll === 'Critical') {
+        damage = this.weapon.damage;
+      }
+
+      targetActor.hitPoints -= damage;
+
+      if (targetActor.hitPoints <= 0) {
+        targetActor.hitPoints = 0;
+
+        if (!world.animate) {
+          world.participants.remove(targetActor);
+          removedActors.push(targetActor);
+          world.collidees.remove(targetActor);
+          targetActor.removeFromScene();
+          world.scene.removeNode(targetActor.mesh);
+          world.scene.removeNode(targetActor.circle);    
+        }
       }
     }
 

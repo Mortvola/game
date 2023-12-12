@@ -27,3 +27,20 @@ export const abilityModifier = (score: number): number => {
   return Math.trunc((score - 2) / 2 - 4);
 }
 
+export const attackRoll = (armorClass: number): 'Miss' | 'Hit' | 'Critical' => {
+  const roll = diceRoll(20);
+
+  if (roll === 1) {
+    return 'Miss';
+  }
+
+  if (roll === 20) {
+    return 'Critical';
+  }
+
+  if (roll >= armorClass) {
+    return 'Hit';
+  }
+
+  return 'Miss';
+}

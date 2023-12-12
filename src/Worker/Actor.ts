@@ -1,4 +1,5 @@
 import { abilityRoll } from "../Dice";
+import LongBow from "../Weapons/LongBow";
 import { ActorInterface, EnvironmentInterface } from "./Interfaces";
 import QLearn from "./QLearn";
 import QStore from "./QStore";
@@ -6,7 +7,7 @@ import QStore from "./QStore";
 class Actor implements ActorInterface {
   hitPoints = 100;
 
-  weaponStrength = 10;
+  weapon = new LongBow();
 
   team: number;
 
@@ -60,7 +61,6 @@ class Actor implements ActorInterface {
         const state = {
           opponents: otherTeam.map((t) => t.hitPoints),
         };
-        const stateKey = QStore.makeKey(state);
 
         let action = qStore.getBestAction(state);
         const result = this.takeAction(action, otherTeam, environment, qLearn);
@@ -133,7 +133,7 @@ class Actor implements ActorInterface {
 
     const removedActors: ActorInterface[] = [];
 
-    targetActor.hitPoints -= this.weaponStrength;
+    targetActor.hitPoints -= this.weapon.damage; // this.weaponStrength;
 
     if (targetActor.hitPoints <= 0) {
       targetActor.hitPoints = 0;
