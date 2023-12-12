@@ -39,7 +39,7 @@ function App() {
   const [score, setScore] = React.useState<{ red: number, blue: number}>({ red: 0, blue: 0});
   const [percentWins, setPercentWins] = React.useState(0);
   const [episodeInfo, setEpisodeInfo] = React.useState<EpisodeInfo | null>(null);
-  const [rewards, setRewards] = React.useState<unknown[]>([["episode", "reward"]]);
+  const [rewards, setRewards] = React.useState<unknown[]>([["episode", "max", "mean", "min"]]);
 
   const scoreCallback = React.useCallback((episode: EpisodeInfo) => {
     wins.push(episode.winningTeam);
@@ -64,10 +64,30 @@ function App() {
       if (evt.data.type === 'Rewards' && evt.data.rewards) {
         const newRewards = evt.data.rewards;
 
+        type Stats = {
+          min: number | null,
+          max: number | null,
+          sum: number,
+        }
+
+        const stats = newRewards.reduce<Stats>((stats, value) => {
+          if (stats.max === null || stats.max < value[1]) {
+            stats.max = value[1];
+          }
+
+          if (stats.min === null || stats.min > value[1]) {
+            stats.min = value[1];
+          }
+
+          stats.sum += value[1];
+
+          return stats;
+        }, { min: null, max: null, sum: 0});
+
         setRewards((prev) => {
           let rewards = [
             ...prev,
-            ...newRewards,
+            [newRewards[0][0], stats.max, stats.sum / newRewards.length, stats.min],
           ];
 
           const maxLength = 1000;
