@@ -1,7 +1,8 @@
 /* eslint-disable no-restricted-globals */
 
 import Environment from './Environment';
-import { qLearn, qStore } from './QLearn';
+import QLearn from './QLearn';
+import QStore from './QStore';
 
 self.onmessage = (event: MessageEvent<string>) => {
   if (event.data === 'start') {
@@ -12,9 +13,14 @@ self.onmessage = (event: MessageEvent<string>) => {
 const learn = () => {
   const environment = new Environment();
 
+  const qLearn = new QLearn();
+  const qStore = new QStore();
+
   let rewards: number[][] = [];
 
-  for (let iteration = 0; iteration < 100000; iteration += 1) {
+  const numIterations = 100000;
+
+  for (let iteration = 0; iteration < numIterations; iteration += 1) {
     // console.log(`running iteration ${iteration} `)
     let finished = false;
 
@@ -22,7 +28,7 @@ const learn = () => {
 
     while (!finished) {
       for (let a = 0; a < environment.turns.length; a += 1) {
-        const removeActors = environment.turns[a].chooseAction(environment)
+        const removeActors = environment.turns[a].chooseAction(environment, qStore, qLearn)
 
         for (let actor of removeActors) {
           const team = environment.teams[actor.team];

@@ -325,8 +325,9 @@ function App() {
 
   const [showGraph, setShowGraph] = React.useState<boolean>(false);
 
-  const handleTestClick = () => {
+  const handleLearnClick = () => {
     setShowGraph(true);
+    setRewards([["episode", "max", "mean", "min"]]);
     worker.postMessage('start');
   }
 
@@ -354,7 +355,7 @@ function App() {
               : 'follow'
           }
         </button>
-        <button onClick={handleTestClick}>Learn</button>
+        <button onClick={handleLearnClick}>Learn</button>
       </div>
       <div className="score">
         <div>

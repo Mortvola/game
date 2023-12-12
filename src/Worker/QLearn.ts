@@ -1,5 +1,3 @@
-import QStore from "./QStore";
-
 class QLearn {
   maxReward = 0;
   rho = 1.0;
@@ -32,8 +30,5 @@ class QLearn {
     this.finished = false;
   }
 }
-
-export const qLearn = new QLearn();
-export const qStore = new QStore();
 
 export default QLearn;

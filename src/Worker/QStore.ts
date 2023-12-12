@@ -8,9 +8,25 @@ class QStore {
   store: QTable = new Map();
 
   static makeKey(state: Key) {
-    return JSON.stringify(
-      state.opponents.map((a) => a).sort((a, b) => a - b)
-    )
+    const sorted = 
+      state.opponents.map((a) => a).sort((a, b) => a - b);
+
+    const key = [];
+    let value = 0;
+
+    key.push(value);
+
+    for (let i = 1; i < sorted.length; i += 1) {
+      if (sorted[i] === sorted[i - 1]) {
+        key.push(value)
+      }
+      else {
+        value += 1;
+        key.push(value);
+      }
+    }
+
+    return JSON.stringify(key);
   }
 
   getValue(state: Key, action: number): number {

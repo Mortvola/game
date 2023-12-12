@@ -1,6 +1,7 @@
 import { abilityRoll } from "../Dice";
 import { ActorInterface, EnvironmentInterface } from "./Interfaces";
-import { qLearn, qStore } from "./QLearn";
+import QLearn from "./QLearn";
+import QStore from "./QStore";
 
 class Actor implements ActorInterface {
   hitPoints = 100;
@@ -19,8 +20,9 @@ class Actor implements ActorInterface {
     this.team = team;
   }
 
-  playAction(
+  takeAction(
     action: number | null, otherTeam: ActorInterface[], environment: EnvironmentInterface,
+    qLearn: QLearn,
   ): { removedActors: ActorInterface[], reward: number, finished: boolean, action: number } {
     if (action === null || Math.random() < qLearn.rho) {
       action = Math.trunc(Math.random() * otherTeam.length);
@@ -37,7 +39,7 @@ class Actor implements ActorInterface {
     }
   }
   
-  chooseAction(environment: EnvironmentInterface): ActorInterface[] {
+  chooseAction(environment: EnvironmentInterface, qStore: QStore, qLearn: QLearn): ActorInterface[] {
     let removedActors: ActorInterface[] = [];
   
     const otherTeam = environment.teams[this.team ^ 1];
@@ -47,7 +49,7 @@ class Actor implements ActorInterface {
       // Have team 0 stick with random shots while team 1 learns.
     
       if (this.team === 0) {
-        const result = this.playAction(null, otherTeam, environment);
+        const result = this.takeAction(null, otherTeam, environment, qLearn);
   
         removedActors = result.removedActors;
   
@@ -58,14 +60,20 @@ class Actor implements ActorInterface {
         const state = {
           opponents: otherTeam.map((t) => t.hitPoints),
         };
-  
+        const stateKey = QStore.makeKey(state);
+
         let action = qStore.getBestAction(state);
-  
-        const result = this.playAction(action, otherTeam, environment);
+        const result = this.takeAction(action, otherTeam, environment, qLearn);
   
         removedActors = result.removedActors;
         const reward = result.reward;
-        const newState = { opponents: environment.teams[this.team ^ 1].map((t) => t.hitPoints) };
+
+        const newState = {
+          opponents: environment.teams[this.team ^ 1]
+            .filter((t) => t.hitPoints !== 0)
+            .map((t) => t.hitPoints),
+        };
+
         action = result.action;
         qLearn.finished = result.finished;
   
@@ -105,7 +113,7 @@ class Actor implements ActorInterface {
         //   console.log(`change ${JSON.stringify(state.opponents)}/${actionType} from ${oldQ} to ${newQ}}`)
         // }
         
-        qStore.setValue(state, action, q);  
+        qStore.setValue(state, action, q);    
       }
   
       if (qLearn.finished) {

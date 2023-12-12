@@ -1,5 +1,5 @@
 export const diceRoll = (sides: number): number => (
-  Math.trunc(Math.random() * sides)
+  Math.trunc(Math.random() * sides) + 1
 )
 
 export const abilityRoll = (): number => {

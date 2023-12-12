@@ -11,6 +11,7 @@ import Shot, { ShotData } from "./Shot";
 import { playShot } from "./Audio";
 import { WorldInterface } from "./WorldInterface";
 import { qStore } from "./QStore";
+import LongBow from "./Weapons/LongBow";
 
 enum States {
   idle,
@@ -35,7 +36,7 @@ class Actor implements ActorInterface {
 
   hitPoints = 100;
 
-  weaponStrength = 10;
+  weapon = new LongBow();
 
   metersPerSecond = 2;
 
@@ -339,7 +340,7 @@ class Actor implements ActorInterface {
 
     const removedActors: Actor[] = [];
 
-    targetActor.hitPoints -= this.weaponStrength;
+    targetActor.hitPoints -= this.weapon.damage;
 
     if (targetActor.hitPoints <= 0) {
       targetActor.hitPoints = 0;

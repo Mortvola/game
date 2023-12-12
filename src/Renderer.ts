@@ -288,8 +288,9 @@ class Renderer implements WorldInterface {
           this.updateActors(elapsedTime, timestamp);
 
           if (
-            this.participants.participants[0].length === 0
-            || this.participants.participants[1].length === 0
+            this.participants.state === ParticipantsState.ready
+            && (this.participants.participants[0].length === 0
+            || this.participants.participants[1].length === 0)
           ) {
             let winningTeam = 0;
             if (this.participants.participants[0].length === 0) {
@@ -298,7 +299,7 @@ class Renderer implements WorldInterface {
             
             const episode: EpisodeInfo = {
               winningTeam,
-          }
+            }
 
             if (this.scoreCallback) {
               this.scoreCallback(episode);
