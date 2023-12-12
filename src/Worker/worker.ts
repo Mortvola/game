@@ -104,12 +104,45 @@ class QStore {
 const qLearn = new QLearn();
 const qStore = new QStore();
 
+const diceRoll = (sides: number): number => (
+  Math.trunc(Math.random() * sides)
+)
+
+const abilityRoll = (): number => {
+  const rolls = [
+    diceRoll(6),
+    diceRoll(6),
+    diceRoll(6),
+    diceRoll(6),
+  ];
+
+  rolls.sort((a: number, b: number) => b - a);
+
+  return rolls[0] + rolls[1] + rolls[2];
+}
+
+const abilityModifier = (score: number): number => {
+  if (score === 1) {
+    return -5
+  }
+
+  if (score === 30) {
+    return 10;
+  }
+
+  return Math.trunc((score - 2) / 2 - 4);
+}
+
 class Actor {
   hitPoints = 100;
 
   team: number;
 
   actionsLeft = 1;
+
+  initiativeRoll = 0;
+
+  dexterity = abilityRoll();
 
   constructor(team: number) {
     this.team = team;
@@ -268,6 +301,16 @@ class Environment {
       ...this.teams[0],
       ...this.teams[1],
     ];
+    
+    this.initiativeRolls();
+  }
+
+  initiativeRolls() {
+    for (const actor of this.turns) {
+      actor.initiativeRoll = diceRoll(20) + abilityModifier(actor.dexterity);
+    }
+
+    this.turns.sort((a, b) => a.initiativeRoll - b.initiativeRoll);
   }
 
   // remove(actor: Actor) {
