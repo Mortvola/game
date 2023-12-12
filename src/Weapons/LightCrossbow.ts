@@ -1,16 +1,16 @@
 import { diceRoll } from "../Dice";
 import { RangedWeapon } from "./RangedWeapon";
 
-class LongBow implements RangedWeapon {
-  cost = 50;
+class LightCrossbow implements RangedWeapon {
+  cost = 25;
 
   get damage() {
     return diceRoll(8);
   }
 
-  range = 150;
+  range = 80;
 
-  longRange = 600;
+  longRange = 320;
 }
 
-export default LongBow;
+export default LightCrossbow;
