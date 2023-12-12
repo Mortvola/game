@@ -315,12 +315,18 @@ function App() {
     }
   }
 
-  const handleAnimateClick = () => {
-    renderer.animate = !renderer.animate
+  const [fast, setFast] = React.useState<boolean>(!renderer!.animate)
+
+  const handleAnimateChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+    setFast(event.target.checked)
+    renderer.animate = !event.target.checked
   }
 
-  const handleFollowClick = () => {
-    renderer.followActiveCharacter = !renderer.followActiveCharacter
+  const [follow, setFollow] = React.useState<boolean>(renderer.followActiveCharacter);
+
+  const handleFollowChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+    setFollow(event.target.checked)
+    renderer.followActiveCharacter = event.target.checked
   }
 
   const [showGraph, setShowGraph] = React.useState<boolean>(false);
@@ -334,28 +340,25 @@ function App() {
   return (
     <div className="App">
       <div className="upper-left">
-        <button type="button" onClick={handlePlayClick}>play</button>
-        <button type="button" onClick={handleInputModeClick} onFocus={(refocus)}>
-          {
-            inputMode === 'Mouse'
-              ? 'Mouse & Keyboard'
-              : 'Controller'
-          }
-        </button>
-        {
-          // showOverlay
-          //   ? <div className="blurred-overlay" onClick={handleBlurredClick} />
-          //   : null
-        }
-        <button onClick={handleAnimateClick}>animate</button>
-        <button onClick={handleFollowClick}>
-          {
-            renderer.followActiveCharacter
-              ? 'unfollow'
-              : 'follow'
-          }
-        </button>
-        <button onClick={handleLearnClick}>Learn</button>
+        <div className="controls">
+          {/* <button type="button" onClick={handlePlayClick}>play</button> */}
+          <button type="button" onClick={handleInputModeClick} onFocus={(refocus)}>
+            {
+              inputMode === 'Mouse'
+                ? 'Mouse & Keyboard'
+                : 'Controller'
+            }
+          </button>
+          <label>
+            <input type="checkbox" onChange={handleAnimateChange} checked={fast ? true : false} />
+            Fast
+          </label>
+          <label>
+            <input type="checkbox" onChange={handleFollowChange} checked={follow ? true : false} />
+            Follow
+          </label>
+          <button className="learn" onClick={handleLearnClick}>Learn</button>
+        </div>
       </div>
       <div className="score">
         <div>

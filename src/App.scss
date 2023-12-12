@@ -70,3 +70,13 @@ canvas {
   height: 300px;
   background-color: white;
 }
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  row-gap: 1rem;
+}
+
+.learn {
+  width: max-content;
+}
