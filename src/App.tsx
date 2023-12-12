@@ -3,7 +3,7 @@ import './App.scss';
 import { gpu, renderer } from './Renderer';
 import { audioContext } from './Audio';
 import { vec4 } from 'wgpu-matrix';
-import { EpisodeInfo, WorkerMessage, worker } from './QLearn';
+import { EpisodeInfo, WorkerMessage, worker } from './QStore';
 import RewardChart from './Chart';
 
 type DiretionKeys = {
@@ -38,7 +38,6 @@ function App() {
 
   const [score, setScore] = React.useState<{ red: number, blue: number}>({ red: 0, blue: 0});
   const [percentWins, setPercentWins] = React.useState(0);
-  const [episodeInfo, setEpisodeInfo] = React.useState<EpisodeInfo | null>(null);
   const [rewards, setRewards] = React.useState<unknown[]>([["episode", "max", "mean", "min"]]);
 
   const scoreCallback = React.useCallback((episode: EpisodeInfo) => {
@@ -55,8 +54,6 @@ function App() {
     setPercentWins(numWins / wins.length);
 
     setScore((prev) => ({ red: prev.red + episode.winningTeam, blue: prev.blue + (episode.winningTeam === 0 ? 1 : 0)}));
-
-    setEpisodeInfo(episode);
   }, []);
 
   React.useEffect(() => {
@@ -90,7 +87,7 @@ function App() {
             [newRewards[0][0], stats.max, stats.sum / newRewards.length, stats.min],
           ];
 
-          const maxLength = 1000;
+          const maxLength = 1001; // Number of entries plus one for titles.
 
           if (rewards.length > maxLength) {
             rewards = [

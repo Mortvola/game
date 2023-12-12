@@ -10,7 +10,7 @@ import { ActorInterface } from "./ActorInterface";
 import Shot, { ShotData } from "./Shot";
 import { playShot } from "./Audio";
 import { WorldInterface } from "./WorldInterface";
-import { qLearn, qStore } from "./QLearn";
+import { qStore } from "./QStore";
 
 enum States {
   idle,
@@ -201,10 +201,12 @@ class Actor implements ActorInterface {
     }
   }
 
-  playAction(
+  takeAction(
     action: number | null, otherTeam: Actor[], timestamp: number, world: WorldInterface,
-  ): { removedActors: Actor[], reward: number, finished: boolean, action: number } {
-    if (action === null || Math.random() < qLearn.rho) {
+  ): Actor[] {
+    const epsilon = 0.02; // Probability of a random action
+
+    if (action === null || Math.random() < epsilon) {
       action = Math.trunc(Math.random() * otherTeam.length);
     }
 
@@ -213,10 +215,7 @@ class Actor implements ActorInterface {
     const target = sortedActors[action];
     const result = this.attack(target, timestamp, world);
 
-    return {
-      ...result,
-      action,
-    }
+    return result.removedActors;
   }
 
   chooseAction(timestamp: number, world: WorldInterface): Actor[] {
@@ -224,78 +223,18 @@ class Actor implements ActorInterface {
   
     const otherTeam = world.participants.participants[this.team ^ 1];
     
-    const gamma = 0.9;
-
-    // Attack a random opponent
     if (otherTeam.length > 0) {
-      // Have team 0 stick with random shots while team 1 learns.
-    
-      if (this.team === 0) {
-        const result = this.playAction(null, otherTeam, timestamp, world);
+      let action: number | null = null;
 
-        removedActors = result.removedActors;
-
-        qLearn.finished = result.finished;
-      }
-      else {
-        // const state = Math.trunc((otherTeamSum / 400) * 1000);
+      if (this.team === 1) {
         const state = {
           opponents: otherTeam.map((t) => t.hitPoints),
         };
 
-        let action = qStore.getBestAction(state);
-
-        const result = this.playAction(action, otherTeam, timestamp, world);
-
-        removedActors = result.removedActors;
-        const reward = result.reward;
-        const newState = { opponents: world.participants.participants[this.team ^ 1].map((t) => t.hitPoints) };
-        action = result.action;
-        qLearn.finished = result.finished;
-
-        qLearn.actionHistory.push(action);
-      
-        let q = qStore.getValue(state, action);
-
-        const bestAction = qStore.getBestAction(newState);
-        let maxQ = 0;
-
-        if (bestAction !== null) {
-          maxQ = qStore.getValue(newState, bestAction);
-        }
-
-        // const oldQ = q;
-
-        qLearn.totalReward += reward;
-        if (reward > qLearn.maxReward) {
-          // console.log(`changed max reward from ${qLearn.maxReward} to ${reward}`)
-          qLearn.maxReward = reward
-        }  
-  
-        // if (reward !== 0 && reward === maxReward) {
-        //   console.log(`state: ${JSON.stringify(state.opponents)}/${actionType}, alpha: ${alpha}, reward: ${reward}, gamma: ${gamma}, maxQ: ${maxQ}, q: ${q}`)
-        // }
-
-        const newQ = q + qLearn.alpha * (reward + gamma * maxQ - q);
-        const qDelta = newQ - q;
-
-        if (qLearn.maxQDelta === null || qDelta > qLearn.maxQDelta ) {
-          qLearn.maxQDelta = qDelta;
-        }
-      
-        q = newQ;
-
-        // if (newQ !== oldQ) {
-        //   console.log(`change ${JSON.stringify(state.opponents)}/${actionType} from ${oldQ} to ${newQ}}`)
-        // }
-        
-        qStore.setValue(state, action, q);  
+        action = qStore.getBestAction(state);
       }
 
-      if (qLearn.finished) {
-        // console.log(`${JSON.stringify(qLearn.actionHistory)}, ${qLearn.actionHistory.length}`)
-        // console.log(`iteration: ${qLearn.iteration}, rho: ${qLearn.rho}, alpha: ${qLearn.alpha}, qDelta: ${qLearn.maxQDelta}, reward: ${qLearn.totalReward}`);
-      }
+      removedActors = this.takeAction(action, otherTeam, timestamp, world);
     }
 
     return removedActors;
@@ -389,7 +328,7 @@ class Actor implements ActorInterface {
     // }
   }
 
-  attack(targetActor: Actor, timestamp: number, world: WorldInterface): { reward: number, finished: boolean, removedActors: Actor[] } {
+  attack(targetActor: Actor, timestamp: number, world: WorldInterface): { removedActors: Actor[] } {
     if (world.animate) {
       this.addShot(targetActor, timestamp, world)
     }
@@ -413,20 +352,7 @@ class Actor implements ActorInterface {
       }
     }
 
-    const otherTeam = world.participants.participants[this.team ^ 1];
-    const otherTeamSum = otherTeam.reduce((accum, a) => {
-      return accum + a.hitPoints;
-    }, 0)
-
-    const team = world.participants.participants[this.team];
-    const teamSum = team.reduce((accum, a) => {
-      return accum + a.hitPoints;
-    }, 0)
-
     return {
-      reward: otherTeamSum === 0 ? teamSum * 100 : -1,
-      finished: otherTeamSum === 0,
-      // newState: Math.trunc((otherTeamSum / 400) * 1000),
       removedActors,
     }
   }

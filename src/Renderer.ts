@@ -23,7 +23,7 @@ import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
 import { ActorInterface } from './ActorInterface';
 import { Delay, WorldInterface } from './WorldInterface';
-import { EpisodeInfo, qLearn } from './QLearn';
+import { EpisodeInfo } from './QStore';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -111,9 +111,6 @@ class Renderer implements WorldInterface {
   }
 
   static async create() {
-    // const participants = new Participants();
-    // participants.createTeams();
-
     const shot = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
 
     const reticle = await Reticle.create(0.05);
@@ -290,18 +287,17 @@ class Renderer implements WorldInterface {
 
           this.updateActors(elapsedTime, timestamp);
 
-          if (qLearn.finished) {
+          if (
+            this.participants.participants[0].length === 0
+            || this.participants.participants[1].length === 0
+          ) {
             let winningTeam = 0;
             if (this.participants.participants[0].length === 0) {
               winningTeam = 1;
             }
             
             const episode: EpisodeInfo = {
-              iteration: qLearn.iteration,
               winningTeam,
-              rho: qLearn.rho,
-              alpha: qLearn.alpha,
-              totalRewards: qLearn.totalReward,
           }
 
             if (this.scoreCallback) {
@@ -309,8 +305,6 @@ class Renderer implements WorldInterface {
             }  
 
             this.participants.state = ParticipantsState.needsPrep;
-
-            qLearn.next();
           }  
 
           this.checkActorFocus();
