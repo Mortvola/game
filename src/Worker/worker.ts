@@ -16,6 +16,8 @@ class QLearn {
   alphaDecay = 0.9999;
   minAlpha = 0.02;
   
+  gamma = 0.9;
+
   actionHistory: number[] = [];
   
   maxQDelta: number | null = null;
@@ -135,9 +137,7 @@ class Actor {
     let removedActors: Actor[] = [];
   
     const otherTeam = environment.teams[this.team ^ 1];
-    
-    const gamma = 0.9;
-  
+      
     // Attack a random opponent
     if (otherTeam.length > 0) {
       // Have team 0 stick with random shots while team 1 learns.
@@ -188,7 +188,7 @@ class Actor {
         //   console.log(`state: ${JSON.stringify(state.opponents)}/${actionType}, alpha: ${alpha}, reward: ${reward}, gamma: ${gamma}, maxQ: ${maxQ}, q: ${q}`)
         // }
   
-        const newQ = q + qLearn.alpha * (reward + gamma * maxQ - q);
+        const newQ = q + qLearn.alpha * (reward + qLearn.gamma * maxQ - q);
         const qDelta = newQ - q;
   
         if (qLearn.maxQDelta === null || qDelta > qLearn.maxQDelta ) {
@@ -205,6 +205,7 @@ class Actor {
       }
   
       if (qLearn.finished) {
+        qLearn.totalReward += environment.teams[1].length * 100;
         // console.log(`${JSON.stringify(qLearn.actionHistory)}, ${qLearn.actionHistory.length}`)
         // console.log(`iteration: ${qLearn.iteration}, rho: ${qLearn.rho}, alpha: ${qLearn.alpha}, qDelta: ${qLearn.maxQDelta}, reward: ${qLearn.totalReward}`);
       }
@@ -237,7 +238,7 @@ class Actor {
     }, 0)
 
     return {
-      reward: otherTeamSum === 0 ? teamSum * 100 : -1,
+      reward: otherTeamSum === 0 ? teamSum : -1,
       finished: otherTeamSum === 0,
       // newState: Math.trunc((otherTeamSum / 400) * 1000),
       removedActors,
@@ -295,9 +296,6 @@ class Environment {
   // }
 }
 
-let red = 0;
-let blue = 0;
-
 const learn = () => {
   const environment = new Environment();
 
@@ -348,13 +346,6 @@ const learn = () => {
           environment.teams[1].length === 0
         ) {
           finished = true;
-
-          if (environment.teams[0].length > 0) {
-            blue += 1;
-          }
-          else if (environment.teams[1].length > 0) {
-              red += 1;
-          }
 
           break;
         }
