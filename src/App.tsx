@@ -326,7 +326,10 @@ function App() {
     renderer.followActiveCharacter = !renderer.followActiveCharacter
   }
 
+  const [showGraph, setShowGraph] = React.useState<boolean>(false);
+
   const handleTestClick = () => {
+    setShowGraph(true);
     worker.postMessage('start');
   }
 
@@ -382,9 +385,15 @@ function App() {
         // onBlur={handleBlur}
       />
       <div className="lower-left">
-        <div className="chart">
-          <RewardChart data={rewards} />
-        </div>
+        {
+          showGraph
+            ? (
+              <div className="chart">
+                <RewardChart data={rewards} />
+              </div>    
+            )
+            : null
+        }
       </div>
     </div>
   );
