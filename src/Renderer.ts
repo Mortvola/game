@@ -23,7 +23,7 @@ import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
 import { ActorInterface } from './ActorInterface';
 import { Delay, WorldInterface } from './WorldInterface';
-import { EpisodeInfo } from './QStore';
+import { EpisodeInfo } from './Actor';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {

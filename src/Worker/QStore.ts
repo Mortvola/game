@@ -2,7 +2,7 @@ type Key = {
   opponents: number[],
 }
 
-type QTable = Map<string, Map<number, number>>;
+export type QTable = Map<string, Map<number, number>>;
 
 class QStore {
   store: QTable = new Map();

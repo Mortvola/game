@@ -10,8 +10,28 @@ import { ActorInterface } from "./ActorInterface";
 import Shot, { ShotData } from "./Shot";
 import { playShot } from "./Audio";
 import { WorldInterface } from "./WorldInterface";
-import { qStore } from "./QStore";
 import LongBow from "./Weapons/LongBow";
+import QStore, { QTable } from "./Worker/QStore";
+
+export const qStore = new QStore();
+
+export const worker = new Worker(new URL("./Worker/worker.ts", import.meta.url));
+
+export type WorkerMessage = {
+  type: 'Rewards' | 'QTable',
+  rewards?: number[][],
+  qtable?: QTable,
+}
+
+worker.addEventListener('message', (evt: MessageEvent<WorkerMessage>) => {
+  if (evt.data.type === 'QTable' && evt.data.qtable) {
+    qStore.store = evt.data.qtable;
+  }
+})
+
+export type EpisodeInfo = {
+  winningTeam: number,
+}
 
 enum States {
   idle,
