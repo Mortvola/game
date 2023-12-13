@@ -1,13 +1,18 @@
-export const diceRoll = (sides: number): number => (
-  Math.trunc(Math.random() * sides) + 1
-)
+export const diceRoll = (numDice: number, sides: number): number => {
+  let sum = 0;
+  for (let i = 0; i < numDice; i += 1) {
+    sum += Math.trunc(Math.random() * sides) + 1
+  }
+
+  return sum;
+}
 
 export const abilityRoll = (): number => {
   const rolls = [
-    diceRoll(6),
-    diceRoll(6),
-    diceRoll(6),
-    diceRoll(6),
+    diceRoll(1, 6),
+    diceRoll(1, 6),
+    diceRoll(1, 6),
+    diceRoll(1, 6),
   ];
 
   rolls.sort((a: number, b: number) => b - a);
@@ -20,7 +25,7 @@ export const abilityModifier = (score: number): number => (
 )
 
 export const attackRoll = (armorClass: number, abilityScore: number): 'Miss' | 'Hit' | 'Critical' => {
-  let roll = diceRoll(20);
+  let roll = diceRoll(1, 20);
 
   if (roll === 1) {
     return 'Miss';

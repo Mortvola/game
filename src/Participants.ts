@@ -54,7 +54,7 @@ class Participants {
   initiativeRolls() {
     for (const team of this.participants) {
       for (const actor of team) {
-        actor.initiativeRoll = diceRoll(20) + abilityModifier(actor.abilityScores.dexterity);
+        actor.initiativeRoll = diceRoll(1, 20) + abilityModifier(actor.abilityScores.dexterity);
         this.turns.push(actor);
       }  
     }

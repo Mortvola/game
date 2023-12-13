@@ -61,15 +61,12 @@ export const getWeapon = (name: string): Weapon | undefined => {
 }
 
 export const weaponDamage = (weapon: Weapon, abilities: AbilityScores, twoHanded: boolean): number => {
-  let roll = 0
   let dieIndex = 0;
   if (twoHanded && weapon.die.length === 2) {
     dieIndex = 1;
   }
 
-  for (let i = 0; i < weapon.die[dieIndex].numDice; i += 1) {
-    roll += diceRoll(weapon.die[dieIndex].die)
-  }
+  const roll = diceRoll(weapon.die[dieIndex].numDice, weapon.die[dieIndex].die)
 
   if (weapon.type === WeaponType.SimpleRange) {
     return roll + abilityModifier(abilities.dexterity);

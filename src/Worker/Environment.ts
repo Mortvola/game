@@ -7,12 +7,6 @@ class Environment implements EnvironmentInterface {
 
   turns: Actor[] = [];
 
-  // turn = 0;
-
-  // get activeActor() {
-  //   return this.turns[this.turn]
-  // }
-
   createTeams() {
     const team1 = [new Actor(0), new Actor(0), new Actor(0), new Actor(0)];
     const team2 = [new Actor(1), new Actor(1), new Actor(1), new Actor(1)];
@@ -30,7 +24,7 @@ class Environment implements EnvironmentInterface {
 
   initiativeRolls() {
     for (const actor of this.turns) {
-      actor.initiativeRoll = diceRoll(20) + abilityModifier(actor.abilities.dexterity);
+      actor.initiativeRoll = diceRoll(1, 20) + abilityModifier(actor.abilities.dexterity);
     }
 
     this.turns.sort((a, b) => a.initiativeRoll - b.initiativeRoll);
