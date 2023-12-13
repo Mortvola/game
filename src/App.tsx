@@ -3,7 +3,7 @@ import './App.scss';
 import { gpu, renderer } from './Renderer';
 import { audioContext } from './Audio';
 import { vec4 } from 'wgpu-matrix';
-import { EpisodeInfo, WorkerMessage, worker } from './Actor';
+import { EpisodeInfo, WorkerMessage, worker } from './Character/Actor';
 import RewardChart from './Chart';
 
 type DiretionKeys = {

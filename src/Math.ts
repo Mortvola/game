@@ -129,3 +129,6 @@ export const timeToTarget = (targetX: number, velocity: number, angle: number) =
 )
 
 
+export const feetToMeters = (feet: number) => (
+  feet * 0.3048
+)

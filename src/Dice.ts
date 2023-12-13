@@ -15,17 +15,9 @@ export const abilityRoll = (): number => {
   return rolls[0] + rolls[1] + rolls[2];
 }
 
-export const abilityModifier = (score: number): number => {
-  if (score === 1) {
-    return -5
-  }
-
-  if (score === 30) {
-    return 10;
-  }
-
-  return Math.trunc((score - 2) / 2) - 4;
-}
+export const abilityModifier = (score: number): number => (
+  Math.floor((score - 10) / 2)
+)
 
 export const attackRoll = (armorClass: number, abilityScore: number): 'Miss' | 'Hit' | 'Critical' => {
   let roll = diceRoll(20);
@@ -45,4 +37,17 @@ export const attackRoll = (armorClass: number, abilityScore: number): 'Miss' | '
   }
 
   return 'Miss';
+}
+
+export const proficiencyBonus = (level: number) => (
+  Math.trunc((level - 1) / 4) + 2
+)
+
+export enum Abilities {
+  strength = 'strength',
+  charisma = 'charisma',
+  dexterity = 'dexterity',
+  intelligence = 'intelligence',
+  constitution = 'constitution',
+  wisdom = 'wisdom',
 }

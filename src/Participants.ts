@@ -1,5 +1,5 @@
 import { Vec4, vec3, vec4 } from "wgpu-matrix";
-import Actor from "./Actor";
+import Actor from "./Character/Actor";
 import { abilityModifier, diceRoll } from "./Dice";
 
 export enum ParticipantsState {
@@ -54,7 +54,7 @@ class Participants {
   initiativeRolls() {
     for (const team of this.participants) {
       for (const actor of team) {
-        actor.initiativeRoll = diceRoll(20) + abilityModifier(actor.dexterity);
+        actor.initiativeRoll = diceRoll(20) + abilityModifier(actor.abilityScores.dexterity);
         this.turns.push(actor);
       }  
     }

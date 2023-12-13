@@ -1,21 +1,24 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
-import Mesh from "./Drawables/Mesh";
-import { box } from "./Drawables/Shapes/box";
-import SceneNode from "./Drawables/SceneNode";
-import { anglesOfLaunch, degToRad, minimumVelocity, timeToTarget } from "./Math";
-import Circle from "./Drawables/Circle";
-import { abilityModifier, abilityRoll, attackRoll } from "./Dice";
-import RenderPass from "./RenderPass";
-import { ActorInterface } from "./ActorInterface";
-import Shot, { ShotData } from "./Shot";
-import { playShot } from "./Audio";
-import { WorldInterface } from "./WorldInterface";
-import LongBow from "./Weapons/LongBow";
-import QStore, { QTable } from "./Worker/QStore";
+import Mesh from "../Drawables/Mesh";
+import { box } from "../Drawables/Shapes/box";
+import SceneNode from "../Drawables/SceneNode";
+import { anglesOfLaunch, degToRad, minimumVelocity, timeToTarget } from "../Math";
+import Circle from "../Drawables/Circle";
+import { abilityModifier, abilityRoll, attackRoll } from "../Dice";
+import RenderPass from "../RenderPass";
+import { ActorInterface } from "../ActorInterface";
+import Shot, { ShotData } from "../Shot";
+import { playShot } from "../Audio";
+import { WorldInterface } from "../WorldInterface";
+import LongBow from "../Weapons/LongBow";
+import QStore, { QTable } from "../Worker/QStore";
+import { AbilityScores } from "./Races/AbilityScores";
+import Human from "./Races/Human";
+import Fighter from "./Classes/Fighter";
 
 export const qStore = new QStore();
 
-export const worker = new Worker(new URL("./Worker/worker.ts", import.meta.url));
+export const worker = new Worker(new URL("../Worker/worker.ts", import.meta.url));
 
 export type WorkerMessage = {
   type: 'Rewards' | 'QTable' | 'Finished',
@@ -48,17 +51,23 @@ type Pause = {
 class Actor implements ActorInterface {
   name: string;
 
+  race = new Human();
+
+  class = new Fighter();
+
+  weapon = new LongBow();
+
+  armorClass = 5;
+
+  abilityScores: AbilityScores;
+
   team: number;
 
   automated: boolean;
 
   moveTo: Vec2 | null = null;
 
-  hitPoints = 100;
-
-  weapon = new LongBow();
-
-  armorClass = 5;
+  hitPoints: number;
 
   metersPerSecond = 2;
 
@@ -77,18 +86,6 @@ class Actor implements ActorInterface {
   circle: Circle;
 
   teamColor: Vec4;
-
-  strength: number;
-
-  dexterity: number;
-
-  constitution: number;
-  
-  intelligence: number;
-
-  wisdom: number;
-
-  charisma: number;
 
   initiativeRoll = 0;
 
@@ -119,12 +116,9 @@ class Actor implements ActorInterface {
     this.circle = new Circle(1, 0.025, color);
     this.circle.postTransforms.push(mat4.fromQuat(q));
 
-    this.strength = abilityRoll();
-    this.dexterity = abilityRoll();
-    this.constitution = abilityRoll();
-    this.intelligence = abilityRoll();
-    this.wisdom = abilityRoll();
-    this.charisma = abilityRoll();
+    this.abilityScores = this.assignAbilityScores()
+
+    this.hitPoints = this.class.hitDice + abilityModifier(this.abilityScores.constitution);
   }
 
   static async create(
@@ -137,6 +131,62 @@ class Actor implements ActorInterface {
     mesh.translate[1] = playerHeight / 2;  
 
     return new Actor(name, mesh, playerHeight, teamColor, team, automated);
+  }
+
+  assignAbilityScores(): AbilityScores {
+    const abilities: AbilityScores = {
+      strength: 0,
+      dexterity: 0,
+      constitution: 0,
+      intelligence: 0,
+      wisdom: 0,
+      charisma: 0,
+    }
+
+    // Roll the dice six times
+    let rolls = [
+      abilityRoll(),
+      abilityRoll(),
+      abilityRoll(),
+      abilityRoll(),
+      abilityRoll(),
+      abilityRoll(),
+    ]
+
+    const getMaxIndex = (r: number[]) => {
+      const max = r.reduce((indexMax, _, index) => {
+        if (index === 0) {
+          return indexMax
+        }
+  
+        return r[indexMax] < r[index] ? index : indexMax
+      }, 0)
+
+      return max;
+    }
+    
+    // Assign the highest dice to the characters class's primary abilities
+    for (const ability of this.class.primaryAbilities) {
+      const max = getMaxIndex(rolls);
+
+      abilities[ability as keyof AbilityScores] = rolls[max] + this.race.abilityIncrease[ability as keyof AbilityScores];
+
+      rolls = [
+        ...rolls.slice(0, max),
+        ...rolls.slice(max + 1),
+      ]
+    }
+
+    // Assign the remaining rolls to the unassigned abilities
+    let index = 0;
+    for (const [key, value] of Object.entries(abilities)) {
+      if (value === 0) {
+        abilities[key as keyof AbilityScores] = rolls[index] + this.race.abilityIncrease[key as keyof AbilityScores]
+        index += 1;
+      }
+    }
+
+    return abilities;
   }
 
   getWorldPosition() {
@@ -362,13 +412,13 @@ class Actor implements ActorInterface {
 
     const removedActors: Actor[] = [];
 
-    const roll = attackRoll(targetActor.armorClass, this.dexterity);
+    const roll = attackRoll(targetActor.armorClass, this.abilityScores.dexterity);
 
     if (roll === 'Hit' || roll === 'Critical') {
-      let damage = this.weapon.damage(this.dexterity);
+      let damage = this.weapon.damage(this.abilityScores.dexterity);
 
       if (roll === 'Critical') {
-        damage = this.weapon.damage(this.dexterity);
+        damage = this.weapon.damage(this.abilityScores.dexterity);
       }
 
       targetActor.hitPoints -= damage;

@@ -1,5 +1,5 @@
 import { Vec2, Vec3, Vec4, vec4 } from "wgpu-matrix";
-import Actor from "./Actor";
+import Actor from "./Character/Actor";
 import { gravity } from "./Math";
 import RenderPass from "./RenderPass";
 import Mesh from "./Drawables/Mesh";

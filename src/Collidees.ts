@@ -1,5 +1,5 @@
 import { Vec4, vec4 } from "wgpu-matrix";
-import Actor from "./Actor";
+import Actor from "./Character/Actor";
 import { isDrawableInterface } from "./Drawables/DrawableInterface";
 
 export type CollisionResult = {

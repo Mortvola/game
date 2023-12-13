@@ -16,14 +16,14 @@ import Mesh from './Drawables/Mesh';
 import { box } from './Drawables/Shapes/box';
 import { isDrawableInterface } from './Drawables/DrawableInterface';
 import Reticle from './Drawables/Reticle';
-import Actor from './Actor';
+import Actor from './Character/Actor';
 import Trajectory from './Drawables/Trajectory';
 import Line from './Drawables/Line';
 import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
 import { ActorInterface } from './ActorInterface';
 import { Delay, WorldInterface } from './WorldInterface';
-import { EpisodeInfo } from './Actor';
+import { EpisodeInfo } from './Character/Actor';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
