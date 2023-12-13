@@ -89,4 +89,8 @@ const learn = () => {
     type: 'QTable',
     qtable: qStore.store,
   })
+
+  postMessage({
+    type: 'Finished',
+  })
 }

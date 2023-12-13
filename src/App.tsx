@@ -99,6 +99,9 @@ function App() {
           return rewards;
         })
       }
+      else if (evt.data.type === 'Finished') {
+        setLearning(false);
+      }
     }
 
     worker.addEventListener("message", listener);
@@ -330,8 +333,10 @@ function App() {
   }
 
   const [showGraph, setShowGraph] = React.useState<boolean>(false);
+  const [learning, setLearning] = React.useState<boolean>(false);
 
   const handleLearnClick = () => {
+    setLearning(true);
     setShowGraph(true);
     setRewards([["episode", "max", "mean", "min"]]);
     worker.postMessage('start');
@@ -357,7 +362,7 @@ function App() {
             <input type="checkbox" onChange={handleFollowChange} checked={follow ? true : false} />
             Follow
           </label>
-          <button className="learn" onClick={handleLearnClick}>Learn</button>
+          <button className="learn" disabled={learning} onClick={handleLearnClick}>Learn</button>
         </div>
       </div>
       <div className="score">

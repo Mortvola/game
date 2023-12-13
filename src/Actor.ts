@@ -18,7 +18,7 @@ export const qStore = new QStore();
 export const worker = new Worker(new URL("./Worker/worker.ts", import.meta.url));
 
 export type WorkerMessage = {
-  type: 'Rewards' | 'QTable',
+  type: 'Rewards' | 'QTable' | 'Finished',
   rewards?: number[][],
   qtable?: QTable,
 }
@@ -59,7 +59,7 @@ class Actor implements ActorInterface {
   weapon = new LongBow();
 
   armorClass = 5;
-  
+
   metersPerSecond = 2;
 
   actionsLeft = 0;
