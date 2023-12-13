@@ -15,7 +15,7 @@ class Actor implements ActorInterface {
 
   initiativeRoll = 0;
 
-  dexterity = abilityRoll();
+  dexterity = 11; // abilityRoll();
 
   constructor(team: number) {
     this.team = team;
@@ -133,7 +133,7 @@ class Actor implements ActorInterface {
 
     const removedActors: ActorInterface[] = [];
 
-    targetActor.hitPoints -= this.weapon.damage; // this.weaponStrength;
+    targetActor.hitPoints -= this.weapon.damage(this.dexterity);
 
     if (targetActor.hitPoints <= 0) {
       targetActor.hitPoints = 0;

@@ -4,7 +4,7 @@ import { box } from "./Drawables/Shapes/box";
 import SceneNode from "./Drawables/SceneNode";
 import { anglesOfLaunch, degToRad, minimumVelocity, timeToTarget } from "./Math";
 import Circle from "./Drawables/Circle";
-import { abilityRoll, attackRoll } from "./Dice";
+import { abilityModifier, abilityRoll, attackRoll } from "./Dice";
 import RenderPass from "./RenderPass";
 import { ActorInterface } from "./ActorInterface";
 import Shot, { ShotData } from "./Shot";
@@ -362,13 +362,13 @@ class Actor implements ActorInterface {
 
     const removedActors: Actor[] = [];
 
-    const roll = attackRoll(targetActor.armorClass);
+    const roll = attackRoll(targetActor.armorClass, this.dexterity);
 
     if (roll === 'Hit' || roll === 'Critical') {
-      let damage = this.weapon.damage;
+      let damage = this.weapon.damage(this.dexterity);
 
       if (roll === 'Critical') {
-        damage = this.weapon.damage;
+        damage = this.weapon.damage(this.dexterity);
       }
 
       targetActor.hitPoints -= damage;

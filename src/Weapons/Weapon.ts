@@ -1,5 +1,20 @@
-export interface Weapon {
-  cost: number;
+import { abilityModifier } from "../Dice";
 
-  damage: number;
+class Weapon {
+  cost = 0;
+
+  damage(abilityScore: number): number {
+    const roll = this.damageRoll();
+
+    const modififier = abilityModifier(abilityScore);
+
+    // console.log(`roll: ${roll}, modifier: ${modififier}, abilityScore: ${abilityScore}`)
+    return roll + modififier;
+  }
+
+  damageRoll(): number {
+    return 0;
+  }
 }
+
+export default Weapon;
