@@ -58,6 +58,8 @@ class Actor implements ActorInterface {
 
   weapon = new LongBow();
 
+  armorClass = 5;
+  
   metersPerSecond = 2;
 
   actionsLeft = 0;
@@ -360,7 +362,7 @@ class Actor implements ActorInterface {
 
     const removedActors: Actor[] = [];
 
-    const roll = attackRoll(5);
+    const roll = attackRoll(targetActor.armorClass);
 
     if (roll === 'Hit' || roll === 'Critical') {
       let damage = this.weapon.damage;

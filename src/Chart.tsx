@@ -14,6 +14,7 @@ const RewardChart: React.FC<PropsType> = ({
       width="100%"
       height="100%"
       data={data}
+      options={{ title: "Rewards" }}
     />
   )
 }
