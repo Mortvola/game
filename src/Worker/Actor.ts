@@ -1,5 +1,5 @@
 import { AbilityScores } from "../Character/Races/AbilityScores";
-import { getWeapon, weaponDamage } from "../Character/Weapons/Weapon";
+import { getWeapon, weaponDamage } from "../Character/Equipment/Weapon";
 import { ActorInterface, EnvironmentInterface } from "./Interfaces";
 import QLearn from "./QLearn";
 import QStore from "./QStore";

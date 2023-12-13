@@ -14,7 +14,7 @@ import QStore, { QTable } from "../Worker/QStore";
 import { AbilityScores } from "./Races/AbilityScores";
 import Human from "./Races/Human";
 import Fighter from "./Classes/Fighter";
-import { getWeapon, weaponDamage } from "./Weapons/Weapon";
+import { getWeapon, weaponDamage } from "./Equipment/Weapon";
 
 export const qStore = new QStore();
 
