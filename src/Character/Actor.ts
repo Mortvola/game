@@ -10,11 +10,11 @@ import { ActorInterface } from "../ActorInterface";
 import Shot, { ShotData } from "../Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
-import LongBow from "../Weapons/LongBow";
 import QStore, { QTable } from "../Worker/QStore";
 import { AbilityScores } from "./Races/AbilityScores";
 import Human from "./Races/Human";
 import Fighter from "./Classes/Fighter";
+import { getWeapon, weaponDamage } from "./Weapons/Weapon";
 
 export const qStore = new QStore();
 
@@ -55,9 +55,11 @@ class Actor implements ActorInterface {
 
   class = new Fighter();
 
-  weapon = new LongBow();
+  weapon = getWeapon('Shortbow');
 
-  armorClass = 5;
+  get armorClass() {
+    return this.class.unarmoredDefence(this.abilityScores);
+  };
 
   abilityScores: AbilityScores;
 
@@ -414,27 +416,29 @@ class Actor implements ActorInterface {
 
     const roll = attackRoll(targetActor.armorClass, this.abilityScores.dexterity);
 
-    if (roll === 'Hit' || roll === 'Critical') {
-      let damage = this.weapon.damage(this.abilityScores.dexterity);
-
-      if (roll === 'Critical') {
-        damage = this.weapon.damage(this.abilityScores.dexterity);
-      }
-
-      targetActor.hitPoints -= damage;
-
-      if (targetActor.hitPoints <= 0) {
-        targetActor.hitPoints = 0;
-
-        if (!world.animate) {
-          world.participants.remove(targetActor);
-          removedActors.push(targetActor);
-          world.collidees.remove(targetActor);
-          targetActor.removeFromScene();
-          world.scene.removeNode(targetActor.mesh);
-          world.scene.removeNode(targetActor.circle);    
+    if (this.weapon) {
+      if (roll === 'Hit' || roll === 'Critical') {
+        let damage = weaponDamage(this.weapon, this.abilityScores, false);
+  
+        if (roll === 'Critical') {
+          damage = weaponDamage(this.weapon, this.abilityScores, false);
         }
-      }
+  
+        targetActor.hitPoints -= damage;
+  
+        if (targetActor.hitPoints <= 0) {
+          targetActor.hitPoints = 0;
+  
+          if (!world.animate) {
+            world.participants.remove(targetActor);
+            removedActors.push(targetActor);
+            world.collidees.remove(targetActor);
+            targetActor.removeFromScene();
+            world.scene.removeNode(targetActor.mesh);
+            world.scene.removeNode(targetActor.circle);    
+          }
+        }
+      }  
     }
 
     return {

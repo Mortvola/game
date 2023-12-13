@@ -1,4 +1,5 @@
-import { Abilities } from "../../Dice";
+import { Abilities, abilityModifier } from "../../Dice";
+import { AbilityScores } from "../Races/AbilityScores";
 
 class CharacterClass {
   hitDice: number;
@@ -14,6 +15,10 @@ class CharacterClass {
     this.level = level;
     this.primaryAbilities = primaryAbilities;
     this.savingThrowsProficiencies = savingThrowsProficiencies;
+  }
+
+  unarmoredDefence(abilityScores: AbilityScores) {
+    return 10 + abilityModifier(abilityScores.dexterity)
   }
 }
 

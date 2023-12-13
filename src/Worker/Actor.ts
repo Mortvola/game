@@ -1,4 +1,5 @@
-import LongBow from "../Weapons/LongBow";
+import { AbilityScores } from "../Character/Races/AbilityScores";
+import { getWeapon, weaponDamage } from "../Character/Weapons/Weapon";
 import { ActorInterface, EnvironmentInterface } from "./Interfaces";
 import QLearn from "./QLearn";
 import QStore from "./QStore";
@@ -6,7 +7,7 @@ import QStore from "./QStore";
 class Actor implements ActorInterface {
   hitPoints = 100;
 
-  weapon = new LongBow();
+  weapon = getWeapon('Shortbow')
 
   team: number;
 
@@ -14,7 +15,14 @@ class Actor implements ActorInterface {
 
   initiativeRoll = 0;
 
-  dexterity = 11; // abilityRoll();
+  abilities: AbilityScores = {
+    strength: 11,
+    dexterity: 11,
+    intelligence: 11,
+    wisdom: 11,
+    constitution: 11,
+    charisma: 11,
+  }
 
   constructor(team: number) {
     this.team = team;
@@ -132,12 +140,14 @@ class Actor implements ActorInterface {
 
     const removedActors: ActorInterface[] = [];
 
-    targetActor.hitPoints -= this.weapon.damage(this.dexterity);
+    if (this.weapon) {
+      targetActor.hitPoints -= weaponDamage(this.weapon, this.abilities, false)
 
-    if (targetActor.hitPoints <= 0) {
-      targetActor.hitPoints = 0;
-
-      removedActors.push(targetActor);
+      if (targetActor.hitPoints <= 0) {
+        targetActor.hitPoints = 0;
+  
+        removedActors.push(targetActor);
+      }
     }
 
     const otherTeam = environment.teams[this.team ^ 1];
