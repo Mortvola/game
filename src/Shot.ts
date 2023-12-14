@@ -63,10 +63,10 @@ class Shot implements ActorInterface {
       const result = world.collidees.detectCollision(this.data.position, newPosition, (actor: Actor) => actor !== this.actor);
 
       if (result) {
-        if (result.actor.hitPoints <= 0) {
+        if (result.actor.character.hitPoints <= 0) {
           const deadActor = result.actor;
 
-          deadActor.hitPoints = 0;
+          deadActor.character.hitPoints = 0;
 
           world.participants.remove(deadActor);
 

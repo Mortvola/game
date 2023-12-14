@@ -3,7 +3,11 @@ import CharacterClass from "./CharacterClass";
 
 class Cleric extends CharacterClass {
   constructor(level = 1) {
-    super(level, 8, [Abilities.wisdom], [Abilities.wisdom, Abilities.charisma])
+    super('Cleric', level, 8, [Abilities.wisdom], [Abilities.wisdom, Abilities.charisma])
+  }
+
+  clone(): Cleric {
+    return new Cleric();
   }
 }
 

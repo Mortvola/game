@@ -4,11 +4,15 @@ import CharacterClass from "./CharacterClass";
 
 class Monk extends CharacterClass {
   constructor(level = 1) {
-    super(level, 8, [Abilities.dexterity, Abilities.wisdom], [Abilities.strength, Abilities.dexterity])
+    super('Monk', level, 8, [Abilities.dexterity, Abilities.wisdom], [Abilities.strength, Abilities.dexterity])
   }
 
   unarmoredDefence(abilityScores: AbilityScores) {
     return 10 + abilityModifier(abilityScores.dexterity) + abilityModifier(abilityScores.wisdom)
+  }
+
+  clone(): Monk {
+    return new Monk();
   }
 }
 

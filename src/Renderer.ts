@@ -24,6 +24,7 @@ import Participants, { ParticipantsState } from './Participants';
 import { ActorInterface } from './ActorInterface';
 import { Delay, WorldInterface } from './WorldInterface';
 import { EpisodeInfo } from './Character/Actor';
+import Character from './Character/Character';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -746,6 +747,10 @@ class Renderer implements WorldInterface {
 
   setScoreCallback(callback: (episode: EpisodeInfo) => void) {
     this.scoreCallback = callback;
+  }
+
+  setParties(parties: Character[][]) {
+    this.participants.setParties(parties);
   }
 }
 

@@ -5,6 +5,8 @@ import { audioContext } from './Audio';
 import { vec4 } from 'wgpu-matrix';
 import { EpisodeInfo, WorkerMessage, worker } from './Character/Actor';
 import RewardChart from './Chart';
+import DefineParties from './DefineParties';
+import Character from './Character/Character';
 
 type DiretionKeys = {
   left: number,
@@ -342,10 +344,28 @@ function App() {
     worker.postMessage('start');
   }
 
+  const [showPartyDefs, setShowPartyDefs] = React.useState<boolean>(false);
+  const [parties, setParties] = React.useState<Character[][]>([[], []]);
+
+  const handleDefinePartiesClick = () => {
+    setShowPartyDefs(true);
+  }
+
+  const handleHideParties = () => {
+    setShowPartyDefs(false);
+  }
+
+  const handlePartySave = (parties: Character[][]) => {
+    setShowPartyDefs(false);
+    setParties(parties);
+    renderer.setParties(parties);
+  }
+
   return (
     <div className="App">
       <div className="upper-left">
         <div className="controls">
+          <button type="button" onClick={handleDefinePartiesClick}>Define Parties</button>
           {/* <button type="button" onClick={handlePlayClick}>play</button> */}
           <button type="button" onClick={handleInputModeClick} onFocus={(refocus)}>
             {
@@ -377,6 +397,13 @@ function App() {
           }
         </div>
       </div>
+      {
+        showPartyDefs
+          ? (
+            <DefineParties parties={parties} onHide={handleHideParties} onSave={handlePartySave} />
+          )
+          : null
+      }
       <canvas
         ref={canvasRef}
         tabIndex={0}

@@ -1,0 +1,41 @@
+.dialog {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10%;
+  margin-bottom: auto;
+  width: 20rem;
+  height: max-content;
+  background-color: white;
+
+  display: grid;
+  column-gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) max-content;
+
+  border: black thin solid;
+  padding: 1rem 1rem 0 1rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.body {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1rem;
+}
+
+.footer {
+  display: flex;
+  justify-content: end;
+  column-gap: 1rem;
+  padding: 0.25rem;
+}

@@ -3,7 +3,11 @@ import CharacterClass from "./CharacterClass";
 
 class Warlock extends CharacterClass {
   constructor(level = 1) {
-    super(level, 8, [Abilities.charisma], [Abilities.wisdom, Abilities.charisma])
+    super('Warlock', level, 8, [Abilities.charisma], [Abilities.wisdom, Abilities.charisma])
+  }
+
+  clone(): Warlock {
+    return new Warlock();
   }
 }
 

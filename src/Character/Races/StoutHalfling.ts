@@ -1,6 +1,8 @@
 import Halfling from "./Halfling";
 
 class StoutHalfling extends Halfling {
+  name = 'Stout Halfling';
+
   abilityIncrease = {
     charisma: 0,
     constitution: 1,
@@ -9,6 +11,10 @@ class StoutHalfling extends Halfling {
     strength: 0,
     wisdom: 0,
   };
+
+  clone(): StoutHalfling {
+    return new StoutHalfling();
+  }
 }
 
 export default StoutHalfling;

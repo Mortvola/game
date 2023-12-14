@@ -4,17 +4,17 @@ import { box } from "../Drawables/Shapes/box";
 import SceneNode from "../Drawables/SceneNode";
 import { anglesOfLaunch, degToRad, minimumVelocity, timeToTarget } from "../Math";
 import Circle from "../Drawables/Circle";
-import { abilityModifier, abilityRoll, attackRoll } from "../Dice";
 import RenderPass from "../RenderPass";
 import { ActorInterface } from "../ActorInterface";
 import Shot, { ShotData } from "../Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
 import QStore, { QTable } from "../Worker/QStore";
-import { AbilityScores } from "./Races/AbilityScores";
 import Human from "./Races/Human";
 import Fighter from "./Classes/Fighter";
-import { getWeapon, weaponDamage } from "./Equipment/Weapon";
+import { weaponDamage } from "./Equipment/Weapon";
+import Character from "./Character";
+import { attackRoll } from "../Dice";
 
 export const qStore = new QStore();
 
@@ -49,27 +49,13 @@ type Pause = {
 }
 
 class Actor implements ActorInterface {
-  name: string;
-
-  race = new Human();
-
-  class = new Fighter();
-
-  weapon = getWeapon('Shortbow');
-
-  get armorClass() {
-    return this.class.unarmoredDefence(this.abilityScores);
-  };
-
-  abilityScores: AbilityScores;
+  character: Character;
 
   team: number;
 
   automated: boolean;
 
   moveTo: Vec2 | null = null;
-
-  hitPoints: number;
 
   metersPerSecond = 2;
 
@@ -98,14 +84,14 @@ class Actor implements ActorInterface {
   pause: Pause | null = null;
 
   private constructor(
-    name: string,
+    character: Character,
     mesh: SceneNode,
     height: number,
     color: Vec4,
     team: number,
     automated: boolean,
   ) {
-    this.name = name;
+    this.character = character;
     this.team = team;
     this.automated = automated;
     this.mesh = mesh;
@@ -117,14 +103,10 @@ class Actor implements ActorInterface {
 
     this.circle = new Circle(1, 0.025, color);
     this.circle.postTransforms.push(mat4.fromQuat(q));
-
-    this.abilityScores = this.assignAbilityScores()
-
-    this.hitPoints = this.class.hitDice + abilityModifier(this.abilityScores.constitution);
   }
 
   static async create(
-    name: string, color: Vec4, teamColor: Vec4, team: number, automated: boolean,
+    character: Character, color: Vec4, teamColor: Vec4, team: number, automated: boolean,
   ) {
     const playerWidth = 1;
     const playerHeight = 1.75;
@@ -132,63 +114,7 @@ class Actor implements ActorInterface {
     const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, color))
     mesh.translate[1] = playerHeight / 2;  
 
-    return new Actor(name, mesh, playerHeight, teamColor, team, automated);
-  }
-
-  assignAbilityScores(): AbilityScores {
-    const abilities: AbilityScores = {
-      strength: 0,
-      dexterity: 0,
-      constitution: 0,
-      intelligence: 0,
-      wisdom: 0,
-      charisma: 0,
-    }
-
-    // Roll the dice six times
-    let rolls = [
-      abilityRoll(),
-      abilityRoll(),
-      abilityRoll(),
-      abilityRoll(),
-      abilityRoll(),
-      abilityRoll(),
-    ]
-
-    const getMaxIndex = (r: number[]) => {
-      const max = r.reduce((indexMax, _, index) => {
-        if (index === 0) {
-          return indexMax
-        }
-  
-        return r[indexMax] < r[index] ? index : indexMax
-      }, 0)
-
-      return max;
-    }
-    
-    // Assign the highest dice to the characters class's primary abilities
-    for (const ability of this.class.primaryAbilities) {
-      const max = getMaxIndex(rolls);
-
-      abilities[ability as keyof AbilityScores] = rolls[max] + this.race.abilityIncrease[ability as keyof AbilityScores];
-
-      rolls = [
-        ...rolls.slice(0, max),
-        ...rolls.slice(max + 1),
-      ]
-    }
-
-    // Assign the remaining rolls to the unassigned abilities
-    let index = 0;
-    for (const [key, value] of Object.entries(abilities)) {
-      if (value === 0) {
-        abilities[key as keyof AbilityScores] = rolls[index] + this.race.abilityIncrease[key as keyof AbilityScores]
-        index += 1;
-      }
-    }
-
-    return abilities;
+    return new Actor(character, mesh, playerHeight, teamColor, team, automated);
   }
 
   getWorldPosition() {
@@ -287,7 +213,7 @@ class Actor implements ActorInterface {
       action = Math.trunc(Math.random() * otherTeam.length);
     }
 
-    const sortedActors = otherTeam.map((a) => a).sort((a, b) => a.hitPoints - b.hitPoints);
+    const sortedActors = otherTeam.map((a) => a).sort((a, b) => a.character.hitPoints - b.character.hitPoints);
 
     const target = sortedActors[action];
     const result = this.attack(target, timestamp, world);
@@ -305,7 +231,7 @@ class Actor implements ActorInterface {
 
       if (this.team === 1) {
         const state = {
-          opponents: otherTeam.map((t) => t.hitPoints),
+          opponents: otherTeam.map((t) => t.character.hitPoints),
         };
 
         action = qStore.getBestAction(state);
@@ -414,20 +340,20 @@ class Actor implements ActorInterface {
 
     const removedActors: Actor[] = [];
 
-    const roll = attackRoll(targetActor.armorClass, this.abilityScores.dexterity);
+    const roll = attackRoll(targetActor.character.armorClass, this.character.abilityScores.dexterity);
 
-    if (this.weapon) {
+    if (this.character.weapon) {
       if (roll === 'Hit' || roll === 'Critical') {
-        let damage = weaponDamage(this.weapon, this.abilityScores, false);
+        let damage = weaponDamage(this.character.weapon, this.character.abilityScores, false);
   
         if (roll === 'Critical') {
-          damage = weaponDamage(this.weapon, this.abilityScores, false);
+          damage = weaponDamage(this.character.weapon, this.character.abilityScores, false);
         }
   
-        targetActor.hitPoints -= damage;
+        targetActor.character.hitPoints -= damage;
   
-        if (targetActor.hitPoints <= 0) {
-          targetActor.hitPoints = 0;
+        if (targetActor.character.hitPoints <= 0) {
+          targetActor.character.hitPoints = 0;
   
           if (!world.animate) {
             world.participants.remove(targetActor);

@@ -2,6 +2,8 @@ import { feetToMeters } from "../../Math";
 import Elf from "./Elf";
 
 class WoodElf extends Elf {
+  name = 'Wood Elf';
+
   speed = feetToMeters(35); 
 
   abilityIncrease = {
@@ -12,6 +14,10 @@ class WoodElf extends Elf {
     strength: 0,
     wisdom: 1,
   };
+
+  clone(): WoodElf {
+    return new WoodElf();
+  }
 }
 
 export default WoodElf;

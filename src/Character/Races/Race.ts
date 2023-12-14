@@ -11,9 +11,15 @@ export enum Size {
 }
 
 export interface Race {
+  name: string;
+  
   speed: number;
 
   abilityIncrease: AbilityScores;
 
   size: Size;
+
+  generateName(): string;
+
+  clone(): Race;
 }

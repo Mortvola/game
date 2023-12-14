@@ -1,0 +1,25 @@
+.selected {
+  background-color: lightblue;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.listEntry {
+  padding: 0.25rem;
+  user-select: none;
+}
+
+.listWrapper {
+  display: grid;
+  grid-template-rows: max-content minmax(0, 1fr);
+}
+
+.header {
+  display: flex;
+  column-gap: 1rem;
+}

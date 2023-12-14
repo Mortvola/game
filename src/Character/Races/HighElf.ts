@@ -1,6 +1,8 @@
 import Elf from "./Elf";
 
 class HighElf extends Elf {
+  name = "High Elf";
+
   abilityIncrease = {
     charisma: 0,
     constitution: 0,
@@ -9,6 +11,10 @@ class HighElf extends Elf {
     strength: 0,
     wisdom: 0,
   };
+
+  clone(): HighElf {
+    return new HighElf();
+  }
 }
 
 export default HighElf;
