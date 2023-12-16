@@ -18,6 +18,8 @@ class Human implements Race {
     wisdom: 1,
   };
 
+  hitPointBonus = 0;
+
   clone(): Human {
     return new Human();
   }

@@ -1,6 +1,8 @@
 import { Abilities, abilityModifier } from "../../Dice";
+import { getArmor } from "../Equipment/Armor";
+import { getWeapon } from "../Equipment/Weapon";
 import { AbilityScores } from "../Races/AbilityScores";
-import CharacterClass from "./CharacterClass";
+import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Monk extends CharacterClass {
   constructor(level = 1) {
@@ -13,6 +15,41 @@ class Monk extends CharacterClass {
 
   clone(): Monk {
     return new Monk();
+  }
+
+  static startingEquipment(): StartingEquipment {
+    return ({
+      equipmentChoices: [
+        {
+          selection: 0,
+          choices: [
+            {
+              armor: [],
+              weapons: [getWeapon('Shortsword')],
+            },
+            {
+              armor: [],
+              weapons: [getWeapon('Dagger')],
+            },
+          ]
+        },
+      ],
+      other: {
+        weapons: [
+          getWeapon('Dart'),
+          getWeapon('Dart'),
+          getWeapon('Dart'),
+          getWeapon('Dart'),
+          getWeapon('Dart'),
+          getWeapon('Dart'),
+          getWeapon('Dart'),
+          getWeapon('Dart'),
+          getWeapon('Dart'),
+          getWeapon('Dart'),
+        ],
+        armor: [],
+      },
+    })
   }
 }
 

@@ -12,6 +12,8 @@ class StoutHalfling extends Halfling {
     wisdom: 0,
   };
 
+  hitPointBonus = 0;
+
   clone(): StoutHalfling {
     return new StoutHalfling();
   }

@@ -12,6 +12,8 @@ class HillDwarf extends Dwarf {
     wisdom: 1,
   };
 
+  hitPointBonus = 1;
+
   clone(): HillDwarf {
     return new HillDwarf();
   }

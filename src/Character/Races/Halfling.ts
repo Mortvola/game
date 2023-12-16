@@ -17,6 +17,8 @@ class Halfling implements Race {
     wisdom: 0,
   };
 
+  hitPointBonus = 0;
+
   clone(): Halfling {
     return new Halfling();
   }

@@ -1,5 +1,7 @@
 import { Abilities } from "../../Dice";
-import CharacterClass from "./CharacterClass";
+import { getArmor } from "../Equipment/Armor";
+import { getWeapon } from "../Equipment/Weapon";
+import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Warlock extends CharacterClass {
   constructor(level = 1) {
@@ -8,6 +10,30 @@ class Warlock extends CharacterClass {
 
   clone(): Warlock {
     return new Warlock();
+  }
+
+  static startingEquipment(): StartingEquipment {
+    return ({
+      equipmentChoices: [
+        {
+          selection: 0,
+          choices: [
+            {
+              armor: [],
+              weapons: [getWeapon('Crossbow, light')],
+            },
+            {
+              armor: [],
+              weapons: [getWeapon('Dagger')],
+            },
+          ]
+        },
+      ],
+      other: {
+        weapons: [getWeapon('Dagger'), getWeapon('Dagger'), getWeapon('Handaxe')],
+        armor: [getArmor('Leather')],
+      },
+    })
   }
 }
 

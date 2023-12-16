@@ -1,32 +1,34 @@
 import React from 'react';
 import CharacterEntry from './CharacterEntry';
 import styles from './PartyList.module.scss';
-import Character from './Character/Character';
+import Character from '../Character/Character';
 import AddActor from './AddActor';
-import { Race } from './Character/Races/Race';
-import Dwarf from './Character/Races/Dwarf';
-import Elf from './Character/Races/Elf';
-import HighElf from './Character/Races/HighElf';
-import HillDwarf from './Character/Races/HillDwarf';
-import Human from './Character/Races/Human';
-import Halfling from './Character/Races/Halfling';
-import MountainDwarf from './Character/Races/MountainDwarf';
-import LightfootHalfling from './Character/Races/LightfootHalfling';
-import StoutHalfling from './Character/Races/StoutHalfling';
-import WoodElf from './Character/Races/WoodElf';
-import CharacterClass from './Character/Classes/CharacterClass';
-import Barbarian from './Character/Classes/Barbarian';
-import Bard from './Character/Classes/Bard';
-import Cleric from './Character/Classes/Cleric';
-import Druid from './Character/Classes/Druid';
-import Fighter from './Character/Classes/Fighter';
-import Monk from './Character/Classes/Monk';
-import Paladin from './Character/Classes/Paladin';
-import Ranger from './Character/Classes/Ranger';
-import Rogue from './Character/Classes/Rogue';
-import Sorcerer from './Character/Classes/Sorcerer';
-import Warlock from './Character/Classes/Warlock';
-import Wizard from './Character/Classes/Wizard';
+import { Race } from '../Character/Races/Race';
+import Dwarf from '../Character/Races/Dwarf';
+import Elf from '../Character/Races/Elf';
+import HighElf from '../Character/Races/HighElf';
+import HillDwarf from '../Character/Races/HillDwarf';
+import Human from '../Character/Races/Human';
+import Halfling from '../Character/Races/Halfling';
+import MountainDwarf from '../Character/Races/MountainDwarf';
+import LightfootHalfling from '../Character/Races/LightfootHalfling';
+import StoutHalfling from '../Character/Races/StoutHalfling';
+import WoodElf from '../Character/Races/WoodElf';
+import CharacterClass from '../Character/Classes/CharacterClass';
+import Barbarian from '../Character/Classes/Barbarian';
+import Bard from '../Character/Classes/Bard';
+import Cleric from '../Character/Classes/Cleric';
+import Druid from '../Character/Classes/Druid';
+import Fighter from '../Character/Classes/Fighter';
+import Monk from '../Character/Classes/Monk';
+import Paladin from '../Character/Classes/Paladin';
+import Ranger from '../Character/Classes/Ranger';
+import Rogue from '../Character/Classes/Rogue';
+import Sorcerer from '../Character/Classes/Sorcerer';
+import Warlock from '../Character/Classes/Warlock';
+import Wizard from '../Character/Classes/Wizard';
+import Weapon from '../Character/Equipment/Weapon';
+import { Armor } from '../Character/Equipment/Armor';
 
 type PropsType = {
   party: Character[],
@@ -57,7 +59,7 @@ const PartyList: React.FC<PropsType> = ({
     setShowAddDialog(true);
   }
 
-  const handleSave = (race: string, charClass: string) => {
+  const handleSave = (race: string, charClass: string, weapons: Weapon[], armor: Armor[]) => {
     setShowAddDialog(false);
 
     let r: Race | null = null;
@@ -137,7 +139,7 @@ const PartyList: React.FC<PropsType> = ({
     }
 
     if (r && c) {
-      const character = new Character(r, c);
+      const character = new Character(r, c, weapons, armor);
 
       onPartyChange([
         ...party,

@@ -1,5 +1,6 @@
 import { Abilities } from "../../Dice";
-import CharacterClass from "./CharacterClass";
+import { getWeapon } from "../Equipment/Weapon";
+import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Wizard extends CharacterClass {
   constructor(level = 1) {
@@ -8,6 +9,30 @@ class Wizard extends CharacterClass {
 
   clone(): Wizard {
     return new Wizard();
+  }
+
+  static startingEquipment(): StartingEquipment {
+    return ({
+      equipmentChoices: [
+        {
+          selection: 0,
+          choices: [
+            {
+              armor: [],
+              weapons: [getWeapon('Quarterstaff')],
+            },
+            {
+              armor: [],
+              weapons: [getWeapon('Dagger')],
+            },
+          ]
+        },
+      ],
+      other: {
+        weapons: [],
+        armor: [],
+      },
+    })
   }
 }
 

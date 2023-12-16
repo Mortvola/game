@@ -95,9 +95,9 @@ class Renderer implements WorldInterface {
 
   scoreCallback: ((episode: EpisodeInfo) => void) | null = null;
 
-  animate = false;
+  animate = true;
 
-  followActiveCharacter = true;
+  followActiveCharacter = false;
 
   constructor(shot: Mesh, reticle: Reticle) {
     this.reticle = reticle;
@@ -693,7 +693,7 @@ class Renderer implements WorldInterface {
   }
 
   interact() {
-    if (!this.participants.activeActor.automated) {
+    if (this.participants.activeActor && !this.participants.activeActor.automated) {
       if (this.focused) {
         if (this.focused !== this.participants.activeActor && this.participants.activeActor.actionsLeft > 0) {
           // this.attack(this.activeActor, this.focused);

@@ -1,4 +1,6 @@
 import { Abilities, abilityModifier } from "../../Dice";
+import { Armor } from "../Equipment/Armor";
+import Weapon from "../Equipment/Weapon";
 import { AbilityScores } from "../Races/AbilityScores";
 
 class CharacterClass {
@@ -27,6 +29,21 @@ class CharacterClass {
   clone(): CharacterClass {
     throw new Error('not implemented')
   }
+}
+
+export type Equipment = {
+  weapons: Weapon[],
+  armor: Armor[]
+}
+
+export type EquipmentChoices = {
+  selection: number,
+  choices: Equipment[],
+}
+
+export type StartingEquipment = {
+  equipmentChoices: EquipmentChoices[],
+  other: Equipment,
 }
 
 export default CharacterClass;

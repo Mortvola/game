@@ -10,8 +10,6 @@ import Shot, { ShotData } from "../Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
 import QStore, { QTable } from "../Worker/QStore";
-import Human from "./Races/Human";
-import Fighter from "./Classes/Fighter";
 import { weaponDamage } from "./Equipment/Weapon";
 import Character from "./Character";
 import { attackRoll } from "../Dice";
@@ -342,12 +340,12 @@ class Actor implements ActorInterface {
 
     const roll = attackRoll(targetActor.character.armorClass, this.character.abilityScores.dexterity);
 
-    if (this.character.weapon) {
+    if (this.character.equipped.rangeWeapon) {
       if (roll === 'Hit' || roll === 'Critical') {
-        let damage = weaponDamage(this.character.weapon, this.character.abilityScores, false);
+        let damage = weaponDamage(this.character.equipped.rangeWeapon, this.character.abilityScores, false);
   
         if (roll === 'Critical') {
-          damage = weaponDamage(this.character.weapon, this.character.abilityScores, false);
+          damage = weaponDamage(this.character.equipped.rangeWeapon, this.character.abilityScores, false);
         }
   
         targetActor.character.hitPoints -= damage;

@@ -12,6 +12,8 @@ class HighElf extends Elf {
     wisdom: 0,
   };
 
+  hitPointBonus = 0;
+
   clone(): HighElf {
     return new HighElf();
   }

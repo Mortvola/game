@@ -109,7 +109,8 @@ export const generateAbilityScores = (race: Race, charClass: CharacterClass): Ab
   let index = 0;
   for (const [key, value] of Object.entries(abilities)) {
     if (value === 0) {
-      abilities[key as keyof AbilityScores] = rolls[index] + race.abilityIncrease[key as keyof AbilityScores]
+      const abilityKey = key as keyof AbilityScores;
+      abilities[abilityKey] = rolls[index] + race.abilityIncrease[abilityKey]
       index += 1;
     }
   }

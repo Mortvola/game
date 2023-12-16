@@ -1,0 +1,14 @@
+.abilities {
+  width: max-content;
+
+  >div {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+
+    >div:nth-child(2) {
+      text-align: end;
+    }
+  }
+}

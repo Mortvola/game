@@ -15,6 +15,8 @@ class WoodElf extends Elf {
     wisdom: 1,
   };
 
+  hitPointBonus = 0;
+
   clone(): WoodElf {
     return new WoodElf();
   }

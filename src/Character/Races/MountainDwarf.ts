@@ -12,6 +12,8 @@ class MountainDwarf extends Dwarf {
     wisdom: 0,
   };
 
+  hitPointBonus = 0;
+
   clone(): MountainDwarf {
     return new MountainDwarf();
   }

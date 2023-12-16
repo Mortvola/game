@@ -17,6 +17,8 @@ class Elf implements Race {
     wisdom: 0,
   };
 
+  hitPointBonus = 0;
+
   clone(): Elf {
     return new Elf();
   }

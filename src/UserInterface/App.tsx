@@ -1,12 +1,12 @@
 import React from 'react';
 import './App.scss';
-import { gpu, renderer } from './Renderer';
-import { audioContext } from './Audio';
+import { gpu, renderer } from '../Renderer';
+import { audioContext } from '../Audio';
 import { vec4 } from 'wgpu-matrix';
-import { EpisodeInfo, WorkerMessage, worker } from './Character/Actor';
-import RewardChart from './Chart';
+import { EpisodeInfo, WorkerMessage, worker } from '../Character/Actor';
+import RewardChart from '../Chart';
 import DefineParties from './DefineParties';
-import Character from './Character/Character';
+import Character from '../Character/Character';
 
 type DiretionKeys = {
   left: number,

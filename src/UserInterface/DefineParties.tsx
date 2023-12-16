@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './DefineParties.module.scss'
-import Character from './Character/Character';
-import CharacterDetails from './CharacterDetails';
+import Character from '../Character/Character';
+import CharacterDetails from './Details/CharacterDetails';
 import PartyList from './PartyList';
 
 type PropsType = {

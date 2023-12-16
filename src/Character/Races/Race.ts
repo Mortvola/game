@@ -17,6 +17,8 @@ export interface Race {
 
   abilityIncrease: AbilityScores;
 
+  hitPointBonus: number;
+  
   size: Size;
 
   generateName(): string;

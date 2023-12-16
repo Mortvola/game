@@ -1,5 +1,5 @@
 import React from 'react';
-import Character from './Character/Character';
+import Character from '../Character/Character';
 
 type PropsType = {
   className?: string,

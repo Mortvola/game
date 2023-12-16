@@ -17,6 +17,8 @@ class Dwarf implements Race {
     wisdom: 0,
   };
 
+  hitPointBonus = 0;
+
   clone(): Dwarf {
     return new Dwarf();
   }

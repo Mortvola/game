@@ -12,6 +12,8 @@ class LightfootHalfling extends Halfling {
     wisdom: 0,
   };
 
+  hitPointBonus = 0;
+
   clone(): LightfootHalfling {
     return new LightfootHalfling();
   }
