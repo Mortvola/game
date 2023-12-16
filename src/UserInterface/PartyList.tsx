@@ -2,7 +2,7 @@ import React from 'react';
 import CharacterEntry from './CharacterEntry';
 import styles from './PartyList.module.scss';
 import Character from '../Character/Character';
-import AddActor from './AddActor';
+import AddCharactor from './AddCharactor';
 import { Race } from '../Character/Races/Race';
 import Dwarf from '../Character/Races/Dwarf';
 import Elf from '../Character/Races/Elf';
@@ -167,7 +167,7 @@ const PartyList: React.FC<PropsType> = ({
           ))
         }
       </div>
-      <AddActor show={showAddDialog} onHide={handleHideDialog} onSave={handleSave} />
+      <AddCharactor show={showAddDialog} onHide={handleHideDialog} onSave={handleSave} />
     </div>
   )
 }

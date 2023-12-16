@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './AddActor.module.scss';
+import styles from './AddCharactor.module.scss';
 import SelectClass from './SelectClass';
 import SelectRace from './SelectRace';
 import Fighter from '../Character/Classes/Fighter';
@@ -25,7 +25,7 @@ type PropsType = {
   onSave: (race: string, charClass: string, weapons: Weapon[], armor: Armor[]) => void,
 }
 
-const AddActor: React.FC<PropsType> = ({
+const AddCharactor: React.FC<PropsType> = ({
   show,
   onHide,
   onSave,
@@ -139,4 +139,4 @@ const AddActor: React.FC<PropsType> = ({
   return null;
 }
 
-export default AddActor;
+export default AddCharactor;
