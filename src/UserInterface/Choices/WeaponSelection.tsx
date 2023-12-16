@@ -1,5 +1,6 @@
 import React from 'react';
 import Weapon, { WeaponName, WeaponType, getWeapon, weapons as weaponList } from '../../Character/Equipment/Weapon';
+import styles from './StartingEquipment.module.scss';
 
 type PropsType = {
   weaponTypes: WeaponType[],
@@ -20,7 +21,7 @@ const WeaponSelection: React.FC<PropsType> = ({
   }
 
   return (
-    <select value={weaponChoice2.name} onChange={handleChoiceChange2}>
+    <select className={styles.selector} value={weaponChoice2.name} onChange={handleChoiceChange2}>
       {
         weaponList
           .filter((w) => weaponTypes.includes(w.type))

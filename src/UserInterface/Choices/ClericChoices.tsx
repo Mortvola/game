@@ -2,7 +2,8 @@ import React from 'react';
 import ABSwitch from '../ABSwitch';
 import { WeaponType } from '../../Character/Equipment/Weapon';
 import { EquipmentChoices } from '../../Character/Classes/CharacterClass';
-import WeaponSelection2 from './WeaponSelection';
+import WeaponSelection from './WeaponSelection';
+import WeaponSelectionWrapper from './WeaponSelectionWrapper';
 
 type PropsType = {
   equipment: EquipmentChoices[],
@@ -37,11 +38,14 @@ const ClericChoices: React.FC<PropsType> = ({
         labels={['A light crossbow & 20 bolts', 'A simple weapon']}
         onChange={handleChoice3}
       />
-      <WeaponSelection2
-        weaponTypes={[WeaponType.Simple, WeaponType.SimpleRange]}
-        weapons={equipment[2].choices[1].weapons}
-        index={0}
-      />
+      <WeaponSelectionWrapper>
+        <div />
+        <WeaponSelection
+          weaponTypes={[WeaponType.Simple, WeaponType.SimpleRange]}
+          weapons={equipment[2].choices[1].weapons}
+          index={0}
+        />
+      </WeaponSelectionWrapper>
     </div>
   )
 }

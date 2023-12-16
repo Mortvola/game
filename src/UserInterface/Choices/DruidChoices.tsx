@@ -2,7 +2,8 @@ import React from 'react';
 import ABSwitch from '../ABSwitch';
 import { EquipmentChoices } from '../../Character/Classes/CharacterClass';
 import { WeaponType } from '../../Character/Equipment/Weapon';
-import WeaponSelection2 from './WeaponSelection';
+import WeaponSelection from './WeaponSelection';
+import WeaponSelectionWrapper from './WeaponSelectionWrapper';
 
 type PropsType = {
   equipment: EquipmentChoices[],
@@ -25,20 +26,26 @@ const DruidChoices: React.FC<PropsType> = ({
         labels={['A wooden shield', 'A simple weapon']}
         onChange={handleChoice1}
       />
-      <WeaponSelection2
-        weaponTypes={[WeaponType.Simple, WeaponType.SimpleRange]}
-        weapons={equipment[0].choices[1].weapons}
-        index={0}
-      />
+      <WeaponSelectionWrapper>
+        <div />
+        <WeaponSelection
+          weaponTypes={[WeaponType.Simple, WeaponType.SimpleRange]}
+          weapons={equipment[0].choices[1].weapons}
+          index={0}
+        />
+      </WeaponSelectionWrapper>
       <ABSwitch
         labels={['A scimitar', 'A simple melee weapon']}
         onChange={handleChoice2}
       />
-      <WeaponSelection2
-        weaponTypes={[WeaponType.Simple]}
-        weapons={equipment[1].choices[1].weapons}
-        index={0}
-      />
+      <WeaponSelectionWrapper>
+        <div />
+        <WeaponSelection
+          weaponTypes={[WeaponType.Simple]}
+          weapons={equipment[1].choices[1].weapons}
+          index={0}
+        />
+      </WeaponSelectionWrapper>
     </div>
   )
 }
