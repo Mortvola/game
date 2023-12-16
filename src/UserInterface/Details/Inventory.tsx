@@ -28,7 +28,10 @@ const Inventory: React.FC<PropsType> = ({
       <div>
         {
           character.armor.map((a) => (
-            <div>{a.name}</div>
+            <div className={styles.armor}>
+              <div>{a.name}</div>
+              <div>{a.armorClass}</div>
+            </div>
           ))
         }
       </div>

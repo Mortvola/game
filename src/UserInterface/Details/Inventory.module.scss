@@ -1,8 +1,16 @@
 .section {
   margin-bottom: 1rem;
+  border: gray thin solid;
+  border-radius: 4px;
+  padding: 0.25rem;
 }
 
 .weapon {
+  display: flex;
+  justify-content: space-between;
+}
+
+.armor {
   display: flex;
   justify-content: space-between;
 }
