@@ -40,8 +40,10 @@ class Bard extends CharacterClass {
         },
       ],
       other: {
+        label: 'Leather armor and a dagger',
         weapons: [getWeapon('Dagger')],
         armor: [getArmor('Leather')],
+        selections: [],
       },
     })
   }

@@ -17,3 +17,16 @@
 .selector {
   height: max-content;
 }
+
+.other {
+  display: grid;
+  flex-direction: column;
+
+  >div {
+    width: max-content;
+  }
+
+  >div:first-child {
+    font-weight: bold;
+  }
+}

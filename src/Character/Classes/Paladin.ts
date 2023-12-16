@@ -57,8 +57,10 @@ class Paladin extends CharacterClass {
         },
       ],
       other: {
+        label: 'Chain mail',
         weapons: [],
         armor: [getArmor('Chain mail')],
+        selections: [],
       },
     })
   }

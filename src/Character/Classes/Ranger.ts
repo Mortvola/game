@@ -57,8 +57,10 @@ class Ranger extends CharacterClass {
         },
       ],
       other: {
+        label: 'A longbow & 20 arrows',
         weapons: [getWeapon('Longbow')],
         armor: [],
+        selections: [],
       },
     })
   }

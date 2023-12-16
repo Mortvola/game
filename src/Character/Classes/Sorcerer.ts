@@ -34,8 +34,10 @@ class Sorcerer extends CharacterClass {
         },
       ],
       other: {
+        label: 'Two daggers',
         weapons: [getWeapon('Dagger'), getWeapon('Dagger')],
         armor: [],
+        selections: [],
       },
     })
   }

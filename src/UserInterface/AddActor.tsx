@@ -126,7 +126,7 @@ const AddActor: React.FC<PropsType> = ({
               <SelectClass onChange={handleSelectClass} />
             </label>
           </div>
-          <StartingEquipment equipment={equipment.equipmentChoices} />
+          <StartingEquipment startingEquipment={equipment} />
         </div>
         <div className={styles.footer}>
           <button type="button" onClick={handleCancelClick}>Cancel</button>

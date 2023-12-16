@@ -74,8 +74,10 @@ class Cleric extends CharacterClass {
         },
       ],
       other: {
+        label: 'A shield',
         weapons: [],
         armor: [getArmor('Shield')],
+        selections: [],
       },
     })
   }

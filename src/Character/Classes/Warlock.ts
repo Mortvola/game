@@ -34,8 +34,10 @@ class Warlock extends CharacterClass {
         },
       ],
       other: {
-        weapons: [getWeapon('Dagger'), getWeapon('Dagger'), getWeapon('Handaxe')],
+        label: 'Leather armor, two daggers and a simple weapon',
+        weapons: [getWeapon('Handaxe'), getWeapon('Dagger'), getWeapon('Dagger')],
         armor: [getArmor('Leather')],
+        selections: [[WeaponType.Simple, WeaponType.SimpleRange]],
       },
     })
   }

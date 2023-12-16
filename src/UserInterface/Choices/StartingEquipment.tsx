@@ -1,19 +1,42 @@
 import React from 'react';
-import { EquipmentChoices } from '../../Character/Classes/CharacterClass';
+import { StartingEquipment as StartingEquipomentTable } from '../../Character/Classes/CharacterClass';
 import EquipmentChoice from './EquipmentChoice';
+import WeaponSelection from './WeaponSelection';
+import styles from './StartingEquipment.module.scss';
 
 type PropsType = {
-  equipment: EquipmentChoices[],
+  startingEquipment: StartingEquipomentTable,
 }
 
 const StartingEquipment: React.FC<PropsType> = ({
-  equipment,
+  startingEquipment,
 }) => (
   <div>
     {
-      equipment.map((e) => (
+      startingEquipment.equipmentChoices.map((e) => (
         <EquipmentChoice equipment={e} />
       ))
+    }
+    {
+      startingEquipment.other.label !== ''
+        ? (
+          <div className={styles.other}>
+            <div>Plus...</div>
+            { startingEquipment.other.label }
+            <div>
+              {
+                startingEquipment.other.selections.map((s, index) => (
+                  <WeaponSelection
+                    weaponTypes={s}
+                    weapons={startingEquipment.other.weapons}
+                    index={index}
+                  />  
+                ))
+              }
+            </div>
+          </div>
+        )
+        : null
     }
   </div>
 )

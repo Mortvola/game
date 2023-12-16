@@ -33,8 +33,10 @@ class Wizard extends CharacterClass {
         },
       ],
       other: {
+        label: '',
         weapons: [],
         armor: [],
+        selections: [],
       },
     })
   }

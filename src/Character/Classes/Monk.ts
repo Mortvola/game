@@ -39,6 +39,7 @@ class Monk extends CharacterClass {
         },
       ],
       other: {
+        label: '10 darts',
         weapons: [
           getWeapon('Dart'),
           getWeapon('Dart'),
@@ -52,6 +53,7 @@ class Monk extends CharacterClass {
           getWeapon('Dart'),
         ],
         armor: [],
+        selections: [],
       },
     })
   }

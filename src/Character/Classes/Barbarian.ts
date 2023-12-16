@@ -55,8 +55,10 @@ class Barbarian extends CharacterClass {
         },
       ],
       other: {
+        label: 'Four javelins',
         weapons: [getWeapon('Javelin'), getWeapon('Javelin'), getWeapon('Javelin'), getWeapon('Javelin')],
         armor: [],
+        selections: [],
       },
     })
   }

@@ -51,8 +51,10 @@ class Druid extends CharacterClass {
         },
       ],
       other: {
+        label: 'Leather armor',
         weapons: [],
         armor: [getArmor('Leather')],
+        selections: [],
       },
     })
   }

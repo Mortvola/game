@@ -68,8 +68,10 @@ class Fighter extends CharacterClass {
         },
       ],
       other: {
+        label: '',
         weapons: [],
         armor: [],
+        selections: [],
       },
     })
   }

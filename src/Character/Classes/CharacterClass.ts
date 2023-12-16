@@ -39,7 +39,9 @@ export type Equipment = {
 }
 
 export type OtherEquipment = {
+  label: string,
   weapons: Weapon[],
+  selections: WeaponType[][],
   armor: Armor[]
 }
 

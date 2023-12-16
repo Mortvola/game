@@ -55,8 +55,10 @@ class Rogue extends CharacterClass {
         },
       ],
       other: {
+        label: 'Leather armor and two daggers',
         weapons: [getWeapon('Dagger'), getWeapon('Dagger')],
         armor: [getArmor('Leather')],
+        selections: [],
       },
     })
   }
