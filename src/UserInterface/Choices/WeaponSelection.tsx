@@ -1,28 +1,28 @@
 import React from 'react';
-import Weapon, { WeaponName, WeaponType, getWeapon, weapons } from '../../Character/Equipment/Weapon';
+import Weapon, { WeaponName, WeaponType, getWeapon, weapons as weaponList } from '../../Character/Equipment/Weapon';
 
 type PropsType = {
   weaponTypes: WeaponType[],
-  weapon: Weapon,
-  onChange: (weapon: Weapon) => void,
+  weapons: Weapon[],
+  index: number,
 }
 
 const WeaponSelection: React.FC<PropsType> = ({
   weaponTypes,
-  weapon,
-  onChange,
+  weapons,
+  index,
 }) => {
-  const [weaponChoice, setWeaponChoice] = React.useState<Weapon>(weapon)
-  const handleChoice2Change: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
+  const [weaponChoice2, setWeaponChoice2] = React.useState<Weapon>(weapons[index])
+  const handleChoiceChange2: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
     const weapon = getWeapon(event.target.value as WeaponName)
-    setWeaponChoice(weapon!);
-    onChange(weapon!)
+    setWeaponChoice2(weapon);
+    weapons[index] = weapon;
   }
 
   return (
-    <select value={weaponChoice.name} onChange={handleChoice2Change}>
+    <select value={weaponChoice2.name} onChange={handleChoiceChange2}>
       {
-        weapons
+        weaponList
           .filter((w) => weaponTypes.includes(w.type))
           .map((w) => (
             <option value={w.name}>{w.name}</option>

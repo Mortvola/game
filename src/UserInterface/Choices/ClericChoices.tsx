@@ -1,8 +1,8 @@
 import React from 'react';
 import ABSwitch from '../ABSwitch';
-import WeaponSelection from './WeaponSelection';
-import Weapon, { WeaponType } from '../../Character/Equipment/Weapon';
+import { WeaponType } from '../../Character/Equipment/Weapon';
 import { EquipmentChoices } from '../../Character/Classes/CharacterClass';
+import WeaponSelection2 from './WeaponSelection';
 
 type PropsType = {
   equipment: EquipmentChoices[],
@@ -23,12 +23,6 @@ const ClericChoices: React.FC<PropsType> = ({
     equipment[2].selection = value;
   }
 
-  const [weaponChoice, setWeaponChoice] = React.useState<Weapon>(equipment[2].choices[1].weapons[0])
-  const handleChoice1Change = (weapon: Weapon) => {
-    setWeaponChoice(weapon);
-    equipment[2].choices[1].weapons[0] = weapon;
-  }
-
   return (
     <div>
       <ABSwitch
@@ -43,10 +37,10 @@ const ClericChoices: React.FC<PropsType> = ({
         labels={['A light crossbow & 20 bolts', 'A simple weapon']}
         onChange={handleChoice3}
       />
-      <WeaponSelection
+      <WeaponSelection2
         weaponTypes={[WeaponType.Simple, WeaponType.SimpleRange]}
-        weapon={weaponChoice}
-        onChange={handleChoice1Change}
+        weapons={equipment[2].choices[1].weapons}
+        index={0}
       />
     </div>
   )

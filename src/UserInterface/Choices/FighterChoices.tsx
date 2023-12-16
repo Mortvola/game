@@ -1,8 +1,8 @@
 import React from 'react';
 import ABSwitch from '../ABSwitch';
 import { EquipmentChoices } from '../../Character/Classes/CharacterClass';
-import Weapon, { WeaponName, WeaponType, getWeapon, weapons } from '../../Character/Equipment/Weapon';
-import WeaponSelection from './WeaponSelection';
+import { WeaponType } from '../../Character/Equipment/Weapon';
+import WeaponSelection2 from './WeaponSelection';
 
 type PropsType = {
   equipment: EquipmentChoices[],
@@ -23,24 +23,6 @@ const FighterChoices: React.FC<PropsType> = ({
     equipment[2].selection = value;
   }
 
-  const [weaponChoice, setWeaponChoice] = React.useState<Weapon>(equipment[1].choices[0].weapons[0])
-  const handleChoice1Change = (weapon: Weapon) => {
-    setWeaponChoice(weapon);
-    equipment[1].choices[0].weapons[0] = weapon;
-  }
-
-  const [weaponChoice2, setWeaponChoice2] = React.useState<Weapon>(equipment[1].choices[1].weapons[0])
-  const handleChoice2Change = (weapon: Weapon) => {
-    setWeaponChoice2(weapon);
-    equipment[1].choices[1].weapons[0] = weapon;
-  }
-
-  const [weaponChoice3, setWeaponChoice3] = React.useState<Weapon>(equipment[1].choices[1].weapons[1])
-  const handleChoice3Change = (weapon: Weapon) => {
-    setWeaponChoice3(weapon);
-    equipment[1].choices[1].weapons[1] = weapon;
-  }
-
   return (
     <div>
       <ABSwitch
@@ -53,20 +35,20 @@ const FighterChoices: React.FC<PropsType> = ({
         value={equipment[1].selection}
         onChange={handleChoice2}
       />
-      <WeaponSelection
+      <WeaponSelection2
         weaponTypes={[WeaponType.Martial, WeaponType.MartialRange]}
-        weapon={weaponChoice}
-        onChange={handleChoice1Change}
+        weapons={equipment[1].choices[0].weapons}
+        index={0}
       />
-      <WeaponSelection
+      <WeaponSelection2
         weaponTypes={[WeaponType.Martial, WeaponType.MartialRange]}
-        weapon={weaponChoice2}
-        onChange={handleChoice2Change}
+        weapons={equipment[1].choices[1].weapons}
+        index={0}
       />
-      <WeaponSelection
+      <WeaponSelection2
         weaponTypes={[WeaponType.Martial, WeaponType.MartialRange]}
-        weapon={weaponChoice3}
-        onChange={handleChoice3Change}
+        weapons={equipment[1].choices[1].weapons}
+        index={1}
       />
       <ABSwitch
         labels={['A light crossbow & 20 bolts', 'Two handaxes']}
