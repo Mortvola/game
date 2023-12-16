@@ -1,5 +1,5 @@
 import { Abilities, abilityModifier } from "../../Dice";
-import { getWeapon } from "../Equipment/Weapon";
+import { WeaponType, getWeapon } from "../Equipment/Weapon";
 import { AbilityScores } from "../Races/AbilityScores";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
@@ -23,12 +23,16 @@ class Barbarian extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'A great axe',
               armor: [],
               weapons: [getWeapon('Greataxe')],
+              selections: []
             },
             {
+              label: 'A martial melee weapon',
               armor: [],
               weapons: [getWeapon('Shortsword')],
+              selections: [[WeaponType.Martial]]
             }
           ]
         },
@@ -36,12 +40,16 @@ class Barbarian extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'Two handaxes',
               weapons: [getWeapon('Handaxe'), getWeapon('Handaxe')],
               armor: [],
+              selections: []
             },
             {
+              label:  'A simple weapon',
               weapons: [getWeapon('Shortbow')],
               armor: [],
+              selections: [[WeaponType.Simple, WeaponType.SimpleRange]]
             },
           ]
         },

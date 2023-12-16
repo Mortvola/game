@@ -18,12 +18,16 @@ class Wizard extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'A quarterstaff',
               armor: [],
               weapons: [getWeapon('Quarterstaff')],
+              selections: [],
             },
             {
+              label:  'A dagger',
               armor: [],
               weapons: [getWeapon('Dagger')],
+              selections: [],
             },
           ]
         },

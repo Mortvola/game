@@ -1,6 +1,6 @@
 import { Abilities } from "../../Dice";
 import { getArmor } from "../Equipment/Armor";
-import { getWeapon } from "../Equipment/Weapon";
+import { WeaponType, getWeapon } from "../Equipment/Weapon";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Warlock extends CharacterClass {
@@ -19,12 +19,16 @@ class Warlock extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'A light crossbow & 20 bolts',
               armor: [],
               weapons: [getWeapon('Crossbow, light')],
+              selections: [],
             },
             {
+              label: 'A simple weapon',
               armor: [],
               weapons: [getWeapon('Dagger')],
+              selections: [[WeaponType.Simple, WeaponType.SimpleRange]],
             },
           ]
         },

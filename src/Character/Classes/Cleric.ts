@@ -1,6 +1,6 @@
 import { Abilities } from "../../Dice";
 import { getArmor } from "../Equipment/Armor";
-import { getWeapon } from "../Equipment/Weapon";
+import { WeaponType, getWeapon } from "../Equipment/Weapon";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Cleric extends CharacterClass {
@@ -19,12 +19,16 @@ class Cleric extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'A mace',
               armor: [],
               weapons: [getWeapon('Mace')],
+              selections: []
             },
             {
+              label:  'A warhammer',
               armor: [],
               weapons: [getWeapon('Warhammer')],
+              selections: []
             },
           ]
         },
@@ -32,16 +36,22 @@ class Cleric extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'Scale mail',
               armor: [getArmor('Scale mail')],
               weapons: [],
+              selections: []
             },
             {
+              label: 'Leather armor',
               armor: [getArmor('Leather')],
               weapons: [],
+              selections: []
             },
             {
+              label:  'Chain mail',
               armor: [getArmor('Chain mail')],
               weapons: [],
+              selections: []
             },
           ]
         },
@@ -49,12 +59,16 @@ class Cleric extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'A light crossbow & 20 bolts',
               armor: [],
               weapons: [getWeapon('Crossbow, light')],
+              selections: []
             },
             {
+              label:  'A simple weapon',
               armor: [],
               weapons: [getWeapon('Dagger')],
+              selections: [[WeaponType.Simple, WeaponType.SimpleRange]]
             },
           ]
         },

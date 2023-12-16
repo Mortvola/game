@@ -1,6 +1,6 @@
 import { Abilities } from "../../Dice";
 import { getArmor } from "../Equipment/Armor";
-import { getWeapon } from "../Equipment/Weapon";
+import { WeaponType, getWeapon } from "../Equipment/Weapon";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Bard extends CharacterClass {
@@ -19,16 +19,22 @@ class Bard extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'A rapier',
               armor: [],
               weapons: [getWeapon('Rapier')],
+              selections: []
             },
             {
+              label:  'A Longsword',
               armor: [],
               weapons: [getWeapon('Longsword')],
+              selections: []
             },
             {
+              label:  'A simple weapon',
               armor: [],
               weapons: [getWeapon('Sickle')],
+              selections: [[WeaponType.Simple, WeaponType.SimpleRange]]
             }
           ]
         },

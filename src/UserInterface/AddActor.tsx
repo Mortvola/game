@@ -2,20 +2,8 @@ import React from 'react';
 import styles from './AddActor.module.scss';
 import SelectClass from './SelectClass';
 import SelectRace from './SelectRace';
-import FighterChoices from './Choices/FighterChoices';
-import BarbarianChoices from './Choices/BarbarianChoices';
-import BardChoices from './Choices/BardChoices';
-import ClericChoices from './Choices/ClericChoices';
-import DruidChoices from './Choices/DruidChoices';
-import MonkChoices from './Choices/MonkChoices';
-import PaladinChoices from './Choices/PaladinChoices';
-import RangerChoices from './Choices/RangerChoices';
-import RogueChoices from './Choices/RogueChoices';
-import SorcererChoices from './Choices/SorcererChoices';
-import WarlockChoices from './Choices/WarlockChoices';
-import WizardChoices from './Choices/WizardChoices';
 import Fighter from '../Character/Classes/Fighter';
-import { StartingEquipment } from '../Character/Classes/CharacterClass';
+import { StartingEquipment as StartingEquipmentTable } from '../Character/Classes/CharacterClass';
 import Weapon from '../Character/Equipment/Weapon';
 import { Armor } from '../Character/Equipment/Armor';
 import Barbarian from '../Character/Classes/Barbarian';
@@ -29,6 +17,7 @@ import Rogue from '../Character/Classes/Rogue';
 import Sorcerer from '../Character/Classes/Sorcerer';
 import Warlock from '../Character/Classes/Warlock';
 import Wizard from '../Character/Classes/Wizard';
+import StartingEquipment from './Choices/StartingEquipment';
 
 type PropsType = {
   show: boolean,
@@ -43,7 +32,7 @@ const AddActor: React.FC<PropsType> = ({
 }) => {
   const [race, setRace] = React.useState<string>('Human')
   const [charClass, setCharClass] = React.useState<string>('Barbarian')
-  const [equipment, setEquipment] = React.useState<StartingEquipment>(Barbarian.startingEquipment());
+  const [equipment, setEquipment] = React.useState<StartingEquipmentTable>(Barbarian.startingEquipment());
 
   const handleSaveClick = () => {
     if (race && charClass) {
@@ -124,49 +113,6 @@ const AddActor: React.FC<PropsType> = ({
   }
 
   if (show) {
-    const renderChoices = () => {
-      switch(charClass) {
-        case "Barbarian":
-          return <BarbarianChoices equipment={equipment.equipmentChoices} />
-
-        case "Bard":
-          return <BardChoices equipment={equipment.equipmentChoices} />
-
-        case "Cleric":
-          return <ClericChoices equipment={equipment.equipmentChoices} />
-  
-        case "Druid":
-          return <DruidChoices equipment={equipment.equipmentChoices} />
-  
-        case "Fighter":
-          return <FighterChoices equipment={equipment.equipmentChoices} />
-
-        case "Monk":
-          return <MonkChoices equipment={equipment.equipmentChoices} />
-
-        case "Paladin":
-          return <PaladinChoices equipment={equipment.equipmentChoices} />
-
-        case "Ranger":
-          return <RangerChoices equipment={equipment.equipmentChoices} />
-
-        case "Rogue":
-          return <RogueChoices equipment={equipment.equipmentChoices} />
-
-        case "Sorcerer":
-          return <SorcererChoices equipment={equipment.equipmentChoices} />
-
-        case "Warlock":
-          return <WarlockChoices equipment={equipment.equipmentChoices} />
-
-        case "Wizard":
-          return <WizardChoices equipment={equipment.equipmentChoices} />
-
-        default:
-          return null;
-      }
-    }
-
     return (
       <div className={styles.dialog}>
         <div className={styles.body}>
@@ -180,9 +126,7 @@ const AddActor: React.FC<PropsType> = ({
               <SelectClass onChange={handleSelectClass} />
             </label>
           </div>
-          {
-            renderChoices()
-          }
+          <StartingEquipment equipment={equipment.equipmentChoices} />
         </div>
         <div className={styles.footer}>
           <button type="button" onClick={handleCancelClick}>Cancel</button>

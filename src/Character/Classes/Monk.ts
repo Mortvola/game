@@ -1,6 +1,6 @@
 import { Abilities, abilityModifier } from "../../Dice";
 import { getArmor } from "../Equipment/Armor";
-import { getWeapon } from "../Equipment/Weapon";
+import { WeaponType, getWeapon } from "../Equipment/Weapon";
 import { AbilityScores } from "../Races/AbilityScores";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
@@ -24,12 +24,16 @@ class Monk extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'A shortsword',
               armor: [],
               weapons: [getWeapon('Shortsword')],
+              selections: []
             },
             {
+              label:  'A simple weapon',
               armor: [],
               weapons: [getWeapon('Dagger')],
+              selections: [[WeaponType.Simple, WeaponType.SimpleRange]]
             },
           ]
         },

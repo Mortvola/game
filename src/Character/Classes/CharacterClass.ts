@@ -1,6 +1,6 @@
 import { Abilities, abilityModifier } from "../../Dice";
 import { Armor } from "../Equipment/Armor";
-import Weapon from "../Equipment/Weapon";
+import Weapon, { WeaponType } from "../Equipment/Weapon";
 import { AbilityScores } from "../Races/AbilityScores";
 
 class CharacterClass {
@@ -32,6 +32,13 @@ class CharacterClass {
 }
 
 export type Equipment = {
+  label: string,
+  weapons: Weapon[],
+  selections: WeaponType[][],
+  armor: Armor[],
+}
+
+export type OtherEquipment = {
   weapons: Weapon[],
   armor: Armor[]
 }
@@ -43,7 +50,7 @@ export type EquipmentChoices = {
 
 export type StartingEquipment = {
   equipmentChoices: EquipmentChoices[],
-  other: Equipment,
+  other: OtherEquipment,
 }
 
 export default CharacterClass;

@@ -19,12 +19,16 @@ class Rogue extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'A rapier',
               armor: [],
               weapons: [getWeapon('Rapier')],
+              selections: [],
             },
             {
+              label: 'A shortsword',
               armor: [],
               weapons: [getWeapon('Shortsword')],
+              selections: [],
             },
           ]
         },
@@ -32,16 +36,20 @@ class Rogue extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'A shortbow & 20 arrows',
               armor: [],
               weapons: [
                 getWeapon('Shortbow'),
               ],
+              selections: [],
             },
             {
+              label:  'A shortsword',
               armor: [],
               weapons: [
                 getWeapon('Shortsword'),
               ],
+              selections: [],
             },
           ]
         },

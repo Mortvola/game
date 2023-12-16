@@ -1,6 +1,6 @@
 import { Abilities } from "../../Dice";
 import { getArmor } from "../Equipment/Armor";
-import { getWeapon } from "../Equipment/Weapon";
+import { WeaponType, getWeapon } from "../Equipment/Weapon";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Ranger extends CharacterClass {
@@ -19,12 +19,16 @@ class Ranger extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'Scale mail',
               armor: [getArmor('Scale mail')],
               weapons: [],
+              selections: [],
             },
             {
+              label:  'Leather armor',
               armor: [getArmor('Leather')],
               weapons: [],
+              selections: [],
             },
           ]
         },
@@ -32,18 +36,22 @@ class Ranger extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'Two shortswords',
               armor: [],
               weapons: [
                 getWeapon('Shortsword'),
                 getWeapon('Shortsword'),
               ],
+              selections: [],
             },
             {
+              label:  'Two simple melee weapons',
               armor: [],
               weapons: [
                 getWeapon('Dagger'),
                 getWeapon('Handaxe'),
               ],
+              selections: [[WeaponType.Simple], [WeaponType.Simple]],
             },
           ]
         },

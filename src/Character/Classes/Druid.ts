@@ -1,6 +1,6 @@
 import { Abilities } from "../../Dice";
 import { getArmor } from "../Equipment/Armor";
-import { getWeapon } from "../Equipment/Weapon";
+import { WeaponType, getWeapon } from "../Equipment/Weapon";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Druid extends CharacterClass {
@@ -19,12 +19,16 @@ class Druid extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'A wooden shield',
               armor: [getArmor('Shield')],
               weapons: [],
+              selections: []
             },
             {
+              label:  'A simple weapon',
               armor: [],
               weapons: [getWeapon('Dagger')],
+              selections: [[WeaponType.Simple, WeaponType.SimpleRange]]
             },
           ]
         },
@@ -32,12 +36,16 @@ class Druid extends CharacterClass {
           selection: 0,
           choices: [
             {
+              label: 'A scimitar',
               armor: [],
               weapons: [getWeapon('Scimitar')],
+              selections: []
             },
             {
+              label:  'A simple melee weapon',
               armor: [],
               weapons: [getWeapon('Dagger')],
+              selections: [[WeaponType.Simple]]
             },
           ]
         },
