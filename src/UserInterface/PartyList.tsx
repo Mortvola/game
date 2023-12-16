@@ -29,6 +29,7 @@ import Warlock from '../Character/Classes/Warlock';
 import Wizard from '../Character/Classes/Wizard';
 import Weapon from '../Character/Equipment/Weapon';
 import { Armor } from '../Character/Equipment/Armor';
+import { getClass, getRace } from '../Character/Utilities';
 
 type PropsType = {
   party: Character[],
@@ -62,81 +63,8 @@ const PartyList: React.FC<PropsType> = ({
   const handleSave = (race: string, charClass: string, weapons: Weapon[], armor: Armor[]) => {
     setShowAddDialog(false);
 
-    let r: Race | null = null;
-
-    switch (race) {
-      case "Dwarf":
-        r = new Dwarf();
-        break;
-      case "Elf":
-        r = new Elf();
-        break;
-      case "Halfling":
-        r = new Halfling();
-        break;
-      case "HighElf":
-        r = new HighElf();
-        break;
-      case "HillDwarf":
-        r = new HillDwarf();
-        break;
-      case "Human":
-        r = new Human();
-        break;
-      case "LightfootHalfling":
-        r = new LightfootHalfling();
-        break;
-      case "MountainDwarf":
-        r = new MountainDwarf();
-        break;
-      case "StoutHalfling":
-        r = new StoutHalfling();
-        break;
-      case "WoodElf":
-        r = new WoodElf();
-        break;
-    }
-
-    let c: CharacterClass | null = null;
-
-    switch (charClass) {
-      case "Barbarian":
-        c = new Barbarian();
-        break;
-      case "Bard":
-        c = new Bard();
-        break;
-      case "Cleric":
-        c = new Cleric();
-        break;
-      case "Druid":
-        c = new Druid();
-        break;
-      case "Fighter":
-        c = new Fighter();
-        break;
-      case "Monk":
-        c = new Monk();
-        break;
-      case "Paladin":
-        c = new Paladin();
-        break;
-      case "Ranger":
-        c = new Ranger();
-        break;
-      case "Rogue":
-        c = new Rogue();
-        break;
-      case "Sorcerer":
-        c = new Sorcerer();
-        break;
-      case "Warlock":
-        c = new Warlock();
-        break;
-      case "Wizard":
-        c = new Wizard();
-        break;
-    }
+    const r = getRace(race);
+    const c = getClass(charClass);
 
     if (r && c) {
       const character = new Character(r, c, weapons, armor);

@@ -1,7 +1,7 @@
 import { abilityModifier, generateAbilityScores } from "../Dice";
 import CharacterClass from "./Classes/CharacterClass";
 import { Armor, ArmorType } from "./Equipment/Armor";
-import Weapon, { WeaponType, getWeapon } from "./Equipment/Weapon";
+import Weapon, { WeaponType } from "./Equipment/Weapon";
 import { AbilityScores } from "./Races/AbilityScores";
 import { Race } from "./Races/Race";
 

@@ -20,12 +20,12 @@ const SelectRace: React.FC<PropsType> = ({
       {/* <option value="Elf">Elf</option> */}
       {/* <option value="Halfling">Halfling</option> */}
       <option value="Human">Human</option>
-      <option value="HighElf">High Elf</option>
-      <option value="WoodElf">Wood Elf</option>
-      <option value="HillDwarf">Hill Dwarf</option>
-      <option value="MountainDwarf">Mountain Dwarf</option>
-      <option value="LightfootHalfling">Lightfoot Halfling</option>
-      <option value="StoutHalfling">Stout Halfling</option>
+      <option value="High Elf">High Elf</option>
+      <option value="Wood Elf">Wood Elf</option>
+      <option value="Hill Dwarf">Hill Dwarf</option>
+      <option value="Mountain Dwarf">Mountain Dwarf</option>
+      <option value="Lightfoot Halfling">Lightfoot Halfling</option>
+      <option value="Stout Halfling">Stout Halfling</option>
     </select>
   )
 }

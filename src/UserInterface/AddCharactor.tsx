@@ -123,7 +123,7 @@ const AddCharactor: React.FC<PropsType> = ({
             </label>
             <label>
               Class
-              <SelectClass onChange={handleSelectClass} />
+              <SelectClass value={charClass} onChange={handleSelectClass} />
             </label>
           </div>
           <StartingEquipment startingEquipment={equipment} />

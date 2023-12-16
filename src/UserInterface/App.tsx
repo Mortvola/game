@@ -7,6 +7,7 @@ import { EpisodeInfo, WorkerMessage, worker } from '../Character/Actor';
 import RewardChart from '../Chart';
 import DefineParties from './DefineParties';
 import Character from '../Character/Character';
+import { restoreParties, storeParties } from '../Character/CharactorStorage';
 
 type DiretionKeys = {
   left: number,
@@ -359,7 +360,15 @@ function App() {
     setShowPartyDefs(false);
     setParties(parties);
     renderer.setParties(parties);
+
+    storeParties(parties);
   }
+
+  React.useEffect(() => {
+    const parties = restoreParties();
+    setParties(parties);
+    renderer.setParties(parties);
+  }, [])
 
   return (
     <div className="App">

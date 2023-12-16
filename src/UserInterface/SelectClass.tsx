@@ -1,13 +1,15 @@
 import React from 'react';
 
 type PropsType = {
+  value: string,
   onChange: (charClass: string) => void,
 }
 
 const SelectClass: React.FC<PropsType> = ({
+  value,
   onChange,
 }) => {
-  const [charClass, setCharClass] = React.useState<string>('Barbarian')
+  const [charClass, setCharClass] = React.useState<string>(value)
 
   const handleClassChange: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
     setCharClass(event.target.value)
