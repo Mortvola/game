@@ -105,46 +105,48 @@ class Actor implements ActorInterface {
             })),
         };
 
-        action = result.action;
-        qLearn.finished = result.finished;
-  
-        // qLearn.actionHistory.push(action);
-      
-        let q = qStore.getValue(state, action);
-  
-        const bestAction = qStore.getBestAction(newState);
-        let maxQ = 0;
-  
-        if (bestAction !== null) {
-          maxQ = qStore.getValue(newState, bestAction);
-        }
-  
-        // const oldQ = q;
-  
-        qLearn.totalReward += reward;
-        if (reward > qLearn.maxReward) {
-          // console.log(`changed max reward from ${qLearn.maxReward} to ${reward}`)
-          qLearn.maxReward = reward
-        }  
-  
-        // if (reward !== 0 && reward === maxReward) {
-        //   console.log(`state: ${JSON.stringify(state.opponents)}/${actionType}, alpha: ${alpha}, reward: ${reward}, gamma: ${gamma}, maxQ: ${maxQ}, q: ${q}`)
-        // }
-  
-        const newQ = q + qLearn.alpha * (reward + qLearn.gamma * maxQ - q);
-        const qDelta = newQ - q;
-  
-        if (qLearn.maxQDelta === null || qDelta > qLearn.maxQDelta ) {
-          qLearn.maxQDelta = qDelta;
-        }
-      
-        q = newQ;
-  
-        // if (newQ !== oldQ) {
-        //   console.log(`change ${JSON.stringify(state.opponents)}/${actionType} from ${oldQ} to ${newQ}}`)
-        // }
+        if (!state.opponent.every((val, index) => val === newState.opponent[index])) {
+          action = result.action;
+          qLearn.finished = result.finished;
+    
+          // qLearn.actionHistory.push(action);
         
-        qStore.setValue(state, action, q);    
+          let q = qStore.getValue(state, action);
+    
+          const bestAction = qStore.getBestAction(newState);
+          let maxQ = 0;
+    
+          if (bestAction !== null) {
+            maxQ = qStore.getValue(newState, bestAction);
+          }
+    
+          // const oldQ = q;
+    
+          qLearn.totalReward += reward;
+          if (reward > qLearn.maxReward) {
+            // console.log(`changed max reward from ${qLearn.maxReward} to ${reward}`)
+            qLearn.maxReward = reward
+          }  
+    
+          // if (reward !== 0 && reward === maxReward) {
+          //   console.log(`state: ${JSON.stringify(state.opponents)}/${actionType}, alpha: ${alpha}, reward: ${reward}, gamma: ${gamma}, maxQ: ${maxQ}, q: ${q}`)
+          // }
+    
+          const newQ = q + qLearn.alpha * (reward + qLearn.gamma * maxQ - q);
+          const qDelta = newQ - q;
+    
+          if (qLearn.maxQDelta === null || qDelta > qLearn.maxQDelta ) {
+            qLearn.maxQDelta = qDelta;
+          }
+        
+          q = newQ;
+    
+          // if (newQ !== oldQ) {
+          //   console.log(`change ${JSON.stringify(state.opponents)}/${actionType} from ${oldQ} to ${newQ}}`)
+          // }
+          
+          qStore.setValue(state, action, q);
+        }
       }
   
       if (qLearn.finished) {

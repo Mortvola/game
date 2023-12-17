@@ -10,7 +10,7 @@ import Shot, { ShotData } from "../Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
 import { Action, ActionType, Key } from "../Worker/QStore";
-import { weaponDamage } from "./Equipment/Weapon";
+import { meanDamage, weaponDamage } from "./Equipment/Weapon";
 import Character from "./Character";
 import { attackRoll } from "../Dice";
 import { qStore, workerQueue } from "../WorkerQueue";
@@ -214,8 +214,8 @@ class Actor implements ActorInterface {
 
       case 'Weapon':
         sortedActors = otherTeam.map((a) => a).sort((a, b) => {
-          const damageA = ((a.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * a.character.equipped.meleeWeapon!.die[0].numDice
-          const damageB = ((b.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * b.character.equipped.meleeWeapon!.die[0].numDice
+          const damageA = meanDamage(a.character.equipped.meleeWeapon!);
+          const damageB = meanDamage(b.character.equipped.meleeWeapon!);
           return damageA - damageB
         });
         break;

@@ -118,4 +118,8 @@ export const weaponDamage = (weapon: Weapon, abilities: AbilityScores, twoHanded
   return roll + abilityModifier(abilities.strength);
 }
 
+export const meanDamage = (weapon: Weapon) => (
+  ((weapon.die[0].die + 1) / 2) * weapon.die[0].numDice
+)
+
 export default Weapon;
