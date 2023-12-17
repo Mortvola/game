@@ -1,4 +1,6 @@
+import Character from "./Character/Character";
 import CharacterClass from "./Character/Classes/CharacterClass";
+import Weapon, { WeaponType, weaponDamage } from "./Character/Equipment/Weapon";
 import { AbilityScores } from "./Character/Races/AbilityScores";
 import { Race } from "./Character/Races/Race";
 
@@ -28,29 +30,42 @@ export const abilityModifier = (score: number): number => (
   Math.floor((score - 10) / 2)
 )
 
-export const attackRoll = (armorClass: number, abilityScore: number): 'Miss' | 'Hit' | 'Critical' => {
+export const getProficiencyBonus = (level: number) => (
+  Math.trunc((level - 1) / 4) + 2
+)
+
+export const attackRoll = (attacker: Character, target: Character, weapon: Weapon, twhoHanded: boolean): number => {
   let roll = diceRoll(1, 20);
 
   if (roll === 1) {
-    return 'Miss';
+    // Critical miss
+    return 0;
   }
 
   if (roll === 20) {
-    return 'Critical';
+    // Critical hit
+    return weaponDamage(weapon, attacker.abilityScores, twhoHanded)
+      + weaponDamage(weapon, attacker.abilityScores, twhoHanded);
   }
 
+  // Add in the ability score modifier
+  let abilityScore = attacker.abilityScores.strength;
+  if ([WeaponType.MartialRange, WeaponType.SimpleRange].includes(weapon.type)) {
+    abilityScore = attacker.abilityScores.dexterity;
+  }
   roll += abilityModifier(abilityScore);
 
-  if (roll >= armorClass) {
-    return 'Hit';
+  // Add in the weapon proficiency bonus.
+  if (attacker.charClass.weaponProficiencies.filter((wp) => weapon.proficiencies.includes(wp)).length > 0) {
+    roll += getProficiencyBonus(attacker.charClass.level)
   }
 
-  return 'Miss';
-}
+  if (roll >= target.armorClass) {
+    return weaponDamage(weapon, attacker.abilityScores, twhoHanded);
+  }
 
-export const proficiencyBonus = (level: number) => (
-  Math.trunc((level - 1) / 4) + 2
-)
+  return 0;
+}
 
 export enum Abilities {
   strength = 'strength',

@@ -1,6 +1,6 @@
 import { Abilities, abilityModifier } from "../../Dice";
 import { Armor } from "../Equipment/Armor";
-import Weapon, { WeaponType } from "../Equipment/Weapon";
+import Weapon, { WeaponProficiencies, WeaponType } from "../Equipment/Weapon";
 import { AbilityScores } from "../Races/AbilityScores";
 
 class CharacterClass {
@@ -14,12 +14,21 @@ class CharacterClass {
 
   savingThrowsProficiencies: Abilities[];
 
-  constructor(name: string, level: number, hitDice: number, primaryAbilities: Abilities[], savingThrowsProficiencies: Abilities[]) {
+  weaponProficiencies: WeaponProficiencies[];
+
+  constructor(
+    name: string,
+    level: number,
+    hitDice: number,
+    primaryAbilities: Abilities[],
+    savingThrowsProficiencies: Abilities[],
+    weaponProficiencies: WeaponProficiencies[]) {
     this.name = name;
     this.hitDice = hitDice;
     this.level = level;
     this.primaryAbilities = primaryAbilities;
     this.savingThrowsProficiencies = savingThrowsProficiencies;
+    this.weaponProficiencies = weaponProficiencies;
   }
 
   unarmoredDefence(abilityScores: AbilityScores) {

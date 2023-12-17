@@ -98,7 +98,7 @@ class QStore {
     else {
       const actionKey = JSON.stringify(action);
       this.store.set(key, (new Map<string, number>()).set(actionKey, value))
-      console.log(`added state, number of states: ${this.store.size}`)
+      // console.log(`added state, number of states: ${this.store.size}`)
     }
   }
 }

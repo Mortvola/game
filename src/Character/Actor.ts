@@ -10,7 +10,7 @@ import Shot, { ShotData } from "../Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
 import { Action, ActionType, Key } from "../Worker/QStore";
-import { meanDamage, weaponDamage } from "./Equipment/Weapon";
+import { meanDamage } from "./Equipment/Weapon";
 import Character from "./Character";
 import { attackRoll } from "../Dice";
 import { qStore, workerQueue } from "../WorkerQueue";
@@ -250,15 +250,8 @@ class Actor implements ActorInterface {
         action = qStore.getBestAction(state);
 
         if (action === null) {
-          console.log(`No best action for ${JSON.stringify(state)}`)
-          // worker.postMessage({
-          //   type: 'ammend',
-          //   parties: characterStorageParties(world.participants.parties),
-          // });
+          // console.log(`No best action for ${JSON.stringify(state)}`)
           workerQueue.update(world.participants.parties)
-        }
-        else {
-          console.log(`${action.type}, ${action.opponent}`)
         }
       }
 
@@ -365,31 +358,25 @@ class Actor implements ActorInterface {
 
     const removedActors: Actor[] = [];
 
-    if (this.character.equipped.meleeWeapon) {
-      const roll = attackRoll(targetActor.character.armorClass, this.character.abilityScores.dexterity);
+    const weapon = this.character.equipped.meleeWeapon;
 
-      if (roll === 'Hit' || roll === 'Critical') {
-        let damage = weaponDamage(this.character.equipped.meleeWeapon, this.character.abilityScores, false);
-  
-        if (roll === 'Critical') {
-          damage = weaponDamage(this.character.equipped.meleeWeapon, this.character.abilityScores, false);
+    if (weapon) {
+      const damage = attackRoll(this.character, targetActor.character, weapon, false);
+
+      targetActor.character.hitPoints -= damage;
+
+      if (targetActor.character.hitPoints <= 0) {
+        targetActor.character.hitPoints = 0;
+
+        if (!world.animate) {
+          world.participants.remove(targetActor);
+          removedActors.push(targetActor);
+          world.collidees.remove(targetActor);
+          targetActor.removeFromScene();
+          world.scene.removeNode(targetActor.mesh);
+          world.scene.removeNode(targetActor.circle);    
         }
-  
-        targetActor.character.hitPoints -= damage;
-  
-        if (targetActor.character.hitPoints <= 0) {
-          targetActor.character.hitPoints = 0;
-  
-          if (!world.animate) {
-            world.participants.remove(targetActor);
-            removedActors.push(targetActor);
-            world.collidees.remove(targetActor);
-            targetActor.removeFromScene();
-            world.scene.removeNode(targetActor.mesh);
-            world.scene.removeNode(targetActor.circle);    
-          }
-        }
-      }  
+      }
     }
 
     return {

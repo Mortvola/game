@@ -5,7 +5,10 @@ import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Paladin extends CharacterClass {
   constructor(level = 1) {
-    super('Paladin', level, 10, [Abilities.strength, Abilities.charisma], [Abilities.wisdom, Abilities.charisma])
+    super(
+      'Paladin', level, 10, [Abilities.strength, Abilities.charisma], [Abilities.wisdom, Abilities.charisma],
+      ['Simple Weapons', 'Martial Weapons']
+    )
   }
 
   clone(): Paladin {

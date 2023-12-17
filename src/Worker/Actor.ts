@@ -166,23 +166,17 @@ class Actor implements ActorInterface {
 
     const removedActors: ActorInterface[] = [];
 
-    if (this.character.equipped.meleeWeapon) {
-      const roll = attackRoll(targetActor.character.armorClass, this.character.abilityScores.dexterity);
+    const weapon = this.character.equipped.meleeWeapon;
 
-      if (roll === 'Hit' || roll === 'Critical') {
-        let damage = weaponDamage(this.character.equipped.meleeWeapon, this.character.abilityScores, false);
+    if (weapon) {
+      const damage = attackRoll(this.character, targetActor.character, weapon, false);
+
+      targetActor.character.hitPoints -= damage;
+
+      if (targetActor.character.hitPoints <= 0) {
+        targetActor.character.hitPoints = 0;
   
-        if (roll === 'Critical') {
-          damage = weaponDamage(this.character.equipped.meleeWeapon, this.character.abilityScores, false);
-        }
-
-        targetActor.character.hitPoints -= damage;
-
-        if (targetActor.character.hitPoints <= 0) {
-          targetActor.character.hitPoints = 0;
-    
-          removedActors.push(targetActor);
-        }
+        removedActors.push(targetActor);
       }
     }
 

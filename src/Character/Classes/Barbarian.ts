@@ -5,7 +5,10 @@ import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Barbarian extends CharacterClass {
   constructor(level = 1) {
-    super('Barbarian', level, 12, [Abilities.strength, Abilities.constitution], [Abilities.strength, Abilities.constitution])
+    super(
+      'Barbarian', level, 12, [Abilities.strength, Abilities.constitution], [Abilities.strength, Abilities.constitution],
+      ['Simple Weapons', 'Martial Weapons']
+    )
   }
 
   unarmoredDefence(abilityScores: AbilityScores) {

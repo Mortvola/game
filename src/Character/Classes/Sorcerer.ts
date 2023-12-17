@@ -1,11 +1,13 @@
 import { Abilities } from "../../Dice";
-import { getArmor } from "../Equipment/Armor";
 import { WeaponType, getWeapon } from "../Equipment/Weapon";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Sorcerer extends CharacterClass {
   constructor(level = 1) {
-    super('Sorcerer', level, 6, [Abilities.charisma], [Abilities.constitution, Abilities.charisma])
+    super(
+      'Sorcerer', level, 6, [Abilities.charisma], [Abilities.constitution, Abilities.charisma],
+      ['Daggers', 'Darts', 'Slings', 'Quarterstaffs', 'Light Crossbows']
+    )
   }
 
   clone(): Sorcerer {

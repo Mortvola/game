@@ -5,7 +5,10 @@ import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Rogue extends CharacterClass {
   constructor(level = 1) {
-    super('Rogue', level, 8, [Abilities.dexterity], [Abilities.dexterity, Abilities.intelligence])
+    super(
+      'Rogue', level, 8, [Abilities.dexterity], [Abilities.dexterity, Abilities.intelligence],
+      ['Simple Weapons', 'Hand Crossbows', 'Longswords', 'Rapiers', 'Shortswords']
+    )
   }
 
   clone(): Rogue {

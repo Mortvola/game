@@ -4,7 +4,10 @@ import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Wizard extends CharacterClass {
   constructor(level = 1) {
-    super('Wizard', level, 6, [Abilities.intelligence], [Abilities.intelligence, Abilities.wisdom])
+    super(
+      'Wizard', level, 6, [Abilities.intelligence], [Abilities.intelligence, Abilities.wisdom],
+      ['Daggers', 'Darts', 'Slings', 'Quarterstaffs', 'Light Crossbows']
+    )
   }
 
   clone(): Wizard {

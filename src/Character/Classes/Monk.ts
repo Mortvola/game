@@ -6,7 +6,10 @@ import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Monk extends CharacterClass {
   constructor(level = 1) {
-    super('Monk', level, 8, [Abilities.dexterity, Abilities.wisdom], [Abilities.strength, Abilities.dexterity])
+    super(
+      'Monk', level, 8, [Abilities.dexterity, Abilities.wisdom], [Abilities.strength, Abilities.dexterity],
+      ['Simple Weapons', 'Shortswords']
+    )
   }
 
   unarmoredDefence(abilityScores: AbilityScores) {

@@ -5,7 +5,10 @@ import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Fighter extends CharacterClass {
   constructor(level = 1) {
-    super('Fighter', level, 10, [Abilities.strength, Abilities.constitution], [Abilities.strength, Abilities.constitution])
+    super(
+      'Fighter', level, 10, [Abilities.strength, Abilities.constitution], [Abilities.strength, Abilities.constitution],
+      ['Simple Weapons', 'Martial Weapons']
+    )
   }
 
   clone(): Fighter {

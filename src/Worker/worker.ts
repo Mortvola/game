@@ -24,8 +24,6 @@ type AmmendMessage = {
 let qStore = new QStore();
 
 self.onmessage = (event: MessageEvent<BaseMessage>) => {
-  console.log(`recvd ${event.data.type}`)
-
   switch (event.data.type) {
     case 'start': {
       const parties = (event.data as StartMessage).parties.map((p) => (

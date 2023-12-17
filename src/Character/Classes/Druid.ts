@@ -5,7 +5,10 @@ import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Druid extends CharacterClass {
   constructor(level = 1) {
-    super('Druid', level, 8, [Abilities.wisdom], [Abilities.intelligence, Abilities.wisdom])
+    super(
+      'Druid', level, 8, [Abilities.wisdom], [Abilities.intelligence, Abilities.wisdom],
+      ['Clubs', 'Daggers', 'Darts', 'Javelins', 'Maces', 'Quarterstaffs', 'Scimitars', 'Sickles', 'Slings', 'Spears']
+    )
   }
 
   clone(): Druid {
