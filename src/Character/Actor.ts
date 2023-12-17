@@ -5,7 +5,7 @@ import SceneNode from "../Drawables/SceneNode";
 import { anglesOfLaunch, degToRad, minimumVelocity, timeToTarget } from "../Math";
 import Circle from "../Drawables/Circle";
 import RenderPass from "../RenderPass";
-import { ActorInterface } from "../ActorInterface";
+import { ActorInterface, ActorOnFinishCallback } from "../ActorInterface";
 import Shot, { ShotData } from "../Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
@@ -193,36 +193,30 @@ class Actor implements ActorInterface {
     const epsilon = 0.02; // Probability of a random action
 
     if (action === null || Math.random() < epsilon) {
-      const actionType = Math.trunc(Math.random() * 3);
-
       action = {
-        type: ['HitPoints', 'ArmorClass', 'Weapon'][actionType] as ActionType,
+        type: 'HitPoints',
         opponent: Math.trunc(Math.random() * otherTeam.length),
       }
     }
 
     let sortedActors: Actor[] = [];
 
-    switch (action.type) {
-      case 'HitPoints':
-        sortedActors = otherTeam.map((a) => a).sort((a, b) => a.character.hitPoints - b.character.hitPoints);
-        break;
+    sortedActors = otherTeam.map((a) => a).sort((a, b) => {
+      if (a.character.hitPoints === b.character.hitPoints) {
+        // hit points are equal, sort by armore class
 
-      case 'ArmorClass':
-        sortedActors = otherTeam.map((a) => a).sort((a, b) => a.character.armorClass - b.character.armorClass);
-        break;
-
-      case 'Weapon':
-        sortedActors = otherTeam.map((a) => a).sort((a, b) => {
-          const damageA = meanDamage(a.character.equipped.meleeWeapon!);
-          const damageB = meanDamage(b.character.equipped.meleeWeapon!);
+        if (a.character.armorClass === b.character.armorClass) {
+          // armor classes are equal so sort by weapon damage
+          const damageA = ((a.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * a.character.equipped.meleeWeapon!.die[0].numDice
+          const damageB = ((b.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * b.character.equipped.meleeWeapon!.die[0].numDice
           return damageA - damageB
-        });
-        break;
+        }
 
-      default:
-        console.log('action type not handled')
-    }
+        return a.character.armorClass - b.character.armorClass;
+      }
+
+      return a.character.hitPoints - b.character.hitPoints
+    });
 
     const target = sortedActors[action.opponent];
     const result = this.attack(target, timestamp, world);
@@ -233,7 +227,7 @@ class Actor implements ActorInterface {
   chooseAction(timestamp: number, world: WorldInterface): Actor[] {
     let removedActors: Actor[] = [];
   
-    const otherTeam = world.participants.participants[this.team ^ 1];
+    const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
     
     if (otherTeam.length > 0) {
       let action: Action | null = null;
@@ -250,12 +244,15 @@ class Actor implements ActorInterface {
         action = qStore.getBestAction(state);
 
         if (action === null) {
-          // console.log(`No best action for ${JSON.stringify(state)}`)
-          workerQueue.update(world.participants.parties)
+          workerQueue.update(state, world.participants.parties)
         }
       }
 
       removedActors = this.takeAction(action, otherTeam, timestamp, world);
+      this.state = States.attacking;
+    }
+    else {
+      this.state = States.postAttack;
     }
 
     return removedActors;
@@ -264,43 +261,49 @@ class Actor implements ActorInterface {
   update(elapsedTime: number, timestamp: number, world: WorldInterface): ActorInterface[] {
     let removedActors: ActorInterface[] = [];
 
-    this.move(elapsedTime)
+    if (this.character.hitPoints > 0) {
+      this.move(elapsedTime)
 
-    if (world.participants.activeActor === this) {
-      // if (this.actionsLeft) {
-        if (world.animate) {
-          if (this.pause && this.pause.startTime + this.pause.duration > timestamp) {
-            return [];
+      if (world.participants.activeActor === this) {
+        // if (this.actionsLeft) {
+          if (world.animate) {
+            if (this.pause && this.pause.startTime + this.pause.duration > timestamp) {
+              return [];
+            }
+
+            switch (this.state) {
+              case States.idle:
+                break;
+      
+              case States.waitingForCamera:
+                if (this.actionsLeft) {
+                  removedActors = this.chooseAction(timestamp, world);
+                }
+                else {
+                  this.state = States.idle;
+                }
+      
+                break;
+      
+              case States.attacking:
+                break;
+      
+              case States.postAttack:
+                world.endTurn2(timestamp);  
+                break;
+            }  
           }
-
-          switch (this.state) {
-            case States.idle:
-              break;
-    
-            case States.waitingForCamera:
-              if (this.actionsLeft) {
-                removedActors = this.chooseAction(timestamp, world);
-                this.state = States.attacking;
-              }
-              else {
-                this.state = States.idle;
-              }
-    
-              break;
-    
-            case States.attacking:
-              break;
-    
-            case States.postAttack:
-              world.endTurn2(timestamp);  
-              break;
-          }  
-        }
-        else {
-          removedActors = this.chooseAction(timestamp, world);
-          world.endTurn2(timestamp);
-        }
-      // }
+          else {
+            removedActors = this.chooseAction(timestamp, world);
+            world.endTurn2(timestamp);
+          }
+        // }
+      }
+    }
+    else {
+      if (world.participants.activeActor === this) {
+        world.endTurn2(timestamp);
+      }
     }
 
     return removedActors;
@@ -317,13 +320,19 @@ class Actor implements ActorInterface {
       startTime: timestamp,
     };
 
-    let onFinish = (timestamp: number) => {}
+    let onFinish: ActorOnFinishCallback = (timestamp: number) => {
+      throw new Error('not implemented.')
+    }
 
     if (this.automated) {
       onFinish = (timestamp: number) => {
         this.state = States.postAttack;
         // this.pause = { startTime: timestamp, duration: 3000 }
         this.pause = { startTime: timestamp, duration: 0 }
+
+        if (targetActor.character.hitPoints <= 0) {
+          world.removeActors.push(targetActor);
+        }
       }
     }
 
@@ -367,6 +376,8 @@ class Actor implements ActorInterface {
 
       if (targetActor.character.hitPoints <= 0) {
         targetActor.character.hitPoints = 0;
+
+        // console.log(`Party ${targetActor.team}: ${targetActor.character.name} the ${targetActor.character.charClass.name} died`);
 
         if (!world.animate) {
           world.participants.remove(targetActor);

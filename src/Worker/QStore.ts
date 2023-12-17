@@ -25,7 +25,21 @@ class QStore {
 
     const sorted = state.opponent
       .filter((a) => a.hitPoints > 0)
-      .map((a) => a).sort((a, b) => a.hitPoints - b.hitPoints);
+      .map((a) => a)
+      .sort((a, b) => {
+        if (a.hitPoints === b.hitPoints) {
+          // hit points are equal, sort by armore class
+
+          if (a.armorClass === b.armorClass) {
+            // armor classes are equal so sort by weapon damage
+            return a.weapon - b.weapon;
+          }
+
+          return a.armorClass - b.armorClass;
+        }
+
+        return a.hitPoints - b.hitPoints
+      });
 
     if (sorted.length > 0) {
       let value = 0;

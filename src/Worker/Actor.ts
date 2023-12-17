@@ -1,7 +1,6 @@
-import { weaponDamage } from "../Character/Equipment/Weapon";
 import { ActorInterface, EnvironmentInterface } from "./Interfaces";
 import QLearn from "./QLearn";
-import QStore, { Action, ActionType, Key } from "./QStore";
+import QStore, { Action, Key } from "./QStore";
 import Character from "../Character/Character";
 import { attackRoll } from "../Dice";
 
@@ -24,36 +23,30 @@ class Actor implements ActorInterface {
     qLearn: QLearn,
   ): { removedActors: ActorInterface[], reward: number, finished: boolean, action: Action } {
     if (action === null || Math.random() < qLearn.rho) {
-      const actionType = Math.trunc(Math.random() * 3);
-
       action = {
-        type: ['HitPoints', 'ArmorClass', 'Weapon'][actionType] as ActionType,
+        type: 'HitPoints',
         opponent: Math.trunc(Math.random() * otherTeam.length),
       }
     }
 
     let sortedActors: ActorInterface[] = [];
 
-    switch (action.type) {
-      case 'HitPoints':
-        sortedActors = otherTeam.map((a) => a).sort((a, b) => a.character.hitPoints - b.character.hitPoints);
-        break;
+    sortedActors = otherTeam.map((a) => a).sort((a, b) => {
+      if (a.character.hitPoints === b.character.hitPoints) {
+        // hit points are equal, sort by armore class
 
-      case 'ArmorClass':
-        sortedActors = otherTeam.map((a) => a).sort((a, b) => a.character.armorClass - b.character.armorClass);
-        break;
-
-      case 'Weapon':
-        sortedActors = otherTeam.map((a) => a).sort((a, b) => {
+        if (a.character.armorClass === b.character.armorClass) {
+          // armor classes are equal so sort by weapon damage
           const damageA = ((a.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * a.character.equipped.meleeWeapon!.die[0].numDice
           const damageB = ((b.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * b.character.equipped.meleeWeapon!.die[0].numDice
           return damageA - damageB
-        });
-        break;
+        }
 
-      default:
-        console.log('action type not handled')
-    }
+        return a.character.armorClass - b.character.armorClass;
+      }
+
+      return a.character.hitPoints - b.character.hitPoints
+    });
 
     const target = sortedActors[action.opponent];
     const result = this.attack(target, environment);
@@ -82,11 +75,12 @@ class Actor implements ActorInterface {
       }
       else {
         const state: Key = {
-          opponent: otherTeam.map((t) => ({
-            hitPoints: t.character.hitPoints,
-            weapon: ((t.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * t.character.equipped.meleeWeapon!.die[0].numDice,
-            armorClass: t.character.armorClass,
-        })),
+          opponent: environment.teams[this.team ^ 1]
+            .map((t) => ({
+              hitPoints: t.character.hitPoints,
+              weapon: ((t.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * t.character.equipped.meleeWeapon!.die[0].numDice,
+              armorClass: t.character.armorClass,
+            })),
         };
 
         let action = qStore.getBestAction(state);

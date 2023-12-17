@@ -71,6 +71,8 @@ class Renderer implements WorldInterface {
 
   actors: ActorInterface[] = [];
 
+  removeActors: ActorInterface[] = [];
+
   shot: Mesh;
 
   lights: Light[] = [];
@@ -224,6 +226,26 @@ class Renderer implements WorldInterface {
         }
       }
     }
+
+    for (const removedActor of this.removeActors) {
+      const index = this.actors.findIndex((a) => a === removedActor);
+
+      if (index !== -1) {
+        this.actors = [
+          ...this.actors.slice(0, index),
+          ...this.actors.slice(index + 1),
+        ];
+      }
+
+      this.participants.remove(removedActor as Actor);
+
+      this.collidees.remove(removedActor as Actor);
+      (removedActor as Actor).removeFromScene();
+      this.scene.removeNode((removedActor as Actor).mesh);
+      this.scene.removeNode((removedActor as Actor).circle);    
+    }
+
+    this.removeActors = [];
   }
 
   async prepareTeams() {
@@ -280,6 +302,7 @@ class Renderer implements WorldInterface {
           const elapsedTime = (timestamp - this.previousTimestamp) * 0.001;
 
           if (this.participants.state === ParticipantsState.needsPrep) {
+            console.log('starting new round');
             this.participants.state = ParticipantsState.preparing;
             this.prepareTeams()
           }

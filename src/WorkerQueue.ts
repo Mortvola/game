@@ -1,6 +1,6 @@
 import Character from "./Character/Character";
 import { CharacterStorage, characterStorageParties } from "./Character/CharacterStorage";
-import QStore, { QTable } from "./Worker/QStore";
+import QStore, { Key, QTable } from "./Worker/QStore";
 
 export const qStore = new QStore();
 
@@ -21,7 +21,10 @@ worker.addEventListener('message', (evt: MessageEvent<WorkerMessage>) => {
 type State = 'Idle' | 'Learning';
 
 class WorkerQueue {
-  queue: CharacterStorage[][][] = [];
+  queue: {
+    state: Key,
+    parties: CharacterStorage[][]
+  }[] = [];
 
   state: State = 'Idle';
 
@@ -34,32 +37,62 @@ class WorkerQueue {
     this.state = 'Learning';
   }
 
-  update(parties: Character[][]) {
+  update(state: Key, parties: Character[][]) {
+    const storageParties = characterStorageParties(parties);
+
+    for (let i = 0; i < storageParties.length; i += 1) {
+      for (let j = 0; j < storageParties[i].length; j += 1) {
+        storageParties[i][j].maxHitPoints = parties[i][j].hitPoints;
+      }
+    }
+
     if (this.state === 'Idle') {
       worker.postMessage({
         type: 'ammend',
-        parties: characterStorageParties(parties),
+        parties: storageParties,
         store: qStore.store,
       });
   
       this.state = 'Learning';
     }
     else {
-      this.queue.push(characterStorageParties(parties))
+      const found = this.queue.some((q) => (
+        q.state.opponent.every((a, index) => (
+          a.hitPoints === state.opponent[index]?.hitPoints
+          && a.armorClass === state.opponent[index]?.armorClass
+          && a.weapon === state.opponent[index]?.weapon
+        ))
+      ))
+
+      if (!found) {
+        this.queue.push({
+          state,
+          parties: storageParties,
+        })  
+
+        // console.log(`queue length: ${this.queue.length}`)
+      }
+      // else {
+      //   console.log('duplicate state in queue')
+      // }
     }
   }
 
   finished() {
     if (this.queue.length > 0) {
-      const parties = this.queue.pop();
+      const entry = this.queue.pop();
 
-      worker.postMessage({
-        type: 'ammend',
-        parties: parties,
-        store: qStore.store,
-      });
-  
-      this.state = 'Learning';
+      if (entry) {
+        worker.postMessage({
+          type: 'ammend',
+          parties: entry.parties,
+          store: qStore.store,
+        });
+    
+        this.state = 'Learning';  
+      }
+
+      // console.log(`queue length: ${this.queue.length}`)
     }
     else {
       this.state = 'Idle';
