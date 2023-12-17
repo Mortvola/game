@@ -9,6 +9,8 @@ class Human implements Race {
 
   size = Size.Medium;
 
+  height = feetToMeters(5.75);
+
   abilityIncrease: AbilityScores = {
     charisma: 1,
     constitution: 1,

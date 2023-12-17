@@ -9,8 +9,7 @@ import { ActorInterface, ActorOnFinishCallback } from "../ActorInterface";
 import Shot, { ShotData } from "../Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
-import { Action, ActionType, Key } from "../Worker/QStore";
-import { meanDamage } from "./Equipment/Weapon";
+import { Action, Key } from "../Worker/QStore";
 import Character from "./Character";
 import { attackRoll } from "../Dice";
 import { qStore, workerQueue } from "../WorkerQueue";
@@ -92,7 +91,7 @@ class Actor implements ActorInterface {
     character: Character, color: Vec4, teamColor: Vec4, team: number, automated: boolean,
   ) {
     const playerWidth = 1;
-    const playerHeight = 1.75;
+    const playerHeight = character.race.height;
 
     const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, color))
     mesh.translate[1] = playerHeight / 2;  

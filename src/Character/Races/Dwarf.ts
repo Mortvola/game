@@ -8,6 +8,8 @@ class Dwarf implements Race {
 
   size = Size.Medium;
 
+  height = feetToMeters(4.5);
+
   abilityIncrease = {
     charisma: 0,
     constitution: 2,

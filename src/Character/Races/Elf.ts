@@ -8,6 +8,8 @@ class Elf implements Race {
 
   size = Size.Medium;
 
+  height = feetToMeters(5.75);
+
   abilityIncrease = {
     charisma: 0,
     constitution: 0,

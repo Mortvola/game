@@ -21,6 +21,8 @@ export interface Race {
   
   size: Size;
 
+  height: number;
+
   generateName(): string;
 
   clone(): Race;

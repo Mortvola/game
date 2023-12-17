@@ -8,6 +8,8 @@ class Halfling implements Race {
 
   size = Size.Small;
 
+  height = feetToMeters(3);
+
   abilityIncrease = {
     charisma: 0,
     constitution: 0,
