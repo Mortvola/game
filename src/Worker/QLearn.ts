@@ -1,11 +1,13 @@
 class QLearn {
+  numIterations = 100000;
+
   maxReward = 0;
   rho = 1.0;
-  epsilonDecay = 0.9999;
-  minRho = 0.02;
+  epsilonDecay = 0.99999;
+  minRho = 0.5;
   
   alpha = 0.9;
-  alphaDecay = 0.9999;
+  alphaDecay = 0.99999;
   minAlpha = 0.02;
   
   gamma = 0.9;

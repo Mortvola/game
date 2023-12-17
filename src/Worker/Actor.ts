@@ -1,13 +1,12 @@
-import { AbilityScores } from "../Character/Races/AbilityScores";
-import { getWeapon, weaponDamage } from "../Character/Equipment/Weapon";
+import { weaponDamage } from "../Character/Equipment/Weapon";
 import { ActorInterface, EnvironmentInterface } from "./Interfaces";
 import QLearn from "./QLearn";
-import QStore from "./QStore";
+import QStore, { Action, ActionType, Key } from "./QStore";
+import Character from "../Character/Character";
+import { attackRoll } from "../Dice";
 
 class Actor implements ActorInterface {
-  hitPoints = 100;
-
-  weapon = getWeapon('Shortbow')
+  character: Character;
 
   team: number;
 
@@ -15,30 +14,48 @@ class Actor implements ActorInterface {
 
   initiativeRoll = 0;
 
-  abilities: AbilityScores = {
-    strength: 11,
-    dexterity: 11,
-    intelligence: 11,
-    wisdom: 11,
-    constitution: 11,
-    charisma: 11,
-  }
-
-  constructor(team: number) {
+  constructor(character: Character,team: number) {
+    this.character = character;
     this.team = team;
   }
 
   takeAction(
-    action: number | null, otherTeam: ActorInterface[], environment: EnvironmentInterface,
+    action: Action | null, otherTeam: ActorInterface[], environment: EnvironmentInterface,
     qLearn: QLearn,
-  ): { removedActors: ActorInterface[], reward: number, finished: boolean, action: number } {
+  ): { removedActors: ActorInterface[], reward: number, finished: boolean, action: Action } {
     if (action === null || Math.random() < qLearn.rho) {
-      action = Math.trunc(Math.random() * otherTeam.length);
+      const actionType = Math.trunc(Math.random() * 3);
+
+      action = {
+        type: ['HitPoints', 'ArmorClass', 'Weapon'][actionType] as ActionType,
+        opponent: Math.trunc(Math.random() * otherTeam.length),
+      }
     }
 
-    const sortedActors = otherTeam.map((a) => a).sort((a, b) => a.hitPoints - b.hitPoints);
+    let sortedActors: ActorInterface[] = [];
 
-    const target = sortedActors[action];
+    switch (action.type) {
+      case 'HitPoints':
+        sortedActors = otherTeam.map((a) => a).sort((a, b) => a.character.hitPoints - b.character.hitPoints);
+        break;
+
+      case 'ArmorClass':
+        sortedActors = otherTeam.map((a) => a).sort((a, b) => a.character.armorClass - b.character.armorClass);
+        break;
+
+      case 'Weapon':
+        sortedActors = otherTeam.map((a) => a).sort((a, b) => {
+          const damageA = ((a.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * a.character.equipped.meleeWeapon!.die[0].numDice
+          const damageB = ((b.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * b.character.equipped.meleeWeapon!.die[0].numDice
+          return damageA - damageB
+        });
+        break;
+
+      default:
+        console.log('action type not handled')
+    }
+
+    const target = sortedActors[action.opponent];
     const result = this.attack(target, environment);
 
     return {
@@ -64,9 +81,12 @@ class Actor implements ActorInterface {
         qLearn.finished = result.finished;
       }
       else {
-        // const state = Math.trunc((otherTeamSum / 400) * 1000);
-        const state = {
-          opponents: otherTeam.map((t) => t.hitPoints),
+        const state: Key = {
+          opponent: otherTeam.map((t) => ({
+            hitPoints: t.character.hitPoints,
+            weapon: ((t.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * t.character.equipped.meleeWeapon!.die[0].numDice,
+            armorClass: t.character.armorClass,
+        })),
         };
 
         let action = qStore.getBestAction(state);
@@ -75,16 +95,20 @@ class Actor implements ActorInterface {
         removedActors = result.removedActors;
         const reward = result.reward;
 
-        const newState = {
-          opponents: environment.teams[this.team ^ 1]
-            .filter((t) => t.hitPoints !== 0)
-            .map((t) => t.hitPoints),
+        const newState: Key = {
+          opponent: environment.teams[this.team ^ 1]
+            .filter((t) => t.character.hitPoints !== 0)
+            .map((t) => ({
+              hitPoints: t.character.hitPoints,
+              weapon: ((t.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * t.character.equipped.meleeWeapon!.die[0].numDice,
+              armorClass: t.character.armorClass,
+            })),
         };
 
         action = result.action;
         qLearn.finished = result.finished;
   
-        qLearn.actionHistory.push(action);
+        // qLearn.actionHistory.push(action);
       
         let q = qStore.getValue(state, action);
   
@@ -140,30 +164,39 @@ class Actor implements ActorInterface {
 
     const removedActors: ActorInterface[] = [];
 
-    if (this.weapon) {
-      targetActor.hitPoints -= weaponDamage(this.weapon, this.abilities, false)
+    if (this.character.equipped.meleeWeapon) {
+      const roll = attackRoll(targetActor.character.armorClass, this.character.abilityScores.dexterity);
 
-      if (targetActor.hitPoints <= 0) {
-        targetActor.hitPoints = 0;
+      if (roll === 'Hit' || roll === 'Critical') {
+        let damage = weaponDamage(this.character.equipped.meleeWeapon, this.character.abilityScores, false);
   
-        removedActors.push(targetActor);
+        if (roll === 'Critical') {
+          damage = weaponDamage(this.character.equipped.meleeWeapon, this.character.abilityScores, false);
+        }
+
+        targetActor.character.hitPoints -= damage;
+
+        if (targetActor.character.hitPoints <= 0) {
+          targetActor.character.hitPoints = 0;
+    
+          removedActors.push(targetActor);
+        }
       }
     }
 
     const otherTeam = environment.teams[this.team ^ 1];
     const otherTeamSum = otherTeam.reduce((accum, a) => {
-      return accum + a.hitPoints;
+      return accum + a.character.hitPoints;
     }, 0)
 
     const team = environment.teams[this.team];
     const teamSum = team.reduce((accum, a) => {
-      return accum + a.hitPoints;
+      return accum + a.character.hitPoints;
     }, 0)
 
     return {
       reward: otherTeamSum === 0 ? teamSum : -1,
       finished: otherTeamSum === 0,
-      // newState: Math.trunc((otherTeamSum / 400) * 1000),
       removedActors,
     }
   }

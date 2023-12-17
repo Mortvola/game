@@ -1,13 +1,13 @@
 import React from 'react';
 import './App.scss';
 import { gpu, renderer } from '../Renderer';
-import { audioContext } from '../Audio';
 import { vec4 } from 'wgpu-matrix';
-import { EpisodeInfo, WorkerMessage, worker } from '../Character/Actor';
+import { EpisodeInfo } from '../Character/Actor';
 import RewardChart from '../Chart';
 import DefineParties from './DefineParties';
 import Character from '../Character/Character';
-import { restoreParties, storeParties } from '../Character/CharactorStorage';
+import { restoreParties, storeParties } from '../Character/CharacterStorage';
+import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
 
 type DiretionKeys = {
   left: number,
@@ -103,6 +103,7 @@ function App() {
         })
       }
       else if (evt.data.type === 'Finished') {
+        workerQueue.finished();
         setLearning(false);
       }
     }
@@ -276,12 +277,12 @@ function App() {
     }
   }
 
-  const handlePlayClick = () => {
-    // Check if context is in suspended state (autoplay policy)
-    if (audioContext.state === "suspended") {
-      audioContext.resume();
-    }
-  }
+  // const handlePlayClick = () => {
+  //   // Check if context is in suspended state (autoplay policy)
+  //   if (audioContext.state === "suspended") {
+  //     audioContext.resume();
+  //   }
+  // }
 
   const [inputMode, setInputMode] = React.useState('Mouse');
 
@@ -338,15 +339,19 @@ function App() {
   const [showGraph, setShowGraph] = React.useState<boolean>(false);
   const [learning, setLearning] = React.useState<boolean>(false);
 
+  const [showPartyDefs, setShowPartyDefs] = React.useState<boolean>(false);
+  const [parties, setParties] = React.useState<Character[][]>([[], []]);
+
   const handleLearnClick = () => {
     setLearning(true);
     setShowGraph(true);
     setRewards([["episode", "max", "mean", "min"]]);
-    worker.postMessage('start');
+    // worker.postMessage({
+    //   type: 'start',
+    //   parties: characterStorageParties(parties),
+    // });
+    workerQueue.start(parties);
   }
-
-  const [showPartyDefs, setShowPartyDefs] = React.useState<boolean>(false);
-  const [parties, setParties] = React.useState<Character[][]>([[], []]);
 
   const handleDefinePartiesClick = () => {
     setShowPartyDefs(true);

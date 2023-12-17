@@ -4,7 +4,7 @@ import { WeaponName, getWeapon } from "./Equipment/Weapon"
 import { AbilityScores } from "./Races/AbilityScores"
 import { getClass, getRace } from "./Utilities"
 
-export type CharactorStorage = {
+export type CharacterStorage = {
   name: string,
   charClass: string,
   race: string,
@@ -20,7 +20,7 @@ export type CharactorStorage = {
   }
 }
 
-export const restoreCharactors = (a: CharactorStorage[]) => {
+export const restoreCharacters = (a: CharacterStorage[]): Character[] => {
   const team = a.map((c) => {
     const race = getRace(c.race);
     const charClass = getClass(c.charClass);
@@ -32,7 +32,7 @@ export const restoreCharactors = (a: CharactorStorage[]) => {
       const character = new Character(race, charClass, weapons, armor);
 
       character.name = c.name;
-      
+
       if (c.equipped.meleeWeapon) {
         character.equipped.meleeWeapon = getWeapon(c.equipped.meleeWeapon as WeaponName);
       }
@@ -59,41 +59,54 @@ export const restoreCharactors = (a: CharactorStorage[]) => {
   return team;
 }
 
+export const characterStorageParty = (party: Character[]) => (
+  party.map((c) => {
+    const s: CharacterStorage = {
+      name: c.name,
+      charClass: c.charClass.name,
+      race: c.race.name,
+      abilityScores: c.abilityScores,
+      maxHitPoints: c.maxHitPoints,
+      weapons: c.weapons.map((w) => w.name),
+      armor: c.armor.map((a) => a.name),
+      equipped: {
+        meleeWeapon: c.equipped.meleeWeapon?.name ?? null,
+        rangeWeapon: c.equipped.rangeWeapon?.name ?? null,
+        armor: c.equipped.armor?.name ?? null,
+        shield: c.equipped.shield?.name ?? null,
+      }
+    }
+
+    return s;
+  })
+)
+
+export const characterStorageParties = (parties: Character[][]) => (
+  [characterStorageParty(parties[0]), characterStorageParty(parties[1])]
+)
+
 const stringifyParty = (party: Character[]) => {
   return JSON.stringify(
-    party.map((c) => {
-      const s: CharactorStorage = {
-        name: c.name,
-        charClass: c.charClass.name,
-        race: c.race.name,
-        abilityScores: c.abilityScores,
-        maxHitPoints: c.maxHitPoints,
-        weapons: c.weapons.map((w) => w.name),
-        armor: c.armor.map((a) => a.name),
-        equipped: {
-          meleeWeapon: c.equipped.meleeWeapon?.name ?? null,
-          rangeWeapon: c.equipped.rangeWeapon?.name ?? null,
-          armor: c.equipped.armor?.name ?? null,
-          shield: c.equipped.shield?.name ?? null,
-        }
-      }
-
-      return s;
-    })
+    characterStorageParty(party)
   )
 }
 
+export const stringifyParties = (parties: Character[][]) => (
+  [stringifyParty(parties[0]), stringifyParty(parties[1])]
+)
+
 export const storeParties = (parties: Character[][]): void => {
-  localStorage.setItem('team1', stringifyParty(parties[0]))
-  localStorage.setItem('team2', stringifyParty(parties[1]))
+  const stringifiedParties = stringifyParties(parties);
+  localStorage.setItem('team1', stringifiedParties[0]);
+  localStorage.setItem('team2', stringifiedParties[1]);
 }
 
 const restoreParty = (id: string): Character[] => {
   const s1 = localStorage.getItem(id);
 
   if (s1) {
-    const a = JSON.parse(s1) as CharactorStorage[];
-    return restoreCharactors(a);
+    const a = JSON.parse(s1) as CharacterStorage[];
+    return restoreCharacters(a);
   }
 
   return [];

@@ -1,77 +1,104 @@
-type Key = {
-  opponents: number[],
+type Opponent = {
+  hitPoints: number,
+  weapon: number,
+  armorClass: number,
 }
 
-export type QTable = Map<string, Map<number, number>>;
+export type Key = {
+  opponent: Opponent[],
+}
+
+export type ActionType = 'HitPoints' | 'Weapon' | 'ArmorClass';
+
+export type Action = {
+  type: ActionType,
+  opponent: number,
+}
+
+export type QTable = Map<string, Map<string, number>>;
 
 class QStore {
   store: QTable = new Map();
 
-  static makeKey(state: Key) {
-    const sorted = 
-      state.opponents.map((a) => a).sort((a, b) => a - b);
+  static makeStateKey(state: Key) {
+    const key: { hp: number, w: number, ac: number }[] = [];
 
-    const key = [];
-    let value = 0;
+    const sorted = state.opponent
+      .filter((a) => a.hitPoints > 0)
+      .map((a) => a).sort((a, b) => a.hitPoints - b.hitPoints);
 
-    key.push(value);
+    if (sorted.length > 0) {
+      let value = 0;
 
-    for (let i = 1; i < sorted.length; i += 1) {
-      if (sorted[i] === sorted[i - 1]) {
-        key.push(value)
-      }
-      else {
-        value += 1;
-        key.push(value);
+      key.push({
+        hp: value,
+        w: sorted[0].weapon,
+        ac: sorted[0].armorClass
+      });
+
+      for (let i = 1; i < sorted.length; i += 1) {
+        if (sorted[i] !== sorted[i - 1]) {
+          value += 1;
+        }
+
+        key.push({
+          hp: value,
+          w: sorted[i].weapon,
+          ac: sorted[i].armorClass
+          });
       }
     }
 
     return JSON.stringify(key);
   }
 
-  getValue(state: Key, action: number): number {
-    const s = this.store.get(QStore.makeKey(state));
+  getValue(state: Key, action: Action): number {
+    const s = this.store.get(QStore.makeStateKey(state));
 
     if (s) {
-      return s.get(action) ?? 0;
+      const actionKey = JSON.stringify(action)
+      return s.get(actionKey) ?? 0;
     }
 
     return 0;
   }
 
-  getBestAction(state: Key): number | null {
-    const key = QStore.makeKey(state);
+  getBestAction(state: Key): Action | null {
+    const key = QStore.makeStateKey(state);
     const s = this.store.get(key);
 
     let maxValue: number | null = null;
-    let bestKey: number | null = null;
+    let bestKey: string | null = null;
 
     if (s) {
-      s.forEach((value, key) => {
+      for (const [key, value] of s) {
         if (maxValue === null || maxValue < value) {
           maxValue = value;
           bestKey = key;
         }
-      })
-    }
+      }
 
-    return bestKey;
+      if (bestKey) {
+        const action = JSON.parse(bestKey) as Action;
+        return action;
+      }  
+    }
+    
+    return null;
   }
 
-  setValue(state: Key, action: number, value: number): void {
-    const key = QStore.makeKey(state);
+  setValue(state: Key, action: Action, value: number): void {
+    const key = QStore.makeStateKey(state);
     const s = this.store.get(key);
 
     if (s) {
-      s.set(action, value)
+      const actionKey = JSON.stringify(action);
+      s.set(actionKey, value)
     }
     else {
-      // console.log('adding new state');
-      // for (let i = 0; i < 4; i += 1) {
-      //   this.store.set(key, (new Map<number, number>()).set(i, 0))
-      // }
-
-      this.store.set(key, (new Map<number, number>()).set(action, value))
+      const actionKey = JSON.stringify(action);
+      this.store.set(key, (new Map<string, number>()).set(actionKey, value))
+      console.log(`added state, number of states: ${this.store.size}`)
     }
   }
 }

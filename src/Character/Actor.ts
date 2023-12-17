@@ -9,26 +9,11 @@ import { ActorInterface } from "../ActorInterface";
 import Shot, { ShotData } from "../Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
-import QStore, { QTable } from "../Worker/QStore";
+import { Action, ActionType, Key } from "../Worker/QStore";
 import { weaponDamage } from "./Equipment/Weapon";
 import Character from "./Character";
 import { attackRoll } from "../Dice";
-
-export const qStore = new QStore();
-
-export const worker = new Worker(new URL("../Worker/worker.ts", import.meta.url));
-
-export type WorkerMessage = {
-  type: 'Rewards' | 'QTable' | 'Finished',
-  rewards?: number[][],
-  qtable?: QTable,
-}
-
-worker.addEventListener('message', (evt: MessageEvent<WorkerMessage>) => {
-  if (evt.data.type === 'QTable' && evt.data.qtable) {
-    qStore.store = evt.data.qtable;
-  }
-})
+import { qStore, workerQueue } from "../WorkerQueue";
 
 export type EpisodeInfo = {
   winningTeam: number,
@@ -203,17 +188,43 @@ class Actor implements ActorInterface {
   }
 
   takeAction(
-    action: number | null, otherTeam: Actor[], timestamp: number, world: WorldInterface,
+    action: Action | null, otherTeam: Actor[], timestamp: number, world: WorldInterface,
   ): Actor[] {
     const epsilon = 0.02; // Probability of a random action
 
     if (action === null || Math.random() < epsilon) {
-      action = Math.trunc(Math.random() * otherTeam.length);
+      const actionType = Math.trunc(Math.random() * 3);
+
+      action = {
+        type: ['HitPoints', 'ArmorClass', 'Weapon'][actionType] as ActionType,
+        opponent: Math.trunc(Math.random() * otherTeam.length),
+      }
     }
 
-    const sortedActors = otherTeam.map((a) => a).sort((a, b) => a.character.hitPoints - b.character.hitPoints);
+    let sortedActors: Actor[] = [];
 
-    const target = sortedActors[action];
+    switch (action.type) {
+      case 'HitPoints':
+        sortedActors = otherTeam.map((a) => a).sort((a, b) => a.character.hitPoints - b.character.hitPoints);
+        break;
+
+      case 'ArmorClass':
+        sortedActors = otherTeam.map((a) => a).sort((a, b) => a.character.armorClass - b.character.armorClass);
+        break;
+
+      case 'Weapon':
+        sortedActors = otherTeam.map((a) => a).sort((a, b) => {
+          const damageA = ((a.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * a.character.equipped.meleeWeapon!.die[0].numDice
+          const damageB = ((b.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * b.character.equipped.meleeWeapon!.die[0].numDice
+          return damageA - damageB
+        });
+        break;
+
+      default:
+        console.log('action type not handled')
+    }
+
+    const target = sortedActors[action.opponent];
     const result = this.attack(target, timestamp, world);
 
     return result.removedActors;
@@ -225,14 +236,30 @@ class Actor implements ActorInterface {
     const otherTeam = world.participants.participants[this.team ^ 1];
     
     if (otherTeam.length > 0) {
-      let action: number | null = null;
+      let action: Action | null = null;
 
-      if (this.team === 1) {
-        const state = {
-          opponents: otherTeam.map((t) => t.character.hitPoints),
+      if (this.team === 1 && qStore.store.size > 0) {
+        const state: Key = {
+          opponent: otherTeam.map((t) => ({
+            hitPoints: t.character.hitPoints,
+            weapon: ((t.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * t.character.equipped.meleeWeapon!.die[0].numDice,
+            armorClass: t.character.armorClass,
+          })),
         };
 
         action = qStore.getBestAction(state);
+
+        if (action === null) {
+          console.log(`No best action for ${JSON.stringify(state)}`)
+          // worker.postMessage({
+          //   type: 'ammend',
+          //   parties: characterStorageParties(world.participants.parties),
+          // });
+          workerQueue.update(world.participants.parties)
+        }
+        else {
+          console.log(`${action.type}, ${action.opponent}`)
+        }
       }
 
       removedActors = this.takeAction(action, otherTeam, timestamp, world);
@@ -338,14 +365,14 @@ class Actor implements ActorInterface {
 
     const removedActors: Actor[] = [];
 
-    const roll = attackRoll(targetActor.character.armorClass, this.character.abilityScores.dexterity);
+    if (this.character.equipped.meleeWeapon) {
+      const roll = attackRoll(targetActor.character.armorClass, this.character.abilityScores.dexterity);
 
-    if (this.character.equipped.rangeWeapon) {
       if (roll === 'Hit' || roll === 'Critical') {
-        let damage = weaponDamage(this.character.equipped.rangeWeapon, this.character.abilityScores, false);
+        let damage = weaponDamage(this.character.equipped.meleeWeapon, this.character.abilityScores, false);
   
         if (roll === 'Critical') {
-          damage = weaponDamage(this.character.equipped.rangeWeapon, this.character.abilityScores, false);
+          damage = weaponDamage(this.character.equipped.meleeWeapon, this.character.abilityScores, false);
         }
   
         targetActor.character.hitPoints -= damage;

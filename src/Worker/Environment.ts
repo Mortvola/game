@@ -1,3 +1,4 @@
+import Character from '../Character/Character';
 import { abilityModifier, diceRoll } from '../Dice';
 import Actor from './Actor';
 import { EnvironmentInterface } from './Interfaces';
@@ -7,9 +8,19 @@ class Environment implements EnvironmentInterface {
 
   turns: Actor[] = [];
 
-  createTeams() {
-    const team1 = [new Actor(0), new Actor(0), new Actor(0), new Actor(0)];
-    const team2 = [new Actor(1), new Actor(1), new Actor(1), new Actor(1)];
+  createTeams(parties: Character[][]) {
+    const team1: Actor[] = [];
+    const team2: Actor[] = [];
+
+    for (const character of parties[0]) {
+      character.hitPoints = character.maxHitPoints;
+      team1.push(new Actor(character, 0))
+    }
+
+    for (const character of parties[1]) {
+      character.hitPoints = character.maxHitPoints;
+      team2.push(new Actor(character, 1))
+    }
 
     this.teams[0] = team1;
     this.teams[1] = team2;
@@ -24,36 +35,11 @@ class Environment implements EnvironmentInterface {
 
   initiativeRolls() {
     for (const actor of this.turns) {
-      actor.initiativeRoll = diceRoll(1, 20) + abilityModifier(actor.abilities.dexterity);
+      actor.initiativeRoll = diceRoll(1, 20) + abilityModifier(actor.character.abilityScores.dexterity);
     }
 
     this.turns.sort((a, b) => a.initiativeRoll - b.initiativeRoll);
   }
-
-  // remove(actor: Actor) {
-  //   const team = this.teams[actor.team];
-  //   let index = team.findIndex((a) => a === actor);
-
-  //   if (index !== -1) {
-  //     this.teams[actor.team] = [
-  //       ...team.slice(0, index),
-  //       ...team.slice(index + 1),
-  //     ];
-  //   }
-
-  //   index = this.turns.findIndex((a) => a === actor);
-
-  //   if (index !== -1) {
-  //     this.turns = [
-  //       ...this.turns.slice(0, index),
-  //       ...this.turns.slice(index + 1),
-  //     ]
-
-  //     if (this.turn >= index) {
-  //       this.turn -= 1;
-  //     }
-  //   }
-  // }
 }
 
 export default Environment;

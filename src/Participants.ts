@@ -11,7 +11,7 @@ export enum ParticipantsState {
 }
 
 class Participants {
-  private parties: Character[][] = [[], []];
+  parties: Character[][] = [[], []];
 
   participants: Actor[][] = [[], []];
 
