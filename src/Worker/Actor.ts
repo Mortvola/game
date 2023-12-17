@@ -105,7 +105,11 @@ class Actor implements ActorInterface {
             })),
         };
 
-        if (!state.opponent.every((val, index) => val === newState.opponent[index])) {
+        const stateKey = QStore.makeStateKey(state);
+        const newStateKey = QStore.makeStateKey(newState);
+
+        // if (!state.opponent.every((val, index) => val === newState.opponent[index])) {
+        if (stateKey !== newStateKey) {
           action = result.action;
           qLearn.finished = result.finished;
     
