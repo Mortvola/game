@@ -108,7 +108,7 @@ class Renderer implements WorldInterface {
     this.mainRenderPass.addDrawable(new CartesianAxes(), 'line');
 
     this.shot = shot;
-    this.scene.addNode(shot);
+    this.scene.addNode(shot, 'lit');
 
     this.updateTransforms();
   }
@@ -173,7 +173,7 @@ class Renderer implements WorldInterface {
       this.participants.activeActor.endTurn();
 
       if (this.focused) {
-        this.mainRenderPass.removeDrawable(this.focused.mesh, 'outline');
+        this.mainRenderPass.removeDrawables(this.focused.sceneNode);
         this.focused = null;
       }
 
@@ -241,8 +241,7 @@ class Renderer implements WorldInterface {
 
       this.collidees.remove(removedActor as Actor);
       (removedActor as Actor).removeFromScene();
-      this.scene.removeNode((removedActor as Actor).mesh);
-      this.scene.removeNode((removedActor as Actor).circle);    
+      this.scene.removeNode((removedActor as Actor).sceneNode);
     }
 
     this.removeActors = [];
@@ -251,8 +250,7 @@ class Renderer implements WorldInterface {
   async prepareTeams() {
     // Remove any current participants
     for (const actor of this.participants.turns) {
-      this.scene.removeNode(actor.mesh);
-      this.scene.removeNode(actor.circle);
+      this.scene.removeNode(actor.sceneNode);
       actor.removeFromScene();
 
       this.collidees.remove(actor);
@@ -267,8 +265,7 @@ class Renderer implements WorldInterface {
     this.participants.initiativeRolls();
 
     for (const actor of this.participants.turns) {
-      this.scene.addNode(actor.mesh);
-      this.scene.addNode(actor.circle);
+      this.scene.addNode(actor.sceneNode, 'lit');
       actor.addToScene(this.mainRenderPass);
       this.collidees.actors.push(actor);
       this.actors.push(actor);
@@ -299,6 +296,7 @@ class Renderer implements WorldInterface {
 
         // Move the camera using the set velocity.
         if (this.previousTimestamp !== null) {
+          // Get elapsed time in seconds.
           const elapsedTime = (timestamp - this.previousTimestamp) * 0.001;
 
           if (this.participants.state === ParticipantsState.needsPrep) {
@@ -360,13 +358,13 @@ class Renderer implements WorldInterface {
   }
 
   updateTransforms() {
-    this.scene.nodes.forEach((node) => {
-      node.computeTransform();
+    this.scene.updateTransforms();
 
+    for (const node of this.scene.nodes) {
       if (isLight(node)) {
         this.lights.push(node);
       }
-    });
+    };
   }
 
   drawScene() {
@@ -557,8 +555,8 @@ class Renderer implements WorldInterface {
     } | null = null;
 
     for (const actor of this.participants.turns) {
-      if (isDrawableInterface(actor.mesh)) {
-        const result = actor.mesh.hitTest(origin, ray);
+      if (isDrawableInterface(actor.sceneNode)) {
+        const result = actor.sceneNode.hitTest(origin, ray);
 
         if (result) {
           if (best === null || result.t < best.t) {
@@ -592,7 +590,7 @@ class Renderer implements WorldInterface {
         if (actor !== this.participants.activeActor) {
           if (!this.focused || this.focused !== actor) {
             if (this.focused) {
-              this.mainRenderPass.removeDrawable(this.focused.mesh, 'outline');
+              this.mainRenderPass.removeDrawables(this.focused.sceneNode);
               this.focused = null;
             }
 
@@ -603,7 +601,7 @@ class Renderer implements WorldInterface {
 
             this.focused = actor;
 
-            this.mainRenderPass.addDrawable(this.focused.mesh, 'outline');
+            this.mainRenderPass.addDrawables(this.focused.sceneNode);
 
             // If the active actor has actions left then
             // render a trajectory from it to the highlighted actor.
@@ -628,7 +626,7 @@ class Renderer implements WorldInterface {
         }
       } else if (point) {
         if (this.focused) {
-          this.mainRenderPass.removeDrawable(this.focused.mesh, 'outline');
+          this.mainRenderPass.removeDrawables(this.focused.sceneNode);
           this.focused = null;
         }
 
@@ -656,7 +654,7 @@ class Renderer implements WorldInterface {
         }
       }
     } else if (this.focused) {
-      this.mainRenderPass.removeDrawable(this.focused.mesh, 'outline');
+      this.mainRenderPass.removeDrawables(this.focused.sceneNode);
       this.focused = null;
     }
   }

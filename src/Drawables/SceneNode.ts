@@ -61,10 +61,8 @@ class SceneNode {
     this.angles = getEulerAngles(this.qRotate);
   }
 
-  computeTransform(transform?: Mat4, prepend = true): Mat4 {
-    this.transform = mat4.identity();
-
-    mat4.translate(this.transform, this.translate, this.transform);
+  computeTransform(transform = mat4.identity(), prepend = true): Mat4 {
+    mat4.translate(transform, this.translate, this.transform);
     mat4.multiply(this.transform, this.getRotation(), this.transform);
     mat4.scale(this.transform, this.scale, this.transform);
 

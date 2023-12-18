@@ -3,6 +3,7 @@ import Collidees from "./Collidees";
 import ContainerNode from "./Drawables/ContainerNode";
 import Mesh from "./Drawables/Mesh";
 import Participants from "./Participants";
+import RenderPass from "./RenderPass";
 
 export type Delay = {
   startTime: number,
@@ -28,4 +29,6 @@ export interface WorldInterface {
   endTurn2(timestamp: number): void;
 
   removeActors: ActorInterface[];
+
+  mainRenderPass: RenderPass;
 }

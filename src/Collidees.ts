@@ -22,8 +22,8 @@ class Collidees {
         continue;
       }
 
-      if (isDrawableInterface(actor.mesh)) {
-        const result = actor.mesh.hitTest(p1, ray);
+      if (isDrawableInterface(actor.sceneNode)) {
+        const result = actor.sceneNode.hitTest(p1, ray);
 
         if (result && result.t <= 1) {
           if (best === null || best.t > result.t) {

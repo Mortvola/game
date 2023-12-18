@@ -3,7 +3,7 @@ import Actor from "./Character/Actor";
 import { gravity } from "./Math";
 import RenderPass from "./RenderPass";
 import Mesh from "./Drawables/Mesh";
-import { ActorInterface, ActorOnFinishCallback } from "./ActorInterface";
+import { ActorInterface } from "./ActorInterface";
 import { WorldInterface } from "./WorldInterface";
 
 export type ShotData = {
@@ -15,9 +15,7 @@ export type ShotData = {
 };
 
 class Shot implements ActorInterface {
-  onFinish: ActorOnFinishCallback;
-
-  startTime: number;
+  startTime: number | null = null;
 
   mesh: Mesh;
 
@@ -28,14 +26,10 @@ class Shot implements ActorInterface {
   renderPass: RenderPass | null = null;
 
   constructor(
-    startTime: number,
-    onFinish: ActorOnFinishCallback,
     mesh: Mesh,
     actor: Actor,
     data: ShotData,
   ) {
-    this.startTime = startTime;
-    this.onFinish = onFinish
     this.mesh = mesh;
     this.actor = actor;
     this.data = data;
@@ -46,6 +40,8 @@ class Shot implements ActorInterface {
 
     if (this.startTime === null) {
       this.startTime = timestamp;
+
+      this.addToScene(world.mainRenderPass);
     } else {
       const shotElapsedTime = (timestamp - this.startTime) * 0.001;
 
@@ -62,21 +58,13 @@ class Shot implements ActorInterface {
 
       const result = world.collidees.detectCollision(this.data.position, newPosition, (actor: Actor) => actor !== this.actor);
 
-      if (result) {
+      if (result || newPosition[1] < 0) {
         removedActors.push(this);
         this.removeFromScene();
-        this.onFinish(timestamp)
 
         return removedActors;
       }
       
-      if (newPosition[1] < 0) {
-        removedActors.push(this);
-        this.removeFromScene();
-        this.onFinish(timestamp)
-        return removedActors;
-      }
-
       this.data.position = newPosition;
 
       world.shot.translate[0] = this.data.position[0];

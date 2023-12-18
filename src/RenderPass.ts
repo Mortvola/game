@@ -53,15 +53,26 @@ class RenderPass {
     }
   }
 
-  addDrawables(drawable: ContainerNode, pipelineType: PipelineTypes) {
-    drawable.nodes.forEach((drawable) => {
-      if (isContainerNode(drawable)) {
-        this.addDrawables(drawable, pipelineType)
+  addDrawables(drawables: ContainerNode) {
+    for (const drawable of drawables.nodes) {
+      if (isContainerNode(drawable.node)) {
+        this.addDrawables(drawable.node)
       }
       else {
-        this.addDrawable(drawable, pipelineType);
+        this.addDrawable(drawable.node, drawable.pipelineType);
       }
-    })
+    }
+  }
+
+  removeDrawables(drawables: ContainerNode) {
+    for (const drawable of drawables.nodes) {
+      if (isContainerNode(drawable.node)) {
+        this.removeDrawables(drawable.node)
+      }
+      else {
+        this.removeDrawable(drawable.node, drawable.pipelineType);
+      }
+    }
   }
 
   getDescriptor(view: GPUTextureView, depthView: GPUTextureView | null): GPURenderPassDescriptor {

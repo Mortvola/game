@@ -1,6 +1,7 @@
-import { Vec4, Mat4 } from 'wgpu-matrix';
+import { Vec4, Mat4, mat4 } from 'wgpu-matrix';
 import DrawableInterface, { isDrawableInterface } from "./DrawableInterface";
 import SceneNode from "./SceneNode";
+import { PipelineTypes } from '../Pipelines/PipelineManager';
 // import { makeObservable, observable, runInAction } from 'mobx';
 
 export type HitTestResult = {
@@ -10,7 +11,10 @@ export type HitTestResult = {
 }
 
 class ContainerNode extends SceneNode {
-  nodes: SceneNode[] = [];
+  nodes: {
+    node: SceneNode,
+    pipelineType: PipelineTypes,
+  }[] = [];
 
   // constructor() {
   //   super();
@@ -20,14 +24,14 @@ class ContainerNode extends SceneNode {
   //   // })
   // }
 
-  addNode(node: SceneNode) {
+  addNode(node: SceneNode, pipelineType: PipelineTypes) {
     // runInAction(() => {
-      this.nodes.push(node);
+      this.nodes.push({ node, pipelineType });
     // })
   }
 
   removeNode(node: SceneNode) {
-    const index = this.nodes.findIndex((n) => n === node);
+    const index = this.nodes.findIndex((n) => n.node === node);
 
     if (index !== -1) {
       this.nodes = [
@@ -37,30 +41,31 @@ class ContainerNode extends SceneNode {
     }
   }
 
-  updateTransforms(mat: Mat4) {
-    this.nodes.forEach((drawable) => {
-      if (isDrawableInterface(drawable)) {
-        drawable.computeTransform(mat);
+  updateTransforms(mat = mat4.identity()) {
+    const transform = this.computeTransform(mat);
+    for (const drawable of this.nodes) {
+      if (isDrawableInterface(drawable.node)) {
+        drawable.node.computeTransform(transform);
       }
-      else if (isContainerNode(drawable)) {
-        const nodeMat = drawable.computeTransform(mat);
-        drawable.updateTransforms(nodeMat);
+      else if (isContainerNode(drawable.node)) {
+        // const nodeMat = drawable.node.computeTransform(transform);
+        drawable.node.updateTransforms(transform);
       }
-    })
+    }
   }
 
   modelHitTest(origin: Vec4, ray: Vec4, filter?: (node: DrawableInterface) => boolean): HitTestResult | null {
     let best: HitTestResult | null = null;
 
-    for (let node of this.nodes) {
+    for (const node of this.nodes) {
       let result;
-      if (isDrawableInterface(node)) {
-        if (!filter || filter(node)) {
-          result = node.hitTest(origin, ray)    
+      if (isDrawableInterface(node.node)) {
+        if (!filter || filter(node.node)) {
+          result = node.node.hitTest(origin, ray)    
         }
       }
-      else if (isContainerNode(node)) {
-        result = node.modelHitTest(origin, ray, filter);
+      else if (isContainerNode(node.node)) {
+        result = node.node.modelHitTest(origin, ray, filter);
       }
 
       if (result) {

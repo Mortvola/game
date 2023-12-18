@@ -69,13 +69,10 @@ class Participants {
 
     for (let i = 0; i < numPlayers; i += 1) {
       const actor = await Actor.create(this.parties[team][i].clone(), color, teamColor, team, automated);
-      actor.mesh.translate[0] = (i - ((numPlayers - 1) / 2))
+      actor.sceneNode.translate[0] = (i - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()
         * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
-      actor.mesh.translate[2] = z + Math.random() * 10 - 5;
-
-      actor.circle.translate = vec3.copy(actor.mesh.translate);
-      actor.circle.translate[1] = 0;
+      actor.sceneNode.translate[2] = z + Math.random() * 10 - 5;
 
       actors.push(actor);
     }
