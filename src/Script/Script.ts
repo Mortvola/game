@@ -1,5 +1,5 @@
-import { ActorInterface } from "./ActorInterface";
-import { WorldInterface } from "./WorldInterface";
+import { ActorInterface } from "../ActorInterface";
+import { WorldInterface } from "../WorldInterface";
 
 class Script implements ActorInterface {
   entries: ActorInterface[] = [];

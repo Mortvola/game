@@ -6,17 +6,19 @@ import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, timeToTarget }
 import Circle from "../Drawables/Circle";
 import RenderPass from "../RenderPass";
 import { ActorInterface } from "../ActorInterface";
-import Shot, { ShotData } from "../Shot";
+import Shot, { ShotData } from "../Script/Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
 import { Action, Key } from "../Worker/QStore";
 import Character from "./Character";
 import { attackRoll } from "../Dice";
 import { qStore, workerQueue } from "../WorkerQueue";
-import Mover from "../Mover";
-import Script from "../Script";
+import Mover from "../Script/Mover";
+import Script from "../Script/Script";
 import Weapon from "./Equipment/Weapon";
 import ContainerNode from "../Drawables/ContainerNode";
+import Logger from "../Script/Logger";
+import Remover from "../Script/Remover";
 
 export type EpisodeInfo = {
   winningTeam: number,
@@ -187,7 +189,7 @@ class Actor implements ActorInterface {
   }
 
   takeAction(
-    action: Action | null, otherTeam: Actor[], timestamp: number, world: WorldInterface,
+    action: Action | null, otherTeam: Actor[], timestamp: number, world: WorldInterface, script: Script,
   ): Actor[] {
     const epsilon = 0.02; // Probability of a random action
 
@@ -223,6 +225,7 @@ class Actor implements ActorInterface {
       this.character.equipped.meleeWeapon!,
       timestamp,
       world,
+      script,
     );
 
     return result.removedActors;
@@ -274,6 +277,8 @@ class Actor implements ActorInterface {
     const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
     
     if (otherTeam.length > 0) {
+      const script = new Script();
+
       if (this.useQLearning) {
         let action: Action | null = null;
 
@@ -293,12 +298,10 @@ class Actor implements ActorInterface {
           }
         }
 
-        removedActors = this.takeAction(action, otherTeam, timestamp, world);
+        removedActors = this.takeAction(action, otherTeam, timestamp, world, script);
         this.state = States.attacking;
       }
       else {
-        const script = new Script();
-
         const closest = this.getClosestTarget(otherTeam);
         // Determine distance to opponents
         const myPosition = this.getWorldPosition();
@@ -306,13 +309,12 @@ class Actor implements ActorInterface {
         if (closest) {
           if (closest.distance <= (this.attackRadius + 0.01) * 2) {
             // The target is already in range.
-            console.log('melee attack')
-
             const result = this.attack(
               otherTeam[closest.index],
               this.character.equipped.meleeWeapon!,
               timestamp,
               world,
+              script,
             );
 
             removedActors.push(...result.removedActors)
@@ -331,6 +333,7 @@ class Actor implements ActorInterface {
                 this.character.equipped.meleeWeapon!,
                 timestamp,
                 world,
+                script,
               );
   
               removedActors.push(...result.removedActors)
@@ -358,6 +361,7 @@ class Actor implements ActorInterface {
                   this.character.equipped.rangeWeapon!,
                   timestamp,
                   world,
+                  script,
                 );
 
                 removedActors.push(...result.removedActors)
@@ -370,20 +374,18 @@ class Actor implements ActorInterface {
             this.state = States.attacking;
           }
         }
+      }
 
-        if (script.entries.length > 0) {
-          if (this.automated) {
-            script.onFinish = (timestamp: number) => {
-              this.state = States.postAttack;
-              // this.pause = { startTime: timestamp, duration: 3000 }
-              this.pause = { startTime: timestamp, duration: 0 }
-            }
+      if (script.entries.length > 0) {
+        if (this.automated) {
+          script.onFinish = (timestamp: number) => {
+            this.state = States.postAttack;
+            // this.pause = { startTime: timestamp, duration: 3000 }
+            this.pause = { startTime: timestamp, duration: 0 }
           }
-
-          world.actors.push(script);
         }
 
-        // this.state = States.postAttack;
+        world.actors.push(script);
       }
     }
     else {
@@ -455,22 +457,6 @@ class Actor implements ActorInterface {
       startTime: timestamp,
     };
 
-    // let onFinish: ActorOnFinishCallback = (timestamp: number) => {
-    //   throw new Error('not implemented.')
-    // }
-
-    // if (this.automated) {
-    //   onFinish = (timestamp: number) => {
-    //     this.state = States.postAttack;
-    //     // this.pause = { startTime: timestamp, duration: 3000 }
-    //     this.pause = { startTime: timestamp, duration: 0 }
-
-    //     if (targetActor.character.hitPoints <= 0) {
-    //       world.removeActors.push(targetActor);
-    //     }
-    //   }
-    // }
-
     const shot = new Shot(world.shot, this, data);
     world.actors.push(shot);
 
@@ -498,6 +484,7 @@ class Actor implements ActorInterface {
     weapon: Weapon,
     timestamp: number,
     world: WorldInterface,
+    script: Script,
   ): { removedActors: Actor[] } {
     this.actionsLeft -= 1;
 
@@ -507,12 +494,19 @@ class Actor implements ActorInterface {
 
     targetActor.character.hitPoints -= damage;
 
+    if (damage > 0) {
+      script.entries.push(new Logger(`Party ${this.team}: ${this.character.name} hit Party ${targetActor.team}: ${targetActor.character.name} for ${damage} points.`))
+    }
+    else {
+      script.entries.push(new Logger(`Party ${this.team}: ${this.character.name} missed Party ${targetActor.team}: ${targetActor.character.name}.`))
+    }
+
     if (targetActor.character.hitPoints <= 0) {
       targetActor.character.hitPoints = 0;
 
-      console.log(`Party ${targetActor.team}: ${targetActor.character.name} the ${targetActor.character.charClass.name} died`);
+      script.entries.push(new Logger(`Party ${targetActor.team}: ${targetActor.character.name} the ${targetActor.character.charClass.name} died.`))
 
-      world.removeActors.push(targetActor);
+      script.entries.push(new Remover(targetActor));
 
       if (!world.animate) {
         world.participants.remove(targetActor);
