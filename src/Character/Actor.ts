@@ -19,6 +19,7 @@ import Weapon from "./Equipment/Weapon";
 import ContainerNode from "../Drawables/ContainerNode";
 import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
+import Delay from "../Script/Delay";
 
 export type EpisodeInfo = {
   winningTeam: number,
@@ -26,14 +27,7 @@ export type EpisodeInfo = {
 
 enum States {
   idle,
-  waitingForCamera,
   attacking,
-  postAttack,
-}
-
-type Pause = {
-  startTime: number,
-  duration: number,
 }
 
 class Actor implements ActorInterface {
@@ -71,8 +65,6 @@ class Actor implements ActorInterface {
 
   state = States.idle;
 
-  pause: Pause | null = null;
-
   private constructor(
     character: Character,
     mesh: SceneNode,
@@ -88,6 +80,8 @@ class Actor implements ActorInterface {
     this.height = height;
     this.chestHeight = height - 0.5;
     this.teamColor = color;
+
+    this.sceneNode.name = character.name;
 
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
@@ -127,9 +121,7 @@ class Actor implements ActorInterface {
     this.circle.color[2] = 1;
     this.circle.color[3] = 1;
 
-    this.state = States.waitingForCamera;
-    this.pause = { startTime: timestamp, duration: 2000 }
-    // this.pause = { startTime: timestamp, duration: 0 }
+    this.state = States.idle;
   }
 
   endTurn() {
@@ -190,7 +182,7 @@ class Actor implements ActorInterface {
 
   takeAction(
     action: Action | null, otherTeam: Actor[], timestamp: number, world: WorldInterface, script: Script,
-  ): Actor[] {
+  ) {
     const epsilon = 0.02; // Probability of a random action
 
     if (action === null || Math.random() < epsilon) {
@@ -227,8 +219,6 @@ class Actor implements ActorInterface {
       world,
       script,
     );
-
-    return result.removedActors;
   }
 
   useQLearning = false;
@@ -264,8 +254,8 @@ class Actor implements ActorInterface {
   addMove(script: Script, myPosition: Vec4, point: Vec4, distance: number) {
     const moveDistance = Math.min(distance, this.character.race.speed)
 
-    const v = vec4.normalize(vec4.subtract(point, myPosition));
-    const newPos = vec4.add(vec4.mulScalar(v, moveDistance), myPosition);
+    const v = vec4.mulScalar(vec4.normalize(vec4.subtract(point, myPosition)), moveDistance);
+    const newPos = vec4.add(myPosition, v);
 
     const mover = new Mover(this.sceneNode, vec2.create(newPos[0], newPos[2]));
     script.entries.push(mover);
@@ -298,90 +288,105 @@ class Actor implements ActorInterface {
           }
         }
 
-        removedActors = this.takeAction(action, otherTeam, timestamp, world, script);
+        this.takeAction(action, otherTeam, timestamp, world, script);
         this.state = States.attacking;
       }
       else {
-        const closest = this.getClosestTarget(otherTeam);
-        // Determine distance to opponents
-        const myPosition = this.getWorldPosition();
+        script.entries.push(new Delay(2000));
 
-        if (closest) {
-          if (closest.distance <= (this.attackRadius + 0.01) * 2) {
-            // The target is already in range.
-            const result = this.attack(
-              otherTeam[closest.index],
-              this.character.equipped.meleeWeapon!,
-              timestamp,
-              world,
-              script,
-            );
+        let done = false;
+        while (!done) {
+          const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
 
-            removedActors.push(...result.removedActors)
-            this.state = States.postAttack;
+          if (otherTeam.length === 0) {
+            break;
           }
-          else {
-            if (closest.distance - this.attackRadius * 2 < this.character.race.speed) {
-              // console.log('move to melee attack')
-              closest.distance -= this.attackRadius * 2;
+        
+          const closest = this.getClosestTarget(otherTeam);
+          // Determine distance to opponents
+          const myPosition = this.getWorldPosition();
 
-              // Move to the new location
-              this.addMove(script, myPosition, closest.point, closest.distance);
+          if (closest) {
+            const target = otherTeam[closest.index];
 
-              const result = this.attack(
-                otherTeam[closest.index],
-                this.character.equipped.meleeWeapon!,
-                timestamp,
-                world,
-                script,
-              );
-  
-              removedActors.push(...result.removedActors)
-              // this.state = States.postAttack;  
-            }
-            else {
-              // To far to move to melee attack
-              // Check range for range attack
-              if (this.character.equipped.rangeWeapon) {
-                const shotData = this.computeShotData(otherTeam[closest.index]);
-
-                const data: ShotData = {
-                  velocityVector: shotData.velocityVector,
-                  orientation: shotData.orientation,
-                  startPos: shotData.startPos,
-                  position: shotData.startPos,
-                  startTime: timestamp,
-                };
-
-                const shot = new Shot(world.shot, this, data);
-                script.entries.push(shot);
-
-                const result = this.attack(
-                  otherTeam[closest.index],
-                  this.character.equipped.rangeWeapon!,
+            if (this.actionsLeft > 0) {
+              if (closest.distance <= (this.attackRadius + 0.01) * 2) {
+                // The target is already in range.
+                this.attack(
+                  target,
+                  this.character.equipped.meleeWeapon!,
                   timestamp,
                   world,
                   script,
                 );
-
-                removedActors.push(...result.removedActors)
               }
+              else {
+                if (closest.distance - this.attackRadius * 2 < this.character.race.speed) {
+                  closest.distance -= this.attackRadius * 2;
 
-              // Move to the new location
+                  // Move to the new location
+                  this.addMove(script, myPosition, closest.point, closest.distance);
+
+                  this.attack(
+                    target,
+                    this.character.equipped.meleeWeapon!,
+                    timestamp,
+                    world,
+                    script,
+                  );
+                }
+                else {
+                  // To far to move to melee attack
+                  // Check range for range attack
+                  if (this.character.equipped.rangeWeapon) {
+                    const shotData = this.computeShotData(target);
+
+                    const data: ShotData = {
+                      velocityVector: shotData.velocityVector,
+                      orientation: shotData.orientation,
+                      startPos: shotData.startPos,
+                      position: shotData.startPos,
+                      startTime: timestamp,
+                    };
+
+                    const shot = new Shot(world.shot, this, data);
+                    script.entries.push(shot);
+
+                    this.attack(
+                      target,
+                      this.character.equipped.rangeWeapon!,
+                      timestamp,
+                      world,
+                      script,
+                    );
+
+                    if (target.character.hitPoints === 0) {
+                      continue;
+                    }
+                  }
+
+                  // Move to the new location
+                  this.addMove(script, myPosition, closest.point, closest.distance);
+                }
+              }
+            }
+            else {
               this.addMove(script, myPosition, closest.point, closest.distance);
             }
 
             this.state = States.attacking;
           }
+
+          done = true;
         }
       }
 
       if (script.entries.length > 0) {
         if (this.automated) {
+          script.entries.push(new Delay(2000));
+
           script.onFinish = (timestamp: number) => {
-            this.state = States.postAttack;
-            // this.pause = { startTime: timestamp, duration: 3000 }
-            this.pause = { startTime: timestamp, duration: 0 }
+            world.endTurn2(timestamp);  
           }
         }
 
@@ -389,7 +394,7 @@ class Actor implements ActorInterface {
       }
     }
     else {
-      this.state = States.postAttack;
+      world.endTurn2(timestamp);
     }
 
     return removedActors;
@@ -404,31 +409,16 @@ class Actor implements ActorInterface {
       if (world.participants.activeActor === this) {
         // if (this.actionsLeft) {
           if (world.animate) {
-            if (this.pause && this.pause.startTime + this.pause.duration > timestamp) {
-              return [];
-            }
-
             switch (this.state) {
               case States.idle:
-                break;
-      
-              case States.waitingForCamera:
                 if (this.actionsLeft) {
                   removedActors = this.chooseAction(timestamp, world);
                 }
-                else {
-                  this.state = States.idle;
-                }
-      
                 break;
       
               case States.attacking:
-                break;
-      
-              case States.postAttack:
-                world.endTurn2(timestamp);  
-                break;
-            }  
+                break;      
+            }
           }
           else {
             removedActors = this.chooseAction(timestamp, world);
@@ -485,20 +475,18 @@ class Actor implements ActorInterface {
     timestamp: number,
     world: WorldInterface,
     script: Script,
-  ): { removedActors: Actor[] } {
+  ) {
     this.actionsLeft -= 1;
-
-    const removedActors: Actor[] = [];
 
     const damage = attackRoll(this.character, targetActor.character, weapon, false);
 
     targetActor.character.hitPoints -= damage;
 
     if (damage > 0) {
-      script.entries.push(new Logger(`Party ${this.team}: ${this.character.name} hit Party ${targetActor.team}: ${targetActor.character.name} for ${damage} points.`))
+      script.entries.push(new Logger(`${this.character.name} hit ${targetActor.character.name} for ${damage} points with ${weapon.name}.`))
     }
     else {
-      script.entries.push(new Logger(`Party ${this.team}: ${this.character.name} missed Party ${targetActor.team}: ${targetActor.character.name}.`))
+      script.entries.push(new Logger(`${this.character.name} missed ${targetActor.character.name} with ${weapon.name}.`))
     }
 
     if (targetActor.character.hitPoints <= 0) {
@@ -510,15 +498,10 @@ class Actor implements ActorInterface {
 
       if (!world.animate) {
         world.participants.remove(targetActor);
-        removedActors.push(targetActor);
         world.collidees.remove(targetActor);
         targetActor.removeFromScene();
         world.scene.removeNode(targetActor.sceneNode);
       }
-    }
-
-    return {
-      removedActors,
     }
   }
 

@@ -20,7 +20,8 @@ class Script implements ActorInterface {
             this.onFinish(timestamp);
           }
   
-          removedActors.push(this)  
+          //world.removeActors.push(this);
+           removedActors.push(this)  
         }
         else {
           // TODO: consider that the entry removed did not take all of the elapsed time

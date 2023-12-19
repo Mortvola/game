@@ -274,8 +274,6 @@ class Renderer implements WorldInterface {
     this.startTurn(0);
   }
 
-  iterations = 2000;
-
   updateFrame = async (timestamp: number) => {
     if (this.render) {
       if (timestamp !== this.previousTimestamp) {
@@ -300,7 +298,7 @@ class Renderer implements WorldInterface {
           const elapsedTime = (timestamp - this.previousTimestamp) * 0.001;
 
           if (this.participants.state === ParticipantsState.needsPrep) {
-            // console.log('starting new round');
+            console.log('*** starting new round ***');
             this.participants.state = ParticipantsState.preparing;
             this.prepareTeams()
           }

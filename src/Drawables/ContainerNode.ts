@@ -36,8 +36,16 @@ class ContainerNode extends SceneNode {
     if (index !== -1) {
       this.nodes = [
         ...this.nodes.slice(0, index),
-        ...this.nodes.slice(index + 1, 0)
+        ...this.nodes.slice(index + 1)
       ]
+    }
+  }
+
+  findNode(node: SceneNode) {
+    const index = this.nodes.findIndex((n) => n.node === node);
+
+    if (index === -1) {
+      console.log('node not found!!!!')
     }
   }
 
