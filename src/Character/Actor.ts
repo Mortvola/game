@@ -2,7 +2,7 @@ import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import Mesh from "../Drawables/Mesh";
 import { box } from "../Drawables/Shapes/box";
 import SceneNode from "../Drawables/SceneNode";
-import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, timeToTarget } from "../Math";
+import { anglesOfLaunch, degToRad, feetToMeters, lineCircleIntersectionTest, minimumVelocity, timeToTarget } from "../Math";
 import Circle from "../Drawables/Circle";
 import RenderPass from "../RenderPass";
 import { ActorInterface } from "../ActorInterface";
@@ -20,6 +20,8 @@ import ContainerNode from "../Drawables/ContainerNode";
 import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
+import { pf } from '../Pathfinder';
+import FollowPath from "../Script/FollowPath";
 
 export type EpisodeInfo = {
   winningTeam: number,
@@ -27,7 +29,7 @@ export type EpisodeInfo = {
 
 enum States {
   idle,
-  attacking,
+  scripting,
 }
 
 class Actor implements ActorInterface {
@@ -148,38 +150,6 @@ class Actor implements ActorInterface {
     }
   }
 
-  move(elapsedTime: number) {
-    // if (this.moveTo) {
-    //   const distanceToTarget = vec2.distance(
-    //     vec2.create(
-    //       this.mesh.translate[0],
-    //       this.mesh.translate[2],
-    //     ),
-    //     this.moveTo,
-    //   );
-
-    //   if (this.metersPerSecond * elapsedTime > distanceToTarget) {
-    //     this.mesh.translate[0] = this.moveTo[0];
-    //     this.mesh.translate[2] = this.moveTo[1];
-
-    //     this.moveTo = null;
-    //   } else {
-    //     let v = vec3.create(
-    //       this.moveTo[0] - this.mesh.translate[0],
-    //       0,
-    //       this.moveTo[1] - this.mesh.translate[2],
-    //     );
-
-    //     v = vec3.normalize(v);
-
-    //     v = vec3.mulScalar(v, elapsedTime * this.metersPerSecond);
-
-    //     this.mesh.translate[0] += v[0];
-    //     this.mesh.translate[2] += v[2];
-    //   }
-    // }
-  }
-
   takeAction(
     action: Action | null, otherTeam: Actor[], timestamp: number, world: WorldInterface, script: Script,
   ) {
@@ -212,7 +182,7 @@ class Actor implements ActorInterface {
     });
 
     const target = sortedActors[action.opponent];
-    const result = this.attack(
+    this.attack(
       target,
       this.character.equipped.meleeWeapon!,
       timestamp,
@@ -251,12 +221,14 @@ class Actor implements ActorInterface {
     return closest;
   }
 
-  addMove(script: Script, myPosition: Vec4, point: Vec4, distance: number) {
+  getDestination(myPosition: Vec4, point: Vec4, distance: number): Vec4 {
     const moveDistance = Math.min(distance, this.character.race.speed)
 
     const v = vec4.mulScalar(vec4.normalize(vec4.subtract(point, myPosition)), moveDistance);
-    const newPos = vec4.add(myPosition, v);
+    return vec4.add(myPosition, v);
+  }
 
+  addMove(script: Script, newPos: Vec4) {
     const mover = new Mover(this.sceneNode, vec2.create(newPos[0], newPos[2]));
     script.entries.push(mover);
   }
@@ -289,9 +261,21 @@ class Actor implements ActorInterface {
         }
 
         this.takeAction(action, otherTeam, timestamp, world, script);
-        this.state = States.attacking;
+        this.state = States.scripting;
       }
       else {
+        pf.clear();
+
+        for (const a of world.participants.turns) {
+          if (a !== this) {
+            const point = a.getWorldPosition();
+
+            const center = vec2.create(point[0], point[2]);
+
+            pf.fillCircle(a, center, a.attackRadius * 2);  
+          }
+        }
+
         script.entries.push(new Delay(2000));
 
         let done = false;
@@ -303,6 +287,7 @@ class Actor implements ActorInterface {
           }
         
           const closest = this.getClosestTarget(otherTeam);
+
           // Determine distance to opponents
           const myPosition = this.getWorldPosition();
 
@@ -324,8 +309,14 @@ class Actor implements ActorInterface {
                 if (closest.distance - this.attackRadius * 2 < this.character.race.speed) {
                   closest.distance -= this.attackRadius * 2;
 
-                  // Move to the new location
-                  this.addMove(script, myPosition, closest.point, closest.distance);
+                  // Find path to the closest
+                  const start = vec2.create(myPosition[0], myPosition[2]);
+                  const t = target.getWorldPosition();
+                  const goal = vec2.create(t[0], t[2])
+                  const path = pf.findPath(start, goal, target);
+
+                  const followPath = new FollowPath(this.sceneNode, path);
+                  script.entries.push(followPath);
 
                   this.attack(
                     target,
@@ -366,15 +357,25 @@ class Actor implements ActorInterface {
                   }
 
                   // Move to the new location
-                  this.addMove(script, myPosition, closest.point, closest.distance);
+                  // const newPos = this.getDestination(myPosition, closest.point, closest.distance);
+                  // this.addMove(script, newPos);
+                  const start = vec2.create(myPosition[0], myPosition[2]);
+                  const t = target.getWorldPosition();
+                  const goal = vec2.create(t[0], t[2])
+                  const path = pf.findPath(start, goal, target);
+
+                  if (path.length > 0) {
+                    script.entries.push(new FollowPath(this.sceneNode, path));                      
+                  }
                 }
               }
             }
             else {
-              this.addMove(script, myPosition, closest.point, closest.distance);
+              const newPos = this.getDestination(myPosition, closest.point, closest.distance);
+              this.addMove(script, newPos);
             }
 
-            this.state = States.attacking;
+            this.state = States.scripting;
           }
 
           done = true;
@@ -404,8 +405,6 @@ class Actor implements ActorInterface {
     let removedActors: ActorInterface[] = [];
 
     if (this.character.hitPoints > 0) {
-      this.move(elapsedTime)
-
       if (world.participants.activeActor === this) {
         // if (this.actionsLeft) {
           if (world.animate) {
@@ -416,7 +415,7 @@ class Actor implements ActorInterface {
                 }
                 break;
       
-              case States.attacking:
+              case States.scripting:
                 break;      
             }
           }

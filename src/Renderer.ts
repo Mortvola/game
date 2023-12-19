@@ -101,6 +101,8 @@ class Renderer implements WorldInterface {
 
   followActiveCharacter = false;
 
+  endOfRound = true;
+
   constructor(shot: Mesh, reticle: Reticle) {
     this.reticle = reticle;
 
@@ -190,6 +192,13 @@ class Renderer implements WorldInterface {
 
       this.focused = null;
 
+      if (
+        this.participants.participants[0].length === 0
+        || this.participants.participants[1].length === 0
+      ) {
+        this.endOfRound = true;
+      }
+
       this.participants.turn = (this.participants.turn + 1) % this.participants.turns.length;
       this.startTurn(timestamp);
     }
@@ -271,6 +280,8 @@ class Renderer implements WorldInterface {
       this.actors.push(actor);
     }
 
+    this.scene.updateTransforms();
+
     this.startTurn(0);
   }
 
@@ -307,11 +318,7 @@ class Renderer implements WorldInterface {
 
           this.updateActors(elapsedTime, timestamp);
 
-          if (
-            this.participants.state === ParticipantsState.ready
-            && (this.participants.participants[0].length === 0
-            || this.participants.participants[1].length === 0)
-          ) {
+          if (this.participants.state === ParticipantsState.ready && this.endOfRound) {
             let winningTeam = 0;
             if (this.participants.participants[0].length === 0) {
               winningTeam = 1;
@@ -326,6 +333,7 @@ class Renderer implements WorldInterface {
             }  
 
             this.participants.state = ParticipantsState.needsPrep;
+            this.endOfRound = false;
           }  
 
           this.checkActorFocus();
