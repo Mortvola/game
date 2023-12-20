@@ -7,13 +7,12 @@ class Line extends Drawable {
 
   vertexBuffer: GPUBuffer;
 
-  constructor(p1: Vec4, p2: Vec4, color = vec4.create(1, 0, 0, 1)) {
+  constructor(p1: Vec4[], color = vec4.create(1, 0, 0, 1)) {
     super();
   
-    this.vertices = [
-      p1[0], p1[1], p1[2], p1[3], color[0], color[1], color[2], color[3],
-      p2[0], p2[1], p2[2], p2[3], color[0], color[1], color[2], color[3],
-    ]
+    this.vertices = p1.flatMap((p) => (
+      [p[0], p[1], p[2], p[3], color[0], color[1], color[2], color[3]]
+    ))
 
     this.vertexBuffer = gpu!.device.createBuffer({
       size: this.vertices.length * Float32Array.BYTES_PER_ELEMENT,

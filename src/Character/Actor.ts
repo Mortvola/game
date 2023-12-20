@@ -2,7 +2,7 @@ import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import Mesh from "../Drawables/Mesh";
 import { box } from "../Drawables/Shapes/box";
 import SceneNode from "../Drawables/SceneNode";
-import { anglesOfLaunch, degToRad, feetToMeters, lineCircleIntersectionTest, minimumVelocity, timeToTarget } from "../Math";
+import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, timeToTarget } from "../Math";
 import Circle from "../Drawables/Circle";
 import RenderPass from "../RenderPass";
 import { ActorInterface } from "../ActorInterface";
@@ -22,7 +22,6 @@ import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
 import { pf } from '../Pathfinder';
 import FollowPath from "../Script/FollowPath";
-import QuadTree from "../QuadTree";
 
 export type EpisodeInfo = {
   winningTeam: number,

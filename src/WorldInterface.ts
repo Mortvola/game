@@ -1,6 +1,7 @@
 import { ActorInterface } from "./ActorInterface";
 import Collidees from "./Collidees";
 import ContainerNode from "./Drawables/ContainerNode";
+import Line from "./Drawables/Line";
 import Mesh from "./Drawables/Mesh";
 import Participants from "./Participants";
 import RenderPass from "./RenderPass";
@@ -33,4 +34,6 @@ export interface WorldInterface {
   mainRenderPass: RenderPass;
 
   loggerCallback: ((message: string) => void) | null;
+
+  path: Line | null;
 }

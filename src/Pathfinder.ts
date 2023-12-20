@@ -1,4 +1,4 @@
-import { Vec2, vec2 } from "wgpu-matrix";
+import { Vec2, Vec4, vec2, vec4 } from "wgpu-matrix";
 import Actor from "./Character/Actor";
 
 type Element = {
@@ -50,13 +50,12 @@ class PathFinder {
   constructor(width: number, height: number, scale: number) {
     this.scale = scale;
 
-    const xOffset = Math.floor(width / 2);
-    const yOffset = Math.floor(height / 2);
+    this.center = vec2.create(Math.floor(width / 2), Math.floor(height / 2))
 
     this.grid = Array.from({ length: height }, (_, y) => (
       Array.from({ length: width }, (_, x) => ({
-        x: x - xOffset,
-        y: y - yOffset,
+        x: x - this.center[0],
+        y: y - this.center[1],
         gCost: 0,
         hCost: 0,
         actors: [],
@@ -66,8 +65,6 @@ class PathFinder {
 
     this.width = width;
     this.height = height;
-
-    this.center = vec2.create(Math.trunc(width / 2), Math.trunc(height / 2))
 
     this.clear();
   }
@@ -320,7 +317,6 @@ class PathFinder {
     }
 
     return true
-    // return false
   }
 
   costEstimate(x1: number, y1: number, x2: number, y2: number): number {
@@ -336,33 +332,28 @@ class PathFinder {
   }
 
   fillCircle(actor: Actor, c: Vec2, r: number) {
-    const center = vec2.create(Math.floor(c[0] * this.scale + 0.5), Math.floor(c[1] * this.scale + 0.5))
+    const center = vec2.create(
+      Math.floor(c[0] * this.scale + 0.5) + this.center[0],
+      Math.floor(c[1] * this.scale + 0.5) + this.center[1],
+    )
     const radius = Math.floor(r * this.scale + 0.5);
-
-    const offset = vec2.add(center, this.center);
 
     let x = radius;
     let y = 0;
   
     // (-radius, 0) and (radius, 0) points.
-    if (0 <= y + offset[1] && y + offset[1] < this.height) {
-      if (0 <= x + offset[0] && x + offset[0] < this.width) {
-        this.grid[y + offset[1]][x + offset[0]].actors.push(actor);
-      }
-
-      if (0 <= -x + offset[0] && -x + offset[0] < this.width) {
-        this.grid[y + offset[1]][-x + offset[0]].actors.push(actor);
-      }
+    if (0 <= y + center[1] && y + center[1] < this.height) {
+      this.horizontalLine(actor, -x + center[0], x + center[0], y + center[1])
     }
 
     // (0, -radius) and (0, radius) points
-    if (0 <= y + offset[0] && y + offset[0] < this.width) {
-      if (0 <= x + offset[1] && x + offset[1] < this.height) {
-        this.grid[x + offset[1]][y + offset[0]].actors.push(actor);
+    if (0 <= y + center[0] && y + center[0] < this.width) {
+      if (0 <= x + center[1] && x + center[1] < this.height) {
+        this.grid[x + center[1]][y + center[0]].actors.push(actor);
       }
 
-      if (0 <= -x + offset[1] && -x + offset[1] < this.height) {
-        this.grid[-x + offset[1]][y + offset[0]].actors.push(actor);
+      if (0 <= -x + center[1] && -x + center[1] < this.height) {
+        this.grid[-x + center[1]][y + center[0]].actors.push(actor);
       }
     }
     
@@ -376,28 +367,28 @@ class PathFinder {
       }
       else {
         x -= 1;
-        p = p + 2 & y - 2 * x + 1;
+        p = p + 2 * y - 2 * x + 1;
       }
   
       if (x < y) {
         break;
       }
   
-      if (0 <= y + offset[1] && y + offset[1] < this.height) {
-        this.horizontalLine(actor, -x + offset[0], x + offset[0], y + offset[1])
+      if (0 <= y + center[1] && y + center[1] < this.height) {
+        this.horizontalLine(actor, -x + center[0], x + center[0], y + center[1])
       }
 
-      if (0 <= -y + offset[1] && -y + offset[1] < this.height) {
-        this.horizontalLine(actor, -x + offset[0], x + offset[0], -y + offset[1])
+      if (0 <= -y + center[1] && -y + center[1] < this.height) {
+        this.horizontalLine(actor, -x + center[0], x + center[0], -y + center[1])
       }
 
       if (x !== y) {
-        if (0 < x + offset[1] && x + offset[1] < this.height) {
-          this.horizontalLine(actor, -y + offset[0], y + offset[0], x + offset[1])
+        if (0 <= x + center[1] && x + center[1] < this.height) {
+          this.horizontalLine(actor, -y + center[0], y + center[0], x + center[1])
         }
 
-        if (0 < -x + offset[1] && -x + offset[1] < this.height) {
-          this.horizontalLine(actor, -y + offset[0], y + offset[0], -x + offset[1])
+        if (0 <= -x + center[1] && -x + center[1] < this.height) {
+          this.horizontalLine(actor, -y + center[0], y + center[0], -x + center[1])
         }
       }
     }
@@ -413,7 +404,7 @@ class PathFinder {
   }
 }
 
-export const pf = new PathFinder(512, 512, 16);
+export const pf = new PathFinder(512, 512, 8);
 
 // const actor = {} as Actor;
 // pf.grid[Math.floor(5 * pf.scale) + pf.center[0]][Math.floor(3 * pf.scale) + pf.center[1]].actors.push(actor);

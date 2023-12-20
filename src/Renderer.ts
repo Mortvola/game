@@ -653,8 +653,7 @@ class Renderer implements WorldInterface {
           const { start, target } = this.computePath(this.participants.activeActor, point);
 
           this.path = new Line(
-            start,
-            target,
+            [start, target],
             vec4.create(1, 1, 1, 1),
           );
 
