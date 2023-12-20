@@ -54,7 +54,14 @@ class PathFinder {
     const yOffset = Math.floor(height / 2);
 
     this.grid = Array.from({ length: height }, (_, y) => (
-      Array.from({ length: width }, (_, x) => ({ x: x - xOffset, y: y - yOffset, gCost: 0, hCost: 0, actors: [], parent: null }))
+      Array.from({ length: width }, (_, x) => ({
+        x: x - xOffset,
+        y: y - yOffset,
+        gCost: 0,
+        hCost: 0,
+        actors: [],
+        parent: null,
+      }))
     ))
 
     this.width = width;
@@ -140,17 +147,36 @@ class PathFinder {
                 continue;
               }
 
-              const cost = currentNode.gCost + this.costEstimate(
-                currentNode.x, currentNode.y, neighborNode.x, neighborNode.y,
-              );
+              if (currentNode.parent && this.LineOfSight(
+                vec2.create(currentNode.parent.x, currentNode.parent.y),
+                vec2.create(neighborNode.x, neighborNode.y)
+              )) {
+                const cost = currentNode.parent.gCost + this.costEstimate(
+                  currentNode.parent.x, currentNode.parent.y, neighborNode.x, neighborNode.y,
+                );
+      
+                if (cost < neighborNode.gCost) { // || !openSet.contains(neighborNode)) {
+                  neighborNode.gCost = cost;
+                  neighborNode.hCost = this.costEstimate(neighborNode.x, neighborNode.y, goalNode.x, goalNode.y);
+                  neighborNode.parent = currentNode.parent;
 
-              if (cost < neighborNode.gCost) { // || !openSet.contains(neighborNode)) {
-                neighborNode.gCost = cost;
-                neighborNode.hCost = this.costEstimate(neighborNode.x, neighborNode.y, goalNode.x, goalNode.y);
-                neighborNode.parent = currentNode;
+                  if (!openSet.contains(neighborNode)) {
+                    openSet.push(neighborNode);
+                  }
+                }
+              } else {
+                const cost = currentNode.gCost + this.costEstimate(
+                  currentNode.x, currentNode.y, neighborNode.x, neighborNode.y,
+                );
+  
+                if (cost < neighborNode.gCost) { // || !openSet.contains(neighborNode)) {
+                  neighborNode.gCost = cost;
+                  neighborNode.hCost = this.costEstimate(neighborNode.x, neighborNode.y, goalNode.x, goalNode.y);
+                  neighborNode.parent = currentNode;
 
-                if (!openSet.contains(neighborNode)) {
-                  openSet.push(neighborNode);
+                  if (!openSet.contains(neighborNode)) {
+                    openSet.push(neighborNode);
+                  }
                 }
               }
             }
@@ -160,6 +186,141 @@ class PathFinder {
     }
 
     return [];
+  }
+
+  // Line of sight algorithm from Movel AI News.
+  LineOfSight(p1: Vec2, p2: Vec2) {
+    let x0 = p1[0]
+    let y0 = p1[1];
+    const x1 = p2[0]
+    const y1 = p2[1];
+
+    let dy = y1 - y0
+    let dx = x1 - x0;
+
+    let f = 0
+
+    const s: number[] = [1, 1];
+
+    if (dy < 0) {
+        dy = -dy
+        s[1] = -1
+    }
+
+    if (dx < 0) {
+        dx = -dx
+        s[0] = -1
+    }
+
+    if (dx >= dy) {
+      while (x0 !== x1) {
+        f = f + dy;
+
+        if (f >= dx ) {
+          const node = this.getNode(
+            vec2.create(
+              x0 + Math.floor((s[0] - 1) / 2),
+              y0 + Math.floor((s[1] - 1) / 2),
+            )
+          );
+
+          if (node.actors.length > 0) { 
+              return false
+          }
+
+          y0 = y0 + s[1]
+          f = f - dx
+        }
+
+        const node = this.getNode(
+          vec2.create(
+            x0 + Math.floor((s[0] - 1) / 2),
+            y0 + Math.floor((s[1] - 1) / 2),
+          )
+        );
+
+        if (f !== 0 && node.actors.length > 0) {
+            return false
+        }
+
+        if (dy === 0) {
+          const node1 = this.getNode(
+            vec2.create(
+              x0 + Math.floor((s[0] - 1) / 2),
+              y0,
+            )
+          );
+
+          const node2 = this.getNode(
+            vec2.create(
+              x0 + Math.floor((s[0] - 1) / 2),
+              y0 - 1,
+            )
+          );
+
+          if (node1.actors.length > 0 && node2.actors.length > 0) {
+            return false
+          }
+        }
+
+        x0 = x0 + s[0];
+      }
+    } else {
+      while (y0 !== y1) {
+        f = f + dx
+        if (f >= dy) {
+          const node = this.getNode(
+            vec2.create(
+              x0 + Math.floor((s[0] - 1) / 2),
+              y0 + Math.floor((s[1] - 1) / 2),
+            )
+          );
+
+          if (node.actors.length > 0) {
+              return false;
+          }
+
+          x0 = x0 + s[0]
+          f = f - dy
+        }
+
+        const node = this.getNode(
+          vec2.create(
+            x0 + Math.floor((s[0] - 1) / 2),
+            y0 + Math.floor((s[1] - 1) / 2),
+          )
+        );
+
+        if (f !== 0 && node.actors.length > 0) {
+          return false;
+        }
+
+        if (dx === 0) {
+          const node1 = this.getNode(
+            vec2.create(
+              x0 + Math.floor((s[0] - 1) / 2),
+              y0,
+            )
+          );
+
+          const node2 = this.getNode(
+            vec2.create(
+              x0 + Math.floor((s[0] - 1) / 2),
+              y0 - 1,
+            )
+          );
+
+          if (node1.actors.length > 0 && node2.actors.length > 0) {
+            return false
+          }
+        }
+
+        y0 = y0 + s[1];
+      }
+    }
+
+    return true
+    // return false
   }
 
   costEstimate(x1: number, y1: number, x2: number, y2: number): number {

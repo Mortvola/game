@@ -22,6 +22,7 @@ import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
 import { pf } from '../Pathfinder';
 import FollowPath from "../Script/FollowPath";
+import QuadTree from "../QuadTree";
 
 export type EpisodeInfo = {
   winningTeam: number,
@@ -264,6 +265,8 @@ class Actor implements ActorInterface {
         this.state = States.scripting;
       }
       else {
+        // const quadTree = new QuadTree(2000, world.participants.turns, 8);
+
         pf.clear();
 
         for (const a of world.participants.turns) {
@@ -491,7 +494,7 @@ class Actor implements ActorInterface {
     if (targetActor.character.hitPoints <= 0) {
       targetActor.character.hitPoints = 0;
 
-      script.entries.push(new Logger(`Party ${targetActor.team}: ${targetActor.character.name} the ${targetActor.character.charClass.name} died.`))
+      script.entries.push(new Logger(`${targetActor.character.name} the ${targetActor.character.charClass.name} died.`))
 
       script.entries.push(new Remover(targetActor));
 

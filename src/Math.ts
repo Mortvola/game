@@ -181,7 +181,7 @@ export const lineCircleIntersectionTest = (center: Vec2, radius: number, p1: Vec
 // lineCircleIntersectionTest(center, radius, p1, p2);
 
 
-const midpointCircle = (center: Vec2, radius: number) => {
+export const midpointCircle = (center: Vec2, radius: number) => {
   let x = radius;
   let y = 0;
 
@@ -216,3 +216,100 @@ const midpointCircle = (center: Vec2, radius: number) => {
     }
   }
 }
+
+export const circleRectangleIntersectionTest = (center: Vec2, radius: number, upperLeft: Vec2, lowerRight: Vec2): boolean => {
+  const rectWidth = lowerRight[0] - upperLeft[0];
+  const rectHeight = upperLeft[1] - lowerRight[1];
+
+  const rectCenter = vec2.create(
+     (lowerRight[0] + upperLeft[0]) / 2,
+     (upperLeft[1] + lowerRight[1]) / 2,
+  );
+
+  const distance = vec2.create(
+    Math.abs(center[0] - rectCenter[0]),
+    Math.abs(center[1] - rectCenter[1]),
+  )
+
+  if (distance[0] > rectWidth / 2 + radius) {
+    return false;
+  }
+
+  if (distance[1] > rectHeight / 2 + radius) {
+    return false;
+  }
+
+  if (distance[0] <= rectWidth / 2) {
+    return true;
+  }
+
+  if (distance[1] <= rectHeight / 2) {
+    return true;
+  }
+
+  const cornerDistanceSq = (distance[0] - rectWidth / 2) * (distance[0] - rectWidth / 2)
+    + (distance[1] - rectHeight / 2) * (distance[1] - rectHeight / 2);
+
+  return cornerDistanceSq <= radius * radius;
+}
+
+const center = vec2.create(-5.707, -2.708);
+const radius = 1;
+
+const upperLeft = vec2.create(-5, 5);
+const lowerRight = vec2.create(7, -2);
+
+const result = circleRectangleIntersectionTest(center, radius, upperLeft, lowerRight);
+
+console.log(`intersection: ${result}`);
+
+
+const midPointLine = (p1: Vec2, p2: Vec2) => { 
+  let start = p1;
+  let end = p2;
+
+  if (start[0] > end[0]) {
+    start = p2;
+    end = p1;
+  }
+
+  let sign = 1;
+  if (start[1] > end[1]) {
+    sign = -1;
+  }
+
+  // calculate dx & dy 
+  let dx = end[0] - start[0]; 
+  let dy = sign * (end[1] - start[1]); 
+
+  // initial value of decision 
+  // parameter d 
+  let d = dy - (dx / 2); 
+  let x = start[0], y = start[1]; 
+
+  // Plot initial given point 
+  // putpixel(x,y) can be used to 
+  // print pixel of line in graphics 
+  console.log(`${x}, ${y}`); 
+
+  // iterate through value of X 
+  while (x < end[0]) { 
+    x += 1; 
+
+    // E or East is chosen 
+    if (d < 0) {
+      d = d + dy; 
+    } else { 
+      // NE or North East is chosen 
+      d += (dy - dx); 
+      y += sign; 
+    } 
+
+    console.log(`${x}, ${y}`); 
+  } 
+}
+
+const p1 = vec2.create(0, 0);
+const p2 = vec2.create(5, 7);
+
+midPointLine(p1, p2);
