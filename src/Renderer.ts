@@ -97,6 +97,8 @@ class Renderer implements WorldInterface {
 
   scoreCallback: ((episode: EpisodeInfo) => void) | null = null;
 
+  loggerCallback: ((message: string) => void) | null = null;
+  
   animate = true;
 
   followActiveCharacter = false;
@@ -774,6 +776,10 @@ class Renderer implements WorldInterface {
 
   setScoreCallback(callback: (episode: EpisodeInfo) => void) {
     this.scoreCallback = callback;
+  }
+
+  setLoggerCallback(callback: (message: string) => void) {
+    this.loggerCallback = callback;
   }
 
   setParties(parties: Character[][]) {

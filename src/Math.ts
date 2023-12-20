@@ -253,15 +253,15 @@ export const circleRectangleIntersectionTest = (center: Vec2, radius: number, up
   return cornerDistanceSq <= radius * radius;
 }
 
-const center = vec2.create(-5.707, -2.708);
-const radius = 1;
+// const center = vec2.create(-5.707, -2.708);
+// const radius = 1;
 
-const upperLeft = vec2.create(-5, 5);
-const lowerRight = vec2.create(7, -2);
+// const upperLeft = vec2.create(-5, 5);
+// const lowerRight = vec2.create(7, -2);
 
-const result = circleRectangleIntersectionTest(center, radius, upperLeft, lowerRight);
+// const result = circleRectangleIntersectionTest(center, radius, upperLeft, lowerRight);
 
-console.log(`intersection: ${result}`);
+// console.log(`intersection: ${result}`);
 
 
 const midPointLine = (p1: Vec2, p2: Vec2) => { 
@@ -309,7 +309,7 @@ const midPointLine = (p1: Vec2, p2: Vec2) => {
   } 
 }
 
-const p1 = vec2.create(0, 0);
-const p2 = vec2.create(5, 7);
+// const p1 = vec2.create(0, 0);
+// const p2 = vec2.create(5, 7);
 
-midPointLine(p1, p2);
+// midPointLine(p1, p2);

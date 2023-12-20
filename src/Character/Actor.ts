@@ -485,10 +485,10 @@ class Actor implements ActorInterface {
     targetActor.character.hitPoints -= damage;
 
     if (damage > 0) {
-      script.entries.push(new Logger(`${this.character.name} hit ${targetActor.character.name} for ${damage} points with ${weapon.name}.`))
+      script.entries.push(new Logger(`${this.character.name} hit ${targetActor.character.name} for ${damage} points with a ${weapon.name}.`))
     }
     else {
-      script.entries.push(new Logger(`${this.character.name} missed ${targetActor.character.name} with ${weapon.name}.`))
+      script.entries.push(new Logger(`${this.character.name} missed ${targetActor.character.name} with a ${weapon.name}.`))
     }
 
     if (targetActor.character.hitPoints <= 0) {

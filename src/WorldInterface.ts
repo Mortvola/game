@@ -31,4 +31,6 @@ export interface WorldInterface {
   removeActors: ActorInterface[];
 
   mainRenderPass: RenderPass;
+
+  loggerCallback: ((message: string) => void) | null;
 }

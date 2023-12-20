@@ -9,7 +9,9 @@ class Logger implements ActorInterface {
   }
 
   update(elapsedTime: number, timestamp: number, world: WorldInterface): ActorInterface[] {
-    console.log(this.message);
+    if (world.loggerCallback) {
+      world.loggerCallback(this.message)
+    }
 
     return [this];
   }

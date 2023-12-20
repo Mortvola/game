@@ -8,6 +8,7 @@ import DefineParties from './DefineParties';
 import Character from '../Character/Character';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
 import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
+import Messages from './Messages';
 
 type DiretionKeys = {
   left: number,
@@ -58,6 +59,21 @@ function App() {
 
     setScore((prev) => ({ red: prev.red + episode.winningTeam, blue: prev.blue + (episode.winningTeam === 0 ? 1 : 0)}));
   }, []);
+
+  const [messages, setMessages] = React.useState<{ id: number, message: string }[]>([]);
+
+  const loggerCallback = React.useCallback((message: string) => {
+    setMessages((prev) => (
+      [
+        ...prev,
+        {
+          id: prev.length === 0 ? 0 : prev[prev.length - 1].id + 1,
+          message,
+        }
+      ]
+      .slice(-4)
+    ));  
+  }, [])
 
   React.useEffect(() => {
     const listener = (evt: MessageEvent<WorkerMessage>) => {
@@ -122,9 +138,10 @@ function App() {
       element.focus();
       (async () => {
         renderer.setScoreCallback(scoreCallback)
+        renderer.setLoggerCallback(loggerCallback)
       })()  
     }
-  }, [scoreCallback])
+  }, [scoreCallback, loggerCallback])
 
   const handlePointerDown: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -441,6 +458,9 @@ function App() {
             )
             : null
         }
+      </div>
+      <div className="lower-right">
+        <Messages messages={messages} />
       </div>
     </div>
   );
