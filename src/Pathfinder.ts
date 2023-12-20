@@ -1,4 +1,4 @@
-import { Vec2, Vec4, vec2, vec4 } from "wgpu-matrix";
+import { Vec2, vec2 } from "wgpu-matrix";
 import Actor from "./Character/Actor";
 
 type Element = {
@@ -84,6 +84,11 @@ class PathFinder {
     return this.grid[v[1] + this.center[0]][v[0] + this.center[0]]
   }
 
+  nodeBlocked(node: Element, target: Actor): boolean {
+    return (node.actors.length > 0
+      && (node.actors.length !== 1 || node.actors[0] !== target))
+  }
+
   findPath(s: Vec2, g: Vec2, target: Actor): Vec2[] {
     const start = vec2.create(Math.floor(s[0] * this.scale + 0.5), Math.floor(s[1] * this.scale + 0.5))
     const goal = vec2.create(Math.floor(g[0] * this.scale + 0.5), Math.floor(g[1] * this.scale + 0.5))
@@ -95,7 +100,6 @@ class PathFinder {
 
     const startNode = this.getNode(start);
     startNode.gCost = 0;
-    // startNode.hCost = this.costEstimate(startNode.x, startNode.y, goalNode.x, goalNode.y);
 
     openSet.push(startNode);
 
@@ -107,8 +111,6 @@ class PathFinder {
       if (currentNode) {
         closedSet.push(currentNode);
 
-        // const currentNode = this.getNode(currentNode);
-
         if (currentNode.actors.length === 1 && currentNode.actors[0] === target) {
           // Found goal
           const path: Vec2[] = [];
@@ -118,7 +120,7 @@ class PathFinder {
             currentNode = currentNode.parent
           }
 
-          return path; // .reverse();
+          return path;
         }
 
         for (let y = -1; y <= 1; y += 1) {
@@ -137,8 +139,7 @@ class PathFinder {
               const neighborNode = this.getNode(neighbor);
 
               if (
-                (neighborNode.actors.length > 0
-                && (neighborNode.actors.length !== 1 || neighborNode.actors[0] !== target))
+                this.nodeBlocked(neighborNode, target)
                 || closedSet.contains(neighborNode)
               ) {
                 continue;
@@ -146,7 +147,8 @@ class PathFinder {
 
               if (currentNode.parent && this.LineOfSight(
                 vec2.create(currentNode.parent.x, currentNode.parent.y),
-                vec2.create(neighborNode.x, neighborNode.y)
+                vec2.create(neighborNode.x, neighborNode.y),
+                target,
               )) {
                 const cost = currentNode.parent.gCost + this.costEstimate(
                   currentNode.parent.x, currentNode.parent.y, neighborNode.x, neighborNode.y,
@@ -186,7 +188,7 @@ class PathFinder {
   }
 
   // Line of sight algorithm from Movel AI News.
-  LineOfSight(p1: Vec2, p2: Vec2) {
+  LineOfSight(p1: Vec2, p2: Vec2, target: Actor) {
     let x0 = p1[0]
     let y0 = p1[1];
     const x1 = p2[0]
@@ -221,7 +223,7 @@ class PathFinder {
             )
           );
 
-          if (node.actors.length > 0) { 
+          if (this.nodeBlocked(node, target)) { 
               return false
           }
 
@@ -236,7 +238,7 @@ class PathFinder {
           )
         );
 
-        if (f !== 0 && node.actors.length > 0) {
+        if (f !== 0 && this.nodeBlocked(node, target)) {
             return false
         }
 
@@ -255,7 +257,7 @@ class PathFinder {
             )
           );
 
-          if (node1.actors.length > 0 && node2.actors.length > 0) {
+          if (this.nodeBlocked(node1, target) && this.nodeBlocked(node2, target)) {
             return false
           }
         }
@@ -273,7 +275,7 @@ class PathFinder {
             )
           );
 
-          if (node.actors.length > 0) {
+          if (this.nodeBlocked(node, target)) {
               return false;
           }
 
@@ -288,7 +290,7 @@ class PathFinder {
           )
         );
 
-        if (f !== 0 && node.actors.length > 0) {
+        if (f !== 0 && this.nodeBlocked(node, target)) {
           return false;
         }
 
@@ -307,7 +309,7 @@ class PathFinder {
             )
           );
 
-          if (node1.actors.length > 0 && node2.actors.length > 0) {
+          if (this.nodeBlocked(node1, target) && this.nodeBlocked(node2, target)) {
             return false
           }
         }
@@ -404,7 +406,7 @@ class PathFinder {
   }
 }
 
-export const pf = new PathFinder(512, 512, 8);
+export const pf = new PathFinder(512, 512, 16);
 
 // const actor = {} as Actor;
 // pf.grid[Math.floor(5 * pf.scale) + pf.center[0]][Math.floor(3 * pf.scale) + pf.center[1]].actors.push(actor);
