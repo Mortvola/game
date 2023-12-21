@@ -40,4 +40,6 @@ export interface WorldInterface {
   path2: Line | null;
 
   path3: Line | null;
+
+  path4: Line | null;
 }

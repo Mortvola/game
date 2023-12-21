@@ -21,7 +21,7 @@ export type CharacterStorage = {
 }
 
 export const restoreCharacters = (a: CharacterStorage[]): Character[] => {
-  const team = a.map((c) => {
+  const team = a.filter((c, index) => index <= 3).map((c) => {
     const race = getRace(c.race);
     const charClass = getClass(c.charClass);
 

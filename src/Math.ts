@@ -134,7 +134,7 @@ export const feetToMeters = (feet: number) => (
 )
 
 
-export const lineCircleIntersectionTest = (center: Vec2, radius: number, p1: Vec2, p2: Vec2): Vec2[] | null => {
+export const lineCircleIntersection = (center: Vec2, radius: number, p1: Vec2, p2: Vec2): Vec2[] | null => {
   const p1x = p1[0] - center[0];
   const p1y = p1[1] - center[1];
 
@@ -160,8 +160,8 @@ export const lineCircleIntersectionTest = (center: Vec2, radius: number, p1: Vec
     const t1y = -D * dx + Math.abs(dy) * Math.sqrt(incidence) / (dr * dr) + center[1];
     const t2y = -D * dx - Math.abs(dy) * Math.sqrt(incidence) / (dr * dr) + center[1];
 
-    console.log(`(${t1x}, ${t1y}`)
-    console.log(`(${t2x}, ${t2y})`)
+    // console.log(`(${t1x}, ${t1y}`)
+    // console.log(`(${t2x}, ${t2y})`)
  
     return [vec2.create(t1x, t1y), vec2.create(t2x, t2y)];
   }
@@ -313,3 +313,89 @@ const midPointLine = (p1: Vec2, p2: Vec2) => {
 // const p2 = vec2.create(5, 7);
 
 // midPointLine(p1, p2);
+
+
+// Cohen-Sutherland line clipping algorithm
+export const lineRectangleClip = (p1: Vec2, p2: Vec2, upperLeft: Vec2, lowerRight: Vec2): Vec2[] | null => {
+  const INSIDE = 0; // 0000
+  const LEFT = 1;   // 0001
+  const RIGHT = 2;  // 0010
+  const BOTTOM = 4; // 0100
+  const TOP = 8;    // 1000
+  
+  let x0 = p1[0];
+  let y0 = p1[1];
+
+  let x1 = p2[0];
+  let y1 = p2[1];
+
+  const outcode = (x: number, y: number) => {
+    let code = INSIDE;
+
+    if (x < upperLeft[0]) {
+      code |= LEFT;
+    } else if (x > lowerRight[0]) {
+      code |= RIGHT;
+    }
+
+    if (y < lowerRight[1]) {
+      code |= BOTTOM;
+    }
+    else if (y > upperLeft[1]) {
+      code |= TOP;
+    }
+
+    return code;
+  }
+
+  let outcode0 = outcode(x0, y0);
+  let outcode1 = outcode(x1, y1);
+
+  for (;;) {
+    if (!(outcode0 | outcode1)) {
+      break;
+    }
+
+    if (outcode0 & outcode1) {
+      return null;
+    }
+
+    // console.log('fail');
+
+    // break;
+    let x = 0;
+    let y = 0;
+
+    let outcodeOut = outcode1 > outcode0 ? outcode1 : outcode0;
+
+    if (outcodeOut & TOP) {
+      x = x0 + (x1 - x0) * (upperLeft[1] - y0) / (y1 - y0);
+      y = upperLeft[1];
+    }
+    else if (outcodeOut & BOTTOM) {
+      x = x0 + (x1 - x0) * (lowerRight[1] - y0) / (y1 - y0);
+      y = lowerRight[1];
+    }
+    else if (outcodeOut & RIGHT) {
+      y = y0 + (y1 - y0) * (lowerRight[0] - x0) / (x1 - x0);
+      x = lowerRight[0];
+    }
+    else if (outcodeOut & LEFT) {
+      y = y0 + (y1 - y0) * (upperLeft[0] - x0) / (x1 - x0);
+      x = upperLeft[0];
+    }
+
+    if (outcodeOut === outcode0) {
+      x0 = x;
+      y0 = y;
+      outcode0 = outcode(x0, y0);
+    }
+    else {
+      x1 = x;
+      y1 = y;
+      outcode1 = outcode(x1, y1);
+    }
+  }
+
+  return [vec2.create(x0, y0), vec2.create(x1, y1)];
+}

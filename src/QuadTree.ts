@@ -1,6 +1,6 @@
 import { Vec2, Vec4, vec2, vec4 } from "wgpu-matrix";
 import Actor from "./Character/Actor";
-import { circleRectangleIntersectionTest } from "./Math";
+import { circleRectangleIntersectionTest, lineCircleIntersection, lineRectangleClip } from "./Math";
 
 enum Direction {
   North = 0,
@@ -61,6 +61,8 @@ class QuadTree {
   blocked: Vec4[];
 
   path: Vec4[] = [];
+
+  smoothedPath: Vec4[] = [];
 
   searcher: Actor;
 
@@ -434,29 +436,81 @@ class QuadTree {
           const actors = currentNode.actors.filter((a) => a !== searcher);
           if (actors.length === 1 && actors[0] === target) {
             // Found goal
-            const path: Vec2[] = [];
+            const wp = searcher.getWorldPosition();
+
+            let path: Vec2[] = [];
+            
+            // Adjust last position so that it is sufficiently far from the target's center
+            // const center4 = target.getWorldPosition();
+            // const center = vec2.create(center4[0], center4[2])
+            // const p1 = this.getCenter(currentNode.parent!);
+            // const p2 = this.getCenter(currentNode);
+            // const intersections = lineCircleIntersection(center, target.attackRadius * 2, p1, p2);
+
+            // if (intersections) {
+            //   if (intersections.length === 2) {
+            //     const d1 = vec2.distance(intersections[0], p2);
+            //     const d2 = vec2.distance(intersections[1], p2);
+
+            //     if (d1 < d2) {
+            //       path.push(intersections[0]);
+            //     }
+            //     else {
+            //       path.push(intersections[1]);
+            //     }
+            //   } else {
+            //     path.push(intersections[0]);
+            //   }
+
+            //   const t = vec2.distance(center, path[0]);
+            //   if (t < target.attackRadius * 2) {
+            //     console.log(`distance delta = ${target.attackRadius * 2 - t}`)
+            //   }
+
+            //   currentNode = currentNode.parent;
+            // }
 
             while (currentNode && currentNode !== startNode) {
               path.push(this.getCenter(currentNode));
 
               currentNode = currentNode.parent
             }
-            
-            if (path.length > 1) {
+
+            if (path.length > 0) {
+              path.push(vec2.create(wp[0], wp[2]))
+            }
+
+            let smoothedPath: Vec2[] = [];
+
+            if (path.length > 0) {
               for (let i = 0; i < path.length - 1; i += 1) {
                 this.path.push(vec4.create(path[i][0], 0, path[i][1], 1))
                 this.path.push(vec4.create(path[i + 1][0], 0, path[i + 1][1], 1))
               }
+
+              smoothedPath.push(path[0]);
+
+              if (path.length > 2) {
+                for (let i = 1; i < path.length - 1; i += 1) {
+                  const blocked = this.lineOfSightBlocked(this.root, smoothedPath[smoothedPath.length - 1], path[i + 1], target);
   
-              this.path.push(this.path[this.path.length - 1]);
-              this.path.push(searcher.getWorldPosition());  
-            }
-            else if (path.length === 1) {
-              this.path.push(vec4.create(path[0][0], 0, path[0][1], 1));
-              this.path.push(searcher.getWorldPosition());  
+                  if (blocked) {
+                    smoothedPath.push(path[i]);
+                  }
+                }  
+              }
+
+              smoothedPath.push(path[path.length - 1]);
+
+              for (let i = 0; i < smoothedPath.length - 1; i += 1) {
+                this.smoothedPath.push(vec4.create(smoothedPath[i][0], 0, smoothedPath[i][1], 1))
+                this.smoothedPath.push(vec4.create(smoothedPath[i + 1][0], 0, smoothedPath[i + 1][1], 1))
+              }
+
+              path = path.slice(0, -1);
             }
             
-            return path;
+            return smoothedPath;
           }
 
           for (const direction of currentNode.neighbors) {
@@ -476,28 +530,29 @@ class QuadTree {
                 currentPoint = vec2.create(wp[0], wp[2]);
               }
 
-              if (currentNode.parent && this.lineOfSight(
-                currentPoint,
-                this.getCenter(neighborNode),
-                target,
-              )) {
-                const cost = currentNode.parent.gCost + this.costEstimate(
-                  currentPoint,
-                  this.getCenter(neighborNode),
-                );
+              // if (currentNode.parent && this.lineOfSight(
+              //   this.root,
+              //   currentPoint,
+              //   this.getCenter(neighborNode),
+              // )) {
+              //   const cost = currentNode.parent.gCost + this.costEstimate(
+              //     currentPoint,
+              //     this.getCenter(neighborNode),
+              //   );
       
-                if (cost < neighborNode.gCost) { // || !openSet.contains(neighborNode)) {
-                  neighborNode.gCost = cost;
-                  neighborNode.hCost = this.costEstimate(
-                    this.getCenter(neighborNode), goal,
-                  );
-                  neighborNode.parent = currentNode.parent;
+              //   if (cost < neighborNode.gCost) {
+              //     neighborNode.gCost = cost;
+              //     neighborNode.hCost = this.costEstimate(
+              //       this.getCenter(neighborNode), goal,
+              //     );
+              //     neighborNode.parent = currentNode.parent;
 
-                  if (!openSet.contains(neighborNode)) {
-                    openSet.push(neighborNode);
-                  }
-                }
-              } else {
+              //     if (!openSet.contains(neighborNode)) {
+              //       openSet.push(neighborNode);
+              //     }
+              //   }
+              // } else
+              {
                 const cost = currentNode.gCost + this.costEstimate(
                   currentPoint, this.getCenter(neighborNode),
                 );
@@ -536,138 +591,43 @@ class QuadTree {
   }
 
   // Line of sight algorithm from Movel AI News.
-  lineOfSight(p1: Vec2, p2: Vec2, target: Actor) {
-    // let x0 = p1[0]
-    // let y0 = p1[1];
-    // const x1 = p2[0]
-    // const y1 = p2[1];
+  lineOfSightBlocked(node: Node, p1: Vec2, p2: Vec2, target: Actor): boolean {
+    if (node.children.length === 0) {
+      // This is a leaf node
 
-    // let dy = y1 - y0
-    // let dx = x1 - x0;
+      if (node.actors.length === 0) {
+        // Nothing to collide with the line
+        return false;
+      }
 
-    // let f = 0
+      for (const actor of node.actors) {
+        if (actor !== target) {
+          const center = actor.getWorldPosition();
 
-    // const s: number[] = [1, 1];
+          if (lineCircleIntersection(center, actor.attackRadius * 2, p1, p2) !== null) {
+            return true;
+          }
+        }
+      }
 
-    // if (dy < 0) {
-    //     dy = -dy
-    //     s[1] = -1
-    // }
+      // Nothing intersected the line.
+      return false;
+    }
 
-    // if (dx < 0) {
-    //     dx = -dx
-    //     s[0] = -1
-    // }
+    // Pass the line to each of the chlidren that have actors.
+    for (const child of node.children) {
+      const line = lineRectangleClip(p1, p2, child.upperLeft, child.lowerRight);
 
-    // if (dx >= dy) {
-    //   while (x0 !== x1) {
-    //     f = f + dy;
+      if (line) {
+        const blocked = this.lineOfSightBlocked(child, line[0], line[1], target);
 
-    //     if (f >= dx ) {
-    //       const node = this.getNode(
-    //         vec2.create(
-    //           x0 + Math.floor((s[0] - 1) / 2),
-    //           y0 + Math.floor((s[1] - 1) / 2),
-    //         )
-    //       );
-
-    //       if (this.nodeBlocked(node, target)) { 
-    //           return false
-    //       }
-
-    //       y0 = y0 + s[1]
-    //       f = f - dx
-    //     }
-
-    //     const node = this.getNode(
-    //       vec2.create(
-    //         x0 + Math.floor((s[0] - 1) / 2),
-    //         y0 + Math.floor((s[1] - 1) / 2),
-    //       )
-    //     );
-
-    //     if (f !== 0 && this.nodeBlocked(node, target)) {
-    //         return false
-    //     }
-
-    //     if (dy === 0) {
-    //       const node1 = this.getNode(
-    //         vec2.create(
-    //           x0 + Math.floor((s[0] - 1) / 2),
-    //           y0,
-    //         )
-    //       );
-
-    //       const node2 = this.getNode(
-    //         vec2.create(
-    //           x0 + Math.floor((s[0] - 1) / 2),
-    //           y0 - 1,
-    //         )
-    //       );
-
-    //       if (this.nodeBlocked(node1, target) && this.nodeBlocked(node2, target)) {
-    //         return false
-    //       }
-    //     }
-
-    //     x0 = x0 + s[0];
-    //   }
-    // } else {
-    //   while (y0 !== y1) {
-    //     f = f + dx
-    //     if (f >= dy) {
-    //       const node = this.getNode(
-    //         vec2.create(
-    //           x0 + Math.floor((s[0] - 1) / 2),
-    //           y0 + Math.floor((s[1] - 1) / 2),
-    //         )
-    //       );
-
-    //       if (this.nodeBlocked(node, target)) {
-    //           return false;
-    //       }
-
-    //       x0 = x0 + s[0]
-    //       f = f - dy
-    //     }
-
-    //     const node = this.getNode(
-    //       vec2.create(
-    //         x0 + Math.floor((s[0] - 1) / 2),
-    //         y0 + Math.floor((s[1] - 1) / 2),
-    //       )
-    //     );
-
-    //     if (f !== 0 && this.nodeBlocked(node, target)) {
-    //       return false;
-    //     }
-
-    //     if (dx === 0) {
-    //       const node1 = this.getNode(
-    //         vec2.create(
-    //           x0 + Math.floor((s[0] - 1) / 2),
-    //           y0,
-    //         )
-    //       );
-
-    //       const node2 = this.getNode(
-    //         vec2.create(
-    //           x0 + Math.floor((s[0] - 1) / 2),
-    //           y0 - 1,
-    //         )
-    //       );
-
-    //       if (this.nodeBlocked(node1, target) && this.nodeBlocked(node2, target)) {
-    //         return false
-    //       }
-    //     }
-
-    //     y0 = y0 + s[1];
-    //   }
-    // }
+        if (blocked) {
+          return true;
+        }  
+      }
+    }
 
     return false;
-    // return true
   }  
 }
 

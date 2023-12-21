@@ -61,6 +61,8 @@ class Actor implements ActorInterface {
 
   circle: Circle;
 
+  outerCircle: Circle;
+
   teamColor: Vec4;
 
   initiativeRoll = 0;
@@ -92,7 +94,11 @@ class Actor implements ActorInterface {
     this.circle = new Circle(this.attackRadius, 0.025, color);
     this.circle.postTransforms.push(mat4.fromQuat(q));
 
+    this.outerCircle = new Circle(this.attackRadius * 2, 0.01, color);
+    this.outerCircle.postTransforms.push(mat4.fromQuat(q));
+
     this.sceneNode.addNode(this.circle, 'circle')
+    this.sceneNode.addNode(this.outerCircle, 'circle')
   }
 
   static async create(
@@ -101,8 +107,9 @@ class Actor implements ActorInterface {
     const playerWidth = 1;
     const playerHeight = character.race.height;
 
-    const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, color))
-    mesh.translate[1] = playerHeight / 2;  
+    // const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, color))
+    const mesh = await Mesh.create(box(0.125, 0.125, 0.125, vec4.create(1, 1, 1, 1)))
+    mesh.translate[1] = 0; // playerHeight / 2;  
 
     return new Actor(character, mesh, playerHeight, teamColor, team, automated);
   }
@@ -285,7 +292,7 @@ class Actor implements ActorInterface {
   
           world.mainRenderPass.addDrawable(world.path, 'line');  
         }
-        
+
         pf.clear();
 
         for (const a of world.participants.turns) {
@@ -353,6 +360,19 @@ class Actor implements ActorInterface {
                       );
               
                       world.mainRenderPass.addDrawable(world.path2, 'line');  
+                    }
+
+                    if (quadTree.smoothedPath.length > 0) {
+                      if (world.path4) {
+                        world.mainRenderPass.removeDrawable(world.path4, 'line');
+                      }
+              
+                      world.path4 = new Line(
+                        quadTree.smoothedPath,
+                        vec4.create(1, 0, 1, 1),
+                      );
+              
+                      world.mainRenderPass.addDrawable(world.path4, 'line');  
                     }
 
                     this.attack(
@@ -430,6 +450,19 @@ class Actor implements ActorInterface {
                       );
               
                       world.mainRenderPass.addDrawable(world.path2, 'line');              
+                    }
+
+                    if (quadTree.smoothedPath.length > 0) {
+                      if (world.path4) {
+                        world.mainRenderPass.removeDrawable(world.path4, 'line');
+                      }
+              
+                      world.path4 = new Line(
+                        quadTree.smoothedPath,
+                        vec4.create(1, 0, 1, 1),
+                      );
+              
+                      world.mainRenderPass.addDrawable(world.path4, 'line');  
                     }
                   }
 

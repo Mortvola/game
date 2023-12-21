@@ -89,6 +89,8 @@ class Renderer implements WorldInterface {
 
   path3: Line | null = null;
 
+  path4: Line | null = null;
+
   reticle: Reticle;
 
   reticlePosition = vec2.create(0, 0);
