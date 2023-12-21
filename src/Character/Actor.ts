@@ -22,6 +22,8 @@ import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
 import { pf } from '../Pathfinder';
 import FollowPath from "../Script/FollowPath";
+import QuadTree from "../QuadTree";
+import Line from "../Drawables/Line";
 
 export type EpisodeInfo = {
   winningTeam: number,
@@ -264,8 +266,26 @@ class Actor implements ActorInterface {
         this.state = States.scripting;
       }
       else {
-        // const quadTree = new QuadTree(2000, world.participants.turns, 8);
+        const quadTree = new QuadTree(
+          2000,
+          this,
+          world.participants.turns.filter((a) => a !== this),
+          13,
+        );
 
+        if (quadTree.lines.length > 0) {
+          if (world.path) {
+            world.mainRenderPass.removeDrawable(world.path, 'line');
+          }
+  
+          world.path = new Line(
+            quadTree.lines,
+            vec4.create(0, 1, 1, 1),
+          );
+  
+          world.mainRenderPass.addDrawable(world.path, 'line');  
+        }
+        
         pf.clear();
 
         for (const a of world.participants.turns) {
@@ -315,18 +335,47 @@ class Actor implements ActorInterface {
                   const start = vec2.create(myPosition[0], myPosition[2]);
                   const t = target.getWorldPosition();
                   const goal = vec2.create(t[0], t[2])
-                  const path = pf.findPath(start, goal, target);
+                  // const path = pf.findPath(start, goal, target);
+                  const path = quadTree.findPath(start, goal, this, target);
 
-                  const followPath = new FollowPath(this.sceneNode, path);
-                  script.entries.push(followPath);
+                  if (path.length > 0) {
+                    const followPath = new FollowPath(this.sceneNode, path);
+                    script.entries.push(followPath);
+  
+                    if (quadTree.path.length > 0) {
+                      if (world.path2) {
+                        world.mainRenderPass.removeDrawable(world.path2, 'line');
+                      }
+              
+                      world.path2 = new Line(
+                        quadTree.path,
+                        vec4.create(1, 1, 0, 1),
+                      );
+              
+                      world.mainRenderPass.addDrawable(world.path2, 'line');  
+                    }
 
-                  this.attack(
-                    target,
-                    this.character.equipped.meleeWeapon!,
-                    timestamp,
-                    world,
-                    script,
-                  );
+                    this.attack(
+                      target,
+                      this.character.equipped.meleeWeapon!,
+                      timestamp,
+                      world,
+                      script,
+                    );  
+                  }
+
+                  if (quadTree.occupied.length > 0) {
+                    if (world.path3) {
+                      world.mainRenderPass.removeDrawable(world.path3, 'line');
+                    }
+            
+                    world.path3 = new Line(
+                      quadTree.occupied,
+                      vec4.create(1, 0, 0, 1),
+                    );
+            
+                    world.mainRenderPass.addDrawable(world.path3, 'line');  
+                  }
                 }
                 else {
                   // To far to move to melee attack
@@ -364,10 +413,37 @@ class Actor implements ActorInterface {
                   const start = vec2.create(myPosition[0], myPosition[2]);
                   const t = target.getWorldPosition();
                   const goal = vec2.create(t[0], t[2])
-                  const path = pf.findPath(start, goal, target);
+                  // const path = pf.findPath(start, goal, target);
+                  const path = quadTree.findPath(start, goal, this, target);
 
                   if (path.length > 0) {
-                    script.entries.push(new FollowPath(this.sceneNode, path));                      
+                    script.entries.push(new FollowPath(this.sceneNode, path));   
+                    
+                    if (quadTree.path.length > 0) {
+                      if (world.path2) {
+                        world.mainRenderPass.removeDrawable(world.path2, 'line');
+                      }
+              
+                      world.path2 = new Line(
+                        quadTree.path,
+                        vec4.create(1, 1, 0, 1),
+                      );
+              
+                      world.mainRenderPass.addDrawable(world.path2, 'line');              
+                    }
+                  }
+
+                  if (quadTree.occupied.length > 0) {
+                    if (world.path3) {
+                      world.mainRenderPass.removeDrawable(world.path3, 'line');
+                    }
+            
+                    world.path3 = new Line(
+                      quadTree.occupied,
+                      vec4.create(1, 0, 0, 1),
+                    );
+            
+                    world.mainRenderPass.addDrawable(world.path3, 'line');  
                   }
                 }
               }
