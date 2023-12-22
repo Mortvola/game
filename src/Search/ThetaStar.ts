@@ -1,5 +1,5 @@
 import { Vec2, vec2 } from "wgpu-matrix";
-import Actor from "./Character/Actor";
+import Actor from "../Character/Actor";
 
 type Element = {
   x: number,
@@ -36,7 +36,7 @@ class Set {
   }
 }
 
-class PathFinder {
+class ThetaStar {
   grid: Element[][];
 
   width: number;
@@ -406,7 +406,7 @@ class PathFinder {
   }
 }
 
-export const pf = new PathFinder(512, 512, 16);
+export const thetaStar = new ThetaStar(512, 512, 16);
 
 // const actor = {} as Actor;
 // pf.grid[Math.floor(5 * pf.scale) + pf.center[0]][Math.floor(3 * pf.scale) + pf.center[1]].actors.push(actor);
@@ -417,4 +417,4 @@ export const pf = new PathFinder(512, 512, 16);
 //   console.log(`${p}`);
 // }
 
-export default PathFinder;
+export default ThetaStar;

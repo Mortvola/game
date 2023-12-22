@@ -20,12 +20,12 @@ import ContainerNode from "../Drawables/ContainerNode";
 import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
-import { pf } from '../Pathfinder';
+import { thetaStar } from '../Search/ThetaStar';
 import FollowPath from "../Script/FollowPath";
 import Line from "../Drawables/Line";
-import QuadTree from "../QuadTree";
+import QuadTree from "../Search/QuadTree";
 
-const useQuadTreeSearch = true;
+const useQuadTreeSearch = false;
 const pointActors = false;
 
 export type EpisodeInfo = {
@@ -258,7 +258,7 @@ class Actor implements ActorInterface {
       path = quadTree.findPath(start, goal, this, target);
     }
     else {
-      path = pf.findPath(start, goal, target);
+      path = thetaStar.findPath(start, goal, target);
     }
 
     if (path.length > 0) {
@@ -362,7 +362,7 @@ class Actor implements ActorInterface {
           }
         }
         else {
-          pf.clear();
+          thetaStar.clear();
 
           for (const a of world.participants.turns) {
             if (a !== this) {
@@ -370,7 +370,7 @@ class Actor implements ActorInterface {
   
               const center = vec2.create(point[0], point[2]);
   
-              pf.fillCircle(a, center, a.attackRadius * 2);  
+              thetaStar.fillCircle(a, center, a.attackRadius * 2);  
             }
           }
         }
