@@ -22,8 +22,11 @@ import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
 import { pf } from '../Pathfinder';
 import FollowPath from "../Script/FollowPath";
-import QuadTree from "../QuadTree";
 import Line from "../Drawables/Line";
+import QuadTree from "../QuadTree";
+
+const useQuadTreeSearch = true;
+const pointActors = false;
 
 export type EpisodeInfo = {
   winningTeam: number,
@@ -98,7 +101,7 @@ class Actor implements ActorInterface {
     this.outerCircle.postTransforms.push(mat4.fromQuat(q));
 
     this.sceneNode.addNode(this.circle, 'circle')
-    this.sceneNode.addNode(this.outerCircle, 'circle')
+    // this.sceneNode.addNode(this.outerCircle, 'circle')
   }
 
   static async create(
@@ -107,9 +110,15 @@ class Actor implements ActorInterface {
     const playerWidth = 1;
     const playerHeight = character.race.height;
 
-    // const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, color))
-    const mesh = await Mesh.create(box(0.125, 0.125, 0.125, vec4.create(1, 1, 1, 1)))
-    mesh.translate[1] = 0; // playerHeight / 2;  
+    let mesh: Mesh;
+    if (pointActors) {
+      mesh = await Mesh.create(box(0.125, 0.125, 0.125, vec4.create(1, 1, 1, 1)))
+      mesh.translate[1] = 0
+    }
+    else {
+      mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, color))
+      mesh.translate[1] = playerHeight / 2;  
+    }
 
     return new Actor(character, mesh, playerHeight, teamColor, team, automated);
   }
@@ -242,6 +251,62 @@ class Actor implements ActorInterface {
     script.entries.push(mover);
   }
 
+  findPath(start: Vec2, goal: Vec2, target: Actor, quadTree: QuadTree | null, world: WorldInterface): Vec2[] {
+    let path: Vec2[] = [];
+
+    if (quadTree) {
+      path = quadTree.findPath(start, goal, this, target);
+    }
+    else {
+      path = pf.findPath(start, goal, target);
+    }
+
+    if (path.length > 0) {
+      if (quadTree) {
+        if (quadTree.path.length > 0) {
+          if (world.path2) {
+            world.mainRenderPass.removeDrawable(world.path2, 'line');
+          }
+  
+          world.path2 = new Line(
+            quadTree.path,
+            vec4.create(1, 1, 0, 1),
+          );
+  
+          world.mainRenderPass.addDrawable(world.path2, 'line');              
+        }
+
+        if (quadTree.smoothedPath.length > 0) {
+          if (world.path4) {
+            world.mainRenderPass.removeDrawable(world.path4, 'line');
+          }
+  
+          world.path4 = new Line(
+            quadTree.smoothedPath,
+            vec4.create(1, 0, 1, 1),
+          );
+  
+          world.mainRenderPass.addDrawable(world.path4, 'line');  
+        }
+
+        if (quadTree.occupied.length > 0) {
+          if (world.path3) {
+            world.mainRenderPass.removeDrawable(world.path3, 'line');
+          }
+  
+          world.path3 = new Line(
+            quadTree.occupied,
+            vec4.create(1, 0, 0, 1),
+          );
+  
+          world.mainRenderPass.addDrawable(world.path3, 'line');  
+        }
+      }
+    }
+
+    return path;
+  }
+
   chooseAction(timestamp: number, world: WorldInterface): Actor[] {
     let removedActors: Actor[] = [];
   
@@ -273,35 +338,40 @@ class Actor implements ActorInterface {
         this.state = States.scripting;
       }
       else {
-        const quadTree = new QuadTree(
-          2000,
-          this,
-          world.participants.turns.filter((a) => a !== this),
-          13,
-        );
+        let quadTree: QuadTree | null = null;
 
-        if (quadTree.lines.length > 0) {
-          if (world.path) {
-            world.mainRenderPass.removeDrawable(world.path, 'line');
-          }
-  
-          world.path = new Line(
-            quadTree.lines,
-            vec4.create(0, 1, 1, 1),
+        if (useQuadTreeSearch) {
+          quadTree = new QuadTree(
+            200,
+            this,
+            world.participants.turns.filter((a) => a !== this),
+            11,
           );
-  
-          world.mainRenderPass.addDrawable(world.path, 'line');  
+
+          if (quadTree.lines.length > 0) {
+            if (world.path) {
+              world.mainRenderPass.removeDrawable(world.path, 'line');
+            }
+    
+            world.path = new Line(
+              quadTree.lines,
+              vec4.create(0, 1, 1, 1),
+            );
+    
+            world.mainRenderPass.addDrawable(world.path, 'line');  
+          }
         }
+        else {
+          pf.clear();
 
-        pf.clear();
-
-        for (const a of world.participants.turns) {
-          if (a !== this) {
-            const point = a.getWorldPosition();
-
-            const center = vec2.create(point[0], point[2]);
-
-            pf.fillCircle(a, center, a.attackRadius * 2);  
+          for (const a of world.participants.turns) {
+            if (a !== this) {
+              const point = a.getWorldPosition();
+  
+              const center = vec2.create(point[0], point[2]);
+  
+              pf.fillCircle(a, center, a.attackRadius * 2);  
+            }
           }
         }
 
@@ -342,38 +412,11 @@ class Actor implements ActorInterface {
                   const start = vec2.create(myPosition[0], myPosition[2]);
                   const t = target.getWorldPosition();
                   const goal = vec2.create(t[0], t[2])
-                  // const path = pf.findPath(start, goal, target);
-                  const path = quadTree.findPath(start, goal, this, target);
+
+                  const path = this.findPath(start, goal, target, quadTree, world);
 
                   if (path.length > 0) {
-                    const followPath = new FollowPath(this.sceneNode, path);
-                    script.entries.push(followPath);
-  
-                    if (quadTree.path.length > 0) {
-                      if (world.path2) {
-                        world.mainRenderPass.removeDrawable(world.path2, 'line');
-                      }
-              
-                      world.path2 = new Line(
-                        quadTree.path,
-                        vec4.create(1, 1, 0, 1),
-                      );
-              
-                      world.mainRenderPass.addDrawable(world.path2, 'line');  
-                    }
-
-                    if (quadTree.smoothedPath.length > 0) {
-                      if (world.path4) {
-                        world.mainRenderPass.removeDrawable(world.path4, 'line');
-                      }
-              
-                      world.path4 = new Line(
-                        quadTree.smoothedPath,
-                        vec4.create(1, 0, 1, 1),
-                      );
-              
-                      world.mainRenderPass.addDrawable(world.path4, 'line');  
-                    }
+                    script.entries.push(new FollowPath(this.sceneNode, path));    
 
                     this.attack(
                       target,
@@ -382,19 +425,6 @@ class Actor implements ActorInterface {
                       world,
                       script,
                     );  
-                  }
-
-                  if (quadTree.occupied.length > 0) {
-                    if (world.path3) {
-                      world.mainRenderPass.removeDrawable(world.path3, 'line');
-                    }
-            
-                    world.path3 = new Line(
-                      quadTree.occupied,
-                      vec4.create(1, 0, 0, 1),
-                    );
-            
-                    world.mainRenderPass.addDrawable(world.path3, 'line');  
                   }
                 }
                 else {
@@ -433,50 +463,11 @@ class Actor implements ActorInterface {
                   const start = vec2.create(myPosition[0], myPosition[2]);
                   const t = target.getWorldPosition();
                   const goal = vec2.create(t[0], t[2])
-                  // const path = pf.findPath(start, goal, target);
-                  const path = quadTree.findPath(start, goal, this, target);
+
+                  const path = this.findPath(start, goal, target, quadTree, world);
 
                   if (path.length > 0) {
-                    script.entries.push(new FollowPath(this.sceneNode, path));   
-                    
-                    if (quadTree.path.length > 0) {
-                      if (world.path2) {
-                        world.mainRenderPass.removeDrawable(world.path2, 'line');
-                      }
-              
-                      world.path2 = new Line(
-                        quadTree.path,
-                        vec4.create(1, 1, 0, 1),
-                      );
-              
-                      world.mainRenderPass.addDrawable(world.path2, 'line');              
-                    }
-
-                    if (quadTree.smoothedPath.length > 0) {
-                      if (world.path4) {
-                        world.mainRenderPass.removeDrawable(world.path4, 'line');
-                      }
-              
-                      world.path4 = new Line(
-                        quadTree.smoothedPath,
-                        vec4.create(1, 0, 1, 1),
-                      );
-              
-                      world.mainRenderPass.addDrawable(world.path4, 'line');  
-                    }
-                  }
-
-                  if (quadTree.occupied.length > 0) {
-                    if (world.path3) {
-                      world.mainRenderPass.removeDrawable(world.path3, 'line');
-                    }
-            
-                    world.path3 = new Line(
-                      quadTree.occupied,
-                      vec4.create(1, 0, 0, 1),
-                    );
-            
-                    world.mainRenderPass.addDrawable(world.path3, 'line');  
+                    script.entries.push(new FollowPath(this.sceneNode, path));    
                   }
                 }
               }

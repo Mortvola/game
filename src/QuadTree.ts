@@ -526,7 +526,6 @@ class QuadTree {
 
               if (currentNode === startNode) {
                 const wp = searcher.getWorldPosition();
-
                 currentPoint = vec2.create(wp[0], wp[2]);
               }
 
