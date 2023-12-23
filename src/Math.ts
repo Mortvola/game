@@ -134,6 +134,63 @@ export const feetToMeters = (feet: number) => (
 )
 
 
+export const lineCircleIntersection2 = (center: Vec2, radius: number, p1: Vec2, p2: Vec2) => {
+  let dx = p2[0] - p1[0];
+  let dy = p2[1] - p1[1];
+
+  if (dx === 0) {
+    let A = 1;
+    let B = -2 * center[1];
+    let C = (center[0] * center[0] + center[1] * center[1] + p1[0] * p1[0] - 2 * p1[0] * center[0] - radius * radius);
+
+    const discriminate = B * B - 4 * A * C;
+
+    if (discriminate < 0) {
+      return null;
+    }
+
+    if (discriminate === 0) {
+      const y = -B / (2 * A);
+
+      return [vec2.create(p1[0], y)]
+    }
+
+    const y1 = (-B + Math.sqrt(discriminate)) / (2 * A);
+    const y2 = (-B - Math.sqrt(discriminate)) / (2 * A);
+
+    return [vec2.create(p1[0], y1), vec2.create(p1[0], y2)];
+  }
+  
+  let m = dy / dx;
+  let b = p1[1] - m * p1[0];
+
+  let A = (m * m + 1);
+  let B = 2 * (m * b - m * center[1] - center[0]);
+  let C = (center[0] * center[0] + center[1] * center[1] - 2 * b * center[1] + b * b - radius * radius);
+
+  const discriminate = B * B - 4 * A * C;
+
+  if (discriminate < 0) {
+    return null;
+  }
+
+  if (discriminate === 0) {
+    const x = -B / (2 * A);
+    const y = m * x + b;
+
+    return [vec2.create(x, y)];
+  }
+
+  const x1 = (-B + Math.sqrt(discriminate)) / (2 * A);
+  const x2 = (-B - Math.sqrt(discriminate)) / (2 * A);
+
+  const y1 = m * x1 + b;
+  const y2 = m * x2 + b;
+
+  return [vec2.create(x1, y1), vec2.create(x2, y2)];
+}
+
+
 export const lineCircleIntersection = (center: Vec2, radius: number, p1: Vec2, p2: Vec2): Vec2[] | null => {
   const p1x = p1[0] - center[0];
   const p1y = p1[1] - center[1];
@@ -148,6 +205,7 @@ export const lineCircleIntersection = (center: Vec2, radius: number, p1: Vec2, p
   const D = p1x * p2y - p2x * p1y;
 
   const incidence = radius * radius * dr * dr - D * D;
+
 
   if (incidence < 0) {
     return null;
@@ -171,6 +229,22 @@ export const lineCircleIntersection = (center: Vec2, radius: number, p1: Vec2, p
 
   return [vec2.create(t1x, t1y)]
 }
+
+const center = vec2.create(0.16735833883285522, -6.719706058502197);
+const radius = 1.524;
+
+const p1 = vec2.create(0.1875, -6.75);
+const p2 = vec2.create(0.1875, -6.375);
+
+// const result1 = lineCircleIntersection(center, radius, p1, p2);
+const result2 = lineCircleIntersection2(center, radius, p1, p2);
+
+if (result2) {
+  console.log(vec2.distance(center, result2[0]))
+  console.log(vec2.distance(center, result2[1]))
+}
+// console.log(result1);
+console.log(result2);
 
 
 // const center = vec2.create(2, 2);

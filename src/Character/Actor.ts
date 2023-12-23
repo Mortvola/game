@@ -20,10 +20,17 @@ import ContainerNode from "../Drawables/ContainerNode";
 import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
-import { thetaStar } from '../Search/ThetaStar';
+import ThetaStarSearch from '../Search/ThetaStar';
 import FollowPath from "../Script/FollowPath";
 import Line from "../Drawables/Line";
 import QuadTree from "../Search/QuadTree";
+import JumpPointSearch from "../Search/JumpPoint";
+import UniformGridSearch from "../Search/UniformGridSearch";
+
+const thetaStar = new ThetaStarSearch(512, 512, 16);
+const jumpPoint = new JumpPointSearch(512, 512, 16);
+
+const pathFinder: UniformGridSearch = jumpPoint;
 
 const useQuadTreeSearch = false;
 const pointActors = false;
@@ -258,7 +265,7 @@ class Actor implements ActorInterface {
       path = quadTree.findPath(start, goal, this, target);
     }
     else {
-      path = thetaStar.findPath(start, goal, target);
+      path = pathFinder.findPath(start, goal, target);
     }
 
     if (path.length > 0) {
@@ -362,7 +369,7 @@ class Actor implements ActorInterface {
           }
         }
         else {
-          thetaStar.clear();
+          pathFinder.clear();
 
           for (const a of world.participants.turns) {
             if (a !== this) {
@@ -370,7 +377,7 @@ class Actor implements ActorInterface {
   
               const center = vec2.create(point[0], point[2]);
   
-              thetaStar.fillCircle(a, center, a.attackRadius * 2);  
+              pathFinder.fillCircle(a, center, a.attackRadius * 2);  
             }
           }
         }
