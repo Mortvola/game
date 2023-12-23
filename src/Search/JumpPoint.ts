@@ -1,6 +1,6 @@
 import { Vec2, vec2 } from "wgpu-matrix";
 import UniformGridSearch, { Element as Node } from "./UniformGridSearch";
-import { feetToMeters, lineCircleIntersection, lineCircleIntersection2 } from "../Math";
+import { feetToMeters, lineCircleIntersection2 } from "../Math";
 
 class Set {
   private nodes: Node[] = [];
@@ -71,8 +71,6 @@ class JumpPointSearch extends UniformGridSearch {
             currentNode = currentNode.parent
           }
 
-          console.log(`center: ${g}, radius: ${feetToMeters(2.5) * 2}`)
-
           for (;;) {
             const result = lineCircleIntersection2(g, feetToMeters(2.5) * 2, path[0], path[1]);
 
@@ -85,7 +83,9 @@ class JumpPointSearch extends UniformGridSearch {
               const d2 = vec2.distance(result[1], g);
 
               if (Math.abs(d1 - feetToMeters(2.5) * 2) > 0.0001
-                || Math.abs(d2 - feetToMeters(2.5) * 2) > 0.0001) {
+                || Math.abs(d2 - feetToMeters(2.5) * 2) > 0.0001
+              ) {
+                console.log(`center: ${g}, radius: ${feetToMeters(2.5) * 2}`)
                 console.log(`Points: ${path[0]}, ${path[1]}`)
                 console.log(`dist 0: ${d1}`)
                 console.log(`dist 1: ${d2}`)  
@@ -106,7 +106,7 @@ class JumpPointSearch extends UniformGridSearch {
               const squaredLength = vec2.lenSq(v);
   
               if (dotProduct < squaredLength) {
-                lineCircleIntersection(g, feetToMeters(2.5) * 2, path[0], path[1]);
+                lineCircleIntersection2(g, feetToMeters(2.5) * 2, path[0], path[1]);
                 path[0] = result[0];
                 break;
               }

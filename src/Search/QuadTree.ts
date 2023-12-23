@@ -1,6 +1,6 @@
 import { Vec2, Vec4, vec2, vec4 } from "wgpu-matrix";
 import Actor from "../Character/Actor";
-import { circleRectangleIntersectionTest, lineCircleIntersection, lineRectangleClip } from "../Math";
+import { circleRectangleIntersectionTest, lineCircleIntersection2, lineRectangleClip } from "../Math";
 
 enum Direction {
   North = 0,
@@ -445,7 +445,7 @@ class QuadTree {
             // const center = vec2.create(center4[0], center4[2])
             // const p1 = this.getCenter(currentNode.parent!);
             // const p2 = this.getCenter(currentNode);
-            // const intersections = lineCircleIntersection(center, target.attackRadius * 2, p1, p2);
+            // const intersections = lineCircleIntersection2(center, target.attackRadius * 2, p1, p2);
 
             // if (intersections) {
             //   if (intersections.length === 2) {
@@ -603,7 +603,7 @@ class QuadTree {
         if (actor !== target) {
           const center = actor.getWorldPosition();
 
-          if (lineCircleIntersection(center, actor.attackRadius * 2, p1, p2) !== null) {
+          if (lineCircleIntersection2(center, actor.attackRadius * 2, p1, p2) !== null) {
             return true;
           }
         }
