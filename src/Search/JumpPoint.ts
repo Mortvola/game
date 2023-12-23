@@ -71,54 +71,7 @@ class JumpPointSearch extends UniformGridSearch {
             currentNode = currentNode.parent
           }
 
-          for (;;) {
-            const result = lineCircleIntersection2(g, feetToMeters(2.5) * 2, path[0], path[1]);
-
-            if (result === null || result.length === 1) {
-              break;
-            }
-
-            if (result.length === 2) {
-              const d1 = vec2.distance(result[0], g);
-              const d2 = vec2.distance(result[1], g);
-
-              if (Math.abs(d1 - feetToMeters(2.5) * 2) > 0.0001
-                || Math.abs(d2 - feetToMeters(2.5) * 2) > 0.0001
-              ) {
-                console.log(`center: ${g}, radius: ${feetToMeters(2.5) * 2}`)
-                console.log(`Points: ${path[0]}, ${path[1]}`)
-                console.log(`dist 0: ${d1}`)
-                console.log(`dist 1: ${d2}`)  
-              }
-
-              // console.log(`${path[0]} - ${path[1]}`)
-              const v = vec2.subtract(path[1], path[0]);
-              let v2 = vec2.subtract(result[0], path[0])
-  
-              let dotProduct = vec2.dot(v, v2);
-  
-              if (dotProduct < 0) {
-                result[0] = result[1]
-                v2 = vec2.subtract(result[0], path[0])
-                dotProduct = vec2.dot(v, v2);
-              }
-
-              const squaredLength = vec2.lenSq(v);
-  
-              if (dotProduct < squaredLength) {
-                lineCircleIntersection2(g, feetToMeters(2.5) * 2, path[0], path[1]);
-                path[0] = result[0];
-                break;
-              }
-              else {
-                if (path.length === 2) {
-                  break;
-                }
-
-                path = path.slice(1);
-              }
-            }
-          }
+          path = this.trimPath(path, g);
 
           // return this.smoothPath(path, target);
           return path;
@@ -149,6 +102,59 @@ class JumpPointSearch extends UniformGridSearch {
     }
 
     return [];
+  }
+
+  trimPath(path: Vec2[], g: Vec2) {
+    for (;;) {
+      const result = lineCircleIntersection2(g, feetToMeters(2.5) * 2, path[0], path[1]);
+
+      if (result === null || result.length === 1) {
+        break;
+      }
+
+      if (result.length === 2) {
+        const d1 = vec2.distance(result[0], g);
+        const d2 = vec2.distance(result[1], g);
+
+        if (Math.abs(d1 - feetToMeters(2.5) * 2) > 0.0001
+          || Math.abs(d2 - feetToMeters(2.5) * 2) > 0.0001
+        ) {
+          console.log(`center: ${g}, radius: ${feetToMeters(2.5) * 2}`)
+          console.log(`Points: ${path[0]}, ${path[1]}`)
+          console.log(`dist 0: ${d1}`)
+          console.log(`dist 1: ${d2}`)  
+        }
+
+        // console.log(`${path[0]} - ${path[1]}`)
+        const v = vec2.subtract(path[1], path[0]);
+        let v2 = vec2.subtract(result[0], path[0])
+
+        let dotProduct = vec2.dot(v, v2);
+
+        if (dotProduct < 0) {
+          result[0] = result[1]
+          v2 = vec2.subtract(result[0], path[0])
+          dotProduct = vec2.dot(v, v2);
+        }
+
+        const squaredLength = vec2.lenSq(v);
+
+        if (dotProduct < squaredLength) {
+          lineCircleIntersection2(g, feetToMeters(2.5) * 2, path[0], path[1]);
+          path[0] = result[0];
+          break;
+        }
+        else {
+          if (path.length === 2) {
+            break;
+          }
+
+          path = path.slice(1);
+        }
+      }
+    }
+
+    return path;
   }
 
   findSuccessor(node: Node | null | undefined, prev: Node, target: Object): Node | null {
