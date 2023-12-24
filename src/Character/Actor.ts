@@ -139,7 +139,7 @@ class Actor implements ActorInterface {
   startTurn(timestamp: number, world: WorldInterface) {
     this.actionsLeft = 1;
 
-    this.distanceLeft = this.metersPerSecond * this.turnDuration;
+    this.distanceLeft = this.character.race.speed;
 
     this.circle.color[0] = 1;
     this.circle.color[1] = 1;
@@ -240,21 +240,21 @@ class Actor implements ActorInterface {
     script.entries.push(mover);
   }
 
-  findPath(start: Vec2, goal: Vec2, target: Actor, world: WorldInterface): Vec2[] {
+  findPath(start: Vec2, goal: Vec2, target: Actor, world: WorldInterface): [Vec2[], number] {
     let path: Vec2[] = [];
 
     path = pathFinder.findPath(start, goal, target);
 
     // Trim the path to the extent the character can move in a single turn.
     let totalDistance = 0;
-    for (let i = path.length - 1; i > 1; i -= 1) {
+    for (let i = path.length - 1; i > 0; i -= 1) {
       const distance = vec2.distance(path[i], path[i - 1]);
 
-      if (totalDistance + distance < this.character.race.speed) {
+      if (totalDistance + distance < this.distanceLeft) {
         totalDistance += distance;
       }
       else {
-        const remainingDistance = this.character.race.speed - totalDistance;
+        const remainingDistance = this.distanceLeft - totalDistance;
 
         const v = vec2.normalize(vec2.subtract(path[i - 1], path[i]));
 
@@ -264,6 +264,8 @@ class Actor implements ActorInterface {
           newPoint,
           ...path.slice(i),
         ]
+
+        totalDistance += remainingDistance;
 
         break;
       }
@@ -282,11 +284,10 @@ class Actor implements ActorInterface {
       world.mainRenderPass.addDrawable(world.path2, 'line');              
     }
 
-    return path;
+    return [path, totalDistance];
   }
 
   chooseAction(timestamp: number, world: WorldInterface): Actor[] {
-    console.log('**** Action Start ****')
     let removedActors: Actor[] = [];
   
     const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
@@ -376,14 +377,15 @@ class Actor implements ActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              const path = this.findPath(start, goal, target, world);
+              const [path, dist] = this.findPath(start, goal, target, world);
               
               if (path.length > 0) {
                 let distanceToTarget = vec2.distance(path[0], goal);
                 distanceToTarget -= target.occupiedRadius
 
                 if (distanceToTarget < this.attackRadius) {
-                  script.entries.push(new FollowPath(this.sceneNode, path));    
+                  script.entries.push(new FollowPath(this.sceneNode, path));  
+                  this.distanceLeft -= dist;  
                   myPosition = vec4.create(path[0][0], 0, path[0][1], 1);
 
                   this.attack(
@@ -435,6 +437,7 @@ class Actor implements ActorInterface {
                   }
   
                   script.entries.push(new FollowPath(this.sceneNode, path));
+                  this.distanceLeft -= dist;  
                   done = true;
                 }
               }
@@ -452,10 +455,11 @@ class Actor implements ActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              const path = this.findPath(start, goal, target, world);
+              const [path, dist] = this.findPath(start, goal, target, world);
 
               if (path.length > 0) {
                 script.entries.push(new FollowPath(this.sceneNode, path));    
+                this.distanceLeft -= dist;  
                 done = true;
               }
               else {
