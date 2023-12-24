@@ -1,4 +1,4 @@
-import { Vec2, vec2 } from "wgpu-matrix";
+import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 
 export type Element = {
   x: number,
@@ -19,6 +19,8 @@ class UniformGridSearch {
   center: Vec2;
 
   scale: number;
+
+  lines: Vec4[] = [];
 
   constructor(width: number, height: number, scale: number) {
     this.scale = scale;
@@ -71,7 +73,7 @@ class UniformGridSearch {
     return this.grid[y][x]
   }
 
-  nodeBlocked(node: Element | null | undefined, target: Object): boolean {
+  nodeBlocked(node: Element | null | undefined, target?: Object): boolean {
     if (node === null || node === undefined) {
       return true;
     }
@@ -219,6 +221,7 @@ class UniformGridSearch {
       Math.floor(c[0] * this.scale + 0.5) + this.center[0],
       Math.floor(c[1] * this.scale + 0.5) + this.center[1],
     )
+    // const center = this.positionToGrid(c);
     const radius = Math.floor(r * this.scale + 0.5);
 
     let x = radius;
@@ -312,6 +315,13 @@ class UniformGridSearch {
     }
 
     return smoothedPath;
+  }
+
+  positionToGrid(position: Vec2): Vec2 {
+    return vec2.create(
+      Math.floor(position[0] * this.scale + 0.5),
+      Math.floor(position[1] * this.scale + 0.5),
+    );
   }
 }
 

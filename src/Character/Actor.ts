@@ -65,7 +65,9 @@ class Actor implements ActorInterface {
 
   chestHeight = 1.45;
 
-  attackRadius = feetToMeters(2.5);
+  occupiedRadius = feetToMeters(2.5);
+
+  attackRadius = this.occupiedRadius + feetToMeters(0.5);
 
   sceneNode = new ContainerNode();
 
@@ -101,14 +103,14 @@ class Actor implements ActorInterface {
 
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
-    this.circle = new Circle(this.attackRadius, 0.025, color);
+    this.circle = new Circle(this.occupiedRadius, 0.025, color);
     this.circle.postTransforms.push(mat4.fromQuat(q));
 
-    this.outerCircle = new Circle(this.attackRadius * 2, 0.01, color);
+    this.outerCircle = new Circle(this.attackRadius, 0.01, color);
     this.outerCircle.postTransforms.push(mat4.fromQuat(q));
 
     this.sceneNode.addNode(this.circle, 'circle')
-    // this.sceneNode.addNode(this.outerCircle, 'circle')
+    this.sceneNode.addNode(this.outerCircle, 'circle')
   }
 
   static async create(
@@ -268,6 +270,19 @@ class Actor implements ActorInterface {
       path = pathFinder.findPath(start, goal, target);
     }
 
+    if (pathFinder.lines.length > 0) {
+      if (world.path2) {
+        world.mainRenderPass.removeDrawable(world.path2, 'line');
+      }
+
+      world.path2 = new Line(
+        pathFinder.lines,
+        vec4.create(1, 1, 0, 1),
+      );
+
+      world.mainRenderPass.addDrawable(world.path2, 'line');              
+    }
+
     if (path.length > 0) {
       if (quadTree) {
         if (quadTree.path.length > 0) {
@@ -315,6 +330,7 @@ class Actor implements ActorInterface {
   }
 
   chooseAction(timestamp: number, world: WorldInterface): Actor[] {
+    console.log('**** Action Start ****')
     let removedActors: Actor[] = [];
   
     const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
@@ -347,41 +363,6 @@ class Actor implements ActorInterface {
       else {
         let quadTree: QuadTree | null = null;
 
-        if (useQuadTreeSearch) {
-          quadTree = new QuadTree(
-            200,
-            this,
-            world.participants.turns.filter((a) => a !== this),
-            11,
-          );
-
-          if (quadTree.lines.length > 0) {
-            if (world.path) {
-              world.mainRenderPass.removeDrawable(world.path, 'line');
-            }
-    
-            world.path = new Line(
-              quadTree.lines,
-              vec4.create(0, 1, 1, 1),
-            );
-    
-            world.mainRenderPass.addDrawable(world.path, 'line');  
-          }
-        }
-        else {
-          pathFinder.clear();
-
-          for (const a of world.participants.turns) {
-            if (a !== this) {
-              const point = a.getWorldPosition();
-  
-              const center = vec2.create(point[0], point[2]);
-  
-              pathFinder.fillCircle(a, center, a.attackRadius * 2);  
-            }
-          }
-        }
-
         script.entries.push(new Delay(2000));
 
         let done = false;
@@ -400,8 +381,44 @@ class Actor implements ActorInterface {
           if (closest) {
             const target = otherTeam[closest.index];
 
+            if (useQuadTreeSearch) {
+              quadTree = new QuadTree(
+                200,
+                this,
+                world.participants.turns.filter((a) => a !== this),
+                11,
+              );
+    
+              if (quadTree.lines.length > 0) {
+                if (world.path) {
+                  world.mainRenderPass.removeDrawable(world.path, 'line');
+                }
+        
+                world.path = new Line(
+                  quadTree.lines,
+                  vec4.create(0, 1, 1, 1),
+                );
+        
+                world.mainRenderPass.addDrawable(world.path, 'line');  
+              }
+            }
+            else {
+              pathFinder.clear();
+    
+              for (const a of world.participants.turns) {
+                if (a !== this && a !== target) {
+                  const point = a.getWorldPosition();
+      
+                  const center = vec2.create(point[0], point[2]);
+      
+                  pathFinder.fillCircle(a, center, a.occupiedRadius + this.occupiedRadius);
+                  // console.log(`circle: ${center[0]}, ${center[1]}, r: ${a.attackRadius * 2}`)
+                }
+              }
+            }
+
             if (this.actionsLeft > 0) {
-              if (closest.distance <= (this.attackRadius + 0.01) * 2) {
+              if (closest.distance <= this.attackRadius + target.occupiedRadius) {
                 // The target is already in range.
                 this.attack(
                   target,
@@ -412,8 +429,8 @@ class Actor implements ActorInterface {
                 );
               }
               else {
-                if (closest.distance - this.attackRadius * 2 < this.character.race.speed) {
-                  closest.distance -= this.attackRadius * 2;
+                if (closest.distance - this.attackRadius + target.occupiedRadius < this.character.race.speed) {
+                  closest.distance -= this.attackRadius + target.occupiedRadius;
 
                   // Find path to the closest
                   const start = vec2.create(myPosition[0], myPosition[2]);
