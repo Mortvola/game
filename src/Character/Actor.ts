@@ -20,13 +20,11 @@ import ContainerNode from "../Drawables/ContainerNode";
 import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
-// import ThetaStarSearch from '../Search/ThetaStar';
 import FollowPath from "../Script/FollowPath";
 import Line from "../Drawables/Line";
 import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
 
-// const thetaStar = new ThetaStarSearch(512, 512, 16);
 const jumpPoint = new JumpPointSearch(512, 512, 16);
 
 const pathFinder: UniformGridSearch = jumpPoint;
@@ -247,6 +245,30 @@ class Actor implements ActorInterface {
 
     path = pathFinder.findPath(start, goal, target);
 
+    // Trim the path to the extent the character can move in a single turn.
+    let totalDistance = 0;
+    for (let i = path.length - 1; i > 1; i -= 1) {
+      const distance = vec2.distance(path[i], path[i - 1]);
+
+      if (totalDistance + distance < this.character.race.speed) {
+        totalDistance += distance;
+      }
+      else {
+        const remainingDistance = this.character.race.speed - totalDistance;
+
+        const v = vec2.normalize(vec2.subtract(path[i - 1], path[i]));
+
+        const newPoint = vec2.add(path[i], vec2.mulScalar(v, remainingDistance));
+
+        path = [
+          newPoint,
+          ...path.slice(i),
+        ]
+
+        break;
+      }
+    }
+
     if (pathFinder.lines.length > 0) {
       if (world.path2) {
         world.mainRenderPass.removeDrawable(world.path2, 'line');
@@ -297,11 +319,14 @@ class Actor implements ActorInterface {
       else {
         script.entries.push(new Delay(2000));
 
+        let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
         const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
         let targets = this.getTargets(otherTeam);
     
         let done = false;
         
+        let myPosition = this.getWorldPosition();
+
         while (!done) {
           if (targets.length === 0) {
             break;
@@ -310,15 +335,13 @@ class Actor implements ActorInterface {
           targets.sort((a, b) => a.distance - b.distance)
 
           // Determine distance to opponents
-          const myPosition = this.getWorldPosition();
-
           const closest = targets[0];
           const target = otherTeam[closest.index];
 
           // Mark grid with which grid cells are occupied with
           // the other actors excluding self and the target.
           pathFinder.clear();
-          for (const a of world.participants.turns) {
+          for (const a of participants) {
             if (a !== this && a !== target) {
               const point = a.getWorldPosition();
   
@@ -340,27 +363,28 @@ class Actor implements ActorInterface {
               );
 
               if (target.character.hitPoints === 0) {
-                targets = targets.slice(1)
-                continue;
+                targets = targets.filter((t) => t !== closest);
+                participants = participants.filter((t) => t !== target)
               }
               else {
                 done = true;
               }
             }
             else {
-              // The target is not within range...
-              if (closest.distance - this.attackRadius + target.occupiedRadius < this.character.race.speed) {
-                closest.distance -= this.attackRadius + target.occupiedRadius;
+              // Find path to the closest
+              const start = vec2.create(myPosition[0], myPosition[2]);
+              const t = target.getWorldPosition();
+              const goal = vec2.create(t[0], t[2])
 
-                // Find path to the closest
-                const start = vec2.create(myPosition[0], myPosition[2]);
-                const t = target.getWorldPosition();
-                const goal = vec2.create(t[0], t[2])
+              const path = this.findPath(start, goal, target, world);
+              
+              if (path.length > 0) {
+                let distanceToTarget = vec2.distance(path[0], goal);
+                distanceToTarget -= target.occupiedRadius
 
-                const path = this.findPath(start, goal, target, world);
-
-                if (path.length > 0) {
+                if (distanceToTarget < this.attackRadius) {
                   script.entries.push(new FollowPath(this.sceneNode, path));    
+                  myPosition = vec4.create(path[0][0], 0, path[0][1], 1);
 
                   this.attack(
                     target,
@@ -370,59 +394,53 @@ class Actor implements ActorInterface {
                     script,
                   );  
 
-                  done = true;
+                  if (target.character.hitPoints === 0) {
+                    targets = targets.filter((t) => t !== closest);
+                    participants = participants.filter((t) => t !== target)
+                  }
+                  else {
+                    done = true;
+                  }
                 }
                 else {
-                  // Can't find path to target. Try another
-                  targets = targets.slice(1)
+                  // Moving to towards the target won't get us close enough 
+                  // for a melee attack.
+                  if (this.character.equipped.rangeWeapon) {
+                    const shotData = this.computeShotData(target);
+  
+                    const data: ShotData = {
+                      velocityVector: shotData.velocityVector,
+                      orientation: shotData.orientation,
+                      startPos: shotData.startPos,
+                      position: shotData.startPos,
+                      startTime: timestamp,
+                    };
+  
+                    const shot = new Shot(world.shot, this, data);
+                    script.entries.push(shot);
+  
+                    this.attack(
+                      target,
+                      this.character.equipped.rangeWeapon!,
+                      timestamp,
+                      world,
+                      script,
+                    );
+  
+                    if (target.character.hitPoints === 0) {
+                      targets = targets.filter((t) => t !== closest);
+                      participants = participants.filter((t) => t !== target)
+                      continue;
+                    }
+                  }
+  
+                  script.entries.push(new FollowPath(this.sceneNode, path));
+                  done = true;
                 }
               }
               else {
-                // To far to move for melee attack
-                // Check range for range attack
-                if (this.character.equipped.rangeWeapon) {
-                  const shotData = this.computeShotData(target);
-
-                  const data: ShotData = {
-                    velocityVector: shotData.velocityVector,
-                    orientation: shotData.orientation,
-                    startPos: shotData.startPos,
-                    position: shotData.startPos,
-                    startTime: timestamp,
-                  };
-
-                  const shot = new Shot(world.shot, this, data);
-                  script.entries.push(shot);
-
-                  this.attack(
-                    target,
-                    this.character.equipped.rangeWeapon!,
-                    timestamp,
-                    world,
-                    script,
-                  );
-
-                  if (target.character.hitPoints === 0) {
-                    targets = targets.slice(1)
-                    continue;
-                  }
-                }
-
-                // Move to the target
-                const start = vec2.create(myPosition[0], myPosition[2]);
-                const t = target.getWorldPosition();
-                const goal = vec2.create(t[0], t[2])
-
-                const path = this.findPath(start, goal, target, world);
-
-                if (path.length > 0) {
-                  script.entries.push(new FollowPath(this.sceneNode, path));    
-                  done = true;
-                }
-                else {
-                  // Can't find path to target. Try another
-                  targets = targets.slice(1)
-                }
+                // Can't find path to target. Try another
+                targets = targets.slice(1)
               }
             }
           }
