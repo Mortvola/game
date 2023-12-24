@@ -331,6 +331,8 @@ class Actor implements ActorInterface {
 
             pathFinder.clear();
   
+            // Mark grid with which grid cells are occupied with
+            // the other actors excluding self and the target.
             for (const a of world.participants.turns) {
               if (a !== this && a !== target) {
                 const point = a.getWorldPosition();
@@ -338,7 +340,6 @@ class Actor implements ActorInterface {
                 const center = vec2.create(point[0], point[2]);
     
                 pathFinder.fillCircle(a, center, a.occupiedRadius + this.occupiedRadius);
-                // console.log(`circle: ${center[0]}, ${center[1]}, r: ${a.attackRadius * 2}`)
               }
             }
 
@@ -354,6 +355,7 @@ class Actor implements ActorInterface {
                 );
               }
               else {
+                // The target is not within range...
                 if (closest.distance - this.attackRadius + target.occupiedRadius < this.character.race.speed) {
                   closest.distance -= this.attackRadius + target.occupiedRadius;
 
@@ -422,15 +424,26 @@ class Actor implements ActorInterface {
               }
             }
             else {
-              const newPos = this.getDestination(myPosition, closest.point, closest.distance);
-              this.addMove(script, newPos);
-            }
+              // No action to excute but we can move closer to the target if needed.
+              if (closest.distance > this.attackRadius + target.occupiedRadius) {
+                // Find path to the closest
+                const start = vec2.create(myPosition[0], myPosition[2]);
+                const t = target.getWorldPosition();
+                const goal = vec2.create(t[0], t[2])
 
-            this.state = States.scripting;
+                const path = this.findPath(start, goal, target, world);
+
+                if (path.length > 0) {
+                  script.entries.push(new FollowPath(this.sceneNode, path));    
+                }
+              }
+            }
           }
 
           done = true;
         }
+
+        this.state = States.scripting;
       }
 
       if (script.entries.length > 0) {
