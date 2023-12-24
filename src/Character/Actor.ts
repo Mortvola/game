@@ -20,13 +20,13 @@ import ContainerNode from "../Drawables/ContainerNode";
 import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
-import ThetaStarSearch from '../Search/ThetaStar';
+// import ThetaStarSearch from '../Search/ThetaStar';
 import FollowPath from "../Script/FollowPath";
 import Line from "../Drawables/Line";
 import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
 
-const thetaStar = new ThetaStarSearch(512, 512, 16);
+// const thetaStar = new ThetaStarSearch(512, 512, 16);
 const jumpPoint = new JumpPointSearch(512, 512, 16);
 
 const pathFinder: UniformGridSearch = jumpPoint;
@@ -298,12 +298,11 @@ class Actor implements ActorInterface {
         script.entries.push(new Delay(2000));
 
         const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
-
         let targets = this.getTargets(otherTeam);
-
+    
         let done = false;
+        
         while (!done) {
-
           if (targets.length === 0) {
             break;
           }
