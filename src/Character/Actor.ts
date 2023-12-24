@@ -218,32 +218,16 @@ class Actor implements ActorInterface {
 
   useQLearning = false;
 
-  getClosestTarget(otherTeam: Actor[]) {
+  getTargets(otherTeam: Actor[]) {
     const myPosition = this.getWorldPosition();
 
-    let closest: {
-      index: number,
-      distance: number,
-      point: Vec4,
-    } | null = null;
+    const rankedTargets = otherTeam.map((a, index) => ({
+      index,
+      distance: vec4.distance(myPosition, a.getWorldPosition()),
+      point: a.getWorldPosition(),
+    }))
 
-    // let minDistance: number | null = null;
-    // let closest = 0;
-    // let closestPoint: Vec4 | null = null;
-
-    for (let i = 0; i < otherTeam.length; i += 1) {
-      const distance = vec4.distance(myPosition, otherTeam[i].getWorldPosition());
-
-      if (closest === null || distance < closest.distance) {
-        closest = {
-          index: i,
-          distance,
-          point: otherTeam[i].getWorldPosition()
-        }
-      }
-    }
-
-    return closest;
+    return rankedTargets;
   }
 
   getDestination(myPosition: Vec4, point: Vec4, distance: number): Vec4 {
@@ -313,119 +297,62 @@ class Actor implements ActorInterface {
       else {
         script.entries.push(new Delay(2000));
 
+        const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
+
+        let targets = this.getTargets(otherTeam);
+
         let done = false;
         while (!done) {
-          const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
 
-          if (otherTeam.length === 0) {
+          if (targets.length === 0) {
             break;
           }
-        
-          const closest = this.getClosestTarget(otherTeam);
+          
+          targets.sort((a, b) => a.distance - b.distance)
 
           // Determine distance to opponents
           const myPosition = this.getWorldPosition();
 
-          if (closest) {
-            const target = otherTeam[closest.index];
+          const closest = targets[0];
+          const target = otherTeam[closest.index];
 
-            pathFinder.clear();
+          // Mark grid with which grid cells are occupied with
+          // the other actors excluding self and the target.
+          pathFinder.clear();
+          for (const a of world.participants.turns) {
+            if (a !== this && a !== target) {
+              const point = a.getWorldPosition();
   
-            // Mark grid with which grid cells are occupied with
-            // the other actors excluding self and the target.
-            for (const a of world.participants.turns) {
-              if (a !== this && a !== target) {
-                const point = a.getWorldPosition();
-    
-                const center = vec2.create(point[0], point[2]);
-    
-                pathFinder.fillCircle(a, center, a.occupiedRadius + this.occupiedRadius);
-              }
+              const center = vec2.create(point[0], point[2]);
+  
+              pathFinder.fillCircle(a, center, a.occupiedRadius + this.occupiedRadius);
             }
+          }
 
-            if (this.actionsLeft > 0) {
-              if (closest.distance <= this.attackRadius + target.occupiedRadius) {
-                // The target is already in range.
-                this.attack(
-                  target,
-                  this.character.equipped.meleeWeapon!,
-                  timestamp,
-                  world,
-                  script,
-                );
+          if (this.actionsLeft > 0) {
+            if (closest.distance <= this.attackRadius + target.occupiedRadius) {
+              // The target is already in range.
+              this.attack(
+                target,
+                this.character.equipped.meleeWeapon!,
+                timestamp,
+                world,
+                script,
+              );
+
+              if (target.character.hitPoints === 0) {
+                targets = targets.slice(1)
+                continue;
               }
               else {
-                // The target is not within range...
-                if (closest.distance - this.attackRadius + target.occupiedRadius < this.character.race.speed) {
-                  closest.distance -= this.attackRadius + target.occupiedRadius;
-
-                  // Find path to the closest
-                  const start = vec2.create(myPosition[0], myPosition[2]);
-                  const t = target.getWorldPosition();
-                  const goal = vec2.create(t[0], t[2])
-
-                  const path = this.findPath(start, goal, target, world);
-
-                  if (path.length > 0) {
-                    script.entries.push(new FollowPath(this.sceneNode, path));    
-
-                    this.attack(
-                      target,
-                      this.character.equipped.meleeWeapon!,
-                      timestamp,
-                      world,
-                      script,
-                    );  
-                  }
-                }
-                else {
-                  // To far to move to melee attack
-                  // Check range for range attack
-                  if (this.character.equipped.rangeWeapon) {
-                    const shotData = this.computeShotData(target);
-
-                    const data: ShotData = {
-                      velocityVector: shotData.velocityVector,
-                      orientation: shotData.orientation,
-                      startPos: shotData.startPos,
-                      position: shotData.startPos,
-                      startTime: timestamp,
-                    };
-
-                    const shot = new Shot(world.shot, this, data);
-                    script.entries.push(shot);
-
-                    this.attack(
-                      target,
-                      this.character.equipped.rangeWeapon!,
-                      timestamp,
-                      world,
-                      script,
-                    );
-
-                    if (target.character.hitPoints === 0) {
-                      continue;
-                    }
-                  }
-
-                  // Move to the new location
-                  // const newPos = this.getDestination(myPosition, closest.point, closest.distance);
-                  // this.addMove(script, newPos);
-                  const start = vec2.create(myPosition[0], myPosition[2]);
-                  const t = target.getWorldPosition();
-                  const goal = vec2.create(t[0], t[2])
-
-                  const path = this.findPath(start, goal, target, world);
-
-                  if (path.length > 0) {
-                    script.entries.push(new FollowPath(this.sceneNode, path));    
-                  }
-                }
+                done = true;
               }
             }
             else {
-              // No action to excute but we can move closer to the target if needed.
-              if (closest.distance > this.attackRadius + target.occupiedRadius) {
+              // The target is not within range...
+              if (closest.distance - this.attackRadius + target.occupiedRadius < this.character.race.speed) {
+                closest.distance -= this.attackRadius + target.occupiedRadius;
+
                 // Find path to the closest
                 const start = vec2.create(myPosition[0], myPosition[2]);
                 const t = target.getWorldPosition();
@@ -435,12 +362,94 @@ class Actor implements ActorInterface {
 
                 if (path.length > 0) {
                   script.entries.push(new FollowPath(this.sceneNode, path));    
+
+                  this.attack(
+                    target,
+                    this.character.equipped.meleeWeapon!,
+                    timestamp,
+                    world,
+                    script,
+                  );  
+
+                  done = true;
+                }
+                else {
+                  // Can't find path to target. Try another
+                  targets = targets.slice(1)
+                }
+              }
+              else {
+                // To far to move for melee attack
+                // Check range for range attack
+                if (this.character.equipped.rangeWeapon) {
+                  const shotData = this.computeShotData(target);
+
+                  const data: ShotData = {
+                    velocityVector: shotData.velocityVector,
+                    orientation: shotData.orientation,
+                    startPos: shotData.startPos,
+                    position: shotData.startPos,
+                    startTime: timestamp,
+                  };
+
+                  const shot = new Shot(world.shot, this, data);
+                  script.entries.push(shot);
+
+                  this.attack(
+                    target,
+                    this.character.equipped.rangeWeapon!,
+                    timestamp,
+                    world,
+                    script,
+                  );
+
+                  if (target.character.hitPoints === 0) {
+                    targets = targets.slice(1)
+                    continue;
+                  }
+                }
+
+                // Move to the target
+                const start = vec2.create(myPosition[0], myPosition[2]);
+                const t = target.getWorldPosition();
+                const goal = vec2.create(t[0], t[2])
+
+                const path = this.findPath(start, goal, target, world);
+
+                if (path.length > 0) {
+                  script.entries.push(new FollowPath(this.sceneNode, path));    
+                  done = true;
+                }
+                else {
+                  // Can't find path to target. Try another
+                  targets = targets.slice(1)
                 }
               }
             }
           }
+          else {
+            // No action to excute but we can move closer to the target if needed.
+            if (closest.distance > this.attackRadius + target.occupiedRadius) {
+              // Find path to the closest
+              const start = vec2.create(myPosition[0], myPosition[2]);
+              const t = target.getWorldPosition();
+              const goal = vec2.create(t[0], t[2])
 
-          done = true;
+              const path = this.findPath(start, goal, target, world);
+
+              if (path.length > 0) {
+                script.entries.push(new FollowPath(this.sceneNode, path));    
+                done = true;
+              }
+              else {
+                // Can't find path to target. Try another
+                targets = targets.slice(1)
+              }
+            }
+            else {
+              done = true;
+            }
+          }
         }
 
         this.state = States.scripting;
