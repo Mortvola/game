@@ -23,7 +23,7 @@ import Delay from "../Script/Delay";
 import ThetaStarSearch from '../Search/ThetaStar';
 import FollowPath from "../Script/FollowPath";
 import Line from "../Drawables/Line";
-import JumpPointSearch from "../Search/JumpPoint";
+import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
 
 const thetaStar = new ThetaStarSearch(512, 512, 16);
