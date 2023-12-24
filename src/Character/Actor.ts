@@ -23,7 +23,6 @@ import Delay from "../Script/Delay";
 import ThetaStarSearch from '../Search/ThetaStar';
 import FollowPath from "../Script/FollowPath";
 import Line from "../Drawables/Line";
-import QuadTree from "../Search/QuadTree";
 import JumpPointSearch from "../Search/JumpPoint";
 import UniformGridSearch from "../Search/UniformGridSearch";
 
@@ -32,7 +31,6 @@ const jumpPoint = new JumpPointSearch(512, 512, 16);
 
 const pathFinder: UniformGridSearch = jumpPoint;
 
-const useQuadTreeSearch = false;
 const pointActors = false;
 
 export type EpisodeInfo = {
@@ -260,15 +258,10 @@ class Actor implements ActorInterface {
     script.entries.push(mover);
   }
 
-  findPath(start: Vec2, goal: Vec2, target: Actor, quadTree: QuadTree | null, world: WorldInterface): Vec2[] {
+  findPath(start: Vec2, goal: Vec2, target: Actor, world: WorldInterface): Vec2[] {
     let path: Vec2[] = [];
 
-    if (quadTree) {
-      path = quadTree.findPath(start, goal, this, target);
-    }
-    else {
-      path = pathFinder.findPath(start, goal, target);
-    }
+    path = pathFinder.findPath(start, goal, target);
 
     if (pathFinder.lines.length > 0) {
       if (world.path2) {
@@ -281,49 +274,6 @@ class Actor implements ActorInterface {
       );
 
       world.mainRenderPass.addDrawable(world.path2, 'line');              
-    }
-
-    if (path.length > 0) {
-      if (quadTree) {
-        if (quadTree.path.length > 0) {
-          if (world.path2) {
-            world.mainRenderPass.removeDrawable(world.path2, 'line');
-          }
-  
-          world.path2 = new Line(
-            quadTree.path,
-            vec4.create(1, 1, 0, 1),
-          );
-  
-          world.mainRenderPass.addDrawable(world.path2, 'line');              
-        }
-
-        if (quadTree.smoothedPath.length > 0) {
-          if (world.path4) {
-            world.mainRenderPass.removeDrawable(world.path4, 'line');
-          }
-  
-          world.path4 = new Line(
-            quadTree.smoothedPath,
-            vec4.create(1, 0, 1, 1),
-          );
-  
-          world.mainRenderPass.addDrawable(world.path4, 'line');  
-        }
-
-        if (quadTree.occupied.length > 0) {
-          if (world.path3) {
-            world.mainRenderPass.removeDrawable(world.path3, 'line');
-          }
-  
-          world.path3 = new Line(
-            quadTree.occupied,
-            vec4.create(1, 0, 0, 1),
-          );
-  
-          world.mainRenderPass.addDrawable(world.path3, 'line');  
-        }
-      }
     }
 
     return path;
@@ -361,8 +311,6 @@ class Actor implements ActorInterface {
         this.state = States.scripting;
       }
       else {
-        let quadTree: QuadTree | null = null;
-
         script.entries.push(new Delay(2000));
 
         let done = false;
@@ -381,39 +329,16 @@ class Actor implements ActorInterface {
           if (closest) {
             const target = otherTeam[closest.index];
 
-            if (useQuadTreeSearch) {
-              quadTree = new QuadTree(
-                200,
-                this,
-                world.participants.turns.filter((a) => a !== this),
-                11,
-              );
+            pathFinder.clear();
+  
+            for (const a of world.participants.turns) {
+              if (a !== this && a !== target) {
+                const point = a.getWorldPosition();
     
-              if (quadTree.lines.length > 0) {
-                if (world.path) {
-                  world.mainRenderPass.removeDrawable(world.path, 'line');
-                }
-        
-                world.path = new Line(
-                  quadTree.lines,
-                  vec4.create(0, 1, 1, 1),
-                );
-        
-                world.mainRenderPass.addDrawable(world.path, 'line');  
-              }
-            }
-            else {
-              pathFinder.clear();
+                const center = vec2.create(point[0], point[2]);
     
-              for (const a of world.participants.turns) {
-                if (a !== this && a !== target) {
-                  const point = a.getWorldPosition();
-      
-                  const center = vec2.create(point[0], point[2]);
-      
-                  pathFinder.fillCircle(a, center, a.occupiedRadius + this.occupiedRadius);
-                  // console.log(`circle: ${center[0]}, ${center[1]}, r: ${a.attackRadius * 2}`)
-                }
+                pathFinder.fillCircle(a, center, a.occupiedRadius + this.occupiedRadius);
+                // console.log(`circle: ${center[0]}, ${center[1]}, r: ${a.attackRadius * 2}`)
               }
             }
 
@@ -437,7 +362,7 @@ class Actor implements ActorInterface {
                   const t = target.getWorldPosition();
                   const goal = vec2.create(t[0], t[2])
 
-                  const path = this.findPath(start, goal, target, quadTree, world);
+                  const path = this.findPath(start, goal, target, world);
 
                   if (path.length > 0) {
                     script.entries.push(new FollowPath(this.sceneNode, path));    
@@ -488,7 +413,7 @@ class Actor implements ActorInterface {
                   const t = target.getWorldPosition();
                   const goal = vec2.create(t[0], t[2])
 
-                  const path = this.findPath(start, goal, target, quadTree, world);
+                  const path = this.findPath(start, goal, target, world);
 
                   if (path.length > 0) {
                     script.entries.push(new FollowPath(this.sceneNode, path));    
