@@ -57,7 +57,7 @@ class Trajectory extends Drawable {
     }
 
     const numSegments = this.trajectoryData.distance * 4;
-
+    
     // Update the trajectory information
     this.trajectoryStructure.set({
       numSegments: numSegments,

@@ -620,8 +620,10 @@ class Renderer implements WorldInterface {
 
             // If the active actor has actions left then
             // render a trajectory from it to the highlighted actor.
-            if (this.participants.activeActor.actionsLeft > 0) {
-              const result = this.participants.activeActor.computeShotData(this.participants.activeActor);
+            if (this.participants.activeActor.actionsLeft > 0
+              && this.participants.activeActor.character.equipped.rangeWeapon
+            ) {
+              const result = this.participants.activeActor.computeShotData(this.focused);
 
               this.trajectory = new Trajectory({
                 velocityVector: result.velocityVector,
