@@ -5,10 +5,10 @@ import { vec4 } from 'wgpu-matrix';
 import { EpisodeInfo } from '../Character/Actor';
 import RewardChart from '../Chart';
 import DefineParties from './DefineParties';
-import Character from '../Character/Character';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
 import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
 import Messages from './Messages';
+import { Party } from './PartyList';
 
 type DiretionKeys = {
   left: number,
@@ -357,7 +357,10 @@ function App() {
   const [learning, setLearning] = React.useState<boolean>(false);
 
   const [showPartyDefs, setShowPartyDefs] = React.useState<boolean>(false);
-  const [parties, setParties] = React.useState<Character[][]>([[], []]);
+  const [parties, setParties] = React.useState<Party[]>([
+    { members: [], automate: false },
+    { members: [], automate: false },
+  ]);
 
   const handleLearnClick = () => {
     setLearning(true);
@@ -378,7 +381,7 @@ function App() {
     setShowPartyDefs(false);
   }
 
-  const handlePartySave = (parties: Character[][]) => {
+  const handlePartySave = (parties: Party[]) => {
     setShowPartyDefs(false);
     setParties(parties);
     renderer.setParties(parties);

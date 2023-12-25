@@ -2,12 +2,12 @@ import React from 'react';
 import styles from './DefineParties.module.scss'
 import Character from '../Character/Character';
 import CharacterDetails from './Details/CharacterDetails';
-import PartyList from './PartyList';
+import PartyList, { Party } from './PartyList';
 
 type PropsType = {
-  parties: Character[][],
+  parties: Party[],
   onHide: () => void,
-  onSave: (parties: Character[][]) => void,
+  onSave: (parties: Party[]) => void,
 }
 
 const DefineParties: React.FC<PropsType> = ({
@@ -15,7 +15,7 @@ const DefineParties: React.FC<PropsType> = ({
   onHide,
   onSave,
 }) => {
-  const [newParties, setNewParties] = React.useState<Character[][]>(parties);
+  const [newParties, setNewParties] = React.useState<Party[]>(parties);
   const [selected, setSelected] = React.useState<Character | null>(null);
 
   const handleSaveClick = () => {
@@ -30,7 +30,7 @@ const DefineParties: React.FC<PropsType> = ({
     setSelected(character);
   }
 
-  const handleParty1Change = (party: Character[]) => {
+  const handleParty1Change = (party: Party) => {
     setNewParties((prev) => {
       return ([
         party,
@@ -39,7 +39,7 @@ const DefineParties: React.FC<PropsType> = ({
     });
   }
 
-  const handleParty2Change = (party: Character[]) => {
+  const handleParty2Change = (party: Party) => {
     setNewParties((prev) => {
       return ([
         prev[0],
@@ -55,14 +55,14 @@ const DefineParties: React.FC<PropsType> = ({
       <div className={styles.wrapper}>
         <div className={styles.teamWrapper}>
           <PartyList
-            party={newParties[0]}
+            party={parties[0]}
             label="Party 1"
             onSelect={handleSelect}
             selected={selected}
             onPartyChange={handleParty1Change}
           />
           <PartyList
-            party={newParties[1]}
+            party={parties[1]}
             label="Party 2"
             onSelect={handleSelect}
             selected={selected}

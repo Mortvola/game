@@ -24,7 +24,7 @@ import Participants, { ParticipantsState } from './Participants';
 import { ActorInterface } from './ActorInterface';
 import { Delay, WorldInterface } from './WorldInterface';
 import { EpisodeInfo } from './Character/Actor';
-import Character from './Character/Character';
+import { Party } from './UserInterface/PartyList';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -787,7 +787,7 @@ class Renderer implements WorldInterface {
     this.loggerCallback = callback;
   }
 
-  setParties(parties: Character[][]) {
+  setParties(parties: Party[]) {
     this.participants.setParties(parties);
   }
 }

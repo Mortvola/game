@@ -1,5 +1,5 @@
-import Character from "./Character/Character";
-import { CharacterStorage, characterStorageParties } from "./Character/CharacterStorage";
+import { CharacterStorage, CharacterStorageParty, characterStorageParties } from "./Character/CharacterStorage";
+import { Party } from "./UserInterface/PartyList";
 import QStore, { Key, QTable } from "./Worker/QStore";
 
 export const qStore = new QStore();
@@ -23,12 +23,12 @@ type State = 'Idle' | 'Learning';
 class WorkerQueue {
   queue: {
     state: Key,
-    parties: CharacterStorage[][]
+    parties: CharacterStorageParty[]
   }[] = [];
 
   state: State = 'Idle';
 
-  start(parties: Character[][]) {
+  start(parties: Party[]) {
     worker.postMessage({
       type: 'start',
       parties: characterStorageParties(parties),
@@ -37,12 +37,12 @@ class WorkerQueue {
     this.state = 'Learning';
   }
 
-  update(state: Key, parties: Character[][]) {
+  update(state: Key, parties: Party[]) {
     const storageParties = characterStorageParties(parties);
 
     for (let i = 0; i < storageParties.length; i += 1) {
-      for (let j = 0; j < storageParties[i].length; j += 1) {
-        storageParties[i][j].maxHitPoints = parties[i][j].hitPoints;
+      for (let j = 0; j < storageParties[i].members.length; j += 1) {
+        storageParties[i].members[j].maxHitPoints = parties[i].members[j].hitPoints;
       }
     }
 

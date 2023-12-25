@@ -1,7 +1,7 @@
-import { Vec4, vec3, vec4 } from "wgpu-matrix";
+import { Vec4, vec4 } from "wgpu-matrix";
 import Actor from "./Character/Actor";
 import { abilityModifier, diceRoll } from "./Dice";
-import Character from "./Character/Character";
+import { Party } from "./UserInterface/PartyList";
 
 export enum ParticipantsState {
   waiting,
@@ -11,7 +11,7 @@ export enum ParticipantsState {
 }
 
 class Participants {
-  parties: Character[][] = [[], []];
+  parties: Party[] = [];
 
   participants: Actor[][] = [[], []];
 
@@ -63,12 +63,12 @@ class Participants {
 
   async createTeam(team: number, z: number, color: Vec4, teamColor: Vec4, automated: boolean): Promise<Actor[]> {
     const actors: Actor[] = [];
-    const numPlayers = this.parties[team].length;
+    const numPlayers = this.parties[team].members.length;
     const spaceBetween = 4;
     const playerWidth = 4;
 
     for (let i = 0; i < numPlayers; i += 1) {
-      const actor = await Actor.create(this.parties[team][i].clone(), color, teamColor, team, automated);
+      const actor = await Actor.create(this.parties[team].members[i].clone(), color, teamColor, team, automated);
       actor.sceneNode.translate[0] = (i - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()
         * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
@@ -92,10 +92,10 @@ class Participants {
     this.state = ParticipantsState.ready;
   }
 
-  setParties(parties: Character[][]) {
+  setParties(parties: Party[]) {
     this.parties = parties;
 
-    if (this.parties[0].length > 0 && this.parties[1].length > 0) {
+    if (this.parties[0].members.length > 0 && this.parties[1].members.length > 0) {
       this.state = ParticipantsState.needsPrep;
     }
   }

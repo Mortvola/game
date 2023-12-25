@@ -1,3 +1,4 @@
+import { Party } from "../UserInterface/PartyList"
 import Character from "./Character"
 import { ArmorName, getArmor } from "./Equipment/Armor"
 import { WeaponName, getWeapon } from "./Equipment/Weapon"
@@ -18,6 +19,11 @@ export type CharacterStorage = {
     armor: string | null,
     shield: string | null,
   }
+}
+
+export type CharacterStorageParty = {
+  members: CharacterStorage[],
+  automate: boolean,
 }
 
 export const restoreCharacters = (a: CharacterStorage[]): Character[] => {
@@ -59,8 +65,8 @@ export const restoreCharacters = (a: CharacterStorage[]): Character[] => {
   return team;
 }
 
-export const characterStorageParty = (party: Character[]) => (
-  party.map((c) => {
+export const characterStorageParty = (party: Party): CharacterStorageParty => ({
+  members: party.members.map((c) => {
     const s: CharacterStorage = {
       name: c.name,
       charClass: c.charClass.name,
@@ -78,41 +84,48 @@ export const characterStorageParty = (party: Character[]) => (
     }
 
     return s;
-  })
-)
+  }),
+  automate: party.automate,
+})
 
-export const characterStorageParties = (parties: Character[][]) => (
+export const characterStorageParties = (parties: Party[]): CharacterStorageParty[] => (
   [characterStorageParty(parties[0]), characterStorageParty(parties[1])]
 )
 
-const stringifyParty = (party: Character[]) => {
+const stringifyParty = (party: Party): string => {
   return JSON.stringify(
     characterStorageParty(party)
   )
 }
 
-export const stringifyParties = (parties: Character[][]) => (
+export const stringifyParties = (parties: Party[]) => (
   [stringifyParty(parties[0]), stringifyParty(parties[1])]
 )
 
-export const storeParties = (parties: Character[][]): void => {
+export const storeParties = (parties: Party[]): void => {
   const stringifiedParties = stringifyParties(parties);
   localStorage.setItem('team1', stringifiedParties[0]);
   localStorage.setItem('team2', stringifiedParties[1]);
 }
 
-const restoreParty = (id: string): Character[] => {
+const restoreParty = (id: string): Party => {
   const s1 = localStorage.getItem(id);
 
   if (s1) {
-    const a = JSON.parse(s1) as CharacterStorage[];
-    return restoreCharacters(a);
+    const a = JSON.parse(s1) as CharacterStorageParty;
+    return ({
+      members: restoreCharacters(a.members),
+      automate: a.automate,
+    })
   }
 
-  return [];
+  return ({
+    members: [],
+    automate: false,
+  });
 }
 
-export const restoreParties = (): Character[][] => {
+export const restoreParties = (): Party[] => {
   const team1 = restoreParty('team1');
   const team2 = restoreParty('team2');
 
