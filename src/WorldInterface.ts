@@ -27,7 +27,7 @@ export interface WorldInterface {
 
   animate: boolean;
   
-  endTurn2(timestamp: number): void;
+  endTurn2(): void;
 
   removeActors: ActorInterface[];
 

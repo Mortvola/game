@@ -7,7 +7,7 @@ import Gpu from './Gpu';
 import {
   degToRad, intersectionPlane,
 } from './Math';
-import ContainerNode from './Drawables/ContainerNode';
+import ContainerNode, { isContainerNode } from './Drawables/ContainerNode';
 import BindGroups, { lightsStructure } from './BindGroups';
 import RenderPass from './RenderPass';
 import Light, { isLight } from './Drawables/Light';
@@ -25,6 +25,9 @@ import { ActorInterface } from './ActorInterface';
 import { Delay, WorldInterface } from './WorldInterface';
 import { EpisodeInfo } from './Character/Actor';
 import { Party } from './UserInterface/PartyList';
+import FollowPath from './Script/FollowPath';
+import Script from './Script/Script';
+import Shot, { ShotData } from './Script/Shot';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -159,7 +162,7 @@ class Renderer implements WorldInterface {
     this.initialized = true;
   }
 
-  startTurn(timestamp: number) {
+  startTurn() {
     if (this.participants.activeActor) {
       if (this.participants.activeActor.automated) {
         this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
@@ -167,7 +170,7 @@ class Renderer implements WorldInterface {
         this.mainRenderPass.addDrawable(this.reticle, 'reticle');
       }
 
-      this.participants.activeActor.startTurn(timestamp, this);
+      this.participants.activeActor.startTurn(this);
 
       const point = this.participants.activeActor.getWorldPosition();
 
@@ -178,7 +181,7 @@ class Renderer implements WorldInterface {
     }
   }
 
-  endTurn2(timestamp: number) {
+  endTurn2() {
     if (this.participants.activeActor) {
       this.participants.activeActor.endTurn();
 
@@ -198,8 +201,6 @@ class Renderer implements WorldInterface {
 
       this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
 
-      this.focused = null;
-
       if (
         this.participants.participants[0].length === 0
         || this.participants.participants[1].length === 0
@@ -208,13 +209,13 @@ class Renderer implements WorldInterface {
       }
 
       this.participants.turn = (this.participants.turn + 1) % this.participants.turns.length;
-      this.startTurn(timestamp);
+      this.startTurn();
     }
   }
 
   endTurn() {
     if (!this.participants.activeActor.automated) {
-      // this.endTurn2();
+      this.endTurn2();
     }
   }
 
@@ -290,7 +291,7 @@ class Renderer implements WorldInterface {
 
     this.scene.updateTransforms();
 
-    this.startTurn(0);
+    this.startTurn();
   }
 
   updateFrame = async (timestamp: number) => {
@@ -518,8 +519,8 @@ class Renderer implements WorldInterface {
   pointerMove(x: number, y: number) {
     // Pan the view if the mouse is near the edge of the window.
     if (this.inputMode === 'Mouse') {
-      // this.reticlePosition[0] = x;
-      // this.reticlePosition[1] = y;
+      this.reticlePosition[0] = x;
+      this.reticlePosition[1] = y;
 
       // let panVector = vec4.create(0, 0, 0, 0);
 
@@ -569,8 +570,8 @@ class Renderer implements WorldInterface {
     } | null = null;
 
     for (const actor of this.participants.turns) {
-      if (isDrawableInterface(actor.sceneNode)) {
-        const result = actor.sceneNode.hitTest(origin, ray);
+      if (isContainerNode(actor.sceneNode)) {
+        const result = actor.sceneNode.modelHitTest(origin, ray);
 
         if (result) {
           if (best === null || result.t < best.t) {
@@ -712,8 +713,16 @@ class Renderer implements WorldInterface {
     if (point) {
       const { target, distance } = this.computePath(actor, point);
 
-      actor.moveTo = vec2.create(target[0], target[2]);
+      const script = new Script();
+
+      const path = [
+        vec2.create(target[0], target[2])
+      ]
+
+      script.entries.push(new FollowPath(actor.sceneNode, path));    
       actor.distanceLeft -= distance;
+
+      this.actors.push(script);
 
       // Travel the distance in one second.
       // This is purely for playability. It's no fun watching an actor dilly-dally as it moves
@@ -730,7 +739,48 @@ class Renderer implements WorldInterface {
     if (this.participants.activeActor && !this.participants.activeActor.automated) {
       if (this.focused) {
         if (this.focused !== this.participants.activeActor && this.participants.activeActor.actionsLeft > 0) {
-          // this.attack(this.activeActor, this.focused);
+          const wp = this.participants.activeActor.getWorldPosition();
+          const targetWp = this.focused.getWorldPosition();
+
+          const distance = vec2.distance(
+            vec2.create(wp[0], wp[2]),
+            vec2.create(targetWp[0], targetWp[2]),
+          )
+
+          const script = new Script();
+
+          if (distance <= this.participants.activeActor.attackRadius + this.focused.occupiedRadius) {
+            this.participants.activeActor.attack(
+              this.focused,
+              this.participants.activeActor.character.equipped.meleeWeapon!,
+              this,
+              script,
+            );
+          }
+          else if (this.participants.activeActor.character.equipped.rangeWeapon) {
+            const shotData = this.participants.activeActor.computeShotData(this.focused);
+  
+            const data: ShotData = {
+              velocityVector: shotData.velocityVector,
+              orientation: shotData.orientation,
+              startPos: shotData.startPos,
+              position: shotData.startPos,
+            };
+
+            const shot = new Shot(this.shot, this.participants.activeActor, data);
+            script.entries.push(shot);
+
+            this.participants.activeActor.attack(
+              this.focused,
+              this.participants.activeActor.character.equipped.rangeWeapon!,
+              this,
+              script,
+            );
+          }
+
+          if (script.entries.length > 0) {
+            this.actors.push(script);
+          }
         }
       } else {
         this.moveActor(this.participants.activeActor);

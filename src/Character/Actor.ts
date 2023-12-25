@@ -47,8 +47,6 @@ class Actor implements ActorInterface {
 
   automated: boolean;
 
-  moveTo: Vec2 | null = null;
-
   metersPerSecond = 2;
 
   actionsLeft = 0;
@@ -136,7 +134,7 @@ class Actor implements ActorInterface {
     );    
   }
 
-  startTurn(timestamp: number, world: WorldInterface) {
+  startTurn(world: WorldInterface) {
     this.actionsLeft = 1;
 
     this.distanceLeft = this.character.race.speed;
@@ -208,7 +206,6 @@ class Actor implements ActorInterface {
     this.attack(
       target,
       this.character.equipped.meleeWeapon!,
-      timestamp,
       world,
       script,
     );
@@ -358,7 +355,6 @@ class Actor implements ActorInterface {
               this.attack(
                 target,
                 this.character.equipped.meleeWeapon!,
-                timestamp,
                 world,
                 script,
               );
@@ -391,7 +387,6 @@ class Actor implements ActorInterface {
                   this.attack(
                     target,
                     this.character.equipped.meleeWeapon!,
-                    timestamp,
                     world,
                     script,
                   );  
@@ -415,7 +410,6 @@ class Actor implements ActorInterface {
                       orientation: shotData.orientation,
                       startPos: shotData.startPos,
                       position: shotData.startPos,
-                      startTime: timestamp,
                     };
   
                     const shot = new Shot(world.shot, this, data);
@@ -424,7 +418,6 @@ class Actor implements ActorInterface {
                     this.attack(
                       target,
                       this.character.equipped.rangeWeapon!,
-                      timestamp,
                       world,
                       script,
                     );
@@ -481,7 +474,7 @@ class Actor implements ActorInterface {
           script.entries.push(new Delay(2000));
 
           script.onFinish = (timestamp: number) => {
-            world.endTurn2(timestamp);  
+            world.endTurn2();  
           }
         }
 
@@ -489,7 +482,7 @@ class Actor implements ActorInterface {
       }
     }
     else {
-      world.endTurn2(timestamp);
+      world.endTurn2();
     }
 
     return removedActors;
@@ -498,31 +491,33 @@ class Actor implements ActorInterface {
   update(elapsedTime: number, timestamp: number, world: WorldInterface): ActorInterface[] {
     let removedActors: ActorInterface[] = [];
 
-    if (this.character.hitPoints > 0) {
-      if (world.participants.activeActor === this) {
-        // if (this.actionsLeft) {
-          if (world.animate) {
-            switch (this.state) {
-              case States.idle:
-                if (this.actionsLeft) {
-                  removedActors = this.chooseAction(timestamp, world);
-                }
-                break;
-      
-              case States.scripting:
-                break;      
+    if (this.automated) {
+      if (this.character.hitPoints > 0) {
+        if (world.participants.activeActor === this) {
+          // if (this.actionsLeft) {
+            if (world.animate) {
+              switch (this.state) {
+                case States.idle:
+                  if (this.actionsLeft) {
+                    removedActors = this.chooseAction(timestamp, world);
+                  }
+                  break;
+        
+                case States.scripting:
+                  break;      
+              }
             }
-          }
-          else {
-            removedActors = this.chooseAction(timestamp, world);
-            world.endTurn2(timestamp);
-          }
-        // }
+            else {
+              removedActors = this.chooseAction(timestamp, world);
+              world.endTurn2();
+            }
+          // }
+        }
       }
-    }
-    else {
-      if (world.participants.activeActor === this) {
-        world.endTurn2(timestamp);
+      else {
+        if (world.participants.activeActor === this) {
+          world.endTurn2();
+        }
       }
     }
 
@@ -537,7 +532,6 @@ class Actor implements ActorInterface {
       orientation: result.orientation,
       startPos: result.startPos,
       position: result.startPos,
-      startTime: timestamp,
     };
 
     const shot = new Shot(world.shot, this, data);
@@ -565,7 +559,6 @@ class Actor implements ActorInterface {
   attack(
     targetActor: Actor,
     weapon: Weapon,
-    timestamp: number,
     world: WorldInterface,
     script: Script,
   ) {

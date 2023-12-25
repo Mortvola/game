@@ -8,7 +8,6 @@ import { WorldInterface } from "../WorldInterface";
 
 export type ShotData = {
   velocityVector: Vec2,
-  startTime: number | null,
   startPos: Vec3,
   position: Vec4,
   orientation: Vec4,

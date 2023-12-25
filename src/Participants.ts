@@ -68,7 +68,7 @@ class Participants {
     const playerWidth = 4;
 
     for (let i = 0; i < numPlayers; i += 1) {
-      const actor = await Actor.create(this.parties[team].members[i].clone(), color, teamColor, team, automated);
+      const actor = await Actor.create(this.parties[team].members[i].clone(), color, teamColor, team, this.parties[team].automate);
       actor.sceneNode.translate[0] = (i - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()
         * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
