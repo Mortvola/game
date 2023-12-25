@@ -52,13 +52,13 @@ class JumpPointSearch extends UniformGridSearch {
       return [];
     }
 
-    if (this.nodeBlocked(sn)) {
-      console.log('start node blocked');
-    }
+    // if (this.nodeBlocked(sn)) {
+    //   console.log('start node blocked');
+    // }
 
-    if (this.nodeBlocked(gn)) {
-      console.log('goal node blocked');
-    }
+    // if (this.nodeBlocked(gn)) {
+    //   console.log('goal node blocked');
+    // }
 
     sn!.actors = [];
     gn!.actors = [];
@@ -99,7 +99,9 @@ class JumpPointSearch extends UniformGridSearch {
             currentNode = currentNode.parent
           }
 
-          path = this.trimPath(path, g);
+          if (target) {
+            path = this.trimPath(path, g);
+          }
 
           return this.smoothPath(path, target);
           // return path;

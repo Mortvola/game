@@ -297,15 +297,7 @@ class Actor implements ActorInterface {
     }
 
     // Do the trimming
-    if (path[trimPoint - 1] === undefined) {
-      console.log('test')
-    }
-
     if (trimPoint !== 0) {
-      // const remainingDistance = this.distanceLeft - totalDistance;
-      // const v = vec2.normalize(vec2.subtract(path[trimPoint - 1], path[trimPoint]));
-      // const newPoint = vec2.add(path[trimPoint], vec2.mulScalar(v, remainingDistance));  
-
       path = path.slice(trimPoint);
     }
 
