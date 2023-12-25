@@ -55,7 +55,7 @@ class UniformGridSearch {
     }
   }
 
-  findPath(s: Vec2, g: Vec2, target: Object): Vec2[] {
+  findPath(s: Vec2, g: Vec2, target: Object | null): Vec2[] {
     throw new Error('Not implemented')
   }
 
@@ -73,7 +73,7 @@ class UniformGridSearch {
     return this.grid[y][x]
   }
 
-  nodeBlocked(node: Element | null | undefined, target?: Object): boolean {
+  nodeBlocked(node: Element | null | undefined, target?: Object | null): boolean {
     if (node === null || node === undefined) {
       return true;
     }
@@ -83,7 +83,7 @@ class UniformGridSearch {
   }
 
   // Line of sight algorithm from Movel AI News.
-  LineOfSight(p1: Vec2, p2: Vec2, target: Object) {
+  LineOfSight(p1: Vec2, p2: Vec2, target: Object | null) {
     let x0 = p1[0]
     let y0 = p1[1];
     const x1 = p2[0]
@@ -289,7 +289,7 @@ class UniformGridSearch {
     }
   }
 
-  smoothPath(path: Vec2[], target: Object): Vec2[] {
+  smoothPath(path: Vec2[], target: Object | null): Vec2[] {
     const smoothedPath: Vec2[] = [];
 
     if (path.length > 0) {

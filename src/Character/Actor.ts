@@ -25,9 +25,7 @@ import Line from "../Drawables/Line";
 import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
 
-const jumpPoint = new JumpPointSearch(512, 512, 16);
-
-const pathFinder: UniformGridSearch = jumpPoint;
+export const pathFinder: UniformGridSearch = new JumpPointSearch(512, 512, 16);
 
 const pointActors = false;
 
@@ -35,7 +33,7 @@ export type EpisodeInfo = {
   winningTeam: number,
 }
 
-enum States {
+export enum States {
   idle,
   scripting,
 }
@@ -237,7 +235,7 @@ class Actor implements ActorInterface {
     script.entries.push(mover);
   }
 
-  findPath(start: Vec2, goal: Vec2, target: Actor, world: WorldInterface): [Vec2[], number] {
+  findPath(start: Vec2, goal: Vec2, target: Actor | null, world: WorldInterface): [Vec2[], number] {
     let path: Vec2[] = [];
 
     path = pathFinder.findPath(start, goal, target);

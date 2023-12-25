@@ -14,9 +14,8 @@ import Light, { isLight } from './Drawables/Light';
 import CartesianAxes from './Drawables/CartesianAxes';
 import Mesh from './Drawables/Mesh';
 import { box } from './Drawables/Shapes/box';
-import { isDrawableInterface } from './Drawables/DrawableInterface';
 import Reticle from './Drawables/Reticle';
-import Actor from './Character/Actor';
+import Actor, { States, pathFinder } from './Character/Actor';
 import Trajectory from './Drawables/Trajectory';
 import Line from './Drawables/Line';
 import Collidees from './Collidees';
@@ -598,7 +597,11 @@ class Renderer implements WorldInterface {
   }
 
   checkActorFocus() {
-    if (this.participants.activeActor && !this.participants.activeActor.automated) {
+    if (
+      this.participants.activeActor
+      && !this.participants.activeActor.automated
+      && this.participants.activeActor.state !== States.scripting
+    ) {
       const { actor, point } = this.cameraHitTest();
 
       if (actor) {
@@ -618,25 +621,71 @@ class Renderer implements WorldInterface {
 
             this.mainRenderPass.addDrawables(this.focused.sceneNode);
 
+            const wp = this.participants.activeActor.getWorldPosition();
+            const targetWp = actor.getWorldPosition();
+
+            let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
+
+            pathFinder.clear();
+            for (const a of participants) {
+              if (a !== this.participants.activeActor && a !== actor) {
+                const point = a.getWorldPosition();
+    
+                const center = vec2.create(point[0], point[2]);
+    
+                pathFinder.fillCircle(a, center, a.occupiedRadius + this.participants.activeActor.occupiedRadius);
+              }
+            }
+  
+            const [path, distance] = this.participants.activeActor.findPath(vec2.create(wp[0], wp[2]), vec2.create(targetWp[0], targetWp[2]), actor, this);
+
             // If the active actor has actions left then
             // render a trajectory from it to the highlighted actor.
-            if (this.participants.activeActor.actionsLeft > 0
-              && this.participants.activeActor.character.equipped.rangeWeapon
-            ) {
-              const result = this.participants.activeActor.computeShotData(this.focused);
-
-              this.trajectory = new Trajectory({
-                velocityVector: result.velocityVector,
-                duration: result.duration,
-                startPos: result.startPos,
-                orientation: result.orientation,
-                distance: result.distance,
-              });
-
-              this.mainRenderPass.addDrawable(this.trajectory, 'trajectory');
-
-              if (this.path) {
-                this.mainRenderPass.removeDrawable(this.path, 'line');
+            if (this.participants.activeActor.actionsLeft > 0) {
+              if (path.length > 0) {
+                let distanceToTarget = vec2.distance(path[0], vec2.create(targetWp[0], targetWp[1]));
+                distanceToTarget -= actor.occupiedRadius
+  
+                if (distanceToTarget < this.participants.activeActor.attackRadius) {
+                }
+                else {
+                  if (this.participants.activeActor.character.equipped.rangeWeapon) {
+                    const result = this.participants.activeActor.computeShotData(this.focused);
+    
+                    this.trajectory = new Trajectory({
+                      velocityVector: result.velocityVector,
+                      duration: result.duration,
+                      startPos: result.startPos,
+                      orientation: result.orientation,
+                      distance: result.distance,
+                    });
+    
+                    this.mainRenderPass.addDrawable(this.trajectory, 'trajectory');
+    
+                    if (this.path) {
+                      this.mainRenderPass.removeDrawable(this.path, 'line');
+                    }
+                  }    
+                }  
+              }
+              else {
+                if (this.participants.activeActor.character.equipped.rangeWeapon) {
+                  const result = this.participants.activeActor.computeShotData(this.focused);
+  
+                  this.trajectory = new Trajectory({
+                    velocityVector: result.velocityVector,
+                    duration: result.duration,
+                    startPos: result.startPos,
+                    orientation: result.orientation,
+                    distance: result.distance,
+                  });
+  
+                  this.mainRenderPass.addDrawable(this.trajectory, 'trajectory');
+  
+                  if (this.path) {
+                    this.mainRenderPass.removeDrawable(this.path, 'line');
+                  }
+                }  
               }
             }
           }
@@ -658,11 +707,35 @@ class Renderer implements WorldInterface {
           this.mainRenderPass.removeDrawable(this.path, 'line');
         }
 
-        if (this.participants.activeActor.distanceLeft > 0) {
-          const { start, target } = this.computePath(this.participants.activeActor, point);
+        const wp = this.participants.activeActor.getWorldPosition();
+
+        let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
+
+        pathFinder.clear();
+        for (const a of participants) {
+          if (a !== this.participants.activeActor) {
+            const point = a.getWorldPosition();
+
+            const center = vec2.create(point[0], point[2]);
+
+            pathFinder.fillCircle(a, center, a.occupiedRadius + this.participants.activeActor.occupiedRadius);
+          }
+        }
+
+        const [path, distance] = this.participants.activeActor.findPath(vec2.create(wp[0], wp[2]), vec2.create(point[0], point[2]), null, this);
+
+        // if (this.participants.activeActor.distanceLeft > 0) {
+        //   const { start, target } = this.computePath(this.participants.activeActor, point);
+
+        if (path.length > 0) {
+          const lines: Vec4[] = [];
+          for (let i = 0; i < path.length - 1; i += 1) {
+            lines.push(vec4.create(path[i][0], 0.1, path[i][1], 1))
+            lines.push(vec4.create(path[i + 1][0], 0.1, path[i + 1][1], 1))
+          }
 
           this.path = new Line(
-            [start, target],
+            lines,
             vec4.create(1, 1, 1, 1),
           );
 
@@ -713,18 +786,40 @@ class Renderer implements WorldInterface {
     const point = intersectionPlane(vec4.create(0, 0, 0, 1), vec4.create(0, 1, 0, 0), origin, ray);
 
     if (point) {
-      const { target, distance } = this.computePath(actor, point);
+      // const { target, distance } = this.computePath(actor, point);
 
       const script = new Script();
 
-      const path = [
-        vec2.create(target[0], target[2])
-      ]
+      // const path = [
+      //   vec2.create(target[0], target[2])
+      // ]
+
+      const wp = this.participants.activeActor.getWorldPosition();
+
+      let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
+
+      pathFinder.clear();
+      for (const a of participants) {
+        if (a !== this.participants.activeActor) {
+          const point = a.getWorldPosition();
+
+          const center = vec2.create(point[0], point[2]);
+
+          pathFinder.fillCircle(a, center, a.occupiedRadius + this.participants.activeActor.occupiedRadius);
+        }
+      }
+
+      const [path, distance] = this.participants.activeActor.findPath(vec2.create(wp[0], wp[2]), vec2.create(point[0], point[2]), null, this);
 
       script.entries.push(new FollowPath(actor.sceneNode, path));    
       actor.distanceLeft -= distance;
 
+      script.onFinish = () => {
+        this.participants.activeActor.state = States.idle;
+      }
+
       this.actors.push(script);
+      this.participants.activeActor.state = States.scripting;
 
       // Travel the distance in one second.
       // This is purely for playability. It's no fun watching an actor dilly-dally as it moves
@@ -738,7 +833,11 @@ class Renderer implements WorldInterface {
   }
 
   interact() {
-    if (this.participants.activeActor && !this.participants.activeActor.automated) {
+    if (
+      this.participants.activeActor
+      && !this.participants.activeActor.automated
+      && this.participants.activeActor.state !== States.scripting
+    ) {
       if (this.focused) {
         if (this.focused !== this.participants.activeActor && this.participants.activeActor.actionsLeft > 0) {
           const wp = this.participants.activeActor.getWorldPosition();
@@ -781,7 +880,12 @@ class Renderer implements WorldInterface {
           }
 
           if (script.entries.length > 0) {
+            script.onFinish = () => {
+              this.participants.activeActor.state = States.idle;
+            }
+      
             this.actors.push(script);
+            this.participants.activeActor.state = States.scripting;
           }
         }
       } else {
