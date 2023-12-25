@@ -235,51 +235,94 @@ class Actor implements ActorInterface {
     script.entries.push(mover);
   }
 
-  findPath(start: Vec2, goal: Vec2, target: Actor | null, world: WorldInterface): [Vec2[], number] {
+  findPath(start: Vec2, goal: Vec2, target: Actor | null, world: WorldInterface): [Vec2[], number, number[][]] {
     let path: Vec2[] = [];
+    const lines: number[][] = [];
 
     path = pathFinder.findPath(start, goal, target);
 
     // Trim the path to the extent the character can move in a single turn.
     let totalDistance = 0;
+    let trimmed = false;
+    let trimPoint = 0;
+    let color = [1, 1, 1, 1];
+    
     for (let i = path.length - 1; i > 0; i -= 1) {
       const distance = vec2.distance(path[i], path[i - 1]);
 
+      lines.push([
+        path[i][0], 0.1, path[i][1], 1,
+        ...color,
+      ])
+
       if (totalDistance + distance < this.distanceLeft) {
         totalDistance += distance;
+
+        lines.push([
+          path[i - 1][0], 0.1, path[i - 1][1], 1,
+          ...color,
+        ])  
       }
-      else {
+      else if (!trimmed) {
         const remainingDistance = this.distanceLeft - totalDistance;
-
         const v = vec2.normalize(vec2.subtract(path[i - 1], path[i]));
-
         const newPoint = vec2.add(path[i], vec2.mulScalar(v, remainingDistance));
 
         path = [
+          ...path.slice(0, i),
           newPoint,
           ...path.slice(i),
         ]
 
+        trimPoint = i;
+
+        i += 1;
+
+        lines.push([
+          path[i - 1][0], 0.1, path[i - 1][1], 1,
+          ...color,
+        ])  
+
         totalDistance += remainingDistance;
 
-        break;
+        trimmed = true;
+        color = [1, 0, 0, 1];
+      }
+      else {
+        lines.push([
+          path[i - 1][0], 0.1, path[i - 1][1], 1,
+          ...color,
+        ])  
       }
     }
 
-    if (pathFinder.lines.length > 0) {
-      if (world.path2) {
-        world.mainRenderPass.removeDrawable(world.path2, 'line');
-      }
-
-      world.path2 = new Line(
-        pathFinder.lines,
-        vec4.create(1, 1, 0, 1),
-      );
-
-      world.mainRenderPass.addDrawable(world.path2, 'line');              
+    // Do the trimming
+    if (path[trimPoint - 1] === undefined) {
+      console.log('test')
     }
 
-    return [path, totalDistance];
+    if (trimPoint !== 0) {
+      // const remainingDistance = this.distanceLeft - totalDistance;
+      // const v = vec2.normalize(vec2.subtract(path[trimPoint - 1], path[trimPoint]));
+      // const newPoint = vec2.add(path[trimPoint], vec2.mulScalar(v, remainingDistance));  
+
+      path = path.slice(trimPoint);
+    }
+
+    // if (pathFinder.lines.length > 0) {
+    //   if (world.path2) {
+    //     world.mainRenderPass.removeDrawable(world.path2, 'line');
+    //   }
+
+    //   world.path2 = new Line(
+    //     pathFinder.lines,
+    //     vec4.create(1, 1, 0, 1),
+    //   );
+
+    //   world.mainRenderPass.addDrawable(world.path2, 'line');              
+    // }
+
+    return [path, totalDistance, lines];
   }
 
   chooseAction(timestamp: number, world: WorldInterface): Actor[] {

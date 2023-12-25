@@ -643,7 +643,9 @@ class Renderer implements WorldInterface {
                 }
               }
     
-              const [path, distance] = this.participants.activeActor.findPath(vec2.create(wp[0], wp[2]), vec2.create(targetWp[0], targetWp[2]), actor, this);
+              const [path,, lines] = this.participants.activeActor.findPath(
+                vec2.create(wp[0], wp[2]), vec2.create(targetWp[0], targetWp[2]), actor, this,
+              );
 
               // If the active actor has actions left then
               // render a trajectory from it to the highlighted actor.
@@ -657,20 +659,11 @@ class Renderer implements WorldInterface {
                   distanceToTarget < this.participants.activeActor.attackRadius
                   && this.participants.activeActor.actionsLeft > 0
                 ) {
-                  const lines: Vec4[] = [];
-                  for (let i = 0; i < path.length - 1; i += 1) {
-                    lines.push(vec4.create(path[i][0], 0.1, path[i][1], 1))
-                    lines.push(vec4.create(path[i + 1][0], 0.1, path[i + 1][1], 1))
-                  }
-        
                   if (this.path) {
                     this.mainRenderPass.removeDrawable(this.path, 'line');
                   }
 
-                  this.path = new Line(
-                    lines,
-                    vec4.create(1, 1, 1, 1),
-                  );
+                  this.path = new Line(lines);
         
                   this.mainRenderPass.addDrawable(this.path, 'line');        
                 }
@@ -695,20 +688,11 @@ class Renderer implements WorldInterface {
                   }
                 }
                 else {
-                  const lines: Vec4[] = [];
-                  for (let i = 0; i < path.length - 1; i += 1) {
-                    lines.push(vec4.create(path[i][0], 0.1, path[i][1], 1))
-                    lines.push(vec4.create(path[i + 1][0], 0.1, path[i + 1][1], 1))
-                  }
-        
                   if (this.path) {
                     this.mainRenderPass.removeDrawable(this.path, 'line');
                   }
 
-                  this.path = new Line(
-                    lines,
-                    vec4.create(1, 1, 1, 1),
-                  );
+                  this.path = new Line(lines);
         
                   this.mainRenderPass.addDrawable(this.path, 'line');                
                 }
@@ -768,22 +752,12 @@ class Renderer implements WorldInterface {
           }
         }
 
-        const [path, distance] = this.participants.activeActor.findPath(vec2.create(wp[0], wp[2]), vec2.create(point[0], point[2]), null, this);
-
-        // if (this.participants.activeActor.distanceLeft > 0) {
-        //   const { start, target } = this.computePath(this.participants.activeActor, point);
+        const [path,, lines] = this.participants.activeActor.findPath(
+          vec2.create(wp[0], wp[2]), vec2.create(point[0], point[2]), null, this,
+        );
 
         if (path.length > 0) {
-          const lines: Vec4[] = [];
-          for (let i = 0; i < path.length - 1; i += 1) {
-            lines.push(vec4.create(path[i][0], 0.1, path[i][1], 1))
-            lines.push(vec4.create(path[i + 1][0], 0.1, path[i + 1][1], 1))
-          }
-
-          this.path = new Line(
-            lines,
-            vec4.create(1, 1, 1, 1),
-          );
+          this.path = new Line(lines);
 
           this.mainRenderPass.addDrawable(this.path, 'line');
         }
@@ -855,7 +829,9 @@ class Renderer implements WorldInterface {
         }
       }
 
-      const [path, distance] = this.participants.activeActor.findPath(vec2.create(wp[0], wp[2]), vec2.create(point[0], point[2]), null, this);
+      const [path, distance] = this.participants.activeActor.findPath(
+        vec2.create(wp[0], wp[2]), vec2.create(point[0], point[2]), null, this,
+      );
 
       script.entries.push(new FollowPath(actor.sceneNode, path));    
       actor.distanceLeft -= distance;
@@ -918,7 +894,9 @@ class Renderer implements WorldInterface {
               }
             }
   
-            const [path, distance] = this.participants.activeActor.findPath(vec2.create(wp[0], wp[2]), vec2.create(targetWp[0], targetWp[2]), this.focused, this);
+            const [path, distance] = this.participants.activeActor.findPath(
+              vec2.create(wp[0], wp[2]), vec2.create(targetWp[0], targetWp[2]), this.focused, this,
+            );
 
             if (
               path.length > 0
