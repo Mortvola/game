@@ -3,11 +3,20 @@
 import { Vec2, vec2 } from "wgpu-matrix";
 import JumpPointSearch from "../Search/JumpPointSearch";
 
-const findPath = (start: Vec2, goal: Vec2, target: Object | null, maxDistance: number): [Vec2[], number, number[][]] => {
+type Occupant = {
+  center: Vec2,
+  radius: number,
+}
+
+const findPath = (start: Vec2, goal: Vec2, target: Object | null, occupants: Occupant[], maxDistance: number): [Vec2[], number, number[][]] => {
   let path: Vec2[] = [];
   const lines: number[][] = [];
 
   const pathFinder = new JumpPointSearch(512, 512, 16)
+
+  for (const a of occupants) {
+    pathFinder.fillCircle(a, a.center, a.radius);
+  }
 
   path = pathFinder.findPath(start, goal, target);
 
@@ -78,12 +87,15 @@ const findPath = (start: Vec2, goal: Vec2, target: Object | null, maxDistance: n
 type Message = {
   start: Vec2,
   goal: Vec2,
-  object: Object,
+  target: Object | null,
+  occupants: Occupant[],
   maxDistance: number,
 }
 
 self.onmessage = (event: MessageEvent<Message>) => {
-  const result = findPath(event.data.start, event.data.goal, event.data.object, event.data.maxDistance);
+  const result = findPath(
+    event.data.start, event.data.goal, event.data.target, event.data.occupants, event.data.maxDistance,
+  );
 
   postMessage({
     type: 'FindPath',

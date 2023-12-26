@@ -21,9 +21,21 @@ import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
 import FollowPath from "../Script/FollowPath";
-import Line from "../Drawables/Line";
 import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
+
+let worker: Worker | null = null;
+
+type WorkerMessage = {
+  type: string,
+  path: Vec2[],
+  distance: number,
+  lines: number[][],
+}
+
+let findPathPromise: {
+  resolve: ((value: [Vec2[], number, number[][]]) => void),
+} | null = null
 
 export const pathFinder: UniformGridSearch = new JumpPointSearch(512, 512, 16);
 
@@ -35,6 +47,7 @@ export type EpisodeInfo = {
 
 export enum States {
   idle,
+  planning,
   scripting,
 }
 
@@ -235,6 +248,46 @@ class Actor implements ActorInterface {
     script.entries.push(mover);
   }
 
+  async findPath2(start: Vec2, goal: Vec2, target: Actor | null, participants: Actor[]): Promise<[Vec2[], number, number[][]]> {
+    const occupants = participants.filter((p) => p !== target && p !== this).map((p) => {
+      const point = p.getWorldPosition();
+
+      return ({
+        center: vec2.create(point[0], point[2]),
+        radius: p.occupiedRadius + this.occupiedRadius
+      })
+    })
+
+    const promise: Promise<[Vec2[], number, number[][]]> = new Promise((resolve, reject) => {
+      if (!worker) {
+        worker = new Worker(new URL("../Workers/PathPlanner.ts", import.meta.url));
+
+        worker.onmessage = (evt: MessageEvent<WorkerMessage>) => {
+          if (evt.data.type === 'FindPath' && findPathPromise) {
+            findPathPromise.resolve([
+              evt.data.path,
+              evt.data.distance,
+              evt.data.lines,
+            ])
+          }
+        }
+      }
+
+      worker.postMessage({
+        type: 'start',
+        start,
+        goal,
+        target: {},
+        occupants,
+        maxDistance: this.distanceLeft,
+      });
+
+      findPathPromise = { resolve };
+    })
+
+    return promise;
+  }
+
   findPath(start: Vec2, goal: Vec2, target: Actor | null, world: WorldInterface): [Vec2[], number, number[][]] {
     let path: Vec2[] = [];
     const lines: number[][] = [];
@@ -317,9 +370,7 @@ class Actor implements ActorInterface {
     return [path, totalDistance, lines];
   }
 
-  chooseAction(timestamp: number, world: WorldInterface): Actor[] {
-    let removedActors: Actor[] = [];
-  
+  async chooseAction(timestamp: number, world: WorldInterface) {
     const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
     
     if (otherTeam.length > 0) {
@@ -369,19 +420,6 @@ class Actor implements ActorInterface {
           const closest = targets[0];
           const target = otherTeam[closest.index];
 
-          // Mark grid with which grid cells are occupied with
-          // the other actors excluding self and the target.
-          pathFinder.clear();
-          for (const a of participants) {
-            if (a !== this && a !== target) {
-              const point = a.getWorldPosition();
-  
-              const center = vec2.create(point[0], point[2]);
-  
-              pathFinder.fillCircle(a, center, a.occupiedRadius + this.occupiedRadius);
-            }
-          }
-
           if (this.actionsLeft > 0) {
             if (closest.distance <= this.attackRadius + target.occupiedRadius) {
               // The target is already in range.
@@ -406,7 +444,7 @@ class Actor implements ActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              const [path, dist] = this.findPath(start, goal, target, world);
+              const [path, dist] = await this.findPath2(start, goal, target, participants);
               
               if (path.length > 0) {
                 let distanceToTarget = vec2.distance(path[0], goal);
@@ -481,7 +519,7 @@ class Actor implements ActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              const [path, dist] = this.findPath(start, goal, target, world);
+              const [path, dist] = await this.findPath2(start, goal, target, participants);
 
               if (path.length > 0) {
                 script.entries.push(new FollowPath(this.sceneNode, path));    
@@ -517,8 +555,6 @@ class Actor implements ActorInterface {
     else {
       world.endTurn2();
     }
-
-    return removedActors;
   }
 
   update(elapsedTime: number, timestamp: number, world: WorldInterface): boolean {
@@ -530,8 +566,12 @@ class Actor implements ActorInterface {
               switch (this.state) {
                 case States.idle:
                   if (this.actionsLeft) {
+                    this.state = States.planning;
                     this.chooseAction(timestamp, world);
                   }
+                  break;
+
+                case States.planning:
                   break;
         
                 case States.scripting:
