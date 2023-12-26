@@ -8,12 +8,12 @@ class Logger implements ActorInterface {
     this.message = message;
   }
 
-  update(elapsedTime: number, timestamp: number, world: WorldInterface): ActorInterface[] {
+  update(elapsedTime: number, timestamp: number, world: WorldInterface): boolean {
     if (world.loggerCallback) {
       world.loggerCallback(this.message)
     }
 
-    return [this];
+    return true;
   }
 }
 

@@ -223,24 +223,15 @@ class Renderer implements WorldInterface {
     for (let i = 0; i < this.actors.length; i += 1) {
       const actor = this.actors[i];
 
-      const removeActors = actor.update(elapsedTime, timestamp, this);
+      const remove = actor.update(elapsedTime, timestamp, this);
 
-      for (const removed of removeActors) {
-        const index = this.actors.findIndex((a) => a === removed);
+      if (remove) {
+        this.actors = [
+          ...this.actors.slice(0, i),
+          ...this.actors.slice(i + 1),
+        ];
 
-        if (index !== -1) {
-          this.actors = [
-            ...this.actors.slice(0, index),
-            ...this.actors.slice(index + 1),
-          ];
-
-          // If the removed actor was earlier or at the current index
-          // position in the array then decrement the i
-          // to account for the removal.
-          if (i >= index) {
-            i -= 1;
-          }
-        }
+        i -= 1;
       }
     }
 

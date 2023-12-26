@@ -9,7 +9,7 @@ import { ActorInterface } from "../ActorInterface";
 import Shot, { ShotData } from "../Script/Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
-import { Action, Key } from "../Worker/QStore";
+import { Action, Key } from "../Workers/QStore";
 import Character from "./Character";
 import { attackRoll } from "../Dice";
 import { qStore, workerQueue } from "../WorkerQueue";
@@ -521,9 +521,7 @@ class Actor implements ActorInterface {
     return removedActors;
   }
 
-  update(elapsedTime: number, timestamp: number, world: WorldInterface): ActorInterface[] {
-    let removedActors: ActorInterface[] = [];
-
+  update(elapsedTime: number, timestamp: number, world: WorldInterface): boolean {
     if (this.automated) {
       if (this.character.hitPoints > 0) {
         if (world.participants.activeActor === this) {
@@ -532,7 +530,7 @@ class Actor implements ActorInterface {
               switch (this.state) {
                 case States.idle:
                   if (this.actionsLeft) {
-                    removedActors = this.chooseAction(timestamp, world);
+                    this.chooseAction(timestamp, world);
                   }
                   break;
         
@@ -541,7 +539,7 @@ class Actor implements ActorInterface {
               }
             }
             else {
-              removedActors = this.chooseAction(timestamp, world);
+              this.chooseAction(timestamp, world);
               world.endTurn2();
             }
           // }
@@ -554,7 +552,7 @@ class Actor implements ActorInterface {
       }
     }
 
-    return removedActors;
+    return false;
   }
 
   addShot(targetActor: Actor, timestamp: number, world: WorldInterface) {

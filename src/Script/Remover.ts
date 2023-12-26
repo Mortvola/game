@@ -8,9 +8,9 @@ class Remover implements ActorInterface {
     this.actor = actor;
   }
 
-  update(elapsedTime: number, timestamp: number, world: WorldInterface): ActorInterface[] {
+  update(elapsedTime: number, timestamp: number, world: WorldInterface): boolean {
     world.removeActors.push(this.actor);
-    return [this];
+    return true;
   }
 }
 

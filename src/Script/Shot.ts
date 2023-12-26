@@ -34,9 +34,7 @@ class Shot implements ActorInterface {
     this.data = data;
   }
 
-  update(elapsedTime: number, timestamp: number, world: WorldInterface): ActorInterface[] {
-    const removedActors: ActorInterface[] = [];
-
+  update(elapsedTime: number, timestamp: number, world: WorldInterface): boolean {
     if (this.startTime === null) {
       this.startTime = timestamp;
 
@@ -58,10 +56,8 @@ class Shot implements ActorInterface {
       const result = world.collidees.detectCollision(this.data.position, newPosition, (actor: Actor) => actor !== this.actor);
 
       if (result || newPosition[1] < 0) {
-        removedActors.push(this);
         this.removeFromScene();
-
-        return removedActors;
+        return true;
       }
       
       this.data.position = newPosition;
@@ -71,7 +67,7 @@ class Shot implements ActorInterface {
       world.shot.translate[2] = this.data.position[2];
     }
 
-    return removedActors;
+    return false;
   }
 
   addToScene(renderPass: RenderPass) {

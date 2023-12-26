@@ -1,10 +1,10 @@
-import { CharacterStorage, CharacterStorageParty, characterStorageParties } from "./Character/CharacterStorage";
+import { CharacterStorageParty, characterStorageParties } from "./Character/CharacterStorage";
 import { Party } from "./UserInterface/PartyList";
-import QStore, { Key, QTable } from "./Worker/QStore";
+import QStore, { Key, QTable } from "./Workers/QStore";
 
 export const qStore = new QStore();
 
-export const worker = new Worker(new URL("./Worker/worker.ts", import.meta.url));
+export const worker = new Worker(new URL("./Workers/worker.ts", import.meta.url));
 
 export type WorkerMessage = {
   type: 'Rewards' | 'QTable' | 'Finished',
