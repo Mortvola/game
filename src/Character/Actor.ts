@@ -23,19 +23,11 @@ import Delay from "../Script/Delay";
 import FollowPath from "../Script/FollowPath";
 import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
+import { findPath2 } from "../Workers/PathPlannerQueue";
 
-let worker: Worker | null = null;
-
-type WorkerMessage = {
-  type: string,
-  path: Vec2[],
-  distance: number,
-  lines: number[][],
-}
-
-let findPathPromise: {
-  resolve: ((value: [Vec2[], number, number[][]]) => void),
-} | null = null
+// let findPathPromise: {
+//   resolve: ((value: [Vec2[], number, number[][]]) => void),
+// } | null = null
 
 export const pathFinder: UniformGridSearch = new JumpPointSearch(512, 512, 16);
 
@@ -248,128 +240,6 @@ class Actor implements ActorInterface {
     script.entries.push(mover);
   }
 
-  async findPath2(start: Vec2, goal: Vec2, target: Actor | null, participants: Actor[]): Promise<[Vec2[], number, number[][]]> {
-    const occupants = participants.filter((p) => p !== target && p !== this).map((p) => {
-      const point = p.getWorldPosition();
-
-      return ({
-        center: vec2.create(point[0], point[2]),
-        radius: p.occupiedRadius + this.occupiedRadius
-      })
-    })
-
-    const promise: Promise<[Vec2[], number, number[][]]> = new Promise((resolve, reject) => {
-      if (!worker) {
-        worker = new Worker(new URL("../Workers/PathPlanner.ts", import.meta.url));
-
-        worker.onmessage = (evt: MessageEvent<WorkerMessage>) => {
-          if (evt.data.type === 'FindPath' && findPathPromise) {
-            findPathPromise.resolve([
-              evt.data.path,
-              evt.data.distance,
-              evt.data.lines,
-            ])
-          }
-        }
-      }
-
-      worker.postMessage({
-        type: 'start',
-        start,
-        goal,
-        target: {},
-        occupants,
-        maxDistance: this.distanceLeft,
-      });
-
-      findPathPromise = { resolve };
-    })
-
-    return promise;
-  }
-
-  findPath(start: Vec2, goal: Vec2, target: Actor | null, world: WorldInterface): [Vec2[], number, number[][]] {
-    let path: Vec2[] = [];
-    const lines: number[][] = [];
-
-    path = pathFinder.findPath(start, goal, target);
-
-    // Trim the path to the extent the character can move in a single turn.
-    let totalDistance = 0;
-    let trimmed = false;
-    let trimPoint = 0;
-    let color = [1, 1, 1, 1];
-    
-    for (let i = path.length - 1; i > 0; i -= 1) {
-      const distance = vec2.distance(path[i], path[i - 1]);
-
-      lines.push([
-        path[i][0], 0.1, path[i][1], 1,
-        ...color,
-      ])
-
-      if (totalDistance + distance < this.distanceLeft) {
-        totalDistance += distance;
-
-        lines.push([
-          path[i - 1][0], 0.1, path[i - 1][1], 1,
-          ...color,
-        ])  
-      }
-      else if (!trimmed) {
-        const remainingDistance = this.distanceLeft - totalDistance;
-        const v = vec2.normalize(vec2.subtract(path[i - 1], path[i]));
-        const newPoint = vec2.add(path[i], vec2.mulScalar(v, remainingDistance));
-
-        path = [
-          ...path.slice(0, i),
-          newPoint,
-          ...path.slice(i),
-        ]
-
-        trimPoint = i;
-
-        i += 1;
-
-        lines.push([
-          path[i - 1][0], 0.1, path[i - 1][1], 1,
-          ...color,
-        ])  
-
-        totalDistance += remainingDistance;
-
-        trimmed = true;
-        color = [1, 0, 0, 1];
-      }
-      else {
-        lines.push([
-          path[i - 1][0], 0.1, path[i - 1][1], 1,
-          ...color,
-        ])  
-      }
-    }
-
-    // Do the trimming
-    if (trimPoint !== 0) {
-      path = path.slice(trimPoint);
-    }
-
-    // if (pathFinder.lines.length > 0) {
-    //   if (world.path2) {
-    //     world.mainRenderPass.removeDrawable(world.path2, 'line');
-    //   }
-
-    //   world.path2 = new Line(
-    //     pathFinder.lines,
-    //     vec4.create(1, 1, 0, 1),
-    //   );
-
-    //   world.mainRenderPass.addDrawable(world.path2, 'line');              
-    // }
-
-    return [path, totalDistance, lines];
-  }
-
   async chooseAction(timestamp: number, world: WorldInterface) {
     const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
     
@@ -444,7 +314,7 @@ class Actor implements ActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              const [path, dist] = await this.findPath2(start, goal, target, participants);
+              const [path, dist] = await findPath2(this, start, goal, target, participants);
               
               if (path.length > 0) {
                 let distanceToTarget = vec2.distance(path[0], goal);
@@ -519,7 +389,7 @@ class Actor implements ActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              const [path, dist] = await this.findPath2(start, goal, target, participants);
+              const [path, dist] = await findPath2(this, start, goal, target, participants);
 
               if (path.length > 0) {
                 script.entries.push(new FollowPath(this.sceneNode, path));    

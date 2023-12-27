@@ -8,7 +8,9 @@ type Occupant = {
   radius: number,
 }
 
-const findPath = (start: Vec2, goal: Vec2, target: Object | null, occupants: Occupant[], maxDistance: number): [Vec2[], number, number[][]] => {
+const findPath = (
+  start: Vec2, goal: Vec2, target: Object | null, occupants: Occupant[], maxDistance: number,
+): [Vec2[], number, number[][]] => {
   let path: Vec2[] = [];
   const lines: number[][] = [];
 
@@ -90,18 +92,20 @@ type Message = {
   target: Object | null,
   occupants: Occupant[],
   maxDistance: number,
+  id: number,
 }
 
 self.onmessage = (event: MessageEvent<Message>) => {
-  const result = findPath(
+  const [path, distance, lines] = findPath(
     event.data.start, event.data.goal, event.data.target, event.data.occupants, event.data.maxDistance,
   );
 
   postMessage({
     type: 'FindPath',
-    path: result[0],
-    distance: result[1],
-    lines: result[2],
+    path,
+    distance,
+    lines,
+    id: event.data.id,
   })
 }
 
