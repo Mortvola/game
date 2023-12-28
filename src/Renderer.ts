@@ -37,6 +37,12 @@ const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   });
 };
 
+export type FocusInfo = {
+  hitpoints: number,
+  maxHitpoints: number,
+  percentSuccess: number,
+}
+
 class Renderer implements WorldInterface {
   initialized = false;
 
@@ -108,6 +114,8 @@ class Renderer implements WorldInterface {
 
   loggerCallback: ((message: string) => void) | null = null;
   
+  focusCallback: ((focusInfo: FocusInfo | null) => void) | null = null;
+
   animate = true;
 
   followActiveCharacter = false;
@@ -618,6 +626,14 @@ class Renderer implements WorldInterface {
 
         if (actor) {
           if (actor !== this.participants.activeActor) { //} && (!this.focused || this.focused !== actor)) {
+            if (this.focusCallback) {
+              this.focusCallback({
+                hitpoints: actor.character.hitPoints,
+                maxHitpoints: actor.character.maxHitPoints,
+                percentSuccess: 0,
+              })
+            }
+
             if (this.focused) {
               this.mainRenderPass.removeDrawables(this.focused.sceneNode);
               this.focused = null;
@@ -706,6 +722,9 @@ class Renderer implements WorldInterface {
             }
           }
         } else if (point) {
+          if (this.focusCallback) {
+            this.focusCallback(null)
+          }
           const wp = this.participants.activeActor.getWorldPosition();
 
           (async () => {
@@ -981,6 +1000,10 @@ class Renderer implements WorldInterface {
 
   setLoggerCallback(callback: (message: string) => void) {
     this.loggerCallback = callback;
+  }
+
+  setFocusCallback(callback: (focusInfo: FocusInfo | null) => void) {
+    this.focusCallback = callback;
   }
 
   setParties(parties: Party[]) {

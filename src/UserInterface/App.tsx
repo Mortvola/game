@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.scss';
-import { gpu, renderer } from '../Renderer';
+import { FocusInfo, gpu, renderer } from '../Renderer';
 import { vec4 } from 'wgpu-matrix';
 import { EpisodeInfo } from '../Character/Actor';
 import RewardChart from '../Chart';
@@ -76,6 +76,13 @@ function App() {
     ));  
   }, [])
 
+  const [focus, setFocus] = React.useState<FocusInfo | null>(null);
+
+  const focusCallback = React.useCallback((focusInfo: FocusInfo | null) => {
+    setFocus(focusInfo);
+    console.log(JSON.stringify(focusInfo))
+  }, [])
+
   React.useEffect(() => {
     const listener = (evt: MessageEvent<WorkerMessage>) => {
       if (evt.data.type === 'Rewards' && evt.data.rewards) {
@@ -138,11 +145,12 @@ function App() {
     if (element) {
       element.focus();
       (async () => {
-        renderer.setScoreCallback(scoreCallback)
-        renderer.setLoggerCallback(loggerCallback)
+        renderer.setScoreCallback(scoreCallback);
+        renderer.setLoggerCallback(loggerCallback);
+        renderer.setFocusCallback(focusCallback);
       })()  
     }
-  }, [scoreCallback, loggerCallback])
+  }, [scoreCallback, loggerCallback, focusCallback])
 
   const handlePointerDown: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -420,7 +428,14 @@ function App() {
           <button className="learn" disabled={learning} onClick={handleLearnClick}>Learn</button>
         </div>
       </div>
-      <div className="score">
+      <div className="upper-center">
+          {
+            focus
+              ? `${focus.hitpoints}/${focus.maxHitpoints}`
+              : null
+          }
+      </div>
+      <div className="upper-right">
         <div>
           {
             `Red: ${score.red} Blue: ${score.blue}`
