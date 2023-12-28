@@ -8,7 +8,7 @@ class FollowPath implements ActorInterface {
 
   sceneNode: SceneNode;
 
-  metersPerSecond = 2;
+  metersPerSecond = 8;
 
   constructor(sceneNode: SceneNode, path: Vec2[]) {
     this.sceneNode = sceneNode;

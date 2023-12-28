@@ -1,4 +1,4 @@
-import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
+import { Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import Mesh from "../Drawables/Mesh";
 import { box } from "../Drawables/Shapes/box";
 import SceneNode from "../Drawables/SceneNode";
@@ -10,7 +10,6 @@ import Shot, { ShotData } from "../Script/Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
 import { Action, Key } from "../Workers/QStore";
-import Character from "./Character";
 import { attackRoll } from "../Dice";
 import { qStore, workerQueue } from "../WorkerQueue";
 import Mover from "../Script/Mover";
@@ -24,6 +23,7 @@ import FollowPath from "../Script/FollowPath";
 import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
 import { findPath2 } from "../Workers/PathPlannerQueue";
+import Creature from "./Creature";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -44,7 +44,7 @@ export enum States {
 }
 
 class Actor implements ActorInterface {
-  character: Character;
+  character: Creature;
 
   team: number;
 
@@ -81,7 +81,7 @@ class Actor implements ActorInterface {
   state = States.idle;
 
   private constructor(
-    character: Character,
+    character: Creature,
     mesh: SceneNode,
     height: number,
     color: Vec4,
@@ -111,7 +111,7 @@ class Actor implements ActorInterface {
   }
 
   static async create(
-    character: Character, color: Vec4, teamColor: Vec4, team: number, automated: boolean,
+    character: Creature, color: Vec4, teamColor: Vec4, team: number, automated: boolean,
   ) {
     const playerWidth = 1;
     const playerHeight = character.race.height;
@@ -505,12 +505,12 @@ class Actor implements ActorInterface {
   ) {
     this.actionsLeft -= 1;
 
-    const damage = attackRoll(this.character, targetActor.character, weapon, false);
+    const [damage, critical] = attackRoll(this.character, targetActor.character, weapon, false);
 
     targetActor.character.hitPoints -= damage;
 
     if (damage > 0) {
-      script.entries.push(new Logger(`${this.character.name} hit ${targetActor.character.name} for ${damage} points with a ${weapon.name}.`))
+      script.entries.push(new Logger(`${this.character.name} ${critical ? 'critically ' : ''}hit ${targetActor.character.name} for ${damage} points with a ${weapon.name}.`))
     }
     else {
       script.entries.push(new Logger(`${this.character.name} missed ${targetActor.character.name} with a ${weapon.name}.`))
@@ -519,7 +519,7 @@ class Actor implements ActorInterface {
     if (targetActor.character.hitPoints <= 0) {
       targetActor.character.hitPoints = 0;
 
-      script.entries.push(new Logger(`${targetActor.character.name} the ${targetActor.character.charClass.name} died.`))
+      script.entries.push(new Logger(`${targetActor.character.name} died.`))
 
       script.entries.push(new Remover(targetActor));
 

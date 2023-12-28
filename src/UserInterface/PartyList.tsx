@@ -6,9 +6,10 @@ import AddCharactor from './AddCharactor';
 import Weapon from '../Character/Equipment/Weapon';
 import { Armor } from '../Character/Equipment/Armor';
 import { getClass, getRace } from '../Character/Utilities';
+import Creature from '../Character/Creature';
 
 export type Party = {
-  members: Character[],
+  members: Creature[],
   automate: boolean,
 }
 
@@ -83,7 +84,7 @@ const PartyList: React.FC<PropsType> = ({
           party.members.map((a) => (
             <CharacterEntry
               className={`${styles.listEntry} ${selected === a ? styles.selected : ''}`}
-              character={a}
+              character={a as Character}
               onClick={handleEntryClick}
             />
           ))

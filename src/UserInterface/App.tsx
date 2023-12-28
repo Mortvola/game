@@ -9,6 +9,7 @@ import { restoreParties, storeParties } from '../Character/CharacterStorage';
 import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
 import Messages from './Messages';
 import { Party } from './PartyList';
+import Goblin from '../Character/Monsters/Goblin';
 
 type DiretionKeys = {
   left: number,

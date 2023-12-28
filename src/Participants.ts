@@ -2,6 +2,8 @@ import { Vec4, vec4 } from "wgpu-matrix";
 import Actor from "./Character/Actor";
 import { abilityModifier, diceRoll } from "./Dice";
 import { Party } from "./UserInterface/PartyList";
+import Goblin from "./Character/Monsters/Goblin";
+import { XPThreshold, xpThresholds } from "./Tables";
 
 export enum ParticipantsState {
   waiting,
@@ -68,7 +70,7 @@ class Participants {
     const playerWidth = 4;
 
     for (let i = 0; i < numPlayers; i += 1) {
-      const actor = await Actor.create(this.parties[team].members[i].clone(), color, teamColor, team, this.parties[team].automate);
+      const actor = await Actor.create(this.parties[team].members[i], color, teamColor, team, this.parties[team].automate);
       actor.sceneNode.translate[0] = (i - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()
         * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
@@ -82,6 +84,59 @@ class Participants {
 
   async createTeams() {
     const players: Actor[] = await this.createTeam(0, 10, vec4.create(0, 0, 0.5, 1), vec4.create(0, 0.6, 0, 1), true);
+
+    const thresholds: XPThreshold = {
+      easy: 0,
+      medium: 0,
+      hard: 0,
+      deadly: 0,
+    }
+
+    for (const member of this.parties[0].members) {
+      thresholds.easy += xpThresholds[member.charClass.level].easy;
+      thresholds.medium += xpThresholds[member.charClass.level].medium;
+      thresholds.hard += xpThresholds[member.charClass.level].hard;
+      thresholds.deadly += xpThresholds[member.charClass.level].deadly;
+    }
+
+    const party: Party = {
+      members: [],
+      automate: true,
+    }
+
+    for (;;) {
+      party.members.push(new Goblin(`Goblin ${party.members.length + 1}`));
+
+      let total = party.members.reduce((sum, c) => (
+        sum + 50
+      ), 0)
+
+      if (party.members.length === 1) {
+        total *= 1;
+      }
+      else if (party.members.length === 2) {
+        total *= 1.5;
+      }
+      else if (party.members.length >= 3 && party.members.length <= 6) {
+        total *= 2;
+      }
+      else if (party.members.length >= 7 && party.members.length <= 10) {
+        total *= 2.5;
+      }
+      else if (party.members.length >= 11 && party.members.length <= 14) {
+        total *= 3;
+      }
+      else {
+        total *= 4;
+      }
+
+      if (total >= thresholds.medium) {
+        break;
+      }
+    }
+    
+    this.parties[1] = party;
+
     const opponents: Actor[] = await this.createTeam(1, -10, vec4.create(0.5, 0, 0, 1), vec4.create(1, 0, 0, 1), true);
 
     this.participants[0] = players;
