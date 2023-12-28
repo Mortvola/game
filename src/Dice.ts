@@ -50,17 +50,7 @@ export const attackRoll = (attacker: Creature, target: Creature, weapon: Weapon,
       true];
   }
 
-  // Add in the ability score modifier
-  let abilityScore = attacker.abilityScores.strength;
-  if (
-    [WeaponType.MartialRange, WeaponType.SimpleRange].includes(weapon.type)
-    || (weapon.properties.includes(WeaponProperties.Finesse)
-    && attacker.abilityScores.dexterity > attacker.abilityScores.strength)
-  ) {
-    abilityScore = attacker.abilityScores.dexterity;
-  }
-  
-  roll += abilityModifier(abilityScore);
+  roll += attacker.getAbilityModifier(weapon);
 
   // Add in the weapon proficiency bonus.
   roll += attacker.getWeaponProficiency(weapon);

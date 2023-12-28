@@ -431,7 +431,7 @@ function App() {
       <div className="upper-center">
           {
             focus
-              ? `${focus.hitpoints}/${focus.maxHitpoints}`
+              ? `${focus.hitpoints}/${focus.maxHitpoints} - ${focus.percentSuccess}%`
               : null
           }
       </div>

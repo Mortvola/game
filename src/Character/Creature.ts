@@ -1,7 +1,7 @@
 import { abilityModifier, getProficiencyBonus } from "../Dice";
 import CharacterClass from "./Classes/CharacterClass";
 import { Armor } from "./Equipment/Armor";
-import Weapon from "./Equipment/Weapon";
+import Weapon, { WeaponProperties, WeaponType } from "./Equipment/Weapon";
 import { AbilityScores } from "./Races/AbilityScores";
 import { Race } from "./Races/Race";
 
@@ -87,6 +87,27 @@ class Creature {
     }
     
     return 0;
+  }
+
+  getAbilityModifier(weapon: Weapon): number {
+    let abilityScore = this.abilityScores.strength;
+  
+    if (
+      [WeaponType.MartialRange, WeaponType.SimpleRange].includes(weapon.type)
+      || (weapon.properties.includes(WeaponProperties.Finesse)
+      && this.abilityScores.dexterity > this.abilityScores.strength)
+    ) {
+      abilityScore = this.abilityScores.dexterity;
+    }
+  
+    return abilityModifier(abilityScore);
+  }
+
+  percentSuccess(target: Creature, weapon: Weapon): number {
+    return Math.min(Math.max(100 - (target.armorClass
+      - this.getAbilityModifier(weapon)
+      - this.getWeaponProficiency(weapon))
+      * 5, 5), 95)
   }
 }
 

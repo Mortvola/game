@@ -626,11 +626,13 @@ class Renderer implements WorldInterface {
 
         if (actor) {
           if (actor !== this.participants.activeActor) { //} && (!this.focused || this.focused !== actor)) {
+            let activeActor = this.participants.activeActor;
+
             if (this.focusCallback) {
               this.focusCallback({
                 hitpoints: actor.character.hitPoints,
                 maxHitpoints: actor.character.maxHitPoints,
-                percentSuccess: 0,
+                percentSuccess: activeActor.character.percentSuccess(actor.character, activeActor.character.equipped.rangeWeapon ?? activeActor.character.equipped.meleeWeapon!),
               })
             }
 
@@ -643,7 +645,7 @@ class Renderer implements WorldInterface {
 
             this.mainRenderPass.addDrawables(this.focused.sceneNode);
 
-            const wp = this.participants.activeActor.getWorldPosition();
+            const wp = activeActor.getWorldPosition();
             const targetWp = actor.getWorldPosition();
 
             const distance = vec2.distance(
@@ -651,13 +653,12 @@ class Renderer implements WorldInterface {
               vec2.create(targetWp[0], targetWp[2]),
             )
 
-            if (distance > this.participants.activeActor.attackRadius + this.focused.occupiedRadius) {
+            if (distance > activeActor.attackRadius + this.focused.occupiedRadius) {
               // To far for a melee attack
               // Find a path to the target...
 
               let focused = this.focused
               let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
-              let activeActor = this.participants.activeActor;
 
               (async () => {
                 const [path,, lines, cancelled] = await findPath2(
