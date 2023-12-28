@@ -35,8 +35,31 @@ export const getProficiencyBonus = (level: number) => (
   Math.trunc((level - 1) / 4) + 2
 )
 
-export const attackRoll = (attacker: Creature, target: Creature, weapon: Weapon, twhoHanded: boolean): [number, boolean] => {
+export type Advantage = 'Disadvantage' | 'Neutral' | 'Advantage';
+
+export const attackRoll = (
+  attacker: Creature,
+  target: Creature,
+  weapon: Weapon,
+  twhoHanded: boolean,
+  advnatage: Advantage,
+): [number, boolean] => {
   let roll = diceRoll(1, 20);
+
+  if (advnatage === 'Disadvantage') {
+    const roll2 = diceRoll(1, 2);
+
+    if (roll > roll2) {
+      roll = roll2;
+    }
+  }
+  else if (advnatage === 'Advantage') {
+    const roll2 = diceRoll(1, 2);
+
+    if (roll < roll2) {
+      roll = roll2;
+    }
+  }
 
   if (roll === 1) {
     // Critical miss

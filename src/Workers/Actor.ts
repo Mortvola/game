@@ -167,7 +167,7 @@ class Actor implements ActorInterface {
     const weapon = this.character.equipped.meleeWeapon;
 
     if (weapon) {
-      const [damage] = attackRoll(this.character, targetActor.character, weapon, false);
+      const [damage] = attackRoll(this.character, targetActor.character, weapon, false, 'Neutral');
 
       targetActor.character.hitPoints -= damage;
 

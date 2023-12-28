@@ -10,11 +10,11 @@ import Shot, { ShotData } from "../Script/Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
 import { Action, Key } from "../Workers/QStore";
-import { attackRoll } from "../Dice";
+import { Advantage, attackRoll } from "../Dice";
 import { qStore, workerQueue } from "../WorkerQueue";
 import Mover from "../Script/Mover";
 import Script from "../Script/Script";
-import Weapon from "./Equipment/Weapon";
+import Weapon, { WeaponType } from "./Equipment/Weapon";
 import ContainerNode from "../Drawables/ContainerNode";
 import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
@@ -505,7 +505,18 @@ class Actor implements ActorInterface {
   ) {
     this.actionsLeft -= 1;
 
-    const [damage, critical] = attackRoll(this.character, targetActor.character, weapon, false);
+    let advantage: Advantage = 'Neutral';
+    if ([WeaponType.MartialRange, WeaponType.SimpleRange].includes(weapon.type)) {
+      const wp = this.getWorldPosition();
+      const targetWp = this.getWorldPosition();
+      const distance = vec2.distanceSq(vec2.create(wp[0], wp[2]), vec2.create(targetWp[0], targetWp[2]));
+
+      if (weapon.range !== null && distance > weapon.range[0]) {
+        advantage = 'Disadvantage';
+      }
+    }
+
+    const [damage, critical] = attackRoll(this.character, targetActor.character, weapon, false, advantage);
 
     targetActor.character.hitPoints -= damage;
 
