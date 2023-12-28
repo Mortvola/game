@@ -1,4 +1,4 @@
-import { abilityModifier, generateAbilityScores, getProficiencyBonus } from "../Dice";
+import { abilityModifier, generateAbilityScores } from "../Dice";
 import CharacterClass from "./Classes/CharacterClass";
 import Creature from "./Creature";
 import { Armor, ArmorType } from "./Equipment/Armor";
@@ -13,7 +13,7 @@ class Character extends Creature {
       + abilityModifier(abilityScores.constitution)
       + race.hitPointBonus;
 
-    super(abilityScores, maxHitPoints, race, charClass, weapons, armor);
+    super(abilityScores, maxHitPoints, race, charClass, weapons, armor, 0);
 
     this.equipped.meleeWeapon = this.weapons
       .filter((w) => [WeaponType.Simple, WeaponType.Martial].includes(w.type))[0];

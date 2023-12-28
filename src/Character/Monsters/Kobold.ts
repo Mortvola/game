@@ -1,39 +1,36 @@
 import CharacterClass from "../Classes/CharacterClass";
 import Creature from "../Creature";
-import { getArmor } from "../Equipment/Armor";
+import { Armor } from "../Equipment/Armor";
 import { getWeapon } from "../Equipment/Weapon";
 import GoblinRace from "./GoblinRace";
 
-class Goblin extends Creature {
+class Kobold extends Creature {
   constructor(name: string) {
     const weapons = [
-      getWeapon('Scimitar'),
-      getWeapon('Shortbow'),
+      getWeapon('Dagger'),
+      getWeapon('Sling'),
     ]
 
-    const armor = [
-      getArmor('Leather'),
-      getArmor('Shield')
-    ]
+    const armor: Armor[] = []
 
     const race = new GoblinRace();
-    const charClass = new CharacterClass('Goblin', 1, 6, [], [], ['Scimitars'])
+    const charClass = new CharacterClass('Kobold', 1, 6, [], [], ['Daggers', 'Slings'])
 
     super(
       {
-        strength: 8,
-        dexterity: 14,
-        constitution: 10,
-        intelligence: 10,
-        wisdom: 8,
+        strength: 7,
+        dexterity: 15,
+        constitution: 9,
+        intelligence: 8,
+        wisdom: 7,
         charisma: 8,
       },
-      7,
+      5,
       race,
       charClass,
       weapons,
       armor,
-      50,
+      25,
     );
 
     this.name = name;
@@ -45,4 +42,4 @@ class Goblin extends Creature {
   }
 }
 
-export default Goblin;
+export default Kobold;

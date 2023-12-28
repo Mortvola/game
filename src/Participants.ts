@@ -4,6 +4,52 @@ import { abilityModifier, diceRoll } from "./Dice";
 import { Party } from "./UserInterface/PartyList";
 import Goblin from "./Character/Monsters/Goblin";
 import { XPThreshold, xpThresholds } from "./Tables";
+import Kobold from "./Character/Monsters/Kobold";
+import Creature from "./Character/Creature";
+
+function createParty<Type extends Creature>(thresholds: XPThreshold, c: new (name: string) => Type, name: string): Party {
+  const party: Party = {
+    members: [],
+    automate: true,
+  }
+
+  for (;;) {
+    party.members.push(new c(`${name} ${party.members.length + 1}`));
+
+    let total = party.members.reduce((sum, c) => (
+      sum + c.experiencePoints
+    ), 0)
+
+    if (total === 0) {
+      throw new Error('zero experience points')
+    }
+  
+    if (party.members.length === 1) {
+      total *= 1;
+    }
+    else if (party.members.length === 2) {
+      total *= 1.5;
+    }
+    else if (party.members.length >= 3 && party.members.length <= 6) {
+      total *= 2;
+    }
+    else if (party.members.length >= 7 && party.members.length <= 10) {
+      total *= 2.5;
+    }
+    else if (party.members.length >= 11 && party.members.length <= 14) {
+      total *= 3;
+    }
+    else {
+      total *= 4;
+    }
+
+    if (total >= thresholds.medium) {
+      break;
+    }
+  }
+
+  return party;
+}
 
 export enum ParticipantsState {
   waiting,
@@ -63,7 +109,7 @@ class Participants {
     this.turns.sort((a, b) => a.initiativeRoll - b.initiativeRoll);
   }
 
-  async createTeam(team: number, z: number, color: Vec4, teamColor: Vec4, automated: boolean): Promise<Actor[]> {
+  async createTeam(team: number, z: number, color: Vec4, teamColor: Vec4): Promise<Actor[]> {
     const actors: Actor[] = [];
     const numPlayers = this.parties[team].members.length;
     const spaceBetween = 4;
@@ -83,7 +129,7 @@ class Participants {
   }
 
   async createTeams() {
-    const players: Actor[] = await this.createTeam(0, 10, vec4.create(0, 0, 0.5, 1), vec4.create(0, 0.6, 0, 1), true);
+    const players: Actor[] = await this.createTeam(0, 10, vec4.create(0, 0, 0.5, 1), vec4.create(0, 0.6, 0, 1));
 
     const thresholds: XPThreshold = {
       easy: 0,
@@ -99,45 +145,24 @@ class Participants {
       thresholds.deadly += xpThresholds[member.charClass.level].deadly;
     }
 
-    const party: Party = {
-      members: [],
-      automate: true,
-    }
+    let party: Party;
 
-    for (;;) {
-      party.members.push(new Goblin(`Goblin ${party.members.length + 1}`));
-
-      let total = party.members.reduce((sum, c) => (
-        sum + 50
-      ), 0)
-
-      if (party.members.length === 1) {
-        total *= 1;
-      }
-      else if (party.members.length === 2) {
-        total *= 1.5;
-      }
-      else if (party.members.length >= 3 && party.members.length <= 6) {
-        total *= 2;
-      }
-      else if (party.members.length >= 7 && party.members.length <= 10) {
-        total *= 2.5;
-      }
-      else if (party.members.length >= 11 && party.members.length <= 14) {
-        total *= 3;
-      }
-      else {
-        total *= 4;
-      }
-
-      if (total >= thresholds.medium) {
+    switch (Math.floor(Math.random() * 2)) {
+      case 0:
+        party = createParty(thresholds, Kobold, 'Kobold');
         break;
-      }
+
+      case 1:
+        party = createParty(thresholds, Goblin, 'Goblin');
+        break;
+
+      default:
+        throw new Error('monster type not selected')
     }
-    
+
     this.parties[1] = party;
 
-    const opponents: Actor[] = await this.createTeam(1, -10, vec4.create(0.5, 0, 0, 1), vec4.create(1, 0, 0, 1), true);
+    const opponents: Actor[] = await this.createTeam(1, -10, vec4.create(0.5, 0, 0, 1), vec4.create(1, 0, 0, 1));
 
     this.participants[0] = players;
     this.participants[1] = opponents;

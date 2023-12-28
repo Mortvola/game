@@ -1,8 +1,8 @@
 import { feetToMeters } from "../../Math";
 import { Race, Size } from "../Races/Race";
 
-class GoblinRace implements Race {
-  name = "Goblin";
+class KoboldRace implements Race {
+  name = "Kobold";
 
   speed = feetToMeters(30);
 
@@ -21,8 +21,8 @@ class GoblinRace implements Race {
 
   hitPointBonus = 0;
 
-  clone(): GoblinRace {
-    return new GoblinRace();
+  clone(): KoboldRace {
+    return new KoboldRace();
   }
 
   generateName(): string {
@@ -30,4 +30,4 @@ class GoblinRace implements Race {
   }
 }
 
-export default GoblinRace;
+export default KoboldRace;

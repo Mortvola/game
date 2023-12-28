@@ -59,6 +59,7 @@ export const attackRoll = (attacker: Creature, target: Creature, weapon: Weapon,
   ) {
     abilityScore = attacker.abilityScores.dexterity;
   }
+  
   roll += abilityModifier(abilityScore);
 
   // Add in the weapon proficiency bonus.

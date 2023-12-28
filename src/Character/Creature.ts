@@ -29,6 +29,8 @@ class Creature {
 
   armor: Armor[];
 
+  experiencePoints: number;
+
   equipped: Equipped = {
     meleeWeapon: null,
     rangeWeapon: null,
@@ -36,7 +38,15 @@ class Creature {
     shield: null,
   }
 
-  constructor(abilityScores: AbilityScores, maxHitPoints: number, race: Race, charClass: CharacterClass, weapons: Weapon[], armor: Armor[]) {
+  constructor(
+    abilityScores: AbilityScores,
+    maxHitPoints: number,
+    race: Race,
+    charClass: CharacterClass,
+    weapons: Weapon[],
+    armor: Armor[],
+    experiencePoints: number,
+  ) {
     this.abilityScores = abilityScores;
     this.maxHitPoints = maxHitPoints;
     this.hitPoints = maxHitPoints;
@@ -44,6 +54,7 @@ class Creature {
     this.charClass = charClass;
     this.weapons = weapons;
     this.armor = armor;
+    this.experiencePoints = experiencePoints;
   }
 
   clone(): Creature {
