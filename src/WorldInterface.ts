@@ -35,7 +35,7 @@ export interface WorldInterface {
 
   loggerCallback: ((message: string) => void) | null;
 
-  path: Line | null;
+  pathLines: Line | null;
 
   path2: Line | null;
 

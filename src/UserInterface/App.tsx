@@ -2,7 +2,7 @@ import React from 'react';
 import './App.scss';
 import { FocusInfo, gpu, renderer } from '../Renderer';
 import { vec4 } from 'wgpu-matrix';
-import { EpisodeInfo } from '../Character/Actor';
+import Actor, { EpisodeInfo } from '../Character/Actor';
 import RewardChart from '../Chart';
 import DefineParties from './DefineParties';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
@@ -10,6 +10,8 @@ import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
 import Messages from './Messages';
 import { Party } from './PartyList';
 import Goblin from '../Character/Monsters/Goblin';
+import ActionBar from './Actions/ActionBar';
+import Creature from '../Character/Creature';
 
 type DiretionKeys = {
   left: number,
@@ -80,7 +82,12 @@ function App() {
 
   const focusCallback = React.useCallback((focusInfo: FocusInfo | null) => {
     setFocus(focusInfo);
-    console.log(JSON.stringify(focusInfo))
+  }, [])
+
+  const [character, setCharacter] = React.useState<Creature | null>(null);
+
+  const characterChangeCallback = React.useCallback((character: Creature | null) => {
+    setCharacter(character)
   }, [])
 
   React.useEffect(() => {
@@ -148,9 +155,10 @@ function App() {
         renderer.setScoreCallback(scoreCallback);
         renderer.setLoggerCallback(loggerCallback);
         renderer.setFocusCallback(focusCallback);
+        renderer.setCharacterChangeCallback(characterChangeCallback)
       })()  
     }
-  }, [scoreCallback, loggerCallback, focusCallback])
+  }, [scoreCallback, loggerCallback, focusCallback, characterChangeCallback])
 
   const handlePointerDown: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -417,15 +425,6 @@ function App() {
                 : 'Controller'
             }
           </button>
-          <label>
-            <input type="checkbox" onChange={handleAnimateChange} checked={fast ? true : false} />
-            Fast
-          </label>
-          <label>
-            <input type="checkbox" onChange={handleFollowChange} checked={follow ? true : false} />
-            Follow
-          </label>
-          <button className="learn" disabled={learning} onClick={handleLearnClick}>Learn</button>
         </div>
       </div>
       <div className="upper-center">
@@ -475,6 +474,13 @@ function App() {
                 <RewardChart data={rewards} />
               </div>    
             )
+            : null
+        }
+      </div>
+      <div className="lower-center">
+        {
+          character
+            ? <ActionBar character={character} />
             : null
         }
       </div>

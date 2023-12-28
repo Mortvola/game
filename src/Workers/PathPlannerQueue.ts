@@ -41,14 +41,16 @@ worker.addEventListener('message', (evt: MessageEvent<MessageResponse>) => {
   if (evt.data.type === 'FindPath') {
     const promise = findPathPromises[evt.data.id]
 
-    promise.resolve([
-      evt.data.path,
-      evt.data.distance,
-      evt.data.lines,
-      false,
-    ])
-
-    delete findPathPromises[evt.data.id];
+    if (promise) {
+      promise.resolve([
+        evt.data.path,
+        evt.data.distance,
+        evt.data.lines,
+        false,
+      ])
+  
+      delete findPathPromises[evt.data.id];  
+    }
 
     if (waiting) {
       worker.postMessage(waiting);
@@ -98,6 +100,8 @@ export const findPath2 = async (
         [],
         true,
       ])  
+
+      delete findPathPromises[waiting.id];  
     }
 
     waiting = message;

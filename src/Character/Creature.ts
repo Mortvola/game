@@ -12,6 +12,8 @@ export type Equipped = {
   shield: Armor | null,
 }
 
+type PrimaryWeapon = 'Melee' | 'Range';
+  
 class Creature {
   name = '';
 
@@ -38,6 +40,8 @@ class Creature {
     shield: null,
   }
 
+  primaryWeapon: PrimaryWeapon = 'Melee';
+  
   constructor(
     abilityScores: AbilityScores,
     maxHitPoints: number,

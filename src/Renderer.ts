@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 import {
+  Vec2,
   Vec4, mat4, vec2, vec4,
 } from 'wgpu-matrix';
 import Camera from './Camera';
@@ -15,7 +16,7 @@ import CartesianAxes from './Drawables/CartesianAxes';
 import Mesh from './Drawables/Mesh';
 import { box } from './Drawables/Shapes/box';
 import Reticle from './Drawables/Reticle';
-import Actor, { States, pathFinder } from './Character/Actor';
+import Actor, { States } from './Character/Actor';
 import Trajectory from './Drawables/Trajectory';
 import Line from './Drawables/Line';
 import Collidees from './Collidees';
@@ -23,11 +24,13 @@ import Participants, { ParticipantsState } from './Participants';
 import { ActorInterface } from './ActorInterface';
 import { Delay, WorldInterface } from './WorldInterface';
 import { EpisodeInfo } from './Character/Actor';
-import { Party } from './UserInterface/PartyList';
 import FollowPath from './Script/FollowPath';
 import Script from './Script/Script';
 import Shot, { ShotData } from './Script/Shot';
 import { findPath2 } from './Workers/PathPlannerQueue';
+import Creature from './Character/Creature';
+import { WeaponType } from './Character/Equipment/Weapon';
+import { Party } from './UserInterface/PartyList';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -36,6 +39,13 @@ const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
     }, 0);
   });
 };
+
+type InteractionType = {
+  type: 'Move' | 'MoveAndMelee' | 'Melee' | 'Range',
+  path: Vec2[] | null,
+  distance: number,
+  target: Actor | null,
+}
 
 export type FocusInfo = {
   hitpoints: number,
@@ -92,7 +102,7 @@ class Renderer implements WorldInterface {
 
   trajectory: Trajectory | null = null;
 
-  path: Line | null = null;
+  pathLines: Line | null = null;
 
   path2: Line | null = null;
 
@@ -116,11 +126,15 @@ class Renderer implements WorldInterface {
   
   focusCallback: ((focusInfo: FocusInfo | null) => void) | null = null;
 
+  characterChangeCallback: ((character: Creature | null) => void) | null = null;
+
   animate = true;
 
   followActiveCharacter = false;
 
   endOfRound = true;
+
+  interactionType: InteractionType | null = null;
 
   constructor(shot: Mesh, reticle: Reticle) {
     this.reticle = reticle;
@@ -174,8 +188,18 @@ class Renderer implements WorldInterface {
     if (this.participants.activeActor) {
       if (this.participants.activeActor.automated) {
         this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
-      } else if (this.inputMode === 'Controller') {
-        this.mainRenderPass.addDrawable(this.reticle, 'reticle');
+
+        if (this.characterChangeCallback) {
+          this.characterChangeCallback(null);
+        }
+      } else {
+        if (this.inputMode === 'Controller') {
+          this.mainRenderPass.addDrawable(this.reticle, 'reticle');
+        }
+
+        if (this.characterChangeCallback) {
+          this.characterChangeCallback(this.participants.activeActor.character);
+        }
       }
 
       this.participants.activeActor.startTurn(this);
@@ -193,8 +217,10 @@ class Renderer implements WorldInterface {
     if (this.participants.activeActor) {
       this.participants.activeActor.endTurn();
 
+      this.interactionType = null;
+
       if (this.focused) {
-        this.mainRenderPass.removeDrawables(this.focused.sceneNode);
+        // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
         this.focused = null;
       }
 
@@ -203,8 +229,8 @@ class Renderer implements WorldInterface {
         this.trajectory = null;
       }
 
-      if (this.path) {
-        this.mainRenderPass.removeDrawable(this.path, 'line');
+      if (this.pathLines) {
+        this.mainRenderPass.removeDrawable(this.pathLines, 'line');
       }
 
       this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
@@ -628,22 +654,26 @@ class Renderer implements WorldInterface {
           if (actor !== this.participants.activeActor) { //} && (!this.focused || this.focused !== actor)) {
             let activeActor = this.participants.activeActor;
 
+            let primaryWeapon = activeActor.character.primaryWeapon === 'Melee'
+              ? activeActor.character.equipped.meleeWeapon
+              : activeActor.character.equipped.rangeWeapon;
+
             if (this.focusCallback) {
               this.focusCallback({
                 hitpoints: actor.character.hitPoints,
                 maxHitpoints: actor.character.maxHitPoints,
-                percentSuccess: activeActor.character.percentSuccess(actor.character, activeActor.character.equipped.rangeWeapon ?? activeActor.character.equipped.meleeWeapon!),
+                percentSuccess: activeActor.character.percentSuccess(actor.character, primaryWeapon!),
               })
             }
 
             if (this.focused) {
-              this.mainRenderPass.removeDrawables(this.focused.sceneNode);
+              // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
               this.focused = null;
             }
 
             this.focused = actor;
 
-            this.mainRenderPass.addDrawables(this.focused.sceneNode);
+            // this.mainRenderPass.addDrawables(this.focused.sceneNode);
 
             const wp = activeActor.getWorldPosition();
             const targetWp = actor.getWorldPosition();
@@ -657,69 +687,106 @@ class Renderer implements WorldInterface {
               // To far for a melee attack
               // Find a path to the target...
 
-              let focused = this.focused
-              let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
-
-              (async () => {
-                const [path,, lines, cancelled] = await findPath2(
-                  activeActor,
-                  vec2.create(wp[0], wp[2]),
-                  vec2.create(targetWp[0], targetWp[2]),
-                  actor, participants,
-                )
-
-                if (!cancelled) {
-                  let distanceToTarget = activeActor.attackRadius * 2;
-                  
-                  if (path.length > 0) {
-                    distanceToTarget = vec2.distance(path[0], vec2.create(targetWp[0], targetWp[2]));
-                    distanceToTarget -= actor.occupiedRadius  
-                  }
-
-                  if (
-                    path.length > 0
-                    && (
-                      (distanceToTarget < activeActor.attackRadius
-                      && activeActor.actionsLeft > 0)
-                      || !(activeActor.character.equipped.rangeWeapon
-                        && activeActor.actionsLeft > 0)
-                    )
-                  ) {
-                    if (this.path) {
-                      this.mainRenderPass.removeDrawable(this.path, 'line');
-                    }
-  
-                    this.path = new Line(lines);
-          
-                    this.mainRenderPass.addDrawable(this.path, 'line');        
-                  }
-                  else if (
-                    activeActor.character.equipped.rangeWeapon
-                    && activeActor.actionsLeft > 0
-                  ) {
-                    const result = activeActor.computeShotData(focused);
-  
-                    if (this.trajectory) {
-                      this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
-                      this.trajectory = null;
-                    }
-                  
-                    this.trajectory = new Trajectory({
-                      velocityVector: result.velocityVector,
-                      duration: result.duration,
-                      startPos: result.startPos,
-                      orientation: result.orientation,
-                      distance: result.distance,
-                    });
-  
-                    this.mainRenderPass.addDrawable(this.trajectory, 'trajectory');
-  
-                    if (this.path) {
-                      this.mainRenderPass.removeDrawable(this.path, 'line');
-                    }
-                  }
+              if (
+                activeActor.actionsLeft > 0
+                && primaryWeapon
+                && [WeaponType.SimpleRange, WeaponType.MartialRange].includes(primaryWeapon.type)
+              ) {
+                const result = activeActor.computeShotData(actor);
+    
+                if (this.trajectory) {
+                  this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+                  this.trajectory = null;
                 }
-              })();
+              
+                this.trajectory = new Trajectory({
+                  velocityVector: result.velocityVector,
+                  duration: result.duration,
+                  startPos: result.startPos,
+                  orientation: result.orientation,
+                  distance: result.distance,
+                });
+
+                this.mainRenderPass.addDrawable(this.trajectory, 'trajectory');
+
+                if (this.pathLines) {
+                  this.mainRenderPass.removeDrawable(this.pathLines, 'line');
+                }
+
+                this.interactionType = {
+                  type: 'Range',
+                  path: null,
+                  distance: 0,
+                  target: actor,
+                }
+              }
+              else {
+                let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
+
+                (async () => {
+                  const [path, distance, lines, cancelled] = await findPath2(
+                    activeActor,
+                    vec2.create(wp[0], wp[2]),
+                    vec2.create(targetWp[0], targetWp[2]),
+                    actor, participants,
+                  )
+
+                  if (!cancelled) {
+                    // let distanceToTarget = activeActor.attackRadius * 2;
+                    
+                    // if (path.length > 0) {
+                    //   distanceToTarget = vec2.distance(path[0], vec2.create(targetWp[0], targetWp[2]));
+                    //   distanceToTarget -= actor.occupiedRadius  
+                    // }
+
+                    if (
+                      path.length > 0
+                      // && (
+                      //   (distanceToTarget < activeActor.attackRadius
+                      //   && activeActor.actionsLeft > 0)
+                      //   || !(activeActor.character.equipped.rangeWeapon
+                      //     && activeActor.actionsLeft > 0)
+                      // )
+                    ) {
+                      if (this.pathLines) {
+                        this.mainRenderPass.removeDrawable(this.pathLines, 'line');
+                      }
+    
+                      this.pathLines = new Line(lines);
+            
+                      this.mainRenderPass.addDrawable(this.pathLines, 'line');
+
+                      if (activeActor.actionsLeft > 0) {
+                        this.interactionType = {
+                          type: 'MoveAndMelee',
+                          path: path,
+                          distance: distance,
+                          target: actor,
+                        }  
+                      }
+                    }
+                  }
+                })();
+              }
+            }
+            else {
+              if (this.trajectory) {
+                this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+                this.trajectory = null;
+              }
+
+              if (this.pathLines) {
+                this.mainRenderPass.removeDrawable(this.pathLines, 'line');
+              }
+
+              if (activeActor.actionsLeft > 0) {
+                this.interactionType = {
+                  type: 'Melee',
+                  path: null,
+                  distance: 0,
+                  target: actor,
+                }  
+              }
             }
           }
         } else if (point) {
@@ -728,17 +795,22 @@ class Renderer implements WorldInterface {
           }
           const wp = this.participants.activeActor.getWorldPosition();
 
+          if (this.focused) {
+            // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
+            this.focused = null;
+          }
+    
           (async () => {
             let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
 
-            const [path,, lines, cancelled] = await findPath2(
+            const [path, distance, lines, cancelled] = await findPath2(
               this.participants.activeActor,
               vec2.create(wp[0], wp[2]),
               vec2.create(point[0], point[2]),
               null, participants,
             )
 
-            if (!cancelled) {
+            if (!cancelled && !this.focused) {
               // if (this.focused) {
               //   this.mainRenderPass.removeDrawables(this.focused.sceneNode);
               //   this.focused = null;
@@ -749,21 +821,28 @@ class Renderer implements WorldInterface {
                 this.trajectory = null;
               }
       
-              if (this.path) {
-                this.mainRenderPass.removeDrawable(this.path, 'line');
+              if (this.pathLines) {
+                this.mainRenderPass.removeDrawable(this.pathLines, 'line');
               }
     
               if (path.length > 0) {
-                this.path = new Line(lines);
+                this.pathLines = new Line(lines);
       
-                this.mainRenderPass.addDrawable(this.path, 'line');
-              }  
+                this.mainRenderPass.addDrawable(this.pathLines, 'line');
+              }
+
+              this.interactionType = {
+                type: 'Move',
+                path: path,
+                distance: distance,
+                target: null,
+              }
             }
           })();
         }
       }
     } else if (this.focused) {
-      this.mainRenderPass.removeDrawables(this.focused.sceneNode);
+      // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
       this.focused = null;
     }
   }
@@ -834,8 +913,8 @@ class Renderer implements WorldInterface {
         }
       })()
 
-      if (this.path) {
-        this.mainRenderPass.removeDrawable(this.path, 'line');
+      if (this.pathLines) {
+        this.mainRenderPass.removeDrawable(this.pathLines, 'line');
       }
     }
   }
@@ -845,112 +924,86 @@ class Renderer implements WorldInterface {
       this.participants.activeActor
       && !this.participants.activeActor.automated
       && this.participants.activeActor.state !== States.scripting
+      && this.interactionType
     ) {
-      if (this.focused) {
-        if (this.focused !== this.participants.activeActor) {
-          const wp = this.participants.activeActor.getWorldPosition();
-          const targetWp = this.focused.getWorldPosition();
+      const activeActor = this.participants.activeActor;
+      const script = new Script();
 
-          const distance = vec2.distance(
-            vec2.create(wp[0], wp[2]),
-            vec2.create(targetWp[0], targetWp[2]),
-          )
+      switch (this.interactionType.type) {
+        case 'Move':
+          script.entries.push(new FollowPath(activeActor.sceneNode, this.interactionType.path!));    
+          activeActor.distanceLeft -= this.interactionType.distance;
 
-          const activeActor = this.participants.activeActor;
-          const target = this.focused;
-          let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
+          if (this.pathLines) {
+            this.mainRenderPass.removeDrawable(this.pathLines, 'line');
+          }            
 
-          (async () => {
-            const script = new Script();
+          break
 
-            if (distance <= activeActor.attackRadius + target.occupiedRadius && activeActor.actionsLeft > 0) {
-              activeActor.attack(
-                target,
-                activeActor.character.equipped.meleeWeapon!,
-                this,
-                script,
-              );
-            }
-            else {
-              const [path, distance,, cancelled] = await findPath2(
-                activeActor,
-                vec2.create(wp[0], wp[2]),
-                vec2.create(targetWp[0], targetWp[2]),
-                target, participants,
-              )
+        case 'MoveAndMelee':
+          script.entries.push(new FollowPath(activeActor.sceneNode, this.interactionType.path!));    
+          activeActor.distanceLeft -= this.interactionType.distance;
 
-              if (!cancelled) {
-                let distanceToTarget = activeActor.attackRadius * 2;
+          activeActor.attack(
+            this.interactionType.target!,
+            activeActor.character.equipped.meleeWeapon!,
+            this,
+            script,
+          );
 
-                if (path.length > 0) {
-                  distanceToTarget = vec2.distance(path[0], vec2.create(targetWp[0], targetWp[2]));
-                  distanceToTarget -= target.occupiedRadius  
-                }
+          if (this.pathLines) {
+            this.mainRenderPass.removeDrawable(this.pathLines, 'line');
+          }            
+          break;
 
-                if (distanceToTarget < activeActor.attackRadius && activeActor.actionsLeft > 0) {
-                  script.entries.push(new FollowPath(activeActor.sceneNode, path));    
-                  activeActor.distanceLeft -= distance;
+        case 'Melee':
+          activeActor.attack(
+            this.interactionType.target!,
+            activeActor.character.equipped.meleeWeapon!,
+            this,
+            script,
+          );
 
-                  activeActor.attack(
-                    target,
-                    activeActor.character.equipped.meleeWeapon!,
-                    this,
-                    script,
-                  );
+          break;
 
-                  if (this.path) {
-                    this.mainRenderPass.removeDrawable(this.path, 'line');
-                  }            
-                }
-                else if (activeActor.character.equipped.rangeWeapon && activeActor.actionsLeft > 0) {
-                  const shotData = activeActor.computeShotData(target);
+        case 'Range':
+          const shotData = activeActor.computeShotData(this.interactionType.target!);
         
-                  const data: ShotData = {
-                    velocityVector: shotData.velocityVector,
-                    orientation: shotData.orientation,
-                    startPos: shotData.startPos,
-                    position: shotData.startPos,
-                  };
+          const data: ShotData = {
+            velocityVector: shotData.velocityVector,
+            orientation: shotData.orientation,
+            startPos: shotData.startPos,
+            position: shotData.startPos,
+          };
 
-                  const shot = new Shot(this.shot, activeActor, data);
-                  script.entries.push(shot);
+          const shot = new Shot(this.shot, activeActor, data);
+          script.entries.push(shot);
 
-                  activeActor.attack(
-                    target,
-                    activeActor.character.equipped.rangeWeapon!,
-                    this,
-                    script,
-                  );
+          activeActor.attack(
+            this.interactionType.target!,
+            activeActor.character.equipped.rangeWeapon!,
+            this,
+            script,
+          );
 
-                  if (this.trajectory) {
-                    this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
-                    this.trajectory = null;
-                  }    
-                }
-                else if (path.length > 0) {
-                  script.entries.push(new FollowPath(activeActor.sceneNode, path));    
-                  activeActor.distanceLeft -= distance;
+          if (this.trajectory) {
+            this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+            this.trajectory = null;
+          }    
 
-                  if (this.path) {
-                    this.mainRenderPass.removeDrawable(this.path, 'line');
-                  }            
-                }
-              }
-            }
-
-            if (script.entries.length > 0) {
-              script.onFinish = () => {
-                activeActor.state = States.idle;
-              }
-        
-              this.actors.push(script);
-              activeActor.state = States.scripting;
-            }
-          })();
-        }
-      } else {
-        this.moveActor(this.participants.activeActor);
+          break;
       }
+
+      if (script.entries.length > 0) {
+        script.onFinish = () => {
+          activeActor.state = States.idle;
+        }
+  
+        this.actors.push(script);
+        activeActor.state = States.scripting;
+      }
+
+      this.interactionType = null;
     }
   }
 
@@ -1005,6 +1058,10 @@ class Renderer implements WorldInterface {
 
   setFocusCallback(callback: (focusInfo: FocusInfo | null) => void) {
     this.focusCallback = callback;
+  }
+
+  setCharacterChangeCallback(callback: (charactor: Creature | null) => void) {
+    this.characterChangeCallback = callback;
   }
 
   setParties(parties: Party[]) {

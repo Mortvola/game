@@ -50,30 +50,6 @@ canvas {
   color: white;
 }
 
-.lower-left {
-  position: absolute;
-  z-index: 2;
-  left: 0;
-  bottom: 0;
-}
-
-.upper-right {
-  position: absolute;
-  z-index: 2;
-  right: 0;
-  top: 0;
-  color: white;
-}
-
-.lower-right {
-  position: absolute;
-  z-index: 2;
-  right: 0;
-  bottom: 0;
-  color: white;
-  padding: 1rem;
-}
-
 .upper-center {
   position: absolute;
   top: 0;
@@ -84,6 +60,42 @@ canvas {
   margin-left: auto;
   z-index: 2;
   color: white;
+}
+
+.upper-right {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  top: 0;
+  color: white;
+}
+
+.lower-left {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  bottom: 0;
+}
+
+.lower-center {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-right: auto;
+  margin-left: auto;
+  width: max-content;
+  color: white;
+}
+
+.lower-right {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  color: white;
+  padding: 1rem;
 }
 
 .chart {
