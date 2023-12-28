@@ -10,7 +10,7 @@ class Mover implements ActorInterface {
 
   moveTo: Vec2;
 
-  metersPerSecond = 8;
+  metersPerSecond = 6;
 
   constructor(sceneNode: SceneNode, moveTo: Vec2, onFinish?: ActorOnFinishCallback) {
     this.sceneNode = sceneNode;

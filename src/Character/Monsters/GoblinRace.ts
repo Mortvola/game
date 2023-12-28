@@ -6,9 +6,9 @@ class GoblinRace implements Race {
 
   speed = feetToMeters(30);
 
-  size = Size.Medium;
+  size = Size.Small;
 
-  height = feetToMeters(5.75);
+  height = feetToMeters(3);
 
   abilityIncrease = {
     charisma: 0,
