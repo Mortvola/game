@@ -1,5 +1,5 @@
 import React from 'react';
-import ABSwitch from '../ABSwitch';
+import ABSwitch from '../AddCharacter/ABSwitch';
 import { EquipmentChoices } from '../../Character/Classes/CharacterClass';
 import WeaponSelectionWrapper from './WeaponSelectionWrapper';
 import WeaponSelection from './WeaponSelection';

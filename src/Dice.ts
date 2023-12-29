@@ -1,7 +1,6 @@
-import Character from "./Character/Character";
 import CharacterClass from "./Character/Classes/CharacterClass";
 import Creature from "./Character/Creature";
-import Weapon, { WeaponProperties, WeaponType, weaponDamage } from "./Character/Equipment/Weapon";
+import Weapon, { weaponDamage } from "./Character/Equipment/Weapon";
 import { AbilityScores } from "./Character/Races/AbilityScores";
 import { Race } from "./Character/Races/Race";
 
@@ -94,7 +93,18 @@ export enum Abilities {
   wisdom = 'wisdom',
 }
 
-export const generateAbilityScores = (race: Race, charClass: CharacterClass): AbilityScores => {
+export const abilityRolls = () => (
+  [
+    abilityRoll(),
+    abilityRoll(),
+    abilityRoll(),
+    abilityRoll(),
+    abilityRoll(),
+    abilityRoll(),
+  ]
+)
+
+export const assignAbilityScores = (rolls: number[], charClass: CharacterClass): AbilityScores => {
   const abilities: AbilityScores = {
     strength: 0,
     dexterity: 0,
@@ -104,15 +114,70 @@ export const generateAbilityScores = (race: Race, charClass: CharacterClass): Ab
     charisma: 0,
   }
 
-  // Roll the dice six times
-  let rolls = [
-    abilityRoll(),
-    abilityRoll(),
-    abilityRoll(),
-    abilityRoll(),
-    abilityRoll(),
-    abilityRoll(),
-  ]
+  const getMaxIndex = (r: number[]) => {
+    const max = r.reduce((indexMax, _, index) => {
+      if (index === 0) {
+        return indexMax
+      }
+
+      return r[indexMax] < r[index] ? index : indexMax
+    }, 0)
+
+    return max;
+  }
+  
+  // Assign the highest dice to the characters class's primary abilities
+  for (const ability of charClass.primaryAbilities) {
+    const max = getMaxIndex(rolls);
+
+    abilities[ability as keyof AbilityScores] = rolls[max];
+
+    rolls = [
+      ...rolls.slice(0, max),
+      ...rolls.slice(max + 1),
+    ]
+  }
+
+  // Assign the remaining rolls to the unassigned abilities
+  let index = 0;
+  for (const [key, value] of Object.entries(abilities)) {
+    if (value === 0) {
+      const abilityKey = key as keyof AbilityScores;
+      abilities[abilityKey] = rolls[index]
+      index += 1;
+    }
+  }
+
+  return abilities;
+}
+
+export const addAbilityIncreases = (abilityScores: AbilityScores, race: Race): AbilityScores => {
+  const updatedScores: AbilityScores = {
+    strength: 0,
+    constitution: 0,
+    dexterity: 0,
+    intelligence: 0,
+    wisdom: 0,
+    charisma: 0,
+  }
+
+  for (const [key] of Object.entries(updatedScores)) {
+    const abilityKey = key as keyof AbilityScores;
+    updatedScores[abilityKey] = abilityScores[abilityKey] + race.abilityIncrease[abilityKey]
+  }
+
+  return updatedScores;
+}
+
+export const generateAbilityScores = (rolls: number[], race: Race, charClass: CharacterClass): AbilityScores => {
+  const abilities: AbilityScores = {
+    strength: 0,
+    dexterity: 0,
+    constitution: 0,
+    intelligence: 0,
+    wisdom: 0,
+    charisma: 0,
+  }
 
   const getMaxIndex = (r: number[]) => {
     const max = r.reduce((indexMax, _, index) => {

@@ -3,11 +3,12 @@ import CharacterClass from "./Classes/CharacterClass";
 import Creature from "./Creature";
 import { Armor, ArmorType } from "./Equipment/Armor";
 import Weapon, { WeaponType } from "./Equipment/Weapon";
+import { AbilityScores } from "./Races/AbilityScores";
 import { Race } from "./Races/Race";
 
 class Character extends Creature {
-  constructor(race: Race, charClass: CharacterClass, weapons: Weapon[], armor: Armor[]) {
-    const abilityScores = generateAbilityScores(race, charClass);
+  constructor(abilityScores: AbilityScores, race: Race, charClass: CharacterClass, weapons: Weapon[], armor: Armor[]) {
+    // const abilityScores = generateAbilityScores(rolls, race, charClass);
 
     const maxHitPoints = charClass.hitDice
       + abilityModifier(abilityScores.constitution)
@@ -37,7 +38,7 @@ class Character extends Creature {
     const weaponsCopy = this.weapons.map((w) => w);
     const armorCopy = this.armor.map((a) => a);
 
-    const copy = new Character(raceCopy, classCopy, weaponsCopy, armorCopy);
+    const copy = new Character(this.abilityScores, raceCopy, classCopy, weaponsCopy, armorCopy);
 
     copy.name = this.name;
     copy.abilityScores = this.abilityScores;

@@ -1,21 +1,24 @@
 import React from 'react';
+import { Race } from '../../Character/Races/Race';
 
 type PropsType = {
+  race: Race,
   onChange: (race: string) => void,
 }
 
 const SelectRace: React.FC<PropsType> = ({
+  race,
   onChange,
 }) => {
-  const [race, setRace] = React.useState<string>('Dwarf')
+  const [raceName, setRaceName] = React.useState<string>(race.name)
 
   const handleRaceChange: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
-    setRace(event.target.value)
+    setRaceName(event.target.value)
     onChange(event.target.value)
   }
 
   return (
-    <select value={race} onChange={handleRaceChange}>
+    <select value={raceName} onChange={handleRaceChange}>
       {/* <option value="Dwarf">Dwarf</option> */}
       {/* <option value="Elf">Elf</option> */}
       {/* <option value="Halfling">Halfling</option> */}

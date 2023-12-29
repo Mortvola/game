@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 
-import { Vec2, vec2 } from "wgpu-matrix";
+import { Vec2, Vec4, vec2, vec4 } from "wgpu-matrix";
 import JumpPointSearch from "../Search/JumpPointSearch";
 
 type Occupant = {
@@ -8,25 +8,12 @@ type Occupant = {
   radius: number,
 }
 
-const findPath = (
-  start: Vec2, goal: Vec2, target: Object | null, occupants: Occupant[], maxDistance: number,
-): [Vec2[], number, number[][]] => {
-  let path: Vec2[] = [];
-  const lines: number[][] = [];
-
-  const pathFinder = new JumpPointSearch(512, 512, 16)
-
-  for (const a of occupants) {
-    pathFinder.fillCircle(a, a.center, a.radius);
-  }
-
-  path = pathFinder.findPath(start, goal, target);
-
-  // Trim the path to the extent the character can move in a single turn.
+const trimPath = (path: Vec2[], maxDistance: number): [Vec2[], number, number[][]] => {
   let totalDistance = 0;
+  const lines: number[][] = [];
+  let color = [1, 1, 1, 1];
   let trimmed = false;
   let trimPoint = 0;
-  let color = [1, 1, 1, 1];
   let distanceLeft = maxDistance;
 
   for (let i = path.length - 1; i > 0; i -= 1) {
@@ -86,6 +73,32 @@ const findPath = (
   return [path, totalDistance, lines];
 }
 
+const findPath = (
+  start: Vec2, goal: Vec2, target: Object | null, occupants: Occupant[], maxDistance: number,
+): [Vec2[], number, number[][], number[][]] => {
+  let path: Vec2[] = [];
+  let debugLines: number[][] = [];
+
+  const pathFinder = new JumpPointSearch(512, 512, 8)
+
+  for (const a of occupants) {
+    const lines = pathFinder.fillCircle(a, a.center, a.radius);
+    debugLines = debugLines.concat(lines)
+  }
+
+  let dbl = debugLines.map((p) => (
+    [
+      (p[0] - pathFinder.center[0]) / pathFinder.scale, 0.1, (p[1] - pathFinder.center[1]) / pathFinder.scale, 1,
+      1, 1, 1, 1,
+    ]
+  ))
+
+  path = pathFinder.findPath(start, goal, target);
+
+  // Trim the path to the extent the character can move in a single turn.
+  return [...trimPath(path, maxDistance), dbl];
+}
+
 type Message = {
   start: Vec2,
   goal: Vec2,
@@ -96,7 +109,7 @@ type Message = {
 }
 
 self.onmessage = (event: MessageEvent<Message>) => {
-  const [path, distance, lines] = findPath(
+  const [path, distance, lines, dbl] = findPath(
     event.data.start, event.data.goal, event.data.target, event.data.occupants, event.data.maxDistance,
   );
 
@@ -106,6 +119,7 @@ self.onmessage = (event: MessageEvent<Message>) => {
     distance,
     lines,
     id: event.data.id,
+    dbl,
   })
 }
 

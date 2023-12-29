@@ -3,6 +3,7 @@ import Character from "./Character"
 import { ArmorName, getArmor } from "./Equipment/Armor"
 import { WeaponName, getWeapon } from "./Equipment/Weapon"
 import { AbilityScores } from "./Races/AbilityScores"
+import { getSpell } from "./Spells/Spells"
 import { getClass, getRace } from "./Utilities"
 
 export type CharacterStorage = {
@@ -13,6 +14,7 @@ export type CharacterStorage = {
   maxHitPoints: number,
   weapons: string[],
   armor: string[],
+  spells: { name: string, prepared: boolean }[],
   equipped: {
     meleeWeapon: string | null,
     rangeWeapon: string | null,
@@ -27,7 +29,7 @@ export type CharacterStorageParty = {
 }
 
 export const restoreCharacters = (a: CharacterStorage[]): Character[] => {
-  const team = a.filter((c, index) => index <= 3).map((c) => {
+  const team = a.map((c) => {
     const race = getRace(c.race);
     const charClass = getClass(c.charClass);
 
@@ -35,7 +37,7 @@ export const restoreCharacters = (a: CharacterStorage[]): Character[] => {
       const weapons = c.weapons.map((w) => getWeapon(w as WeaponName))
       const armor = c.armor.map((a) => getArmor(a as ArmorName))
 
-      const character = new Character(race, charClass, weapons, armor);
+      const character = new Character(c.abilityScores, race, charClass, weapons, armor);
 
       character.name = c.name;
 
@@ -53,6 +55,10 @@ export const restoreCharacters = (a: CharacterStorage[]): Character[] => {
 
       if (c.equipped.shield) {
         character.equipped.shield = getArmor(c.equipped.shield as ArmorName);
+      }
+
+      if (c.spells) {
+        character.spells = c.spells.map((s) => ({ spell: getSpell(s.name)!, prepared: s.prepared }))
       }
 
       return character;
@@ -75,6 +81,7 @@ export const characterStorageParty = (party: Party): CharacterStorageParty => ({
       maxHitPoints: c.maxHitPoints,
       weapons: c.weapons.map((w) => w.name),
       armor: c.armor.map((a) => a.name),
+      spells: c.spells.map((s) => ({ name: s.spell.name, prepared: s.prepared})),
       equipped: {
         meleeWeapon: c.equipped.meleeWeapon?.name ?? null,
         rangeWeapon: c.equipped.rangeWeapon?.name ?? null,
@@ -127,7 +134,7 @@ const restoreParty = (id: string): Party => {
 
 export const restoreParties = (): Party[] => {
   const team1 = restoreParty('team1');
-  const team2 = restoreParty('team2');
+  // const team2 = restoreParty('team2');
 
-  return [team1, team2];
+  return [team1];
 }

@@ -2,14 +2,13 @@ import React from 'react';
 import './App.scss';
 import { FocusInfo, gpu, renderer } from '../Renderer';
 import { vec4 } from 'wgpu-matrix';
-import Actor, { EpisodeInfo } from '../Character/Actor';
+import { EpisodeInfo } from '../Character/Actor';
 import RewardChart from '../Chart';
 import DefineParties from './DefineParties';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
 import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
 import Messages from './Messages';
 import { Party } from './PartyList';
-import Goblin from '../Character/Monsters/Goblin';
 import ActionBar from './Actions/ActionBar';
 import Creature from '../Character/Creature';
 

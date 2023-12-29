@@ -1,3 +1,4 @@
+import { debug } from "console";
 import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 
 export type Element = {
@@ -216,7 +217,9 @@ class UniformGridSearch {
     return true
   }
 
-  fillCircle(actor: Object, c: Vec2, r: number) {
+  fillCircle(actor: Object, c: Vec2, r: number): number[][] {
+    let debugLines: number[][] = [];
+
     const center = vec2.create(
       Math.floor(c[0] * this.scale + 0.5) + this.center[0],
       Math.floor(c[1] * this.scale + 0.5) + this.center[1],
@@ -229,7 +232,8 @@ class UniformGridSearch {
   
     // (-radius, 0) and (radius, 0) points.
     if (0 <= y + center[1] && y + center[1] < this.height) {
-      this.horizontalLine(actor, -x + center[0], x + center[0], y + center[1])
+      const lines = this.horizontalLine(actor, -x + center[0], x + center[0], y + center[1])
+      debugLines = debugLines.concat(lines);
     }
 
     // (0, -radius) and (0, radius) points
@@ -261,32 +265,40 @@ class UniformGridSearch {
       }
   
       if (0 <= y + center[1] && y + center[1] < this.height) {
-        this.horizontalLine(actor, -x + center[0], x + center[0], y + center[1])
+        const lines = this.horizontalLine(actor, -x + center[0], x + center[0], y + center[1])
+        debugLines = debugLines.concat(lines);
       }
 
       if (0 <= -y + center[1] && -y + center[1] < this.height) {
-        this.horizontalLine(actor, -x + center[0], x + center[0], -y + center[1])
+        const lines = this.horizontalLine(actor, -x + center[0], x + center[0], -y + center[1])
+        debugLines = debugLines.concat(lines);
       }
 
       if (x !== y) {
         if (0 <= x + center[1] && x + center[1] < this.height) {
-          this.horizontalLine(actor, -y + center[0], y + center[0], x + center[1])
+          const lines = this.horizontalLine(actor, -y + center[0], y + center[0], x + center[1])
+          debugLines = debugLines.concat(lines);
         }
 
         if (0 <= -x + center[1] && -x + center[1] < this.height) {
-          this.horizontalLine(actor, -y + center[0], y + center[0], -x + center[1])
+          const lines = this.horizontalLine(actor, -y + center[0], y + center[0], -x + center[1])
+          debugLines = debugLines.concat(lines);
         }
       }
     }
+
+    return debugLines;
   }
 
-  horizontalLine(actor: Object, x1: number, x2: number, y: number) {
+  horizontalLine(actor: Object, x1: number, x2: number, y: number): [number[], number[]] {
     x1 = Math.max(x1, 0);
     x2 = Math.min(x2, this.width - 1);
 
     for (let x = x1; x <= x2; x += 1) {
       this.grid[y][x].actors.push(actor);
     }
+
+    return [[x1, y], [x2, y]]
   }
 
   smoothPath(path: Vec2[], target: Object | null): Vec2[] {

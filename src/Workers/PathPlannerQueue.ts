@@ -1,11 +1,11 @@
-import { Vec2, vec2 } from "wgpu-matrix";
+import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import Actor from "../Character/Actor";
 
 const worker: Worker = new Worker(new URL("../Workers/PathPlanner.ts", import.meta.url));
 
 let requestId = 0;
 
-type Occupant = {
+export type Occupant = {
   center: Vec2,
   radius: number,
 }
@@ -25,10 +25,11 @@ type MessageResponse = {
   distance: number,
   lines: number[][],
   id: number,
+  dbl: number[][],
 }
 
 type FindPathPromise = {
-  resolve: ((value: [Vec2[], number, number[][], boolean]) => void),
+  resolve: ((value: [Vec2[], number, number[][], boolean, number[][]]) => void),
 }
 
 const findPathPromises: Record<number, FindPathPromise> = {};
@@ -47,6 +48,7 @@ worker.addEventListener('message', (evt: MessageEvent<MessageResponse>) => {
         evt.data.distance,
         evt.data.lines,
         false,
+        evt.data.dbl,
       ])
   
       delete findPathPromises[evt.data.id];  
@@ -62,9 +64,7 @@ worker.addEventListener('message', (evt: MessageEvent<MessageResponse>) => {
   }
 })
 
-export const findPath2 = async (
-  actor: Actor, start: Vec2, goal: Vec2, target: Actor | null, participants: Actor[],
-): Promise<[Vec2[], number, number[][], boolean]> => {
+export const getOccupants = (actor: Actor, target: Actor | null, participants: Actor[], others: Occupant[]) => {
   const occupants = participants.filter((p) => p !== target && p !== actor).map((p) => {
     const point = p.getWorldPosition();
 
@@ -73,6 +73,13 @@ export const findPath2 = async (
       radius: p.occupiedRadius + actor.occupiedRadius
     })
   })
+
+  return occupants.concat(others.map((o) => ({ center: o.center, radius: o.radius + actor.occupiedRadius})));
+}
+
+export const findPath2 = async (
+  actor: Actor, start: Vec2, goal: Vec2, target: Actor | null, occupants: Occupant[],
+): Promise<[Vec2[], number, number[][], boolean, number[][]]> => {
 
   requestId += 1;
 
@@ -99,6 +106,7 @@ export const findPath2 = async (
         0,
         [],
         true,
+        [],
       ])  
 
       delete findPathPromises[waiting.id];  
@@ -107,17 +115,17 @@ export const findPath2 = async (
     waiting = message;
   }
 
-  const promise: Promise<[Vec2[], number, number[][], boolean]> = new Promise((resolve, reject) => {
+  const promise: Promise<[Vec2[], number, number[][], boolean, number[][]]> = new Promise((resolve, reject) => {
     findPathPromises[requestId] = { resolve };
   })
 
   return promise;
 }
 
-export const queueFindPath = async (
-  actor: Actor, start: Vec2, goal: Vec2, target: Actor | null, participants: Actor[],
-): Promise<[Vec2[], number, number[][], boolean]> => {
-  const result = await findPath2(actor, start, goal, target, participants)
+// export const queueFindPath = async (
+//   actor: Actor, start: Vec2, goal: Vec2, target: Actor | null, occupants: Occupant[],
+// ): Promise<[Vec2[], number, number[][], boolean]> => {
+//   const result = await findPath2(actor, start, goal, target, occupants)
   
-  return result;
-}
+//   return result;
+// }

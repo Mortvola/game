@@ -2,7 +2,7 @@ import CharacterClass from "../Classes/CharacterClass";
 import Creature from "../Creature";
 import { Armor } from "../Equipment/Armor";
 import { getWeapon } from "../Equipment/Weapon";
-import GoblinRace from "./GoblinRace";
+import KoboldRace from "./KoboldRace";
 
 class Kobold extends Creature {
   constructor(name: string) {
@@ -13,7 +13,7 @@ class Kobold extends Creature {
 
     const armor: Armor[] = []
 
-    const race = new GoblinRace();
+    const race = new KoboldRace();
     const charClass = new CharacterClass('Kobold', 1, 6, [], [], ['Daggers', 'Slings'])
 
     super(

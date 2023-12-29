@@ -175,7 +175,7 @@ class Participants {
   setParties(parties: Party[]) {
     this.parties = parties;
 
-    if (this.parties[0].members.length > 0 && this.parties[1].members.length > 0) {
+    if (this.parties[0].members.length > 0) { // && this.parties[1].members.length > 0) {
       this.state = ParticipantsState.needsPrep;
     }
   }

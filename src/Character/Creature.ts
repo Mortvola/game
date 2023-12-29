@@ -1,9 +1,11 @@
 import { abilityModifier, getProficiencyBonus } from "../Dice";
+import { KnownSpell } from "../UserInterface/AddCharacter/Spells/KnownSpell";
 import CharacterClass from "./Classes/CharacterClass";
 import { Armor } from "./Equipment/Armor";
 import Weapon, { WeaponProperties, WeaponType } from "./Equipment/Weapon";
 import { AbilityScores } from "./Races/AbilityScores";
 import { Race } from "./Races/Race";
+import Spell from "./Spells/Spell";
 
 export type Equipped = {
   meleeWeapon: Weapon | null,
@@ -30,6 +32,10 @@ class Creature {
   weapons: Weapon[];
 
   armor: Armor[];
+
+  spells: KnownSpell[] = [];
+
+  action: Spell | null = null;
 
   experiencePoints: number;
 

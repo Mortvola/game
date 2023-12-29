@@ -1,12 +1,12 @@
 /* eslint-disable no-restricted-syntax */
 import {
   Vec2,
-  Vec4, mat4, vec2, vec4,
+  Vec4, mat4, quat, vec2, vec3, vec4,
 } from 'wgpu-matrix';
 import Camera from './Camera';
 import Gpu from './Gpu';
 import {
-  degToRad, intersectionPlane,
+  degToRad, feetToMeters, intersectionPlane,
 } from './Math';
 import ContainerNode, { isContainerNode } from './Drawables/ContainerNode';
 import BindGroups, { lightsStructure } from './BindGroups';
@@ -27,10 +27,11 @@ import { EpisodeInfo } from './Character/Actor';
 import FollowPath from './Script/FollowPath';
 import Script from './Script/Script';
 import Shot, { ShotData } from './Script/Shot';
-import { findPath2 } from './Workers/PathPlannerQueue';
+import { Occupant, findPath2, getOccupants } from './Workers/PathPlannerQueue';
 import Creature from './Character/Creature';
 import { WeaponType } from './Character/Equipment/Weapon';
 import { Party } from './UserInterface/PartyList';
+import Circle from './Drawables/Circle';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -41,10 +42,12 @@ const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
 };
 
 type InteractionType = {
-  type: 'Move' | 'MoveAndMelee' | 'Melee' | 'Range',
+  type: 'Move' | 'MoveAndMelee' | 'Melee' | 'Range' | 'Occupant',
   path: Vec2[] | null,
   distance: number,
   target: Actor | null,
+  point?: Vec2,
+  radius?: number,
 }
 
 export type FocusInfo = {
@@ -135,6 +138,10 @@ class Renderer implements WorldInterface {
   endOfRound = true;
 
   interactionType: InteractionType | null = null;
+
+  circleAoE: Circle | null = null;
+
+  occupants: Occupant[] = [];
 
   constructor(shot: Mesh, reticle: Reticle) {
     this.reticle = reticle;
@@ -631,6 +638,7 @@ class Renderer implements WorldInterface {
       && !this.participants.activeActor.automated
       && this.participants.activeActor.state !== States.scripting
     ) {
+      let activeActor = this.participants.activeActor;
       const { actor, point } = this.cameraHitTest();
 
       if (
@@ -647,198 +655,223 @@ class Renderer implements WorldInterface {
         //   console.log(`actor changed: ${actor?.character.name}, ${this.prevActor?.character.name}`)
         // }
 
-        this.prevActor = actor ?? null;
-        this.prevPoint = point ?? null;
+        if (activeActor.character.action) {
+          if (this.circleAoE === null) {
+            this.circleAoE = new Circle(feetToMeters(10), 0.1, vec4.create(0.5, 0.5, 0.5, 1))
+            this.mainRenderPass.addDrawable(this.circleAoE, 'circle');
+            this.scene.addNode(this.circleAoE, 'circle');
 
-        if (actor) {
-          if (actor !== this.participants.activeActor) { //} && (!this.focused || this.focused !== actor)) {
-            let activeActor = this.participants.activeActor;
+            const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
+            this.circleAoE.postTransforms.push(mat4.fromQuat(q));
+          }
 
-            let primaryWeapon = activeActor.character.primaryWeapon === 'Melee'
-              ? activeActor.character.equipped.meleeWeapon
-              : activeActor.character.equipped.rangeWeapon;
+          if (point) {
+            this.circleAoE.translate = vec3.create(point[0], 0, point[2])
 
-            if (this.focusCallback) {
-              this.focusCallback({
-                hitpoints: actor.character.hitPoints,
-                maxHitpoints: actor.character.maxHitPoints,
-                percentSuccess: activeActor.character.percentSuccess(actor.character, primaryWeapon!),
-              })
+            this.interactionType = {
+              type: 'Occupant',
+              path: null,
+              distance: 0,
+              target: null,
+              point: vec2.create(point[0], point[2]),
+              radius: feetToMeters(10),
             }
+          }
+        }
+        else {
+          this.prevActor = actor ?? null;
+          this.prevPoint = point ?? null;
 
-            if (this.focused) {
-              // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
-              this.focused = null;
-            }
+          if (actor) {
+            if (actor !== this.participants.activeActor) { //} && (!this.focused || this.focused !== actor)) {
+              let primaryWeapon = activeActor.character.primaryWeapon === 'Melee'
+                ? activeActor.character.equipped.meleeWeapon
+                : activeActor.character.equipped.rangeWeapon;
 
-            this.focused = actor;
+              if (this.focusCallback) {
+                this.focusCallback({
+                  hitpoints: actor.character.hitPoints,
+                  maxHitpoints: actor.character.maxHitPoints,
+                  percentSuccess: activeActor.character.percentSuccess(actor.character, primaryWeapon!),
+                })
+              }
 
-            // this.mainRenderPass.addDrawables(this.focused.sceneNode);
+              if (this.focused) {
+                // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
+                this.focused = null;
+              }
 
-            const wp = activeActor.getWorldPosition();
-            const targetWp = actor.getWorldPosition();
+              this.focused = actor;
 
-            const distance = vec2.distance(
-              vec2.create(wp[0], wp[2]),
-              vec2.create(targetWp[0], targetWp[2]),
-            )
+              // this.mainRenderPass.addDrawables(this.focused.sceneNode);
 
-            if (distance > activeActor.attackRadius + this.focused.occupiedRadius) {
-              // To far for a melee attack
-              // Find a path to the target...
+              const wp = activeActor.getWorldPosition();
+              const targetWp = actor.getWorldPosition();
 
-              if (
-                activeActor.actionsLeft > 0
-                && primaryWeapon
-                && [WeaponType.SimpleRange, WeaponType.MartialRange].includes(primaryWeapon.type)
-              ) {
-                const result = activeActor.computeShotData(actor);
-    
+              const distance = vec2.distance(
+                vec2.create(wp[0], wp[2]),
+                vec2.create(targetWp[0], targetWp[2]),
+              )
+
+              if (distance > activeActor.attackRadius + this.focused.occupiedRadius) {
+                // To far for a melee attack
+                // Find a path to the target...
+
+                if (
+                  activeActor.actionsLeft > 0
+                  && primaryWeapon
+                  && [WeaponType.SimpleRange, WeaponType.MartialRange].includes(primaryWeapon.type)
+                ) {
+                  const result = activeActor.computeShotData(actor);
+      
+                  if (this.trajectory) {
+                    this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+                    this.trajectory = null;
+                  }
+                
+                  this.trajectory = new Trajectory({
+                    velocityVector: result.velocityVector,
+                    duration: result.duration,
+                    startPos: result.startPos,
+                    orientation: result.orientation,
+                    distance: result.distance,
+                  });
+
+                  this.mainRenderPass.addDrawable(this.trajectory, 'trajectory');
+
+                  if (this.pathLines) {
+                    this.mainRenderPass.removeDrawable(this.pathLines, 'line');
+                  }
+
+                  this.interactionType = {
+                    type: 'Range',
+                    path: null,
+                    distance: 0,
+                    target: actor,
+                  }
+                }
+                else {
+                  let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
+                  const occupants = getOccupants(activeActor, actor, participants, []);
+
+                  (async () => {
+                    const [path, distance, lines, cancelled] = await findPath2(
+                      activeActor,
+                      vec2.create(wp[0], wp[2]),
+                      vec2.create(targetWp[0], targetWp[2]),
+                      actor, occupants,
+                    )
+
+                    if (!cancelled) {
+                      // let distanceToTarget = activeActor.attackRadius * 2;
+                      
+                      // if (path.length > 0) {
+                      //   distanceToTarget = vec2.distance(path[0], vec2.create(targetWp[0], targetWp[2]));
+                      //   distanceToTarget -= actor.occupiedRadius  
+                      // }
+
+                      if (
+                        path.length > 0
+                        // && (
+                        //   (distanceToTarget < activeActor.attackRadius
+                        //   && activeActor.actionsLeft > 0)
+                        //   || !(activeActor.character.equipped.rangeWeapon
+                        //     && activeActor.actionsLeft > 0)
+                        // )
+                      ) {
+                        if (this.pathLines) {
+                          this.mainRenderPass.removeDrawable(this.pathLines, 'line');
+                        }
+      
+                        this.pathLines = new Line(lines);
+              
+                        this.mainRenderPass.addDrawable(this.pathLines, 'line');
+
+                        if (activeActor.actionsLeft > 0) {
+                          this.interactionType = {
+                            type: 'MoveAndMelee',
+                            path: path,
+                            distance: distance,
+                            target: actor,
+                          }  
+                        }
+                      }
+                    }
+                  })();
+                }
+              }
+              else {
                 if (this.trajectory) {
                   this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
                   this.trajectory = null;
                 }
-              
-                this.trajectory = new Trajectory({
-                  velocityVector: result.velocityVector,
-                  duration: result.duration,
-                  startPos: result.startPos,
-                  orientation: result.orientation,
-                  distance: result.distance,
-                });
-
-                this.mainRenderPass.addDrawable(this.trajectory, 'trajectory');
 
                 if (this.pathLines) {
                   this.mainRenderPass.removeDrawable(this.pathLines, 'line');
                 }
 
-                this.interactionType = {
-                  type: 'Range',
-                  path: null,
-                  distance: 0,
-                  target: actor,
+                if (activeActor.actionsLeft > 0) {
+                  this.interactionType = {
+                    type: 'Melee',
+                    path: null,
+                    distance: 0,
+                    target: actor,
+                  }  
                 }
               }
-              else {
-                let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
-
-                (async () => {
-                  const [path, distance, lines, cancelled] = await findPath2(
-                    activeActor,
-                    vec2.create(wp[0], wp[2]),
-                    vec2.create(targetWp[0], targetWp[2]),
-                    actor, participants,
-                  )
-
-                  if (!cancelled) {
-                    // let distanceToTarget = activeActor.attackRadius * 2;
-                    
-                    // if (path.length > 0) {
-                    //   distanceToTarget = vec2.distance(path[0], vec2.create(targetWp[0], targetWp[2]));
-                    //   distanceToTarget -= actor.occupiedRadius  
-                    // }
-
-                    if (
-                      path.length > 0
-                      // && (
-                      //   (distanceToTarget < activeActor.attackRadius
-                      //   && activeActor.actionsLeft > 0)
-                      //   || !(activeActor.character.equipped.rangeWeapon
-                      //     && activeActor.actionsLeft > 0)
-                      // )
-                    ) {
-                      if (this.pathLines) {
-                        this.mainRenderPass.removeDrawable(this.pathLines, 'line');
-                      }
-    
-                      this.pathLines = new Line(lines);
-            
-                      this.mainRenderPass.addDrawable(this.pathLines, 'line');
-
-                      if (activeActor.actionsLeft > 0) {
-                        this.interactionType = {
-                          type: 'MoveAndMelee',
-                          path: path,
-                          distance: distance,
-                          target: actor,
-                        }  
-                      }
-                    }
-                  }
-                })();
-              }
             }
-            else {
-              if (this.trajectory) {
-                this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
-                this.trajectory = null;
-              }
+          } else if (point) {
+            if (this.focusCallback) {
+              this.focusCallback(null)
+            }
+            const wp = this.participants.activeActor.getWorldPosition();
 
-              if (this.pathLines) {
-                this.mainRenderPass.removeDrawable(this.pathLines, 'line');
-              }
+            if (this.focused) {
+              // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
+              this.focused = null;
+            }
+      
+            (async () => {
+              let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
+              const occupants = getOccupants(activeActor, null, participants, []);
 
-              if (activeActor.actionsLeft > 0) {
+              const [path, distance, lines, cancelled] = await findPath2(
+                activeActor,
+                vec2.create(wp[0], wp[2]),
+                vec2.create(point[0], point[2]),
+                null, occupants,
+              )
+
+              if (!cancelled && !this.focused) {
+                // if (this.focused) {
+                //   this.mainRenderPass.removeDrawables(this.focused.sceneNode);
+                //   this.focused = null;
+                // }
+        
+                if (this.trajectory) {
+                  this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+                  this.trajectory = null;
+                }
+        
+                if (this.pathLines) {
+                  this.mainRenderPass.removeDrawable(this.pathLines, 'line');
+                }
+      
+                if (path.length > 0) {
+                  this.pathLines = new Line(lines);
+        
+                  this.mainRenderPass.addDrawable(this.pathLines, 'line');
+                }
+
                 this.interactionType = {
-                  type: 'Melee',
-                  path: null,
-                  distance: 0,
-                  target: actor,
-                }  
+                  type: 'Move',
+                  path: path,
+                  distance: distance,
+                  target: null,
+                }
               }
-            }
+            })();
           }
-        } else if (point) {
-          if (this.focusCallback) {
-            this.focusCallback(null)
-          }
-          const wp = this.participants.activeActor.getWorldPosition();
-
-          if (this.focused) {
-            // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
-            this.focused = null;
-          }
-    
-          (async () => {
-            let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
-
-            const [path, distance, lines, cancelled] = await findPath2(
-              this.participants.activeActor,
-              vec2.create(wp[0], wp[2]),
-              vec2.create(point[0], point[2]),
-              null, participants,
-            )
-
-            if (!cancelled && !this.focused) {
-              // if (this.focused) {
-              //   this.mainRenderPass.removeDrawables(this.focused.sceneNode);
-              //   this.focused = null;
-              // }
-      
-              if (this.trajectory) {
-                this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
-                this.trajectory = null;
-              }
-      
-              if (this.pathLines) {
-                this.mainRenderPass.removeDrawable(this.pathLines, 'line');
-              }
-    
-              if (path.length > 0) {
-                this.pathLines = new Line(lines);
-      
-                this.mainRenderPass.addDrawable(this.pathLines, 'line');
-              }
-
-              this.interactionType = {
-                type: 'Move',
-                path: path,
-                distance: distance,
-                target: null,
-              }
-            }
-          })();
         }
       }
     } else if (this.focused) {
@@ -887,6 +920,7 @@ class Renderer implements WorldInterface {
     if (point) {
       const wp = this.participants.activeActor.getWorldPosition();
       let participants = this.participants.turns.filter((a) => a.character.hitPoints > 0);
+      const occupants = getOccupants(this.participants.activeActor, actor, participants, []);
 
       (async () => {
         const script = new Script();
@@ -895,7 +929,7 @@ class Renderer implements WorldInterface {
           actor,
           vec2.create(wp[0], wp[2]),
           vec2.create(point[0], point[2]),
-          actor, participants,
+          actor, occupants,
         )
 
         if (path.length > 0) {
@@ -990,6 +1024,12 @@ class Renderer implements WorldInterface {
             this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
             this.trajectory = null;
           }    
+
+          break;
+        
+        case 'Occupant':
+          this.occupants.push({ center: this.interactionType.point!, radius: this.interactionType.radius! })
+          activeActor.character.action = null;
 
           break;
       }

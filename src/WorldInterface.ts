@@ -5,6 +5,7 @@ import Line from "./Drawables/Line";
 import Mesh from "./Drawables/Mesh";
 import Participants from "./Participants";
 import RenderPass from "./RenderPass";
+import { Occupant } from "./Workers/PathPlannerQueue";
 
 export type Delay = {
   startTime: number,
@@ -42,4 +43,6 @@ export interface WorldInterface {
   path3: Line | null;
 
   path4: Line | null;
+
+  occupants: Occupant[];
 }

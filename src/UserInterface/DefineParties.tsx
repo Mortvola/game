@@ -55,14 +55,14 @@ const DefineParties: React.FC<PropsType> = ({
       <div className={styles.wrapper}>
         <div className={styles.teamWrapper}>
           <PartyList
-            party={parties[0]}
+            party={newParties[0]}
             label="Party 1"
             onSelect={handleSelect}
             selected={selected}
             onPartyChange={handleParty1Change}
           />
           <PartyList
-            party={parties[1]}
+            party={newParties[1]}
             label="Party 2"
             onSelect={handleSelect}
             selected={selected}

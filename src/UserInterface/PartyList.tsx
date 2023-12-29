@@ -2,11 +2,12 @@ import React from 'react';
 import CharacterEntry from './CharacterEntry';
 import styles from './PartyList.module.scss';
 import Character from '../Character/Character';
-import AddCharactor from './AddCharactor';
+import AddCharactor from './AddCharacter/AddCharactor';
 import Weapon from '../Character/Equipment/Weapon';
 import { Armor } from '../Character/Equipment/Armor';
 import { getClass, getRace } from '../Character/Utilities';
 import Creature from '../Character/Creature';
+import { AbilityScores } from '../Character/Races/AbilityScores';
 
 export type Party = {
   members: Creature[],
@@ -43,30 +44,37 @@ const PartyList: React.FC<PropsType> = ({
     setShowAddDialog(true);
   }
 
-  const handleSave = (race: string, charClass: string, weapons: Weapon[], armor: Armor[]) => {
+  const handleSave = (character: Creature) => {
     setShowAddDialog(false);
 
-    const r = getRace(race);
-    const c = getClass(charClass);
+    onPartyChange({
+      members: [
+        ...party.members,
+        character,  
+      ],
+      automate,
+    })
 
-    if (r && c) {
-      const character = new Character(r, c, weapons, armor);
-
-      onPartyChange({
-        members: [
-          ...party.members,
-          character,  
-        ],
-        automate,
-      })
-
-      onSelect(character);
-    }
+    onSelect(character);
   }
 
   const handleAutomateChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     setAutomate(event.target.checked);
     party.automate = event.target.checked;
+  }
+
+  const handleDelete = (character: Character) => {
+    const index = party.members.findIndex((c) => c === character);
+
+    if (index !== -1) {
+      onPartyChange({
+        members: [
+          ...party.members.slice(0, index),
+          ...party.members.slice(index + 1),
+        ],
+        automate,
+      })  
+    }
   }
 
   return (
@@ -86,11 +94,22 @@ const PartyList: React.FC<PropsType> = ({
               className={`${styles.listEntry} ${selected === a ? styles.selected : ''}`}
               character={a as Character}
               onClick={handleEntryClick}
+              onDelete={handleDelete}
             />
           ))
         }
       </div>
-      <AddCharactor show={showAddDialog} onHide={handleHideDialog} onSave={handleSave} />
+      {
+        showAddDialog
+          ? (
+            <AddCharactor
+              show={showAddDialog}
+              onHide={handleHideDialog}
+              onSave={handleSave}
+            />
+          )
+          : null
+      }
     </div>
   )
 }

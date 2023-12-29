@@ -22,8 +22,9 @@ import Delay from "../Script/Delay";
 import FollowPath from "../Script/FollowPath";
 import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
-import { findPath2 } from "../Workers/PathPlannerQueue";
+import { findPath2, getOccupants } from "../Workers/PathPlannerQueue";
 import Creature from "./Creature";
+import Line from "../Drawables/Line";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -314,8 +315,17 @@ class Actor implements ActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              const [path, dist] = await findPath2(this, start, goal, target, participants);
+              if (world.path2) {
+                world.mainRenderPass.removeDrawable(world.path2, 'line')
+                world.path2 = null;
+              }
+
+              const occupants = getOccupants(this, target, participants, world.occupants);
+              const [path, dist,,, dbl] = await findPath2(this, start, goal, target, occupants);
               
+              world.path2 = new Line(dbl);
+              world.mainRenderPass.addDrawable(world.path2, 'line')
+
               if (path.length > 0) {
                 let distanceToTarget = vec2.distance(path[0], goal);
                 distanceToTarget -= target.occupiedRadius
@@ -389,7 +399,16 @@ class Actor implements ActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              const [path, dist] = await findPath2(this, start, goal, target, participants);
+              if (world.path2) {
+                world.mainRenderPass.removeDrawable(world.path2, 'line')
+                world.path2 = null;
+              }
+
+              const occupants = getOccupants(this, target, participants, world.occupants);
+              const [path, dist,,, dbl] = await findPath2(this, start, goal, target, occupants);
+
+              world.path2 = new Line(dbl);
+              world.mainRenderPass.addDrawable(world.path2, 'line')
 
               if (path.length > 0) {
                 script.entries.push(new FollowPath(this.sceneNode, path));    
