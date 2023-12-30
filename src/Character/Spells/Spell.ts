@@ -2,7 +2,8 @@ import { Vec4 } from "wgpu-matrix";
 import { feetToMeters } from "../../Math";
 import Script from "../../Script/Script";
 import { WorldInterface } from "../../WorldInterface";
-import { Action } from "../Action";
+import { Action } from "../Actions/Action";
+import Actor from "../Actor";
 
 class Spell implements Action {
   name: string;
@@ -17,10 +18,10 @@ class Spell implements Action {
     this.name = name;
   }
 
-  prepareInteraction(point: Vec4, world: WorldInterface): void {
+  prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
   }
 
-  interact(script: Script, world: WorldInterface) {
+  interact(actor: Actor, script: Script, world: WorldInterface) {
   }
 }
 

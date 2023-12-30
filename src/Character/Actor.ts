@@ -321,7 +321,7 @@ class Actor implements ActorInterface {
               // }
 
               const occupants = getOccupants(this, target, participants, world.occupants);
-              const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.attackRadius, target, occupants);
+              const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.occupiedRadius, target, occupants);
               
               // world.path2 = new Line(dbl);
               // world.mainRenderPass.addDrawable(world.path2, 'line')
@@ -405,7 +405,7 @@ class Actor implements ActorInterface {
               // }
 
               const occupants = getOccupants(this, target, participants, world.occupants);
-              const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.attackRadius, target, occupants);
+              const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.occupiedRadius, target, occupants);
 
               // world.path2 = new Line(dbl);
               // world.mainRenderPass.addDrawable(world.path2, 'line')

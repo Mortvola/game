@@ -1,12 +1,20 @@
 import { ActorInterface } from "./ActorInterface";
+import Actor from "./Character/Actor";
 import Collidees from "./Collidees";
 import Circle from "./Drawables/Circle";
 import ContainerNode from "./Drawables/ContainerNode";
 import Line from "./Drawables/Line";
 import Mesh from "./Drawables/Mesh";
+import Trajectory from "./Drawables/Trajectory";
 import Participants from "./Participants";
 import RenderPass from "./RenderPass";
 import { Occupant } from "./Workers/PathPlannerQueue";
+
+export type FocusInfo = {
+  hitpoints: number,
+  maxHitpoints: number,
+  percentSuccess: number,
+}
 
 export type Delay = {
   startTime: number,
@@ -48,4 +56,10 @@ export interface WorldInterface {
   occupants: Occupant[];
 
   circleAoE: Circle | null;
+
+  trajectory: Trajectory | null;
+
+  focused: Actor | null;
+
+  focusCallback: ((focusInfo: FocusInfo | null) => void) | null;
 }

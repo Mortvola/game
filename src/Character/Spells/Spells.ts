@@ -1,4 +1,5 @@
 import Grease from "./Grease";
+import MageArmor from "./MageArmor";
 import MagicMissile from './MagicMissile'
 import Spell from "./Spell";
 
@@ -39,7 +40,7 @@ export const spellList = [
     // 'Illusory Script',
     new Spell('Jump'),
     new Spell('Longstrider'),
-    new Spell('Mage Armor'),
+    new MageArmor(),
     new MagicMissile(),
     new Spell('Protection from Good and Evil'),
     new Spell('Ray of Sickness'),

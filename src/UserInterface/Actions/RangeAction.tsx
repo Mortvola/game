@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
 import Creature from '../../Character/Creature';
+import RangeAttack from '../../Character/Actions/RangeAttack';
 
 type PropsType = {
   character: Creature,
@@ -10,7 +11,7 @@ const RangeAction: React.FC<PropsType> = ({
   character,
 }) => {
   const handleClick = () => {
-    character.primaryWeapon = 'Range';
+    character.defaultAction = new RangeAttack();
   }
 
   return (

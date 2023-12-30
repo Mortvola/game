@@ -100,6 +100,9 @@ class JumpPointSearch extends UniformGridSearch {
           }
 
           if (goalRadius) {
+            if (path.length < 2) {
+              console.log('malformed path');
+            }
             path = this.trimPath(path, g, goalRadius);
           }
 
@@ -173,6 +176,11 @@ class JumpPointSearch extends UniformGridSearch {
 
   trimPath(path: Vec2[], g: Vec2, goalRadius: number) {
     for (;;) {
+      if (path.length < 2) {
+        console.log('path is too short')
+        break;
+      }
+
       const result = lineCircleIntersection2(g, goalRadius, path[0], path[1]);
 
       if (result === null || result.length === 1) {

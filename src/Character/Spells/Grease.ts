@@ -4,6 +4,7 @@ import { degToRad, feetToMeters } from "../../Math";
 import Script from "../../Script/Script";
 import { WorldInterface } from "../../WorldInterface";
 import Spell from "./Spell";
+import Actor from "../Actor";
 
 class Grease extends Spell {
   castingTime = 1;
@@ -20,7 +21,7 @@ class Grease extends Spell {
     super('Grease')
   }
 
-  prepareInteraction(point: Vec4, world: WorldInterface) {
+  prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface) {
     if (world.circleAoE === null) {
       world.circleAoE = new Circle(feetToMeters(10), 0.1, vec4.create(0.5, 0.5, 0.5, 1))
       world.mainRenderPass.addDrawable(world.circleAoE, 'circle');
@@ -37,7 +38,7 @@ class Grease extends Spell {
     }
   }
 
-  interact(script: Script, world: WorldInterface) {
+  interact(actor: Actor, script: Script, world: WorldInterface) {
     if (this.center !== null) {
       world.occupants.push({ center: this.center, radius: this.radius })
     }

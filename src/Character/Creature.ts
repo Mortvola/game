@@ -1,5 +1,6 @@
 import { abilityModifier, getProficiencyBonus } from "../Dice";
 import { KnownSpell } from "../UserInterface/AddCharacter/Spells/KnownSpell";
+import { Action } from "./Actions/Action";
 import CharacterClass from "./Classes/CharacterClass";
 import { Armor } from "./Equipment/Armor";
 import Weapon, { WeaponProperties, WeaponType } from "./Equipment/Weapon";
@@ -46,7 +47,7 @@ class Creature {
     shield: null,
   }
 
-  primaryWeapon: PrimaryWeapon = 'Melee';
+  defaultAction: Action | null = null;
   
   constructor(
     abilityScores: AbilityScores,

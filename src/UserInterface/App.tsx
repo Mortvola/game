@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.scss';
-import { FocusInfo, gpu, renderer } from '../Renderer';
+import { gpu, renderer } from '../Renderer';
 import { vec4 } from 'wgpu-matrix';
 import { EpisodeInfo } from '../Character/Actor';
 import RewardChart from '../Chart';
@@ -11,6 +11,7 @@ import Messages from './Messages';
 import { Party } from './PartyList';
 import ActionBar from './Actions/ActionBar';
 import Creature from '../Character/Creature';
+import { FocusInfo } from '../WorldInterface';
 
 type DiretionKeys = {
   left: number,
