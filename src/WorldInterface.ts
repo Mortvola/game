@@ -1,5 +1,6 @@
 import { ActorInterface } from "./ActorInterface";
 import Collidees from "./Collidees";
+import Circle from "./Drawables/Circle";
 import ContainerNode from "./Drawables/ContainerNode";
 import Line from "./Drawables/Line";
 import Mesh from "./Drawables/Mesh";
@@ -45,4 +46,6 @@ export interface WorldInterface {
   path4: Line | null;
 
   occupants: Occupant[];
+
+  circleAoE: Circle | null;
 }

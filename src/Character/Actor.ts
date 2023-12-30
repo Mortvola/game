@@ -65,7 +65,7 @@ class Actor implements ActorInterface {
 
   occupiedRadius = feetToMeters(2.5);
 
-  attackRadius = this.occupiedRadius + feetToMeters(0.5);
+  attackRadius = this.occupiedRadius + feetToMeters(0.8);
 
   sceneNode = new ContainerNode();
 
@@ -315,16 +315,16 @@ class Actor implements ActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              if (world.path2) {
-                world.mainRenderPass.removeDrawable(world.path2, 'line')
-                world.path2 = null;
-              }
+              // if (world.path2) {
+              //   world.mainRenderPass.removeDrawable(world.path2, 'line')
+              //   world.path2 = null;
+              // }
 
               const occupants = getOccupants(this, target, participants, world.occupants);
-              const [path, dist,,, dbl] = await findPath2(this, start, goal, target, occupants);
+              const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.attackRadius, target, occupants);
               
-              world.path2 = new Line(dbl);
-              world.mainRenderPass.addDrawable(world.path2, 'line')
+              // world.path2 = new Line(dbl);
+              // world.mainRenderPass.addDrawable(world.path2, 'line')
 
               if (path.length > 0) {
                 let distanceToTarget = vec2.distance(path[0], goal);
@@ -399,16 +399,16 @@ class Actor implements ActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              if (world.path2) {
-                world.mainRenderPass.removeDrawable(world.path2, 'line')
-                world.path2 = null;
-              }
+              // if (world.path2) {
+              //   world.mainRenderPass.removeDrawable(world.path2, 'line')
+              //   world.path2 = null;
+              // }
 
               const occupants = getOccupants(this, target, participants, world.occupants);
-              const [path, dist,,, dbl] = await findPath2(this, start, goal, target, occupants);
+              const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.attackRadius, target, occupants);
 
-              world.path2 = new Line(dbl);
-              world.mainRenderPass.addDrawable(world.path2, 'line')
+              // world.path2 = new Line(dbl);
+              // world.mainRenderPass.addDrawable(world.path2, 'line')
 
               if (path.length > 0) {
                 script.entries.push(new FollowPath(this.sceneNode, path));    

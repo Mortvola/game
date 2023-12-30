@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 
-import { Vec2, Vec4, vec2, vec4 } from "wgpu-matrix";
+import { Vec2, vec2 } from "wgpu-matrix";
 import JumpPointSearch from "../Search/JumpPointSearch";
 
 type Occupant = {
@@ -74,12 +74,12 @@ const trimPath = (path: Vec2[], maxDistance: number): [Vec2[], number, number[][
 }
 
 const findPath = (
-  start: Vec2, goal: Vec2, target: Object | null, occupants: Occupant[], maxDistance: number,
+  start: Vec2, goal: Vec2, goalRadius: number | null, target: Object | null, occupants: Occupant[], maxDistance: number,
 ): [Vec2[], number, number[][], number[][]] => {
   let path: Vec2[] = [];
   let debugLines: number[][] = [];
 
-  const pathFinder = new JumpPointSearch(512, 512, 8)
+  const pathFinder = new JumpPointSearch(512, 512, 4)
 
   for (const a of occupants) {
     const lines = pathFinder.fillCircle(a, a.center, a.radius);
@@ -93,24 +93,26 @@ const findPath = (
     ]
   ))
 
-  path = pathFinder.findPath(start, goal, target);
+  path = pathFinder.findPath(start, goal, goalRadius, target);
 
   // Trim the path to the extent the character can move in a single turn.
   return [...trimPath(path, maxDistance), dbl];
 }
 
-type Message = {
+export type MessageRequest = {
+  type: string,
   start: Vec2,
   goal: Vec2,
+  goalRadius: number | null,
   target: Object | null,
   occupants: Occupant[],
   maxDistance: number,
   id: number,
 }
 
-self.onmessage = (event: MessageEvent<Message>) => {
+self.onmessage = (event: MessageEvent<MessageRequest>) => {
   const [path, distance, lines, dbl] = findPath(
-    event.data.start, event.data.goal, event.data.target, event.data.occupants, event.data.maxDistance,
+    event.data.start, event.data.goal, event.data.goalRadius, event.data.target, event.data.occupants, event.data.maxDistance,
   );
 
   postMessage({

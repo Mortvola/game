@@ -28,7 +28,7 @@ class Set {
 }
 
 class ThetaStarSearch extends UniformGridSearch {
-  findPath(s: Vec2, g: Vec2, target: Object): Vec2[] {
+  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: Object): Vec2[] {
     const start = vec2.create(Math.floor(s[0] * this.scale + 0.5), Math.floor(s[1] * this.scale + 0.5))
     const goal = vec2.create(Math.floor(g[0] * this.scale + 0.5), Math.floor(g[1] * this.scale + 0.5))
     

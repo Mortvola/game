@@ -56,7 +56,7 @@ class UniformGridSearch {
     }
   }
 
-  findPath(s: Vec2, g: Vec2, target: Object | null): Vec2[] {
+  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: Object | null): Vec2[] {
     throw new Error('Not implemented')
   }
 

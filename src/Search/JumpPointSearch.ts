@@ -33,7 +33,7 @@ class JumpPointSearch extends UniformGridSearch {
 
   lines2: Vec2[] = [];
 
-  findPath(s: Vec2, g: Vec2, target: Object | null): Vec2[] {
+  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: Object | null): Vec2[] {
     this.lines = [];
     this.lines2 = [];
 
@@ -99,8 +99,8 @@ class JumpPointSearch extends UniformGridSearch {
             currentNode = currentNode.parent
           }
 
-          if (target) {
-            path = this.trimPath(path, g);
+          if (goalRadius) {
+            path = this.trimPath(path, g, goalRadius);
           }
 
           return this.smoothPath(path, target);
@@ -171,9 +171,9 @@ class JumpPointSearch extends UniformGridSearch {
     return [];
   }
 
-  trimPath(path: Vec2[], g: Vec2) {
+  trimPath(path: Vec2[], g: Vec2, goalRadius: number) {
     for (;;) {
-      const result = lineCircleIntersection2(g, feetToMeters(2.5) * 2 + 1 / this.scale, path[0], path[1]);
+      const result = lineCircleIntersection2(g, goalRadius, path[0], path[1]);
 
       if (result === null || result.length === 1) {
         break;

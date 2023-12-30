@@ -1,5 +1,6 @@
-import { Vec2, Vec4, vec2 } from "wgpu-matrix";
+import { Vec2, vec2 } from "wgpu-matrix";
 import Actor from "../Character/Actor";
+import { MessageRequest } from "./PathPlanner";
 
 const worker: Worker = new Worker(new URL("../Workers/PathPlanner.ts", import.meta.url));
 
@@ -8,15 +9,6 @@ let requestId = 0;
 export type Occupant = {
   center: Vec2,
   radius: number,
-}
-
-type MessageRequest = {
-  start: Vec2,
-  goal: Vec2,
-  target: Object | null,
-  occupants: Occupant[],
-  maxDistance: number,
-  id: number,
 }
 
 type MessageResponse = {
@@ -78,15 +70,16 @@ export const getOccupants = (actor: Actor, target: Actor | null, participants: A
 }
 
 export const findPath2 = async (
-  actor: Actor, start: Vec2, goal: Vec2, target: Actor | null, occupants: Occupant[],
+  actor: Actor, start: Vec2, goal: Vec2, goalRadius: number | null, target: Actor | null, occupants: Occupant[],
 ): Promise<[Vec2[], number, number[][], boolean, number[][]]> => {
 
   requestId += 1;
 
-  const message = {
+  const message: MessageRequest = {
     type: 'start',
     start,
     goal,
+    goalRadius,
     target: target === null ? null : {},
     occupants,
     maxDistance: actor.distanceLeft,
@@ -121,11 +114,3 @@ export const findPath2 = async (
 
   return promise;
 }
-
-// export const queueFindPath = async (
-//   actor: Actor, start: Vec2, goal: Vec2, target: Actor | null, occupants: Occupant[],
-// ): Promise<[Vec2[], number, number[][], boolean]> => {
-//   const result = await findPath2(actor, start, goal, target, occupants)
-  
-//   return result;
-// }
