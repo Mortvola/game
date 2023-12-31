@@ -390,7 +390,7 @@ function App() {
       <div className="upper-center">
           {
             focus
-              ? `${focus.name} ${focus.hitpoints}/${focus.maxHitpoints}`
+              ? `${focus.name} HP: ${focus.hitpoints}/${focus.maxHitpoints} AC: ${focus.armorClass}`
               : null
           }
       </div>
@@ -417,9 +417,25 @@ function App() {
         // onBlur={handleBlur}
       />
       <div className={`action`} style={actionInfoStyle}>
+        <div>
+          <div>
+            {
+              actionInfo
+                ? actionInfo.action
+                : null
+            }
+          </div>
+          <div>
+            {
+              (actionInfo?.percentSuccess ?? null) !== null
+                ? `${actionInfo?.percentSuccess ?? 0}%`
+                : null
+            }
+          </div>
+        </div>
         {
-          actionInfo
-            ? `${actionInfo.action} ${actionInfo.percentSuccess !== null ? `${actionInfo.percentSuccess}%` : ''}`
+          actionInfo?.description
+            ? actionInfo.description
             : null
         }
       </div>

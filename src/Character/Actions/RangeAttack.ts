@@ -1,7 +1,7 @@
-import { Vec2, Vec4, vec2 } from "wgpu-matrix";
+import { Vec4, vec2 } from "wgpu-matrix";
 import Script from "../../Script/Script";
 import { WorldInterface } from "../../WorldInterface";
-import { Action } from "./Action";
+import Action from "./Action";
 import Actor from "../Actor";
 import Trajectory from "../../Drawables/Trajectory";
 import { findPath2, getOccupants } from "../../Workers/PathPlannerQueue";
@@ -9,15 +9,9 @@ import Line from "../../Drawables/Line";
 import Shot, { ShotData } from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
 
-class RangeAttack implements Action {
-  path: Vec2[] = [];
-
-  distance = 0;
-
-  target: Actor | null = null;
-
+class RangeAttack extends Action {
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
-    if (target && actor.actionsLeft > 0) {
+    if (target) {
       const result = actor.computeShotData(target);
       
       if (world.trajectory) {
@@ -58,20 +52,10 @@ class RangeAttack implements Action {
         world.trajectory = null;
       }
 
-      if (point || target) {
+      if (point) {
         const wp = actor.getWorldPosition();
         
-        // If there isn't a point but there is a target
-        // then use the target's location.
-        let targetWp: Vec2;
-
-        if (point) {
-          targetWp = vec2.create(point[0], point[2])
-        }
-        else {
-          const tmp = target!.getWorldPosition();
-          targetWp = vec2.create(tmp[0], tmp[2])
-        }
+        let targetWp = vec2.create(point[0], point[2])
 
         let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
         const occupants = getOccupants(actor, target, participants, []);
@@ -81,7 +65,7 @@ class RangeAttack implements Action {
             actor,
             vec2.create(wp[0], wp[2]),
             targetWp,
-            target ? target.occupiedRadius + actor.occupiedRadius : null,
+            null,
             target, occupants,
           )
   

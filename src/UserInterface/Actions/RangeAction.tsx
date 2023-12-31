@@ -11,7 +11,7 @@ const RangeAction: React.FC<PropsType> = ({
   character,
 }) => {
   const handleClick = () => {
-    character.defaultAction = new RangeAttack();
+    character.action = new RangeAttack();
   }
 
   return (

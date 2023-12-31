@@ -12,6 +12,7 @@ import { Occupant } from "./Workers/PathPlannerQueue";
 
 export type ActionInfo = {
   action: string,
+  description?: string,
   percentSuccess: number | null,
 }
 
@@ -19,6 +20,7 @@ export type FocusInfo = {
   name: string,
   hitpoints: number,
   maxHitpoints: number,
+  armorClass: number,
 }
 
 export type Delay = {

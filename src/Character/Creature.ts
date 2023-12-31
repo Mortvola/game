@@ -1,12 +1,12 @@
 import { abilityModifier, getProficiencyBonus } from "../Dice";
 import { KnownSpell } from "../UserInterface/AddCharacter/Spells/KnownSpell";
-import { Action } from "./Actions/Action";
+import Action from "./Actions/Action";
+import Condition from "./Actions/Conditions/Condition";
 import CharacterClass from "./Classes/CharacterClass";
 import { Armor } from "./Equipment/Armor";
 import Weapon, { WeaponProperties, WeaponType } from "./Equipment/Weapon";
 import { AbilityScores } from "./Races/AbilityScores";
 import { Race } from "./Races/Race";
-import Spell from "./Actions/Spells/Spell";
 
 export type Equipped = {
   meleeWeapon: Weapon | null,
@@ -36,7 +36,7 @@ class Creature {
 
   spells: KnownSpell[] = [];
 
-  action: Spell | null = null;
+  action: Action | null = null;
 
   experiencePoints: number;
 
@@ -47,8 +47,10 @@ class Creature {
     shield: null,
   }
 
-  defaultAction: Action | null = null;
-  
+  primaryWeapon: PrimaryWeapon = 'Melee';
+
+  conditions: Condition[] = [];
+
   constructor(
     abilityScores: AbilityScores,
     maxHitPoints: number,
@@ -89,8 +91,22 @@ class Creature {
       return ac;
     }
   
+    const condition = this.getArmorClassCondition();
+
+    if (condition) {
+      return condition.armorClass(this.abilityScores.dexterity)
+    }
+
     return this.charClass.unarmoredDefence(this.abilityScores);
   };
+
+  getArmorClassCondition(): Condition | null {
+    if (this.conditions.length > 0) {
+      return this.conditions[0];
+    }
+
+    return null;
+  }
 
   getWeaponProficiency(weapon: Weapon) {
     if (this.charClass.weaponProficiencies.filter((wp) => weapon.proficiencies.includes(wp)).length > 0) {

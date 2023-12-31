@@ -25,6 +25,8 @@ import UniformGridSearch from "../Search/UniformGridSearch";
 import { findPath2, getOccupants } from "../Workers/PathPlannerQueue";
 import Creature from "./Creature";
 import Line from "../Drawables/Line";
+import MeleeAttack from "./Actions/MeleeAttack";
+import RangeAttack from "./Actions/RangeAttack";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -149,6 +151,15 @@ class Actor implements ActorInterface {
     this.circle.color[3] = 1;
 
     this.state = States.idle;
+
+    if (!this.automated) {
+      if (this.character.primaryWeapon === 'Melee') {
+        this.character.action = new MeleeAttack();
+      }
+      else {
+        this.character.action = new RangeAttack();
+      }
+    }
   }
 
   endTurn() {

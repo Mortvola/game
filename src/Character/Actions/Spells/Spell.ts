@@ -2,10 +2,10 @@ import { Vec4 } from "wgpu-matrix";
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
 import { WorldInterface } from "../../../WorldInterface";
-import { Action } from "../Action";
+import Action from "../Action";
 import Actor from "../../Actor";
 
-class Spell implements Action {
+class Spell extends Action {
   name: string;
 
   castingTime = 1;
@@ -15,6 +15,7 @@ class Spell implements Action {
   duration = 60;
 
   constructor(name: string) {
+    super();
     this.name = name;
   }
 

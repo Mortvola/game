@@ -28,6 +28,7 @@ import { Occupant } from './Workers/PathPlannerQueue';
 import Creature from './Character/Creature';
 import { Party } from './UserInterface/PartyList';
 import Circle from './Drawables/Circle';
+import MoveAction from './Character/Actions/MoveAction';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -643,6 +644,7 @@ class Renderer implements WorldInterface {
               name: this.focused.character.name,
               hitpoints: this.focused.character.hitPoints,
               maxHitpoints: this.focused.character.maxHitPoints,
+              armorClass: this.focused.character.armorClass,
             })  
           }
           else {
@@ -650,10 +652,8 @@ class Renderer implements WorldInterface {
           }
         }  
 
-        const action = activeActor.character.action ?? activeActor.character.defaultAction;
-
-        if (action) {
-          action.prepareInteraction(activeActor, actor ?? null, point ?? null, this)            
+        if (activeActor.character.action) {
+          activeActor.character.action.prepareInteraction(activeActor, actor ?? null, point ?? null, this)            
         }
       }
     } else if (this.focused) {
@@ -683,11 +683,19 @@ class Renderer implements WorldInterface {
       const activeActor = this.participants.activeActor;
       const script = new Script();
 
-      const action = activeActor.character.action ?? activeActor.character.defaultAction;
+      if (activeActor.character.action) {
+        activeActor.character.action.interact(activeActor, script, this)
 
-      if (action) {
-        action.interact(activeActor, script, this)
-        activeActor.character.action = null;
+        if (activeActor.actionsLeft === 0) {
+          activeActor.character.action = null;
+
+          if (activeActor.distanceLeft > 0) {
+            activeActor.character.action = new MoveAction();
+          }
+          else if (this.actionInfoCallback) {
+            this.actionInfoCallback(null)
+          }              
+        }
       }
 
       if (script.entries.length > 0) {
