@@ -4,7 +4,7 @@ import { abilityModifier } from '../../../Dice';
 import styles from '../AddCharacter.module.scss';
 import KnownSpells from './KnownSpells';
 import AvailableSpells from './AvailableSpells';
-import Spell from '../../../Character/Spells/Spell';
+import Spell from '../../../Character/Actions/Spells/Spell';
 import { KnownSpell } from './KnownSpell';
 
 type PropsType = {

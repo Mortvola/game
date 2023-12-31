@@ -6,7 +6,7 @@ import { Armor } from "./Equipment/Armor";
 import Weapon, { WeaponProperties, WeaponType } from "./Equipment/Weapon";
 import { AbilityScores } from "./Races/AbilityScores";
 import { Race } from "./Races/Race";
-import Spell from "./Spells/Spell";
+import Spell from "./Actions/Spells/Spell";
 
 export type Equipped = {
   meleeWeapon: Weapon | null,

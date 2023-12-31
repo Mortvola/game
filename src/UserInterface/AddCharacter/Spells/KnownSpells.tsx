@@ -2,7 +2,7 @@ import React from 'react';
 import { useDrop } from 'react-dnd';
 import { ItemTypes } from './Spell';
 import styles from '../AddCharacter.module.scss';
-import Spell from '../../../Character/Spells/Spell';
+import Spell from '../../../Character/Actions/Spells/Spell';
 import KnownSpellComponent, { KnownSpell } from './KnownSpell';
 import { count } from 'console';
 

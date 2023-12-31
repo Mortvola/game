@@ -1,6 +1,6 @@
 import React from 'react';
 import SpellComponent, { ItemTypes } from './Spell';
-import Spell from '../../../Character/Spells/Spell';
+import Spell from '../../../Character/Actions/Spells/Spell';
 
 export type KnownSpell = {
   prepared: boolean,

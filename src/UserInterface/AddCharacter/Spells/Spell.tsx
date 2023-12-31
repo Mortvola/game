@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDrag } from 'react-dnd';
-import Spell from '../../../Character/Spells/Spell';
+import Spell from '../../../Character/Actions/Spells/Spell';
 
 export enum ItemTypes {
   SPELL = 'spell',

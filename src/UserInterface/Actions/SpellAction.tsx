@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import Spell from '../../Character/Spells/Spell';
+import Spell from '../../Character/Actions/Spells/Spell';
 import Creature from '../../Character/Creature';
 
 type PropsType = {

@@ -3,7 +3,7 @@ import Character from "./Character"
 import { ArmorName, getArmor } from "./Equipment/Armor"
 import { WeaponName, getWeapon } from "./Equipment/Weapon"
 import { AbilityScores } from "./Races/AbilityScores"
-import { getSpell } from "./Spells/Spells"
+import { getSpell } from "./Actions/Spells/Spells"
 import { getClass, getRace } from "./Utilities"
 
 export type CharacterStorage = {

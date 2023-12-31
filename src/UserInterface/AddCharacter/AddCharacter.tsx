@@ -35,8 +35,8 @@ import { abilityRolls, addAbilityIncreases, assignAbilityScores } from '../../Di
 import { AbilityScores } from '../../Character/Races/AbilityScores';
 import Spells from './Spells/Spells';
 import { KnownSpell } from './Spells/KnownSpell';
-import { spellList } from '../../Character/Spells/Spells';
-import Spell from '../../Character/Spells/Spell';
+import { spellList } from '../../Character/Actions/Spells/Spells';
+import Spell from '../../Character/Actions/Spells/Spell';
 import Creature from '../../Character/Creature';
 
 type PropsType = {

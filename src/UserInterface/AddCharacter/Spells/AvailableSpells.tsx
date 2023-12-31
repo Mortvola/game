@@ -2,7 +2,7 @@ import React from 'react';
 import { useDrop } from 'react-dnd';
 import SpellComponent, { ItemTypes } from './Spell';
 import styles from '../AddCharacter.module.scss';
-import Spell from '../../../Character/Spells/Spell';
+import Spell from '../../../Character/Actions/Spells/Spell';
 
 type PropsType = {
   spells: Spell[],

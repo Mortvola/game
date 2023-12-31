@@ -1,4 +1,4 @@
-import { feetToMeters } from "../../Math";
+import { feetToMeters } from "../../../Math";
 import Spell from "./Spell";
 
 class MagicMissile extends Spell {

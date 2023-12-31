@@ -1,10 +1,10 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
-import Circle from "../../Drawables/Circle";
-import { degToRad, feetToMeters } from "../../Math";
-import Script from "../../Script/Script";
-import { WorldInterface } from "../../WorldInterface";
+import Circle from "../../../Drawables/Circle";
+import { degToRad, feetToMeters } from "../../../Math";
+import Script from "../../../Script/Script";
+import { WorldInterface } from "../../../WorldInterface";
 import Spell from "./Spell";
-import Actor from "../Actor";
+import Actor from "../../Actor";
 
 class Grease extends Spell {
   castingTime = 1;
