@@ -24,7 +24,6 @@ import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
 import { findPath2, getOccupants } from "../Workers/PathPlannerQueue";
 import Creature from "./Creature";
-import Line from "../Drawables/Line";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
 
@@ -334,6 +333,11 @@ class Actor implements ActorInterface {
               const occupants = getOccupants(this, target, participants, world.occupants);
               const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.occupiedRadius, target, occupants);
               
+              if (this !== world.participants.activeActor) {
+                console.log('aborted turn')
+                return;
+              }
+
               // world.path2 = new Line(dbl);
               // world.mainRenderPass.addDrawable(world.path2, 'line')
 
@@ -418,6 +422,11 @@ class Actor implements ActorInterface {
               const occupants = getOccupants(this, target, participants, world.occupants);
               const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.occupiedRadius, target, occupants);
 
+              if (this !== world.participants.activeActor) {
+                console.log('aborted turn')
+                return;
+              }
+
               // world.path2 = new Line(dbl);
               // world.mainRenderPass.addDrawable(world.path2, 'line')
 
@@ -445,15 +454,17 @@ class Actor implements ActorInterface {
           script.entries.push(new Delay(2000));
 
           script.onFinish = (timestamp: number) => {
-            world.endTurn2();  
+            world.endTurn2(this);  
           }
         }
 
+        console.log(`${this.character.name} added a script`);
         world.actors.push(script);
       }
     }
     else {
-      world.endTurn2();
+      console.log(`${this.character.name} ended their turn`);
+      world.endTurn2(this);
     }
   }
 
@@ -466,6 +477,7 @@ class Actor implements ActorInterface {
               switch (this.state) {
                 case States.idle:
                   if (this.actionsLeft) {
+                    console.log(`${this.character.name} started planning`)
                     this.state = States.planning;
                     this.chooseAction(timestamp, world);
                   }
@@ -480,14 +492,14 @@ class Actor implements ActorInterface {
             }
             else {
               this.chooseAction(timestamp, world);
-              world.endTurn2();
+              world.endTurn2(this);
             }
           // }
         }
       }
       else {
         if (world.participants.activeActor === this) {
-          world.endTurn2();
+          world.endTurn2(this);
         }
       }
     }

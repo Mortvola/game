@@ -202,8 +202,8 @@ class Renderer implements WorldInterface {
     }
   }
 
-  endTurn2() {
-    if (this.participants.activeActor) {
+  endTurn2(actor: Actor) {
+    if (this.participants.activeActor && this.participants.activeActor === actor) {
       this.participants.activeActor.endTurn();
 
       if (this.focused) {
@@ -239,7 +239,7 @@ class Renderer implements WorldInterface {
 
   endTurn() {
     if (!this.participants.activeActor.automated) {
-      this.endTurn2();
+      this.endTurn2(this.participants.activeActor);
     }
   }
 
@@ -333,6 +333,7 @@ class Renderer implements WorldInterface {
           const elapsedTime = (timestamp - this.previousTimestamp) * 0.001;
 
           if (this.participants.state === ParticipantsState.needsPrep) {
+            this.actors = [];
             console.log('*** starting new round ***');
             this.participants.state = ParticipantsState.preparing;
             this.prepareTeams()
@@ -340,7 +341,9 @@ class Renderer implements WorldInterface {
 
           this.camera.updatePosition(elapsedTime, timestamp);
 
-          this.updateActors(elapsedTime, timestamp);
+          if (this.participants.state === ParticipantsState.ready) {
+            this.updateActors(elapsedTime, timestamp);
+          }
 
           if (this.participants.state === ParticipantsState.ready && this.endOfRound) {
             let winningTeam = 0;
