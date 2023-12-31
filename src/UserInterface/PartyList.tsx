@@ -2,12 +2,8 @@ import React from 'react';
 import CharacterEntry from './CharacterEntry';
 import styles from './PartyList.module.scss';
 import Character from '../Character/Character';
-import AddCharactor from './AddCharacter/AddCharactor';
-import Weapon from '../Character/Equipment/Weapon';
-import { Armor } from '../Character/Equipment/Armor';
-import { getClass, getRace } from '../Character/Utilities';
+import AddCharacter from './AddCharacter/AddCharacter';
 import Creature from '../Character/Creature';
-import { AbilityScores } from '../Character/Races/AbilityScores';
 
 export type Party = {
   members: Creature[],
@@ -102,7 +98,7 @@ const PartyList: React.FC<PropsType> = ({
       {
         showAddDialog
           ? (
-            <AddCharactor
+            <AddCharacter
               show={showAddDialog}
               onHide={handleHideDialog}
               onSave={handleSave}

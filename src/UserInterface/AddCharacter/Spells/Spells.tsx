@@ -1,7 +1,7 @@
 import React from 'react';
 import { AbilityScores } from '../../../Character/Races/AbilityScores';
 import { abilityModifier } from '../../../Dice';
-import styles from '../AddCharactor.module.scss';
+import styles from '../AddCharacter.module.scss';
 import KnownSpells from './KnownSpells';
 import AvailableSpells from './AvailableSpells';
 import Spell from '../../../Character/Spells/Spell';

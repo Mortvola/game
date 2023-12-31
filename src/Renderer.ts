@@ -758,7 +758,7 @@ class Renderer implements WorldInterface {
     this.actionInfoCallback = callback;
   }
 
-  setCharacterChangeCallback(callback: (charactor: Creature | null) => void) {
+  setCharacterChangeCallback(callback: (character: Creature | null) => void) {
     this.characterChangeCallback = callback;
   }
 

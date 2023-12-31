@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './AddCharactor.module.scss'
+import styles from './AddCharacter.module.scss'
 import { Race } from '../../Character/Races/Race';
 import { AbilityScores } from '../../Character/Races/AbilityScores';
 

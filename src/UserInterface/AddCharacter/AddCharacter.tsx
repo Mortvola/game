@@ -1,7 +1,7 @@
 import React from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import styles from './AddCharactor.module.scss';
+import styles from './AddCharacter.module.scss';
 import Fighter from '../../Character/Classes/Fighter';
 import CharacterClass, { StartingEquipment as StartingEquipmentTable } from '../../Character/Classes/CharacterClass';
 import Weapon from '../../Character/Equipment/Weapon';
@@ -45,7 +45,7 @@ type PropsType = {
   onSave: (character: Creature) => void,
 }
 
-const AddCharactor: React.FC<PropsType> = ({
+const AddCharacter: React.FC<PropsType> = ({
   show,
   onHide,
   onSave,
@@ -316,4 +316,4 @@ const AddCharactor: React.FC<PropsType> = ({
   return null;
 }
 
-export default AddCharactor;
+export default AddCharacter;
