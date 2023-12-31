@@ -10,10 +10,15 @@ import Participants from "./Participants";
 import RenderPass from "./RenderPass";
 import { Occupant } from "./Workers/PathPlannerQueue";
 
+export type ActionInfo = {
+  action: string,
+  percentSuccess: number | null,
+}
+
 export type FocusInfo = {
+  name: string,
   hitpoints: number,
   maxHitpoints: number,
-  percentSuccess: number,
 }
 
 export type Delay = {
@@ -62,4 +67,6 @@ export interface WorldInterface {
   focused: Actor | null;
 
   focusCallback: ((focusInfo: FocusInfo | null) => void) | null;
+
+  actionInfoCallback: ((actionInfo: ActionInfo | null) => void) | null;
 }

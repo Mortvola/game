@@ -39,11 +39,10 @@ class RangeAttack implements Action {
         world.mainRenderPass.removeDrawable(world.pathLines, 'line');
       }
   
-      if (world.focusCallback) {
-        world.focusCallback({
-          hitpoints: target.character.hitPoints,
-          maxHitpoints: target.character.maxHitPoints,
-          percentSuccess: actor.character.percentSuccess(target.character, actor.character.equipped.meleeWeapon!),
+      if (world.actionInfoCallback) {
+        world.actionInfoCallback({
+          action: 'Range',
+          percentSuccess: actor.character.percentSuccess(target.character, actor.character.equipped.rangeWeapon!),
         })
       }
 
@@ -53,10 +52,6 @@ class RangeAttack implements Action {
     }
     else {
       this.target = null;
-
-      if (world.focusCallback) {
-        world.focusCallback(null);
-      }
 
       if (world.trajectory) {
         world.mainRenderPass.removeDrawable(world.trajectory, 'trajectory');
@@ -106,9 +101,13 @@ class RangeAttack implements Action {
   
             this.path = path;
             this.distance = distance;
-          }
-          else {
-            console.log(`canceled: ${cancelled}, focus: ${world.focused}`)
+
+            if (world.actionInfoCallback) {
+              world.actionInfoCallback({
+                action: 'Move',
+                percentSuccess: null,
+              })
+            }              
           }
         })();
       }  

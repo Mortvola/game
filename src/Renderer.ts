@@ -21,7 +21,7 @@ import Line from './Drawables/Line';
 import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
 import { ActorInterface } from './ActorInterface';
-import { Delay, FocusInfo, WorldInterface } from './WorldInterface';
+import { ActionInfo, Delay, FocusInfo, WorldInterface } from './WorldInterface';
 import { EpisodeInfo } from './Character/Actor';
 import Script from './Script/Script';
 import { Occupant } from './Workers/PathPlannerQueue';
@@ -109,6 +109,8 @@ class Renderer implements WorldInterface {
   loggerCallback: ((message: string) => void) | null = null;
   
   focusCallback: ((focusInfo: FocusInfo | null) => void) | null = null;
+
+  actionInfoCallback: ((actionInfo: ActionInfo | null) => void) | null = null;
 
   characterChangeCallback: ((character: Creature | null) => void) | null = null;
 
@@ -204,8 +206,11 @@ class Renderer implements WorldInterface {
       this.participants.activeActor.endTurn();
 
       if (this.focused) {
-        // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
         this.focused = null;
+      }
+
+      if (this.actionInfoCallback) {
+        this.actionInfoCallback(null);
       }
 
       if (this.trajectory) {
@@ -632,6 +637,19 @@ class Renderer implements WorldInterface {
         this.prevActor = actor ?? null;
         this.prevPoint = point ?? null;
 
+        if (this.focusCallback) {
+          if (this.focused) {
+            this.focusCallback({
+              name: this.focused.character.name,
+              hitpoints: this.focused.character.hitPoints,
+              maxHitpoints: this.focused.character.maxHitPoints,
+            })  
+          }
+          else {
+            this.focusCallback(null);
+          }
+        }  
+
         const action = activeActor.character.action ?? activeActor.character.defaultAction;
 
         if (action) {
@@ -641,6 +659,10 @@ class Renderer implements WorldInterface {
     } else if (this.focused) {
       // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
       this.focused = null;
+
+      if (this.focusCallback) {
+        this.focusCallback(null);
+      }
     }
   }
 
@@ -730,6 +752,10 @@ class Renderer implements WorldInterface {
 
   setFocusCallback(callback: (focusInfo: FocusInfo | null) => void) {
     this.focusCallback = callback;
+  }
+
+  setActionInfoCallback(callback: (actionInfo: ActionInfo | null) => void) {
+    this.actionInfoCallback = callback;
   }
 
   setCharacterChangeCallback(callback: (charactor: Creature | null) => void) {

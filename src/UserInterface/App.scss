@@ -113,3 +113,13 @@ canvas {
 .learn {
   width: max-content;
 }
+
+.action {
+  position: absolute;
+  z-index: 3;
+  color: white;
+  top: 0;
+  left: 0;
+  width: max-content;
+  height: max-content;
+}

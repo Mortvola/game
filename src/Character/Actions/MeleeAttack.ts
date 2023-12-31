@@ -61,16 +61,22 @@ class MeleeAttack implements Action {
                 this.type = 'MoveAndMelee';
                 this.target = target;
 
-                if (world.focusCallback) {
-                  world.focusCallback({
-                    hitpoints: target.character.hitPoints,
-                    maxHitpoints: target.character.maxHitPoints,
+                if (world.actionInfoCallback) {
+                  world.actionInfoCallback({
+                    action: 'Melee',
                     percentSuccess: actor.character.percentSuccess(target.character, actor.character.equipped.meleeWeapon!),
                   })
-                }
+                }          
               }
               else {
                 this.type = 'Move';
+
+                if (world.actionInfoCallback) {
+                  world.actionInfoCallback({
+                    action: 'Melee',
+                    percentSuccess: 0,
+                  })
+                }                  
               }
             }
           }
@@ -89,21 +95,16 @@ class MeleeAttack implements Action {
         this.type = 'Melee';
         this.target = target;
 
-        if (world.focusCallback) {
-          world.focusCallback({
-            hitpoints: target.character.hitPoints,
-            maxHitpoints: target.character.maxHitPoints,
+        if (world.actionInfoCallback) {
+          world.actionInfoCallback({
+            action: 'Melee',
             percentSuccess: actor.character.percentSuccess(target.character, actor.character.equipped.meleeWeapon!),
           })
-        }
+        }          
       }
     }
     else {
       this.target = null;
-
-      if (world.focusCallback) {
-        world.focusCallback(null);
-      }
 
       if (world.trajectory) {
         world.mainRenderPass.removeDrawable(world.trajectory, 'trajectory');
@@ -154,6 +155,13 @@ class MeleeAttack implements Action {
             this.type = 'Move';
             this.path = path;
             this.distance = distance;
+
+            if (world.actionInfoCallback) {
+              world.actionInfoCallback({
+                action: 'Move',
+                percentSuccess: null,
+              })
+            }              
           }
         })();
       }  

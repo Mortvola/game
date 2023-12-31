@@ -2,7 +2,6 @@ import React from 'react';
 import './App.scss';
 import { gpu, renderer } from '../Renderer';
 import { vec4 } from 'wgpu-matrix';
-import { EpisodeInfo } from '../Character/Actor';
 import RewardChart from '../Chart';
 import DefineParties from './DefineParties';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
@@ -11,7 +10,7 @@ import Messages from './Messages';
 import { Party } from './PartyList';
 import ActionBar from './Actions/ActionBar';
 import Creature from '../Character/Creature';
-import { FocusInfo } from '../WorldInterface';
+import { ActionInfo, FocusInfo } from '../WorldInterface';
 
 type DiretionKeys = {
   left: number,
@@ -19,8 +18,6 @@ type DiretionKeys = {
   forward: number,
   backward: number,
 }
-
-let wins: number[] = []
 
 function App() {
   const [hasFocus, setHasFocus] = React.useState<boolean>(false); 
@@ -43,25 +40,7 @@ function App() {
     }
   }, [])
 
-  const [score, setScore] = React.useState<{ red: number, blue: number}>({ red: 0, blue: 0});
-  const [percentWins, setPercentWins] = React.useState(0);
   const [rewards, setRewards] = React.useState<unknown[]>([["episode", "max", "mean", "min"]]);
-
-  const scoreCallback = React.useCallback((episode: EpisodeInfo) => {
-    wins.push(episode.winningTeam);
-
-    if (wins.length > 1000) {
-      wins = wins.slice(1)
-    }
-
-    const numWins = wins.reduce((accum, entry) => (
-      accum + entry
-    ), 0)
-
-    setPercentWins(numWins / wins.length);
-
-    setScore((prev) => ({ red: prev.red + episode.winningTeam, blue: prev.blue + (episode.winningTeam === 0 ? 1 : 0)}));
-  }, []);
 
   const [messages, setMessages] = React.useState<{ id: number, message: string }[]>([]);
 
@@ -82,6 +61,13 @@ function App() {
 
   const focusCallback = React.useCallback((focusInfo: FocusInfo | null) => {
     setFocus(focusInfo);
+  }, [])
+
+  const [actionInfoStyle, setActionInfoStyle] = React.useState<React.CSSProperties>({});
+  const [actionInfo, setActionInfo] = React.useState<ActionInfo | null>(null);
+
+  const actionInfoCallback = React.useCallback((actionInfo: ActionInfo | null) => {
+    setActionInfo(actionInfo);
   }, [])
 
   const [character, setCharacter] = React.useState<Creature | null>(null);
@@ -135,7 +121,6 @@ function App() {
       }
       else if (evt.data.type === 'Finished') {
         workerQueue.finished();
-        setLearning(false);
       }
     }
 
@@ -152,13 +137,13 @@ function App() {
     if (element) {
       element.focus();
       (async () => {
-        renderer.setScoreCallback(scoreCallback);
         renderer.setLoggerCallback(loggerCallback);
         renderer.setFocusCallback(focusCallback);
+        renderer.setActionInfoCallback(actionInfoCallback)
         renderer.setCharacterChangeCallback(characterChangeCallback)
       })()  
     }
-  }, [scoreCallback, loggerCallback, focusCallback, characterChangeCallback])
+  }, [loggerCallback, focusCallback, characterChangeCallback, actionInfoCallback])
 
   const handlePointerDown: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -186,6 +171,7 @@ function App() {
     if (element) {
       const rect = element.getBoundingClientRect();
 
+      setActionInfoStyle({ left: event.clientX + 10, top: event.clientY + 10 })
       const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
       const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
       renderer?.pointerMove(clipX, clipY);
@@ -356,39 +342,13 @@ function App() {
     }
   }
 
-  const [fast, setFast] = React.useState<boolean>(!renderer!.animate)
-
-  const handleAnimateChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-    setFast(event.target.checked)
-    renderer.animate = !event.target.checked
-  }
-
-  const [follow, setFollow] = React.useState<boolean>(renderer.followActiveCharacter);
-
-  const handleFollowChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-    setFollow(event.target.checked)
-    renderer.followActiveCharacter = event.target.checked
-  }
-
   const [showGraph, setShowGraph] = React.useState<boolean>(false);
-  const [learning, setLearning] = React.useState<boolean>(false);
 
   const [showPartyDefs, setShowPartyDefs] = React.useState<boolean>(false);
   const [parties, setParties] = React.useState<Party[]>([
     { members: [], automate: false },
     { members: [], automate: false },
   ]);
-
-  const handleLearnClick = () => {
-    setLearning(true);
-    setShowGraph(true);
-    setRewards([["episode", "max", "mean", "min"]]);
-    // worker.postMessage({
-    //   type: 'start',
-    //   parties: characterStorageParties(parties),
-    // });
-    workerQueue.start(parties);
-  }
 
   const handleDefinePartiesClick = () => {
     setShowPartyDefs(true);
@@ -430,21 +390,11 @@ function App() {
       <div className="upper-center">
           {
             focus
-              ? `${focus.hitpoints}/${focus.maxHitpoints} - ${focus.percentSuccess}%`
+              ? `${focus.name} ${focus.hitpoints}/${focus.maxHitpoints}`
               : null
           }
       </div>
       <div className="upper-right">
-        <div>
-          {
-            `Red: ${score.red} Blue: ${score.blue}`
-          }
-        </div>
-        <div>
-          {
-            `Wins: ${(percentWins * 100).toFixed(2)}%`
-          }
-        </div>
       </div>
       {
         showPartyDefs
@@ -466,6 +416,13 @@ function App() {
         // onFocus={handleFocus}
         // onBlur={handleBlur}
       />
+      <div className={`action`} style={actionInfoStyle}>
+        {
+          actionInfo
+            ? `${actionInfo.action} ${actionInfo.percentSuccess !== null ? `${actionInfo.percentSuccess}%` : ''}`
+            : null
+        }
+      </div>
       <div className="lower-left">
         {
           showGraph
