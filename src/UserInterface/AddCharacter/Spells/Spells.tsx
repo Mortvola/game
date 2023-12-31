@@ -6,14 +6,15 @@ import KnownSpells from './KnownSpells';
 import AvailableSpells from './AvailableSpells';
 import Spell from '../../../Character/Actions/Spells/Spell';
 import { KnownSpell } from './KnownSpell';
+import { R } from '../../../Character/Actions/Spells/Spells';
 
 type PropsType = {
   level: number,
   abilityScores: AbilityScores,
   knownSpells: KnownSpell[],
-  availableSpells: Spell[],
+  availableSpells: R<Spell>[],
   onKnownSpellsChange: (knownSpell: KnownSpell[]) => void,
-  onAvailableSpellChange: (spell: Spell[]) => void,
+  onAvailableSpellChange: (spell: R<Spell>[]) => void,
 }
 
 const Spells: React.FC<PropsType> = ({

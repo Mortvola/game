@@ -6,18 +6,11 @@ import Action from "../Action";
 import Actor from "../../Actor";
 
 class Spell extends Action {
-  name: string;
-
   castingTime = 1;
 
   range = feetToMeters(60);
 
   duration = 60;
-
-  constructor(name: string) {
-    super();
-    this.name = name;
-  }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
   }

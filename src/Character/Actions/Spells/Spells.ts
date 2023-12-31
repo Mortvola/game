@@ -1,7 +1,35 @@
+import BurningHands from "./BurningHands";
 import Grease from "./Grease";
 import MageArmor from "./MageArmor";
 import MagicMissile from './MagicMissile'
 import Spell from "./Spell";
+import Thunderwave from "./Thunderwave";
+import WitchBolt from "./WitchBolt";
+
+export class R<T> {
+  spell: new () => T;
+  name: string;
+
+  constructor(spell: new () => T, name: string) {
+    this.spell = spell;
+    this.name = name;
+  }
+}
+
+export const spellList2: R<Spell>[][] = [
+  [],
+  [
+    new R(BurningHands, 'Burning Hands'),
+    new R(Grease, 'Grease'),
+    new R(MageArmor, 'Mage Armor'),
+    new R(MagicMissile, 'Magic Missle'),
+    new R(Thunderwave, 'Thunderwave'),
+    new R(WitchBolt, 'Witch Bolt'),
+  ],
+]
+
+const t = new spellList2[1][0].spell();
+console.log(t.name);
 
 export const spellList = [
   [
@@ -55,12 +83,24 @@ export const spellList = [
   ]
 ]
 
-export const getSpell = (name: string): Spell | null => {
-  for (const level of spellList) {
+export const getSpell = (name: string): R<Spell> | null => {
+  for (const level of spellList2) {
     const spell = level.find((s) => s.name === name);
 
     if (spell) {
       return spell;
+    }
+  }
+
+  return null;
+}
+
+export const getSpell2 = (name: string): Spell | null => {
+  for (const level of spellList2) {
+    const spell = level.find((s) => s.name === name);
+
+    if (spell) {
+      return new spell.spell();
     }
   }
 

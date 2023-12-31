@@ -3,24 +3,25 @@ import { useDrop } from 'react-dnd';
 import SpellComponent, { ItemTypes } from './Spell';
 import styles from '../AddCharacter.module.scss';
 import Spell from '../../../Character/Actions/Spells/Spell';
+import { R } from '../../../Character/Actions/Spells/Spells';
 
 type PropsType = {
-  spells: Spell[],
-  onChange: (spells: Spell[]) => void,
+  spells: R<Spell>[],
+  onChange: (spells: R<Spell>[]) => void,
 }
 
 const AvailableSpells: React.FC<PropsType> = ({
   spells,
   onChange,
 }) => {  
-  const moveSpell = React.useCallback((spell: Spell) => {
+  const moveSpell = React.useCallback((spell: R<Spell>) => {
     onChange([
       ...spells,
       spell,
     ]);
   }, [spells, onChange])
 
-  const checkDrop = React.useCallback((spell: Spell): boolean => (
+  const checkDrop = React.useCallback((spell: R<Spell>): boolean => (
     !spells.includes(spell)
   ), [spells])
 

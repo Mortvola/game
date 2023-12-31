@@ -35,7 +35,7 @@ import { abilityRolls, addAbilityIncreases, assignAbilityScores } from '../../Di
 import { AbilityScores } from '../../Character/Races/AbilityScores';
 import Spells from './Spells/Spells';
 import { KnownSpell } from './Spells/KnownSpell';
-import { spellList } from '../../Character/Actions/Spells/Spells';
+import { R, spellList, spellList2 } from '../../Character/Actions/Spells/Spells';
 import Spell from '../../Character/Actions/Spells/Spell';
 import Creature from '../../Character/Creature';
 
@@ -58,7 +58,7 @@ const AddCharacter: React.FC<PropsType> = ({
   const [baseAbilityScores, setBaseAbilityScores] = React.useState<AbilityScores>(assignAbilityScores(rolls, charClass))
   const [abilityScores, setAbilityScores] = React.useState<AbilityScores>(addAbilityIncreases(baseAbilityScores, race))
   const [knownSpells, setKnownSpells] = React.useState<KnownSpell[]>([]);
-  const [availableSpells, setAvailableSpells] = React.useState<Spell[]>(spellList[1].map((s) => s))
+  const [availableSpells, setAvailableSpells] = React.useState<R<Spell>[]>(spellList2[1].map((s) => s))
 
   React.useEffect(() => {
     if (abilityScores) {
@@ -255,10 +255,10 @@ const AddCharacter: React.FC<PropsType> = ({
 
   const handleKnownSpellsChange = (spells: KnownSpell[]) => {
     setKnownSpells(spells);
-    setAvailableSpells(spellList[1].filter((s) => !spells.some((ks) => (ks.spell.name === s.name))))
+    setAvailableSpells(spellList2[1].filter((s) => !spells.some((ks) => (ks.spell.name === s.name))))
   }
 
-  const handleAvailableSpellsChange = (spells: Spell[]) => {
+  const handleAvailableSpellsChange = (spells: R<Spell>[]) => {
     setAvailableSpells(spells);
     setKnownSpells((prev) => (prev.filter((ks) => !spells.some((s) => ks.spell.name === s.name))))
   }

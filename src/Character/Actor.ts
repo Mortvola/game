@@ -560,27 +560,26 @@ class Actor implements ActorInterface {
 
     const [damage, critical] = attackRoll(this.character, targetActor.character, weapon, false, advantage);
 
-    targetActor.character.hitPoints -= damage;
+    targetActor.takeDamage(damage, critical, weapon.name, script);
+  }
 
-    if (damage > 0) {
-      script.entries.push(new Logger(`${this.character.name} ${critical ? 'critically ' : ''}hit ${targetActor.character.name} for ${damage} points with a ${weapon.name}.`))
-    }
-    else {
-      script.entries.push(new Logger(`${this.character.name} missed ${targetActor.character.name} with a ${weapon.name}.`))
-    }
+  takeDamage(damage: number, critical: boolean, weaponName: string, script: Script) {
+    if (this.character.hitPoints > 0) {
+      this.character.hitPoints -= damage;
 
-    if (targetActor.character.hitPoints <= 0) {
-      targetActor.character.hitPoints = 0;
+      if (damage > 0) {
+        script.entries.push(new Logger(`${this.character.name} ${critical ? 'critically ' : ''}hit ${this.character.name} for ${damage} points with a ${weaponName}.`))
+      }
+      else {
+        script.entries.push(new Logger(`${this.character.name} missed ${this.character.name} with a ${weaponName}.`))
+      }
 
-      script.entries.push(new Logger(`${targetActor.character.name} died.`))
+      if (this.character.hitPoints <= 0) {
+        this.character.hitPoints = 0;
 
-      script.entries.push(new Remover(targetActor));
+        script.entries.push(new Logger(`${this.character.name} died.`))
 
-      if (!world.animate) {
-        world.participants.remove(targetActor);
-        world.collidees.remove(targetActor);
-        targetActor.removeFromScene();
-        world.scene.removeNode(targetActor.sceneNode);
+        script.entries.push(new Remover(this));
       }
     }
   }

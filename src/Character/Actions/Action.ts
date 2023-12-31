@@ -7,12 +7,18 @@ import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
 
 class Action {
+  name: string;
+
   path: Vec2[] = [];
 
   distance = 0;
 
   target: Actor | null = null;
 
+  constructor(name: string) {
+    this.name = name;
+  }
+  
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
 
   }
@@ -164,7 +170,6 @@ class Action {
       }  
     }
   }
-
 
   zeroDistanceAction(actor: Actor, script: Script, world: WorldInterface, action: () => void): void {
     if (this.path.length > 0) {

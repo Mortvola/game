@@ -10,6 +10,10 @@ import Shot, { ShotData } from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
 
 class RangeAttack extends Action {
+  constructor() {
+    super('Range Attack')
+  }
+  
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     if (target) {
       const result = actor.computeShotData(target);

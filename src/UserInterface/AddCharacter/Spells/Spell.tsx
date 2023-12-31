@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDrag } from 'react-dnd';
 import Spell from '../../../Character/Actions/Spells/Spell';
+import { R } from '../../../Character/Actions/Spells/Spells';
 
 export enum ItemTypes {
   SPELL = 'spell',
@@ -9,7 +10,7 @@ export enum ItemTypes {
 }
 
 type PropsType = {
-  spell: Spell,
+  spell: R<Spell>,
   type: ItemTypes,
 }
 

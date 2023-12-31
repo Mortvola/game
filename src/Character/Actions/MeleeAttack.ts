@@ -5,6 +5,10 @@ import Action from "./Action";
 import Actor from "../Actor";
 
 class MeleeAttack extends Action {
+  constructor() {
+    super('Melee Attack')
+  }
+  
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     let actionPercent = 0;
 

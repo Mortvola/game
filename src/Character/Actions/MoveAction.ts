@@ -14,6 +14,10 @@ class MoveAction extends Action {
 
   distance = 0;
 
+  constructor() {
+    super('Move')
+  }
+
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     if (world.trajectory) {
       world.mainRenderPass.removeDrawable(world.trajectory, 'trajectory');
