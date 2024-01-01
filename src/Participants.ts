@@ -118,6 +118,8 @@ class Participants {
     for (let i = 0; i < numPlayers; i += 1) {
       const actor = await Actor.create(this.parties[team].members[i], color, teamColor, team, this.parties[team].automate);
 
+      actor.character.hitPoints = actor.character.maxHitPoints;
+      
       switch (actor.character.charClass.name) {
         case 'Cleric':
           for (const slots of clericSpellSlots[actor.character.charClass.level]) {
@@ -133,6 +135,7 @@ class Participants {
 
           break;
       }
+
       actor.sceneNode.translate[0] = (i - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()
         * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;

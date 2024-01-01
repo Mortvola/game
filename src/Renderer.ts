@@ -225,6 +225,7 @@ class Renderer implements WorldInterface {
 
       this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
 
+      // If one of the parties have been wiped out then end the round.
       if (
         this.participants.participants[0].length === 0
         || this.participants.participants[1].length === 0

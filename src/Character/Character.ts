@@ -1,4 +1,4 @@
-import { abilityModifier, generateAbilityScores } from "../Dice";
+import { abilityModifier } from "../Dice";
 import CharacterClass from "./Classes/CharacterClass";
 import Creature from "./Creature";
 import { Armor, ArmorType } from "./Equipment/Armor";
