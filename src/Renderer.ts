@@ -234,6 +234,9 @@ class Renderer implements WorldInterface {
 
       this.participants.turn = (this.participants.turn + 1) % this.participants.turns.length;
       this.startTurn();
+
+      // Cause the focus information to update.
+      this.updateFocus = true;
     }
   }
 
@@ -615,6 +618,7 @@ class Renderer implements WorldInterface {
     return {};
   }
 
+  updateFocus = true;
   prevActor: Actor | null = null;
   prevPoint: Vec4 | null = null;
   
@@ -628,18 +632,22 @@ class Renderer implements WorldInterface {
       const { actor, point } = this.cameraHitTest();
 
       if (
-        (actor ?? null) !== (this.prevActor ?? null)
-        || ((point ?? null) === null && this.prevPoint !== null)
-        || ((point ?? null) !== null && this.prevPoint === null)
+        this.updateFocus
         || (
-          point !== undefined && this.prevPoint !== null && (
-            point[0] !== this.prevPoint[0] || point[2] !== this.prevPoint[2]
+          (actor ?? null) !== (this.prevActor ?? null)
+          || ((point ?? null) === null && this.prevPoint !== null)
+          || ((point ?? null) !== null && this.prevPoint === null)
+          || (
+            point !== undefined && this.prevPoint !== null && (
+              point[0] !== this.prevPoint[0] || point[2] !== this.prevPoint[2]
+            )
           )
         )
       ) {
         this.focused = actor ?? null;
         this.prevActor = actor ?? null;
         this.prevPoint = point ?? null;
+        this.updateFocus = false;
 
         if (this.focusCallback) {
           if (this.focused) {
@@ -658,6 +666,9 @@ class Renderer implements WorldInterface {
         if (activeActor.character.action) {
           activeActor.character.action.prepareInteraction(activeActor, actor ?? null, point ?? null, this)            
         }
+      }
+      else {
+        console.log('no change')
       }
     } else if (this.focused) {
       // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
@@ -711,6 +722,9 @@ class Renderer implements WorldInterface {
             this.actionInfoCallback(null)
           }
         }
+
+        // Cause the focus to update.
+        this.updateFocus =true;
       }
 
       if (script.entries.length > 0) {

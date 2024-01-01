@@ -411,6 +411,13 @@ function App() {
       <div className="lower-left">
         {
           character
+            ? character.conditions.map((c) => (
+              <div>{c.name}</div>
+            ))
+            : null
+        }
+        {
+          character
             ? <div>{character.name}</div>
             : null
         }
