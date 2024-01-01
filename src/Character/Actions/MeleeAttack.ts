@@ -6,7 +6,7 @@ import Actor from "../Actor";
 
 class MeleeAttack extends Action {
   constructor() {
-    super('Melee Attack', 'Action')
+    super('Melee', 'Action')
   }
   
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -16,7 +16,7 @@ class MeleeAttack extends Action {
       actionPercent = actor.character.percentSuccess(target.character, actor.character.equipped.meleeWeapon!);
     }
 
-    this.prepareZeroDistAction('Melee', actionPercent, actor, target, point, world);
+    this.prepareZeroDistAction(actionPercent, actor, target, point, world);
   }
 
   interact(actor: Actor, script: Script, world: WorldInterface): void {

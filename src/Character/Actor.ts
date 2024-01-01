@@ -230,11 +230,12 @@ class Actor implements ActorInterface {
   getTargets(otherTeam: Actor[]) {
     const myPosition = this.getWorldPosition();
 
-    const rankedTargets = otherTeam.map((a, index) => ({
-      index,
-      distance: vec4.distance(myPosition, a.getWorldPosition()),
-      point: a.getWorldPosition(),
-    }))
+    const rankedTargets = otherTeam
+      .map((a, index) => ({
+        index,
+        distance: vec4.distance(myPosition, a.getWorldPosition()),
+        point: a.getWorldPosition(),
+      }))
 
     return rankedTargets;
   }
@@ -283,7 +284,9 @@ class Actor implements ActorInterface {
         script.entries.push(new Delay(2000));
 
         let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-        const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
+        const otherTeam = world.participants.participants[this.team ^ 1]
+          .filter((a) => a.character.hitPoints > 0 && !a.character.hasCondition('Sanctuary'));
+
         let targets = this.getTargets(otherTeam);
     
         let done = false;
@@ -561,6 +564,11 @@ class Actor implements ActorInterface {
     const [damage, critical] = attackRoll(this.character, targetActor.character, weapon, false, advantage);
 
     targetActor.takeDamage(damage, critical, this, weapon.name, script);
+
+    if (this.character.hasCondition('Sanctuary')) {
+      this.character.removeCondition('Sanctuary')
+      script.entries.push(new Logger(`${this.character.name} lost sanctuary.`))
+    }
   }
 
   takeDamage(damage: number, critical: boolean, from: Actor, weaponName: string, script: Script) {

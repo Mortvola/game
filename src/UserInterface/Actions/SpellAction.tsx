@@ -18,7 +18,7 @@ const SpellAction = <T extends Spell>({
   }
 
   return (
-    <div className={styles.action} onClick={handleClick}>{spell.name}</div>
+    <div className={`${styles.action} ${spell.time === 'Bonus' ? styles.bonus : ''}`} onClick={handleClick}>{spell.name}</div>
   )
 }
 

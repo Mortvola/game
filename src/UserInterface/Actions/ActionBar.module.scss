@@ -3,8 +3,13 @@
   height: 3rem;
   border: thin white solid;
   margin: 0.25rem;
-  background-color: orange;
-  color: black;
+  background-color: green;
+  color: white;
+
+  &.bonus {
+    background-color: orange;
+    color: black;
+  }
 }
 
 .list {

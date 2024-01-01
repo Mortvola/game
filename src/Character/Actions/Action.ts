@@ -30,7 +30,7 @@ class Action {
 
   }
 
-  prepareZeroDistAction(actionName: string, actionPercent: number, actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  prepareZeroDistAction(actionPercent: number, actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     if (target) {
       const wp = actor.getWorldPosition();
       const targetWp = target.getWorldPosition();
@@ -77,7 +77,7 @@ class Action {
 
                 if (world.actionInfoCallback) {
                   world.actionInfoCallback({
-                    action: actionName,
+                    action: this.name,
                     percentSuccess: actionPercent,
                   })
                 }          
@@ -88,7 +88,7 @@ class Action {
 
                 if (world.actionInfoCallback) {
                   world.actionInfoCallback({
-                    action: actionName,
+                    action: this.name,
                     percentSuccess: actionPercent,
                   })
                 }                  
@@ -113,7 +113,7 @@ class Action {
 
         if (world.actionInfoCallback) {
           world.actionInfoCallback({
-            action: actionName,
+            action: this.name,
             percentSuccess: actionPercent,
           })
         }          

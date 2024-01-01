@@ -3,12 +3,11 @@ import { abilityModifier } from "../../../Dice";
 class Condition {
   name: string;
 
-  constructor(name: string) {
-    this.name = name;
-  }
+  duration: number;
 
-  armorClass(dexterity: number) {
-    return 13 + abilityModifier(dexterity);
+  constructor(name: string, duration: number) {
+    this.name = name;
+    this.duration = duration;
   }
 }
 

@@ -91,21 +91,27 @@ class Creature {
       return ac;
     }
   
-    const condition = this.getArmorClassCondition();
-
-    if (condition) {
-      return condition.armorClass(this.abilityScores.dexterity)
+    if ( this.hasCondition('Mage Armor')) {
+      return 13 + abilityModifier(this.abilityScores.dexterity)
     }
 
     return this.charClass.unarmoredDefence(this.abilityScores);
   };
 
-  getArmorClassCondition(): Condition | null {
-    if (this.conditions.length > 0) {
-      return this.conditions[0];
-    }
+  hasCondition(name: string): boolean {
+    return this.conditions.some((c) => c.name === name);
+  }
 
-    return null;
+
+  removeCondition(name: string): void {
+    const index = this.conditions.findIndex((c) => c.name === name);
+
+    if (index !== -1) {
+      this.conditions = [
+        ...this.conditions.slice(0, index),
+        ...this.conditions.slice(index + 1),
+      ]
+    }
   }
 
   getWeaponProficiency(weapon: Weapon) {

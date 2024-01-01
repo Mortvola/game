@@ -11,7 +11,7 @@ import FollowPath from "../../Script/FollowPath";
 
 class RangeAttack extends Action {
   constructor() {
-    super('Range Attack', 'Action')
+    super('Range', 'Action')
   }
   
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -39,7 +39,7 @@ class RangeAttack extends Action {
   
       if (world.actionInfoCallback) {
         world.actionInfoCallback({
-          action: 'Range',
+          action: this.name,
           percentSuccess: actor.character.percentSuccess(target.character, actor.character.equipped.rangeWeapon!),
         })
       }

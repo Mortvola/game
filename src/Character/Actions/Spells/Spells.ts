@@ -27,55 +27,53 @@ import Thunderwave from "./Thunderwave";
 import TrueStrike from "./TrueStrike";
 import WitchBolt from "./WitchBolt";
 
-export class R<T> {
+type TimeType = 'Action' | 'Bonus' | 'Move';
+
+export type R<T> = {
   spell: new () => T;
   name: string;
-
-  constructor(spell: new () => T, name: string) {
-    this.spell = spell;
-    this.name = name;
-  }
+  time: TimeType,
 }
 
 export const wizardSpells: R<Spell>[][] = [
   [
-    new R(AcidSplash, 'Acid Splash'),
-    new R(BladeWard, 'Blade Ward'),
-    new R(ChillTouch, 'Chill Touch'),
-    new R(FireBolt, 'Fire Bolt'),
-    new R(Light, 'Light'),
-    new R(PoisonSpray, 'Poison Spray'),
-    new R(RayOfFrost, 'Ray of Frost'),
-    new R(ShockingGrasp, 'Shocking Grasp'),
-    new R(TrueStrike, 'True Strike')
+    { spell: AcidSplash, name: 'Acid Splash', time: 'Action' },
+    { spell: BladeWard, name: 'Blade Ward', time: 'Action' },
+    { spell: ChillTouch, name: 'Chill Touch', time: 'Action' },
+    { spell: FireBolt, name: 'Fire Bolt', time: 'Action' },
+    { spell: Light, name: 'Light', time: 'Action' },
+    { spell: PoisonSpray, name: 'Poison Spray', time: 'Action' },
+    { spell: RayOfFrost, name: 'Ray of Frost', time: 'Action' },
+    { spell: ShockingGrasp, name: 'Shocking Grasp', time: 'Action' },
+    { spell: TrueStrike, name: 'True Strike', time: 'Action' },
   ],
   [
-    new R(BurningHands, 'Burning Hands'),
-    new R(Grease, 'Grease'),
-    new R(MageArmor, 'Mage Armor'),
-    new R(MagicMissile, 'Magic Missle'),
-    new R(Thunderwave, 'Thunderwave'),
-    new R(WitchBolt, 'Witch Bolt'),
+    { spell: BurningHands, name: 'Burning Hands', time: 'Action' },
+    { spell: Grease, name: 'Grease', time: 'Action' },
+    { spell: MageArmor, name: 'Mage Armor', time: 'Action' },
+    { spell: MagicMissile, name: 'Magic Missle', time: 'Action' },
+    { spell: Thunderwave, name: 'Thunderwave', time: 'Action' },
+    { spell: WitchBolt, name: 'Witch Bolt', time: 'Action' },
   ],
 ]
 
 export const clericSpells: R<Spell>[][] = [
   [
-    new R(Guidance, 'Guidance'),
-    new R(Light, 'LIght'),
-    new R(Resistance, 'Resistance'),
-    new R(SacredFlame, 'Sacred Flame'),
+    { spell: Guidance, name: 'Guidance', time: 'Action' },
+    { spell: Light, name: 'LIght', time: 'Action' },
+    { spell: Resistance, name: 'Resistance', time: 'Action' },
+    { spell: SacredFlame, name: 'Sacred Flame', time: 'Action' },
   ],
   [
-    new R(Bane, 'Bane'),
-    new R(Bless, 'Bless'),
-    new R(CureWounds, 'Cure Wounds'),
-    new R(GuidingBolt, 'Guiding Bolt'),
-    new R(HealingWord, 'Healing Word'),
-    new R(InflictWounds, 'Inflict Wounds'),
-    new R(ProtectionFromGoodAndEvil, 'Protection from Good and Evil'),
-    new R(Sanctuary, 'Sanctuary'),
-    new R(ShieldOfFaith, 'Shield of Faith'),
+    { spell: Bane, name: 'Bane', time: 'Action' },
+    { spell: Bless, name: 'Bless', time: 'Action' },
+    { spell: CureWounds, name: 'Cure Wounds', time: 'Action' },
+    { spell: GuidingBolt, name: 'Guiding Bolt', time: 'Action' },
+    { spell: HealingWord, name: 'Healing Word', time: 'Bonus' },
+    { spell: InflictWounds, name: 'Inflict Wounds', time: 'Action' },
+    { spell: ProtectionFromGoodAndEvil, name: 'Protection from Good and Evil', time: 'Action' },
+    { spell: Sanctuary, name: 'Sanctuary', time: 'Bonus' },
+    { spell: ShieldOfFaith, name: 'Shield of Faith', time: 'Bonus' },
   ]
 ]
 
