@@ -2,7 +2,7 @@ import Spell from "./Spell";
 
 class AcidSplash extends Spell {
   constructor() {
-    super('Acid Splash', 'Action')
+    super('Acid Splash', 'Action', 0)
   }
 }
 

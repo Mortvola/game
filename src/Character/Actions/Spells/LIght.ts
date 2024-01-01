@@ -2,7 +2,7 @@ import Spell from "./Spell";
 
 class Light extends Spell {
   constructor() {
-    super('Light', 'Action')
+    super('Light', 'Action', 0)
   }
 }
 

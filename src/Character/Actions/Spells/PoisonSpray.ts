@@ -2,7 +2,7 @@ import Spell from "./Spell";
 
 class PoisonSpray extends Spell {
   constructor() {
-    super('Poison Spray', 'Action')
+    super('Poison Spray', 'Action', 0)
   }
 }
 

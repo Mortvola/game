@@ -135,10 +135,6 @@ class RangeAttack extends Action {
         world.mainRenderPass.removeDrawable(world.trajectory, 'trajectory');
         world.trajectory = null;
       }
-
-      if (actor.actionsLeft > 0) {
-        actor.actionsLeft -= 1;
-      }
     }
 
     this.path = [];

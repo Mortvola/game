@@ -2,7 +2,7 @@ import Spell from "./Spell";
 
 class ProtectionFromGoodAndEvil extends Spell {
   constructor() {
-    super('Protection from Evil and Good', 'Action')
+    super('Protection from Evil and Good', 'Action', 1)
   }
 }
 

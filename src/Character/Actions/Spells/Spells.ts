@@ -1,3 +1,4 @@
+import { TimeType } from "../Action";
 import AcidSplash from "./AcidSplash";
 import Bane from "./Bane";
 import BladeWard from "./BladeWard";
@@ -27,53 +28,52 @@ import Thunderwave from "./Thunderwave";
 import TrueStrike from "./TrueStrike";
 import WitchBolt from "./WitchBolt";
 
-type TimeType = 'Action' | 'Bonus' | 'Move';
-
 export type R<T> = {
   spell: new () => T;
   name: string;
   time: TimeType,
+  level: number,
 }
 
 export const wizardSpells: R<Spell>[][] = [
   [
-    { spell: AcidSplash, name: 'Acid Splash', time: 'Action' },
-    { spell: BladeWard, name: 'Blade Ward', time: 'Action' },
-    { spell: ChillTouch, name: 'Chill Touch', time: 'Action' },
-    { spell: FireBolt, name: 'Fire Bolt', time: 'Action' },
-    { spell: Light, name: 'Light', time: 'Action' },
-    { spell: PoisonSpray, name: 'Poison Spray', time: 'Action' },
-    { spell: RayOfFrost, name: 'Ray of Frost', time: 'Action' },
-    { spell: ShockingGrasp, name: 'Shocking Grasp', time: 'Action' },
-    { spell: TrueStrike, name: 'True Strike', time: 'Action' },
+    { spell: AcidSplash, name: 'Acid Splash', time: 'Action', level: 0 },
+    { spell: BladeWard, name: 'Blade Ward', time: 'Action', level: 0 },
+    { spell: ChillTouch, name: 'Chill Touch', time: 'Action', level: 0 },
+    { spell: FireBolt, name: 'Fire Bolt', time: 'Action', level: 0 },
+    { spell: Light, name: 'Light', time: 'Action', level: 0 },
+    { spell: PoisonSpray, name: 'Poison Spray', time: 'Action', level: 0 },
+    { spell: RayOfFrost, name: 'Ray of Frost', time: 'Action', level: 0 },
+    { spell: ShockingGrasp, name: 'Shocking Grasp', time: 'Action', level: 0 },
+    { spell: TrueStrike, name: 'True Strike', time: 'Action', level: 0 },
   ],
   [
-    { spell: BurningHands, name: 'Burning Hands', time: 'Action' },
-    { spell: Grease, name: 'Grease', time: 'Action' },
-    { spell: MageArmor, name: 'Mage Armor', time: 'Action' },
-    { spell: MagicMissile, name: 'Magic Missle', time: 'Action' },
-    { spell: Thunderwave, name: 'Thunderwave', time: 'Action' },
-    { spell: WitchBolt, name: 'Witch Bolt', time: 'Action' },
+    { spell: BurningHands, name: 'Burning Hands', time: 'Action', level: 1 },
+    { spell: Grease, name: 'Grease', time: 'Action', level: 1 },
+    { spell: MageArmor, name: 'Mage Armor', time: 'Action', level: 1 },
+    { spell: MagicMissile, name: 'Magic Missle', time: 'Action', level: 1 },
+    { spell: Thunderwave, name: 'Thunderwave', time: 'Action', level: 1 },
+    { spell: WitchBolt, name: 'Witch Bolt', time: 'Action', level: 1 },
   ],
 ]
 
 export const clericSpells: R<Spell>[][] = [
   [
-    { spell: Guidance, name: 'Guidance', time: 'Action' },
-    { spell: Light, name: 'LIght', time: 'Action' },
-    { spell: Resistance, name: 'Resistance', time: 'Action' },
-    { spell: SacredFlame, name: 'Sacred Flame', time: 'Action' },
+    { spell: Guidance, name: 'Guidance', time: 'Action', level: 0 },
+    { spell: Light, name: 'LIght', time: 'Action', level: 0 },
+    { spell: Resistance, name: 'Resistance', time: 'Action', level: 0 },
+    { spell: SacredFlame, name: 'Sacred Flame', time: 'Action', level: 0 },
   ],
   [
-    { spell: Bane, name: 'Bane', time: 'Action' },
-    { spell: Bless, name: 'Bless', time: 'Action' },
-    { spell: CureWounds, name: 'Cure Wounds', time: 'Action' },
-    { spell: GuidingBolt, name: 'Guiding Bolt', time: 'Action' },
-    { spell: HealingWord, name: 'Healing Word', time: 'Bonus' },
-    { spell: InflictWounds, name: 'Inflict Wounds', time: 'Action' },
-    { spell: ProtectionFromGoodAndEvil, name: 'Protection from Good and Evil', time: 'Action' },
-    { spell: Sanctuary, name: 'Sanctuary', time: 'Bonus' },
-    { spell: ShieldOfFaith, name: 'Shield of Faith', time: 'Bonus' },
+    { spell: Bane, name: 'Bane', time: 'Action', level: 1 },
+    { spell: Bless, name: 'Bless', time: 'Action', level: 1 },
+    { spell: CureWounds, name: 'Cure Wounds', time: 'Action', level: 1 },
+    { spell: GuidingBolt, name: 'Guiding Bolt', time: 'Action', level: 1 },
+    { spell: HealingWord, name: 'Healing Word', time: 'Bonus', level: 1 },
+    { spell: InflictWounds, name: 'Inflict Wounds', time: 'Action', level: 1 },
+    { spell: ProtectionFromGoodAndEvil, name: 'Protection from Good and Evil', time: 'Action', level: 1 },
+    { spell: Sanctuary, name: 'Sanctuary', time: 'Bonus', level: 1 },
+    { spell: ShieldOfFaith, name: 'Shield of Faith', time: 'Bonus', level: 1 },
   ]
 ]
 

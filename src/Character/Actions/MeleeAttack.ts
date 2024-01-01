@@ -27,10 +27,6 @@ class MeleeAttack extends Action {
         world,
         script,
       );
-
-      if (actor.actionsLeft > 0) {
-        actor.actionsLeft -= 1;
-      }    
     });
   }
 }

@@ -8,7 +8,7 @@ import Logger from "../../../Script/Logger";
 
 class Sanctuary extends Spell {
   constructor() {
-    super('Sanctuary', 'Bonus')
+    super('Sanctuary', 'Bonus', 1)
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -37,8 +37,8 @@ class Sanctuary extends Spell {
         world.actionInfoCallback(null);
       }
 
-      if (actor.actionsLeft > 0) {
-        actor.actionsLeft -= 1;
+      if (actor.character.bonusActionsLeft > 0) {
+        actor.character.bonusActionsLeft -= 1;
       }
     }
   }

@@ -2,7 +2,7 @@ import Spell from "./Spell";
 
 class SacredFlame extends Spell {
   constructor() {
-    super('Sacred Flame', 'Action')
+    super('Sacred Flame', 'Action', 0)
   }
 }
 

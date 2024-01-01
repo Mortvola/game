@@ -38,6 +38,12 @@ class Creature {
 
   action: Action | null = null;
 
+  actionsLeft = 0;
+
+  bonusActionsLeft = 0;
+
+  spellSlots: number[] = [];
+
   experiencePoints: number;
 
   equipped: Equipped = {

@@ -689,7 +689,7 @@ class Renderer implements WorldInterface {
       if (activeActor.character.action) {
         activeActor.character.action.interact(activeActor, script, this)
 
-        if (activeActor.actionsLeft === 0) {
+        if (activeActor.character.actionsLeft === 0) {
           activeActor.character.action = null;
 
           if (activeActor.distanceLeft > 0) {

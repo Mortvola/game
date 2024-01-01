@@ -7,7 +7,7 @@ import { abilityModifier, diceRoll } from "../../../Dice";
 
 class HealingWord extends Spell {
   constructor() {
-    super('Healing Word', 'Bonus')
+    super('Healing Word', 'Bonus', 1)
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -37,8 +37,8 @@ class HealingWord extends Spell {
         world.actionInfoCallback(null);
       }
 
-      if (actor.actionsLeft > 0) {
-        actor.actionsLeft -= 1;
+      if (actor.character.bonusActionsLeft > 0) {
+        actor.character.bonusActionsLeft -= 1;
       }
     }
   }

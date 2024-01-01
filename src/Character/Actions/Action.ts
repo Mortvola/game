@@ -6,10 +6,12 @@ import { findPath2, getOccupants } from "../../Workers/PathPlannerQueue";
 import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
 
+export type TimeType = 'Action' | 'Bonus' | 'Move';
+
 class Action {
   name: string;
 
-  time: 'Action' | 'Bonus' | 'Move';
+  time: TimeType;
 
   path: Vec2[] = [];
 
@@ -17,7 +19,7 @@ class Action {
 
   target: Actor | null = null;
 
-  constructor(name: string, time: 'Action' | 'Bonus' | 'Move') {
+  constructor(name: string, time: TimeType) {
     this.name = name;
     this.time = time;
   }

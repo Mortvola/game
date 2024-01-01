@@ -7,7 +7,7 @@ import { abilityModifier, diceRoll } from "../../../Dice";
 
 class CureWounds extends Spell {
   constructor() {
-    super('Cure Wounds', 'Action');
+    super('Cure Wounds', 'Action', 1);
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -18,8 +18,8 @@ class CureWounds extends Spell {
     this.zeroDistanceAction(actor, script, world, () => {
       this.target?.takeHealing(diceRoll(1, 8) + abilityModifier(actor.character.abilityScores.wisdom), actor, this.name, script)
 
-      if (actor.actionsLeft > 0) {
-        actor.actionsLeft -= 1;
+      if (actor.character.actionsLeft > 0) {
+        actor.character.actionsLeft -= 1;
       }    
     });
   }

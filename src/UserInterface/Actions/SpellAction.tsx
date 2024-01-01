@@ -14,7 +14,13 @@ const SpellAction = <T extends Spell>({
   spell,
 }: PropsType<T>) => {
   const handleClick = () => {
-    character.action = new spell.spell();
+    if (
+      ((spell.time === 'Action' && character.actionsLeft > 0)
+      || (spell.time === 'Bonus' && character.bonusActionsLeft > 0))
+      && character.spellSlots[spell.level - 1] > 0
+    ) {
+      character.action = new spell.spell();
+    }
   }
 
   return (

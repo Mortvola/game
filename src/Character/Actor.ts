@@ -54,8 +54,6 @@ class Actor implements ActorInterface {
 
   metersPerSecond = 2;
 
-  actionsLeft = 0;
-
   distanceLeft = 0;
 
   turnDuration = 6;
@@ -140,7 +138,8 @@ class Actor implements ActorInterface {
   }
 
   startTurn(world: WorldInterface) {
-    this.actionsLeft = 1;
+    this.character.actionsLeft = 1;
+    this.character.bonusActionsLeft = 1;
 
     this.distanceLeft = this.character.race.speed;
 
@@ -304,7 +303,7 @@ class Actor implements ActorInterface {
           const closest = targets[0];
           const target = otherTeam[closest.index];
 
-          if (this.actionsLeft > 0) {
+          if (this.character.actionsLeft > 0) {
             if (closest.distance <= this.attackRadius + target.occupiedRadius) {
               // The target is already in range.
               this.attack(
@@ -479,7 +478,7 @@ class Actor implements ActorInterface {
             if (world.animate) {
               switch (this.state) {
                 case States.idle:
-                  if (this.actionsLeft) {
+                  if (this.character.actionsLeft) {
                     console.log(`${this.character.name} started planning`)
                     this.state = States.planning;
                     this.chooseAction(timestamp, world);
@@ -548,7 +547,7 @@ class Actor implements ActorInterface {
     world: WorldInterface,
     script: Script,
   ) {
-    this.actionsLeft -= 1;
+    this.character.actionsLeft -= 1;
 
     let advantage: Advantage = 'Neutral';
     if ([WeaponType.MartialRange, WeaponType.SimpleRange].includes(weapon.type)) {

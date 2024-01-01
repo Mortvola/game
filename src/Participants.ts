@@ -3,7 +3,7 @@ import Actor from "./Character/Actor";
 import { abilityModifier, diceRoll } from "./Dice";
 import { Party } from "./UserInterface/PartyList";
 import Goblin from "./Character/Monsters/Goblin";
-import { XPThreshold, xpThresholds } from "./Tables";
+import { XPThreshold, clericSpellSlots, wizardSpellSlots, xpThresholds } from "./Tables";
 import Kobold from "./Character/Monsters/Kobold";
 import Creature from "./Character/Creature";
 
@@ -117,6 +117,22 @@ class Participants {
 
     for (let i = 0; i < numPlayers; i += 1) {
       const actor = await Actor.create(this.parties[team].members[i], color, teamColor, team, this.parties[team].automate);
+
+      switch (actor.character.charClass.name) {
+        case 'Cleric':
+          for (const slots of clericSpellSlots[actor.character.charClass.level]) {
+            actor.character.spellSlots.push(slots)
+          }
+          
+          break;
+
+        case 'Wizard':
+          for (const slots of wizardSpellSlots[actor.character.charClass.level]) {
+            actor.character.spellSlots.push(slots)
+          }
+
+          break;
+      }
       actor.sceneNode.translate[0] = (i - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()
         * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
