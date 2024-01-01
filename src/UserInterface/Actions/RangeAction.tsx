@@ -2,7 +2,6 @@ import React from 'react';
 import styles from './ActionBar.module.scss';
 import Creature from '../../Character/Creature';
 import RangeAttack from '../../Character/Actions/RangeAttack';
-import { WeaponType } from '../../Character/Equipment/Weapon';
 
 type PropsType = {
   character: Creature,
@@ -11,16 +10,26 @@ type PropsType = {
 const RangeAction: React.FC<PropsType> = ({
   character,
 }) => {
+  const isAvailable = (): boolean => (
+    character.actionsLeft > 0
+  )
+
   const handleClick = () => {
-    if (character.actionsLeft > 0) {
+    if (isAvailable()) {
       character.action = new RangeAttack();
     }
 
     character.primaryWeapon = 'Range';
   }
 
+  let  className = styles.action;
+
+  if (!isAvailable()) {
+    className = `${className} ${styles.disabled}`
+  }
+
   return (
-    <div className={styles.action} onClick={handleClick}>Range</div>
+    <div className={className} onClick={handleClick}>Range</div>
   )
 }
 

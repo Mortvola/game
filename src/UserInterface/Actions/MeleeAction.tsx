@@ -10,16 +10,26 @@ type PropsType = {
 const MeleeAction: React.FC<PropsType> = ({
   character,
 }) => {
+  const isAvailable = (): boolean => (
+    character.actionsLeft > 0
+  )
+
   const handleClick = () => {
-    if (character.actionsLeft > 0) {
+    if (isAvailable()) {
       character.action = new MeleeAttack();
     }
 
     character.primaryWeapon = 'Melee';
   }
 
+  let  className = styles.action;
+
+  if (!isAvailable()) {
+    className = `${className} ${styles.disabled}`
+  }
+
   return (
-    <div className={styles.action} onClick={handleClick}>Melee</div>
+    <div className={className} onClick={handleClick}>Melee</div>
   )
 }
 
