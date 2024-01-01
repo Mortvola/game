@@ -410,12 +410,8 @@ function App() {
       </div>
       <div className="lower-left">
         {
-          showGraph
-            ? (
-              <div className="chart">
-                <RewardChart data={rewards} />
-              </div>    
-            )
+          character
+            ? <div>{character.name}</div>
             : null
         }
       </div>
