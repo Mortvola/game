@@ -27,21 +27,11 @@ class MageArmor extends Spell {
   }
 
   interact(actor: Actor, script: Script, world: WorldInterface): boolean {
-    this.zeroDistanceAction(actor, script, world, () => {
+    return this.zeroDistanceAction(actor, script, world, () => {
       this.target?.character.conditions.push(new MageArmorCondition());
 
       script.entries.push(new Logger(`${actor.character.name} cast Mage Armor on ${this.target?.character.name}.`))
-
-      if (actor.character.actionsLeft > 0) {
-        actor.character.actionsLeft -= 1;
-      }
     });
-
-    if (actor.character.actionsLeft < 0) {
-      return true;
-    }
-
-    return false;
   }
 }
 

@@ -176,23 +176,28 @@ class Action {
     }
   }
 
-  zeroDistanceAction(actor: Actor, script: Script, world: WorldInterface, action: () => void): void {
+  zeroDistanceAction(actor: Actor, script: Script, world: WorldInterface, action: () => void): boolean {
     if (this.path.length > 0) {
       script.entries.push(new FollowPath(actor.sceneNode, this.path));    
       actor.distanceLeft -= this.distance;
     }
 
-    if (this.target) {
-      action();
-    }
-
     if (world.pathLines) {
       world.mainRenderPass.removeDrawable(world.pathLines, 'line');
+      world.pathLines = null;
+    }
+
+    if (this.target) {
+      action();
+
+      return true;
     }
 
     this.path = [];
     this.target = null;
-    this.distance = 0;  
+    this.distance = 0;
+
+    return false;
   }
 }
 

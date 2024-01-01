@@ -56,10 +56,6 @@ class MagicMissile extends Spell {
           world.actionInfoCallback(null);
         }
 
-        if (actor.character.actionsLeft > 0) {
-          actor.character.actionsLeft -= 1;
-        }
-
         return true;
       }
     }

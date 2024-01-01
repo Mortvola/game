@@ -688,6 +688,17 @@ class Renderer implements WorldInterface {
 
       if (activeActor.character.action) {
         if (activeActor.character.action.interact(activeActor, script, this)) {
+          if (activeActor.character.action.time === 'Action') {
+            if (activeActor.character.actionsLeft > 0) {
+              activeActor.character.actionsLeft -= 1;
+            }
+          }
+          else if (activeActor.character.action.time === 'Bonus') {
+            if (activeActor.character.bonusActionsLeft > 0) {
+              activeActor.character.bonusActionsLeft -= 1;
+            }
+          }
+
           activeActor.character.action = null;
 
           if (activeActor.character.actionsLeft > 0) {

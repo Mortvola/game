@@ -20,7 +20,7 @@ class MeleeAttack extends Action {
   }
 
   interact(actor: Actor, script: Script, world: WorldInterface): boolean {
-    this.zeroDistanceAction(actor, script, world, () => {
+    return this.zeroDistanceAction(actor, script, world, () => {
       actor.attack(
         this.target!,
         actor.character.equipped.meleeWeapon!,
@@ -28,12 +28,6 @@ class MeleeAttack extends Action {
         script,
       );
     });
-
-    if (actor.character.actionsLeft <= 0) {
-      return true;
-    }
-
-    return false;
   }
 }
 

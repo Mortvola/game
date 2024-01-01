@@ -226,6 +226,10 @@ class Actor implements ActorInterface {
       world,
       script,
     );
+
+    if (this.character.actionsLeft > 0) {
+      this.character.actionsLeft -= 1;
+    }
   }
 
   useQLearning = false;
@@ -317,6 +321,10 @@ class Actor implements ActorInterface {
                 script,
               );
 
+              if (this.character.actionsLeft > 0) {
+                this.character.actionsLeft -= 1;
+              }
+
               if (target.character.hitPoints === 0) {
                 targets = targets.filter((t) => t !== closest);
                 participants = participants.filter((t) => t !== target)
@@ -363,6 +371,10 @@ class Actor implements ActorInterface {
                     script,
                   );  
 
+                  if (this.character.actionsLeft > 0) {
+                    this.character.actionsLeft -= 1;
+                  }
+    
                   if (target.character.hitPoints === 0) {
                     targets = targets.filter((t) => t !== closest);
                     participants = participants.filter((t) => t !== target)
@@ -394,6 +406,10 @@ class Actor implements ActorInterface {
                       script,
                     );
   
+                    if (this.character.actionsLeft > 0) {
+                      this.character.actionsLeft -= 1;
+                    }
+      
                     if (target.character.hitPoints === 0) {
                       targets = targets.filter((t) => t !== closest);
                       participants = participants.filter((t) => t !== target)
@@ -551,8 +567,6 @@ class Actor implements ActorInterface {
     world: WorldInterface,
     script: Script,
   ) {
-    this.character.actionsLeft -= 1;
-
     let advantage: Advantage = 'Neutral';
     if ([WeaponType.MartialRange, WeaponType.SimpleRange].includes(weapon.type)) {
       const wp = this.getWorldPosition();

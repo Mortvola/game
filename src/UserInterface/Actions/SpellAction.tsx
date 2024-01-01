@@ -23,8 +23,19 @@ const SpellAction = <T extends Spell>({
     }
   }
 
+  const handleFocus: React.FocusEventHandler<HTMLDivElement> = (event) => {
+    event.target.blur();
+  }
+
   return (
-    <div className={`${styles.action} ${spell.time === 'Bonus' ? styles.bonus : ''}`} onClick={handleClick}>{spell.name}</div>
+    <div
+      className={`${styles.action}
+      ${spell.time === 'Bonus' ? styles.bonus : ''}`}
+      onClick={handleClick}
+      onFocus={handleFocus}
+    >
+      {spell.name}
+    </div>
   )
 }
 

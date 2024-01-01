@@ -42,10 +42,6 @@ class Grease extends Spell {
     if (this.center !== null) {
       world.occupants.push({ center: this.center, radius: this.radius })
 
-      if (actor.character.actionsLeft > 0) {
-        actor.character.actionsLeft -= 1;
-      }
-
       return true;
     }
 

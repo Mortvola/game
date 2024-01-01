@@ -37,10 +37,6 @@ class HealingWord extends Spell {
         world.actionInfoCallback(null);
       }
 
-      if (actor.character.bonusActionsLeft > 0) {
-        actor.character.bonusActionsLeft -= 1;
-      }
-
       return true;
     }
 

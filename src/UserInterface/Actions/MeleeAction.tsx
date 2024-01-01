@@ -11,12 +11,19 @@ const MeleeAction: React.FC<PropsType> = ({
   character,
 }) => {
   const handleClick = () => {
-    character.action = new MeleeAttack();
+    if (character.actionsLeft > 0) {
+      character.action = new MeleeAttack();
+    }
+
     character.primaryWeapon = 'Melee';
   }
 
+  const handleFocus: React.FocusEventHandler<HTMLDivElement> = (event) => {
+    event.target.blur();
+  }
+
   return (
-    <div className={styles.action} onClick={handleClick}>Melee</div>
+    <div className={styles.action} onClick={handleClick} onFocus={handleFocus}>Melee</div>
   )
 }
 
