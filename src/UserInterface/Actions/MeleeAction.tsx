@@ -12,6 +12,7 @@ const MeleeAction: React.FC<PropsType> = ({
 }) => {
   const handleClick = () => {
     character.action = new MeleeAttack();
+    character.primaryWeapon = 'Melee';
   }
 
   return (

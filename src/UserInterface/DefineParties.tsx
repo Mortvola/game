@@ -61,13 +61,6 @@ const DefineParties: React.FC<PropsType> = ({
             selected={selected}
             onPartyChange={handleParty1Change}
           />
-          <PartyList
-            party={newParties[1]}
-            label="Party 2"
-            onSelect={handleSelect}
-            selected={selected}
-            onPartyChange={handleParty2Change}
-          />
         </div>
         <CharacterDetails character={selected} />
       </div>

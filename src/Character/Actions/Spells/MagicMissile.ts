@@ -16,7 +16,7 @@ class MagicMissile extends Spell {
   targets: Actor[] = [];
 
   constructor() {
-    super('Magic Missle')
+    super('Magic Missle', 'Action')
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -26,7 +26,7 @@ class MagicMissile extends Spell {
 
     if (world.actionInfoCallback) {
       world.actionInfoCallback({
-        action: 'Magic Missile',
+        action: this.name,
         description: `Select ${3 - this.targets.length} more targets.`,
         percentSuccess: target ? 100 : 0,
       })
@@ -41,14 +41,14 @@ class MagicMissile extends Spell {
       if (world.actionInfoCallback) {
         if (this.targets.length < 3) {
           world.actionInfoCallback({
-            action: 'Magic Missile',
+            action: this.name,
             description: `Select ${3 - this.targets.length} more targets.`,
             percentSuccess: 100,
           })          
         }
         else {
           for (const target of this.targets) {
-            target.takeDamage(diceRoll(1, 4) + 1, false, 'Magic Missle', script)
+            target.takeDamage(diceRoll(1, 4) + 1, false, actor, 'Magic Missle', script)
           }
 
           world.actionInfoCallback(null);

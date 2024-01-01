@@ -6,7 +6,7 @@ import Actor from "../Actor";
 
 class MeleeAttack extends Action {
   constructor() {
-    super('Melee Attack')
+    super('Melee Attack', 'Action')
   }
   
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {

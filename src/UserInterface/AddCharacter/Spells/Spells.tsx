@@ -12,7 +12,8 @@ type PropsType = {
   level: number,
   abilityScores: AbilityScores,
   knownSpells: KnownSpell[],
-  availableSpells: R<Spell>[],
+  availableSpells: R<Spell>[] | null,
+  maxPreparedSpells: number,
   onKnownSpellsChange: (knownSpell: KnownSpell[]) => void,
   onAvailableSpellChange: (spell: R<Spell>[]) => void,
 }
@@ -22,11 +23,11 @@ const Spells: React.FC<PropsType> = ({
   abilityScores,
   knownSpells,
   availableSpells,
+  maxPreparedSpells,
   onKnownSpellsChange,
   onAvailableSpellChange,
 }) => {
   const maxKnownSpells = 6;
-  const maxPreparedSpells = level + abilityModifier(abilityScores.intelligence);
 
   return (
     <div className={styles.spellsLayout}>
@@ -38,7 +39,11 @@ const Spells: React.FC<PropsType> = ({
           ))
         }
       </div> */}
-      <AvailableSpells spells={availableSpells} onChange={onAvailableSpellChange} />
+      {
+        availableSpells
+          ? <AvailableSpells spells={availableSpells} onChange={onAvailableSpellChange} />
+          : <div />
+      }
       <KnownSpells
         knownSpells={knownSpells}
         onChange={onKnownSpellsChange}

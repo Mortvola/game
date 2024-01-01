@@ -3,7 +3,7 @@ import Character from "./Character"
 import { ArmorName, getArmor } from "./Equipment/Armor"
 import { WeaponName, getWeapon } from "./Equipment/Weapon"
 import { AbilityScores } from "./Races/AbilityScores"
-import { getSpell } from "./Actions/Spells/Spells"
+import { clericSpells, getSpell, wizardSpells } from "./Actions/Spells/Spells"
 import { getClass, getRace } from "./Utilities"
 
 export type CharacterStorage = {
@@ -58,7 +58,12 @@ export const restoreCharacters = (a: CharacterStorage[]): Character[] => {
       }
 
       if (c.spells) {
-        character.spells = c.spells.map((s) => ({ spell: getSpell(s.name)!, prepared: s.prepared }))
+        if (c.charClass === 'Wizard') {
+          character.spells = c.spells.map((s) => ({ spell: getSpell(wizardSpells, s.name)!, prepared: s.prepared }))
+        }
+        else if (c.charClass === 'Cleric') {
+          character.spells = c.spells.map((s) => ({ spell: getSpell(clericSpells, s.name)!, prepared: s.prepared }))
+        }
       }
 
       return character;

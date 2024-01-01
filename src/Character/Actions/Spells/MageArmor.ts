@@ -14,7 +14,7 @@ class MageArmor extends Spell {
   duration = 8 * 60 * 60;
 
   constructor() {
-    super('Mage Armor')
+    super('Mage Armor', 'Action')
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {

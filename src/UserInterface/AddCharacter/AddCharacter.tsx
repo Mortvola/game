@@ -31,11 +31,11 @@ import MountainDwarf from '../../Character/Races/MountainDwarf';
 import StoutHalfling from '../../Character/Races/StoutHalfling';
 import LightfootHalfling from '../../Character/Races/LightfootHalfling';
 import Character from '../../Character/Character';
-import { abilityRolls, addAbilityIncreases, assignAbilityScores } from '../../Dice';
+import { abilityModifier, abilityRolls, addAbilityIncreases, assignAbilityScores } from '../../Dice';
 import { AbilityScores } from '../../Character/Races/AbilityScores';
 import Spells from './Spells/Spells';
 import { KnownSpell } from './Spells/KnownSpell';
-import { R, spellList, spellList2 } from '../../Character/Actions/Spells/Spells';
+import { R, clericSpells, wizardSpells } from '../../Character/Actions/Spells/Spells';
 import Spell from '../../Character/Actions/Spells/Spell';
 import Creature from '../../Character/Creature';
 
@@ -53,18 +53,19 @@ const AddCharacter: React.FC<PropsType> = ({
   const [charClass, setCharClass] = React.useState<CharacterClass>(new Barbarian())
   const [equipment, setEquipment] = React.useState<StartingEquipmentTable>(Barbarian.startingEquipment());
   const [race, setRace] = React.useState<Race>(new Human());
-  const [character, setCharacter] = React.useState<Character | null>(null);
+  // const [character, setCharacter] = React.useState<Character | null>(null);
   const [rolls] = React.useState<number[]>(abilityRolls());
   const [baseAbilityScores, setBaseAbilityScores] = React.useState<AbilityScores>(assignAbilityScores(rolls, charClass))
   const [abilityScores, setAbilityScores] = React.useState<AbilityScores>(addAbilityIncreases(baseAbilityScores, race))
   const [knownSpells, setKnownSpells] = React.useState<KnownSpell[]>([]);
-  const [availableSpells, setAvailableSpells] = React.useState<R<Spell>[]>(spellList2[1].map((s) => s))
+  const [availableSpells, setAvailableSpells] = React.useState<R<Spell>[] | null>(null)
+  const [maxPreparedSpells, setMaxPreparedSpells] = React.useState<number>(0)
 
-  React.useEffect(() => {
-    if (abilityScores) {
-      setCharacter(new Character(abilityScores, race, charClass, [], []))
-    }
-  }, [abilityScores, charClass, race])
+  // React.useEffect(() => {
+  //   if (abilityScores) {
+  //     setCharacter(new Character(abilityScores, race, charClass, [], []))
+  //   }
+  // }, [abilityScores, charClass, race])
 
   const handleSaveClick = () => {
     if (race && charClass && abilityScores) {
@@ -81,9 +82,7 @@ const AddCharacter: React.FC<PropsType> = ({
 
       const character = new Character(abilityScores, race, charClass, weapons, armor);
 
-      if (charClass.name === 'Wizard') {
-        character.spells = knownSpells;
-      }
+      character.spells = knownSpells;
       
       onSave(character)
     }
@@ -128,6 +127,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
+        setKnownSpells([])
         setEquipment(Barbarian.startingEquipment())
         break;
       }
@@ -138,6 +138,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
+        setKnownSpells([])
         setEquipment(Bard.startingEquipment())
         break;
       }
@@ -146,8 +147,12 @@ const AddCharacter: React.FC<PropsType> = ({
         const cc = new Cleric();
         const scores = assignAbilityScores(rolls, cc);
         setBaseAbilityScores(scores);
-        setAbilityScores(addAbilityIncreases(scores, race))
+        const adjustedScores = addAbilityIncreases(scores, race);
+        setAbilityScores(adjustedScores)
         setCharClass(cc)
+        setAvailableSpells(null)
+        setKnownSpells(clericSpells[1].map((s) => ({ spell: s, prepared: false })))
+        setMaxPreparedSpells(1 + abilityModifier(adjustedScores.wisdom))
         setEquipment(Cleric.startingEquipment())
         break;
       }
@@ -158,6 +163,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
+        setKnownSpells([])
         setEquipment(Druid.startingEquipment())
         break;
       }
@@ -168,6 +174,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
+        setKnownSpells([])
         setEquipment(Fighter.startingEquipment())
         break;
       }
@@ -178,6 +185,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
+        setKnownSpells([])
         setEquipment(Monk.startingEquipment())
         break;
       }
@@ -188,6 +196,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
+        setKnownSpells([])
         setEquipment(Paladin.startingEquipment())
         break;
       }
@@ -198,6 +207,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
+        setKnownSpells([])
         setEquipment(Ranger.startingEquipment())
         break;
       }
@@ -208,6 +218,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
+        setKnownSpells([])
         setEquipment(Rogue.startingEquipment())
         break;
       }
@@ -218,6 +229,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
+        setKnownSpells([])
         setEquipment(Sorcerer.startingEquipment())
         break;
       }
@@ -228,6 +240,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
+        setKnownSpells([])
         setEquipment(Warlock.startingEquipment())
         break;
       }
@@ -238,6 +251,9 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
+        setAvailableSpells(wizardSpells[1].filter((s) => s))
+        setKnownSpells([])
+        setMaxPreparedSpells(1 + abilityModifier(abilityScores.intelligence))
         setEquipment(Wizard.startingEquipment())
         break;
       }
@@ -255,7 +271,12 @@ const AddCharacter: React.FC<PropsType> = ({
 
   const handleKnownSpellsChange = (spells: KnownSpell[]) => {
     setKnownSpells(spells);
-    setAvailableSpells(spellList2[1].filter((s) => !spells.some((ks) => (ks.spell.name === s.name))))
+    if (charClass.name === 'Wizard') {
+      setAvailableSpells(wizardSpells[1].filter((s) => !spells.some((ks) => (ks.spell.name === s.name))))
+    }
+    else {
+      setAvailableSpells(clericSpells[1].filter((s) => !spells.some((ks) => (ks.spell.name === s.name))))
+    }
   }
 
   const handleAvailableSpellsChange = (spells: R<Spell>[]) => {
@@ -273,7 +294,7 @@ const AddCharacter: React.FC<PropsType> = ({
               <Tab title="Class" tabKey="Class" selected={tab} onSelect={handleSelect} />
               <Tab title="Abilities" tabKey="Abilities" selected={tab} onSelect={handleSelect} />
               {
-                charClass.name === 'Wizard'
+                charClass.name === 'Wizard' || charClass.name === 'Cleric'
                   ? (
                     <Tab title="Spells" tabKey="Spells" selected={tab} onSelect={handleSelect} />
                   )
@@ -296,6 +317,7 @@ const AddCharacter: React.FC<PropsType> = ({
                 abilityScores={abilityScores}
                 knownSpells={knownSpells}
                 availableSpells={availableSpells}
+                maxPreparedSpells={maxPreparedSpells}
                 onKnownSpellsChange={handleKnownSpellsChange}
                 onAvailableSpellChange={handleAvailableSpellsChange}
               />

@@ -11,7 +11,7 @@ import FollowPath from "../../Script/FollowPath";
 
 class RangeAttack extends Action {
   constructor() {
-    super('Range Attack')
+    super('Range Attack', 'Action')
   }
   
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {

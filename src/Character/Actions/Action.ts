@@ -9,14 +9,17 @@ import FollowPath from "../../Script/FollowPath";
 class Action {
   name: string;
 
+  time: 'Action' | 'Bonus' | 'Move';
+
   path: Vec2[] = [];
 
   distance = 0;
 
   target: Actor | null = null;
 
-  constructor(name: string) {
+  constructor(name: string, time: 'Action' | 'Bonus' | 'Move') {
     this.name = name;
+    this.time = time;
   }
   
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {

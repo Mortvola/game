@@ -71,7 +71,7 @@ const Abilities: React.FC<PropsType> = ({
     </div>
     <div className={styles.ability}>
       <div>
-        Wisdon
+        Wisdom
       </div>
       <div>
         {scores?.wisdom}

@@ -18,7 +18,7 @@ class Grease extends Spell {
   center: Vec2 | null = null;
 
   constructor() {
-    super('Grease')
+    super('Grease', 'Action')
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface) {

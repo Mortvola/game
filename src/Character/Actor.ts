@@ -560,18 +560,18 @@ class Actor implements ActorInterface {
 
     const [damage, critical] = attackRoll(this.character, targetActor.character, weapon, false, advantage);
 
-    targetActor.takeDamage(damage, critical, weapon.name, script);
+    targetActor.takeDamage(damage, critical, this, weapon.name, script);
   }
 
-  takeDamage(damage: number, critical: boolean, weaponName: string, script: Script) {
+  takeDamage(damage: number, critical: boolean, from: Actor, weaponName: string, script: Script) {
     if (this.character.hitPoints > 0) {
       this.character.hitPoints -= damage;
 
       if (damage > 0) {
-        script.entries.push(new Logger(`${this.character.name} ${critical ? 'critically ' : ''}hit ${this.character.name} for ${damage} points with a ${weaponName}.`))
+        script.entries.push(new Logger(`${from.character.name} ${critical ? 'critically ' : ''}hit ${this.character.name} for ${damage} points with a ${weaponName}.`))
       }
       else {
-        script.entries.push(new Logger(`${this.character.name} missed ${this.character.name} with a ${weaponName}.`))
+        script.entries.push(new Logger(`${from.character.name} missed ${this.character.name} with a ${weaponName}.`))
       }
 
       if (this.character.hitPoints <= 0) {
@@ -582,6 +582,12 @@ class Actor implements ActorInterface {
         script.entries.push(new Remover(this));
       }
     }
+  }
+
+  takeHealing(hitPoints: number, from: Actor, by: string, script: Script) {
+    this.character.hitPoints = Math.min(this.character.hitPoints + hitPoints, this.character.maxHitPoints);
+
+    script.entries.push(new Logger(`${this.character.name} healed ${hitPoints} hit points by ${by} from ${from.character.name}.`))
   }
 
   computeShotData(targetActor: Actor) {

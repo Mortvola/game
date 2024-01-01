@@ -79,7 +79,7 @@ canvas {
 
 .lower-center {
   position: absolute;
-  z-index: 2;
+  z-index: 4;
   left: 0;
   right: 0;
   bottom: 0;
@@ -116,7 +116,7 @@ canvas {
 
 .action {
   position: absolute;
-  z-index: 3;
+  z-index: 1;
   color: white;
   top: 0;
   left: 0;

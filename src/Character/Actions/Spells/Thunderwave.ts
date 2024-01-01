@@ -2,7 +2,7 @@ import Spell from "./Spell";
 
 class Thunderwave extends Spell {
   constructor() {
-    super('Thunderwave')
+    super('Thunderwave', 'Action')
   }
 }
 
