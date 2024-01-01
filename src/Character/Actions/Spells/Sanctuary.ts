@@ -28,7 +28,7 @@ class Sanctuary extends Spell {
     }              
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface) {
+  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     if (this.target) {
       this.target.character.conditions.push(new SanctuaryCondition())
       script.entries.push(new Logger(`${actor.character.name} gained sanctuary.`))
@@ -40,7 +40,11 @@ class Sanctuary extends Spell {
       if (actor.character.bonusActionsLeft > 0) {
         actor.character.bonusActionsLeft -= 1;
       }
+
+      return true;
     }
+
+    return false;
   }
 }
 

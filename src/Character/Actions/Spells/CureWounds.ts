@@ -14,7 +14,7 @@ class CureWounds extends Spell {
     this.prepareZeroDistAction(100, actor, target, point, world);
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface): void {
+  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     this.zeroDistanceAction(actor, script, world, () => {
       this.target?.takeHealing(diceRoll(1, 8) + abilityModifier(actor.character.abilityScores.wisdom), actor, this.name, script)
 
@@ -22,6 +22,12 @@ class CureWounds extends Spell {
         actor.character.actionsLeft -= 1;
       }    
     });
+
+    if (actor.character.actionsLeft <= 0) {
+      return true;
+    }
+
+    return false;
   }
 }
 

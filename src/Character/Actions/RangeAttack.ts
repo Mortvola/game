@@ -102,7 +102,7 @@ class RangeAttack extends Action {
     }
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface): void {
+  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     if (this.path.length > 0) {
       script.entries.push(new FollowPath(actor.sceneNode, this.path));    
       actor.distanceLeft -= this.distance;
@@ -135,11 +135,15 @@ class RangeAttack extends Action {
         world.mainRenderPass.removeDrawable(world.trajectory, 'trajectory');
         world.trajectory = null;
       }
+
+      return true;
     }
 
     this.path = [];
     this.distance = 0;
-    this.target = null;  
+    this.target = null;
+
+    return false;
   }
 }
 

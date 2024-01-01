@@ -24,7 +24,7 @@ class HealingWord extends Spell {
     }              
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface) {
+  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     if (this.target) {
       this.target.takeHealing(
         diceRoll(1, 4) + abilityModifier(actor.character.abilityScores.wisdom),
@@ -40,7 +40,11 @@ class HealingWord extends Spell {
       if (actor.character.bonusActionsLeft > 0) {
         actor.character.bonusActionsLeft -= 1;
       }
+
+      return true;
     }
+
+    return false;
   }
 }
 

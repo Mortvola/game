@@ -38,27 +38,33 @@ class MagicMissile extends Spell {
       this.targets.push(this.target);
       this.target = null;
 
-      if (world.actionInfoCallback) {
-        if (this.targets.length < 3) {
+      if (this.targets.length < 3) {
+        if (world.actionInfoCallback) {
           world.actionInfoCallback({
             action: this.name,
             description: `Select ${3 - this.targets.length} more targets.`,
             percentSuccess: 100,
           })          
         }
-        else {
-          for (const target of this.targets) {
-            target.takeDamage(diceRoll(1, 4) + 1, false, actor, 'Magic Missle', script)
-          }
-
-          world.actionInfoCallback(null);
-
-          if (actor.character.actionsLeft > 0) {
-            actor.character.actionsLeft -= 1;
-          }
+      }
+      else {
+        for (const target of this.targets) {
+          target.takeDamage(diceRoll(1, 4) + 1, false, actor, 'Magic Missle', script)
         }
+
+        if (world.actionInfoCallback) {
+          world.actionInfoCallback(null);
+        }
+
+        if (actor.character.actionsLeft > 0) {
+          actor.character.actionsLeft -= 1;
+        }
+
+        return true;
       }
     }
+
+    return false;
   }
 }
 

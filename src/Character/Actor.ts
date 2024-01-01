@@ -151,12 +151,16 @@ class Actor implements ActorInterface {
     this.state = States.idle;
 
     if (!this.automated) {
-      if (this.character.primaryWeapon === 'Melee') {
-        this.character.action = new MeleeAttack();
-      }
-      else {
-        this.character.action = new RangeAttack();
-      }
+      this.setDefaultAction();
+    }
+  }
+
+  setDefaultAction() {
+    if (this.character.primaryWeapon === 'Melee') {
+      this.character.action = new MeleeAttack();
+    }
+    else {
+      this.character.action = new RangeAttack();
     }
   }
 

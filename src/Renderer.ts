@@ -687,17 +687,18 @@ class Renderer implements WorldInterface {
       const script = new Script();
 
       if (activeActor.character.action) {
-        activeActor.character.action.interact(activeActor, script, this)
-
-        if (activeActor.character.actionsLeft === 0) {
+        if (activeActor.character.action.interact(activeActor, script, this)) {
           activeActor.character.action = null;
 
-          if (activeActor.distanceLeft > 0) {
+          if (activeActor.character.actionsLeft > 0) {
+            activeActor.setDefaultAction();
+          }
+          else if (activeActor.distanceLeft > 0) {
             activeActor.character.action = new MoveAction();
           }
           else if (this.actionInfoCallback) {
             this.actionInfoCallback(null)
-          }              
+          }
         }
       }
 

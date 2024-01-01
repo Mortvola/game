@@ -28,8 +28,8 @@ class Action {
 
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface): void {
-
+  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
+    return true;
   }
 
   prepareZeroDistAction(actionPercent: number, actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {

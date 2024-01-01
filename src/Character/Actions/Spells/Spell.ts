@@ -23,7 +23,8 @@ class Spell extends Action {
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface) {
+  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
+    return true;
   }
 }
 

@@ -26,7 +26,7 @@ class MageArmor extends Spell {
     this.prepareZeroDistAction(actionPercent, actor, target, point, world);
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface): void {
+  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     this.zeroDistanceAction(actor, script, world, () => {
       this.target?.character.conditions.push(new MageArmorCondition());
 
@@ -34,8 +34,14 @@ class MageArmor extends Spell {
 
       if (actor.character.actionsLeft > 0) {
         actor.character.actionsLeft -= 1;
-      }    
+      }
     });
+
+    if (actor.character.actionsLeft < 0) {
+      return true;
+    }
+
+    return false;
   }
 }
 

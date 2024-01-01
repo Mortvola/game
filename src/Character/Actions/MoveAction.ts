@@ -78,7 +78,7 @@ class MoveAction extends Action {
     })();
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface): void {
+  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     script.entries.push(new FollowPath(actor.sceneNode, this.path));    
     actor.distanceLeft -= this.distance;
 
@@ -93,6 +93,8 @@ class MoveAction extends Action {
     this.type = 'None';
     this.path = [];
     this.distance = 0;
+
+    return true;
   }
 }
 

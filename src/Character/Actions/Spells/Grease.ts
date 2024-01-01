@@ -38,10 +38,18 @@ class Grease extends Spell {
     }
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface) {
+  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     if (this.center !== null) {
       world.occupants.push({ center: this.center, radius: this.radius })
+
+      if (actor.character.actionsLeft > 0) {
+        actor.character.actionsLeft -= 1;
+      }
+
+      return true;
     }
+
+    return false;
   }
 }
 
