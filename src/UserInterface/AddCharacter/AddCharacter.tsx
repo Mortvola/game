@@ -119,7 +119,6 @@ const AddCharacter: React.FC<PropsType> = ({
   }
 
   const handleSelectClass = (charClass: string) => {
-    console.log('assign class')
     switch(charClass) {
       case "Barbarian": {
         const cc = new Barbarian();

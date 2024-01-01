@@ -348,7 +348,6 @@ class Actor implements ActorInterface {
               const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.occupiedRadius, target, occupants);
               
               if (this !== world.participants.activeActor) {
-                console.log('aborted turn')
                 return;
               }
 
@@ -445,7 +444,6 @@ class Actor implements ActorInterface {
               const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.occupiedRadius, target, occupants);
 
               if (this !== world.participants.activeActor) {
-                console.log('aborted turn')
                 return;
               }
 
@@ -480,12 +478,10 @@ class Actor implements ActorInterface {
           }
         }
 
-        console.log(`${this.character.name} added a script`);
         world.actors.push(script);
       }
     }
     else {
-      console.log(`${this.character.name} ended their turn`);
       world.endTurn2(this);
     }
   }
@@ -499,7 +495,6 @@ class Actor implements ActorInterface {
               switch (this.state) {
                 case States.idle:
                   if (this.character.actionsLeft) {
-                    console.log(`${this.character.name} started planning`)
                     this.state = States.planning;
                     this.chooseAction(timestamp, world);
                   }

@@ -18,12 +18,8 @@ const MeleeAction: React.FC<PropsType> = ({
     character.primaryWeapon = 'Melee';
   }
 
-  const handleFocus: React.FocusEventHandler<HTMLDivElement> = (event) => {
-    event.target.blur();
-  }
-
   return (
-    <div className={styles.action} onClick={handleClick} onFocus={handleFocus}>Melee</div>
+    <div className={styles.action} onClick={handleClick}>Melee</div>
   )
 }
 

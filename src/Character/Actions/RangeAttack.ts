@@ -83,9 +83,6 @@ class RangeAttack extends Action {
     
               world.mainRenderPass.addDrawable(world.pathLines, 'line');
             }
-            else {
-              console.log('path length === 0')
-            }
   
             this.path = path;
             this.distance = distance;

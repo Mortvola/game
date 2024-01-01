@@ -19,12 +19,8 @@ const RangeAction: React.FC<PropsType> = ({
     character.primaryWeapon = 'Range';
   }
 
-  const handleFocus: React.FocusEventHandler<HTMLDivElement> = (event) => {
-    event.target.blur();
-  }
-
   return (
-    <div className={styles.action} onClick={handleClick} onFocus={handleFocus}>Range</div>
+    <div className={styles.action} onClick={handleClick}>Range</div>
   )
 }
 

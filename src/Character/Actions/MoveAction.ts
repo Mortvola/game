@@ -8,8 +8,6 @@ import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
 
 class MoveAction extends Action {
-  type: 'Melee' | 'MoveAndMelee' | 'Move' | 'None' = 'None';
-
   path: Vec2[] = [];
 
   distance = 0;
@@ -60,11 +58,7 @@ class MoveAction extends Action {
 
           world.mainRenderPass.addDrawable(world.pathLines, 'line');
         }
-        else {
-          console.log('path length === 0')
-        }
 
-        this.type = 'Move';
         this.path = path;
         this.distance = distance;
 
@@ -90,7 +84,6 @@ class MoveAction extends Action {
       world.actionInfoCallback(null)
     }              
 
-    this.type = 'None';
     this.path = [];
     this.distance = 0;
 

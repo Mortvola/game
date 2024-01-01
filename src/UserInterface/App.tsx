@@ -34,6 +34,7 @@ function App() {
 
     if (element) {
       element.focus();
+
       (async () => {
         await renderer.setCanvas(element);
       })()  
@@ -231,7 +232,7 @@ function App() {
     }
   }, []);
 
-  const updateDirection = () => {
+  const updateDirection = React.useCallback(() => {
     const direction = vec4.normalize(vec4.create(
       movement.current.right - movement.current.left,
       0,
@@ -240,10 +241,10 @@ function App() {
     ))
 
     renderer?.updateDirection(direction);
-  }
+  }, [])
 
-  const handleKeyDown: React.KeyboardEventHandler<HTMLCanvasElement> = (event) => {
-    const upperKey = event.key.toUpperCase();
+  const handleKeyDown = React.useCallback((key: string) => {
+    const upperKey = key.toUpperCase();
     switch (upperKey) {
       case 'E':
         movement.current.forward = 1;
@@ -270,13 +271,11 @@ function App() {
       case 'ARROWUP':
         renderer.zoomIn();
         break;
-      // default:
-      //   console.log(upperKey)
     }
-  }
+  }, [updateDirection])
 
-  const handleKeyUp: React.KeyboardEventHandler<HTMLCanvasElement> = (event) => {
-    const upperKey = event.key.toUpperCase();
+  const handleKeyUp = React.useCallback((key: string) => {
+    const upperKey = key.toUpperCase();
     switch (upperKey) {
       case 'E':
         movement.current.forward = 0;
@@ -295,51 +294,23 @@ function App() {
         updateDirection()
         break;
     }
-  }
+  }, [updateDirection])
 
-  // const handlePlayClick = () => {
-  //   // Check if context is in suspended state (autoplay policy)
-  //   if (audioContext.state === "suspended") {
-  //     audioContext.resume();
-  //   }
-  // }
+  React.useEffect(() => {
+    document.body.onkeydown = (e) => {
+      handleKeyDown(e.key)
+    }
+
+    document.body.onkeyup = (e) => {
+      handleKeyUp(e.key)
+    }
+  }, [handleKeyDown, handleKeyUp])
 
   const [inputMode, setInputMode] = React.useState('Mouse');
 
   const handleInputModeClick = () => {
     renderer.toggleInputMode();
     setInputMode((prev) => prev === 'Controller' ? 'Mouse' : 'Controller')
-  }
-
-  // const [showOverlay, setShowOverlay] = React.useState<boolean>(false);
-
-  // const handleFocus: React.FocusEventHandler<HTMLCanvasElement> = (event) => {
-  //   setHasFocus(true);
-  // }
-
-  // const handleBlur = () => {
-  //   setHasFocus(false);
-  //   setShowOverlay(true);
-  // }
-
-  // const handleBlurredClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
-  //   event.stopPropagation();
-  //   setShowOverlay(false);
-    
-  //   const element = canvasRef.current;
-
-  //   if (element) {
-  //     element.focus();
-  //   }
-  // }
-
-  const refocus = () => {
-    // setShowOverlay(false);
-    const element = canvasRef.current;
-
-    if (element) {
-      element.focus();
-    }
   }
 
   const [showGraph, setShowGraph] = React.useState<boolean>(false);
@@ -373,12 +344,14 @@ function App() {
   }, [])
 
   return (
-    <div className="App">
+    <div
+      className="App"
+    >
       <div className="upper-left">
         <div className="controls">
           <button type="button" onClick={handleDefinePartiesClick}>Define Parties</button>
           {/* <button type="button" onClick={handlePlayClick}>play</button> */}
-          <button type="button" onClick={handleInputModeClick} onFocus={(refocus)}>
+          <button type="button" onClick={handleInputModeClick}>
             {
               inputMode === 'Mouse'
                 ? 'Mouse & Keyboard'
@@ -411,10 +384,6 @@ function App() {
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerLeave}
         onWheel={handleWheel}
-        onKeyDown={handleKeyDown}
-        onKeyUp={handleKeyUp}
-        // onFocus={handleFocus}
-        // onBlur={handleBlur}
       />
       <div className={`action`} style={actionInfoStyle}>
         <div>
@@ -450,7 +419,9 @@ function App() {
             : null
         }
       </div>
-      <div className="lower-center">
+      <div
+        className="lower-center"
+      >
         {
           character
             ? <ActionBar character={character} />
