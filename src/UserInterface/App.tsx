@@ -11,6 +11,7 @@ import { Party } from './PartyList';
 import ActionBar from './Actions/ActionBar';
 import Creature from '../Character/Creature';
 import { ActionInfo, FocusInfo } from '../WorldInterface';
+import StatusBar from './StatusBar/StatusBar';
 
 type DiretionKeys = {
   left: number,
@@ -160,7 +161,7 @@ function App() {
       if (event.metaKey) {
         renderer?.centerOn(clipX, clipY)
       }
-      else {
+      else if (!event.ctrlKey) {
         renderer?.interact()
       }
     }
@@ -427,7 +428,12 @@ function App() {
       >
         {
           character
-            ? <ActionBar character={character} />
+            ? (
+              <div>
+                <StatusBar character={character} />
+                <ActionBar character={character} />
+              </div>
+            )
             : null
         }
       </div>

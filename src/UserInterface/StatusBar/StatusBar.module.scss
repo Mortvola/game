@@ -1,0 +1,29 @@
+.statusbar {
+  display: flex;
+  flex-direction: row;
+  column-gap: 8px;
+}
+
+.action {
+  width: 32px;
+  height: 32px;
+  background-color: green;
+  border: white thin solid;
+  border-radius: 16px;
+
+  &.unavailable {
+    background-color: black
+  }
+}
+
+.bonus {
+  width: 32px;
+  height: 32px;
+  background-color: orange;
+  border: white thin solid;
+  border-radius: 16px;
+
+  &.unavailable {
+    background-color: black;
+  }
+}

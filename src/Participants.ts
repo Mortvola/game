@@ -11,19 +11,22 @@ function createParty<Type extends Creature>(thresholds: XPThreshold, c: new (nam
   const party: Party = {
     members: [],
     automate: true,
+    experiencePoints: 0,
   }
 
   for (;;) {
     party.members.push(new c(`${name} ${party.members.length + 1}`));
 
-    let total = party.members.reduce((sum, c) => (
+    party.experiencePoints = party.members.reduce((sum, c) => (
       sum + c.experiencePoints
     ), 0)
 
-    if (total === 0) {
+    if (party.experiencePoints === 0) {
       throw new Error('zero experience points')
     }
   
+    let total = party.experiencePoints;
+
     if (party.members.length === 1) {
       total *= 1;
     }
@@ -119,6 +122,7 @@ class Participants {
       const actor = await Actor.create(this.parties[team].members[i], color, teamColor, team, this.parties[team].automate);
 
       actor.character.hitPoints = actor.character.maxHitPoints;
+      actor.character.conditions = [];
       
       switch (actor.character.charClass.name) {
         case 'Cleric':

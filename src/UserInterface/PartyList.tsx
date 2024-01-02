@@ -8,6 +8,7 @@ import Creature from '../Character/Creature';
 export type Party = {
   members: Creature[],
   automate: boolean,
+  experiencePoints?: number,
 }
 
 type PropsType = {

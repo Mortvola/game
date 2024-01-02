@@ -38,6 +38,10 @@ const CharacterDetails: React.FC<PropsType> = ({
               <div>Armor Class</div>
               <div>{character?.armorClass}</div>
             </div>
+            <div>
+              <div>Exp Points</div>
+              <div>{character?.experiencePoints}</div>
+            </div>
           </div>
         </div>
       </div>

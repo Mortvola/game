@@ -350,18 +350,29 @@ class Renderer implements WorldInterface {
           }
 
           if (this.participants.state === ParticipantsState.ready && this.endOfRound) {
-            let winningTeam = 0;
+            let winningTeam: number | null = null;
             if (this.participants.participants[0].length === 0) {
               winningTeam = 1;
             }
+            else if (this.participants.participants[1].length === 0) {
+              winningTeam = 0;
+            }
             
-            const episode: EpisodeInfo = {
-              winningTeam,
+            if (winningTeam === 0) {
+              for (let character of this.participants.parties[0].members) {
+                character.experiencePoints += this.participants.parties[1].experiencePoints ?? 0;
+              }
             }
 
-            if (this.scoreCallback) {
-              this.scoreCallback(episode);
-            }  
+            if (winningTeam !== null) {
+              const episode: EpisodeInfo = {
+                winningTeam,
+              }  
+
+              if (this.scoreCallback) {
+                this.scoreCallback(episode);
+              }  
+            }
 
             this.participants.state = ParticipantsState.needsPrep;
             this.endOfRound = false;
