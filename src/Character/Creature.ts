@@ -1,8 +1,10 @@
 import { abilityModifier, getProficiencyBonus } from "../Dice";
-import { clericSpellSlots, wizardSpellSlots } from "../Tables";
+import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from "../Tables";
 import { KnownSpell } from "../UserInterface/AddCharacter/Spells/KnownSpell";
 import Action from "./Actions/Action";
 import Condition from "./Actions/Conditions/Condition";
+import Spell from "./Actions/Spells/Spell";
+import { R, clericSpells, druidSpells } from "./Actions/Spells/Spells";
 import CharacterClass from "./Classes/CharacterClass";
 import { Armor } from "./Equipment/Armor";
 import Weapon, { WeaponProperties, WeaponType } from "./Equipment/Weapon";
@@ -35,7 +37,9 @@ class Creature {
 
   armor: Armor[];
 
-  spells: KnownSpell[] = [];
+  spells: R<Spell>[] = [];
+
+  knownSpells: R<Spell>[] | null = null;
 
   action: Action | null = null;
 
@@ -44,8 +48,6 @@ class Creature {
   bonusActionsLeft = 0;
 
   spellSlots: number[] = [];
-
-  classActions: Action[] = [];
   
   experiencePoints: number;
 
@@ -159,7 +161,58 @@ class Creature {
 
       case 'Wizard':
         return wizardSpellSlots[this.charClass.level - 1][spellLevel - 1];
+
+      case 'Druid':
+        return druidSpellSlots[this.charClass.level - 1][spellLevel - 1];
     }
+  }
+
+  getKnownSpells() {
+    const isPrepared = (s: string) => {
+      const result = this.spells.some(
+          (ks) => {
+            // console.log(`${ks.name}, ${s}`)
+            return ks.name === s
+          }
+        )
+      
+      return result;
+    }
+  
+    switch (this.charClass.name) {
+      case 'Druid':
+        return druidSpells[1].map((s) => ({
+          spell: s,
+          prepared: isPrepared(s.name)
+        }))
+
+        case 'Cleric':
+        return clericSpells[1].map((s) => ({
+          spell: s,
+          prepared: isPrepared(s.name)
+        }))
+
+      case 'Wizard':
+        return this.knownSpells!.map((s) => ({
+          spell: s,
+          prepared: isPrepared(s.name)
+        }))
+    }
+
+    return [];
+  }
+
+  getMaxPreparedSpells(): number {
+    switch (this.charClass.name) {
+      case 'Druid':
+      case 'Cleric':
+        return 1 + abilityModifier(this.abilityScores.wisdom);
+
+      case 'Wizard':
+        return 1 + abilityModifier(this.abilityScores.intelligence);
+    }
+
+    return 0;
   }
 }
 

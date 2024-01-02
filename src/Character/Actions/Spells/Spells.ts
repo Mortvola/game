@@ -4,26 +4,36 @@ import Bane from "./Bane";
 import BladeWard from "./BladeWard";
 import Bless from "./Bless";
 import BurningHands from "./BurningHands";
+import CharmPerson from "./CharmPerson";
 import ChillTouch from "./ChillTouch";
 import CureWounds from "./CureWounds";
+import Entangle from "./Entangle";
+import FaerieFire from "./FaerieFire";
 import FireBolt from "./FireBolt";
+import FogCloud from "./FogCloud";
+import Goodberry from "./Goodberry";
 import Grease from "./Grease";
 import Guidance from "./Guidance";
 import GuidingBolt from "./GuidingBolt";
 import HealingWord from "./HealingWord";
 import InflictWounds from "./InflictWounds";
+import Jump from "./Jump";
 import Light from "./LIght";
+import Longstrider from "./Longstrider";
 import MageArmor from "./MageArmor";
 import MagicMissile from './MagicMissile'
 import PoisonSpray from "./PoisonSpray";
+import ProduceFlame from "./ProduceFlame";
 import ProtectionFromGoodAndEvil from "./ProtectionFromGoodAndEvil";
 import RayOfFrost from "./RayOfFrost";
 import Resistance from "./Resistance";
 import SacredFlame from "./SacredFlame";
 import Sanctuary from "./Sanctuary";
 import ShieldOfFaith from "./ShieldOfFaith";
+import Shillelagh from "./Shillelagh";
 import ShockingGrasp from "./ShockingGrasp";
 import Spell from "./Spell";
+import ThornWhip from "./ThornWhip";
 import Thunderwave from "./Thunderwave";
 import TrueStrike from "./TrueStrike";
 import WitchBolt from "./WitchBolt";
@@ -51,7 +61,7 @@ export const wizardSpells: R<Spell>[][] = [
     { spell: BurningHands, name: 'Burning Hands', time: 'Action', level: 1 },
     { spell: Grease, name: 'Grease', time: 'Action', level: 1 },
     { spell: MageArmor, name: 'Mage Armor', time: 'Action', level: 1 },
-    { spell: MagicMissile, name: 'Magic Missle', time: 'Action', level: 1 },
+    { spell: MagicMissile, name: 'Magic Missile', time: 'Action', level: 1 },
     { spell: Thunderwave, name: 'Thunderwave', time: 'Action', level: 1 },
     { spell: WitchBolt, name: 'Witch Bolt', time: 'Action', level: 1 },
   ],
@@ -74,7 +84,30 @@ export const clericSpells: R<Spell>[][] = [
     { spell: ProtectionFromGoodAndEvil, name: 'Protection from Good and Evil', time: 'Action', level: 1 },
     { spell: Sanctuary, name: 'Sanctuary', time: 'Bonus', level: 1 },
     { spell: ShieldOfFaith, name: 'Shield of Faith', time: 'Bonus', level: 1 },
-  ]
+  ],
+]
+
+export const druidSpells: R<Spell>[][] = [
+  [
+    { spell: Guidance, name: 'Guidance', time: 'Action', level: 0 },
+    { spell: PoisonSpray, name: 'Poison Spay', time: 'Action', level: 0 },
+    { spell: ProduceFlame, name: 'Produce Flame', time: 'Action', level: 0 },
+    { spell: Resistance, name: 'Resistance', time: 'Action', level: 0 },
+    { spell: Shillelagh, name: 'Shillelagh', time: 'Bonus', level: 0 },
+    { spell: ThornWhip, name: 'Thorn Whip', time: 'Action', level: 0 },
+  ],
+  [
+    { spell: CharmPerson, name: 'Charm Person', time: 'Action', level: 1 },
+    { spell: CureWounds, name: 'Cure Wounds', time: 'Action', level: 1 },
+    { spell: Entangle, name: 'Entangle', time: 'Action', level: 1 },
+    { spell: FaerieFire, name: 'Faerie Fire', time: 'Action', level: 1 },
+    { spell: FogCloud, name: 'Fog Cloud', time: 'Action', level: 1 },
+    { spell: Goodberry, name: 'Goodberry', time: 'Action', level: 1 },
+    { spell: HealingWord, name: 'Healing Word', time: 'Bonus', level: 1 },
+    { spell: Jump, name: 'Jump', time: 'Action', level: 1 },
+    { spell: Longstrider, name: 'Longstrider', time: 'Action', level: 1 },
+    { spell: Thunderwave, name: 'Thunderwave', time: 'Action', level: 1 },
+  ],
 ]
 
 // export const spellList = [
@@ -130,6 +163,28 @@ export const clericSpells: R<Spell>[][] = [
 // ]
 
 export const getSpell = (spells: R<Spell>[][], name: string): R<Spell> | null => {
+  if (name === 'BurningHands') {
+    name = 'Burning Hands'
+  }
+  else if (name === 'MageArmor') {
+    name = 'Mage Armor'
+  }
+  else if (name === 'MagicMissile') {
+    name = 'Magic Missile'
+  }
+  else if (name === 'CureWounds') {
+    name = 'Cure Wounds'
+  }
+  else if (name === 'WitchBolt') {
+    name = 'Witch Bolt'
+  }
+  else if (name === 'GuidingBolt') {
+    name = 'Guiding Bolt'
+  }
+  else if (name === 'HealingWord') {
+    name = 'Healing Word'
+  }
+
   for (const level of spells) {
     const spell = level.find((s) => s.name === name);
 

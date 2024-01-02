@@ -79,6 +79,7 @@ const PartyList: React.FC<PropsType> = ({
         {
           party.members.map((m) => (
             <CharacterEntry
+              key={m.character.name}
               className={`${styles.listEntry} ${selected === m.character ? styles.selected : ''}`}
               member={m}
               onClick={handleEntryClick}

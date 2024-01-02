@@ -82,7 +82,7 @@ const AddCharacter: React.FC<PropsType> = ({
 
       const character = new Character(abilityScores, race, charClass, weapons, armor);
 
-      character.spells = knownSpells;
+      character.spells = knownSpells.map((s) => s.spell);
       
       onSave(character)
     }

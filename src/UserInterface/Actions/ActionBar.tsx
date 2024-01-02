@@ -26,8 +26,8 @@ const ActionBar: React.FC<PropsType> = ({
           : null
       }
       {
-        character.spells.filter((s) => s.prepared).map((s) => (
-          <SpellAction character={character} spell={s.spell} />
+        character.spells.map((s) => (
+          <SpellAction character={character} spell={s} />
         ))
       }
       {

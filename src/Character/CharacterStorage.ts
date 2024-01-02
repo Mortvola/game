@@ -3,7 +3,7 @@ import Character from "./Character"
 import { ArmorName, getArmor } from "./Equipment/Armor"
 import { WeaponName, getWeapon } from "./Equipment/Weapon"
 import { AbilityScores } from "./Races/AbilityScores"
-import { clericSpells, getSpell, wizardSpells } from "./Actions/Spells/Spells"
+import { clericSpells, druidSpells, getSpell, wizardSpells } from "./Actions/Spells/Spells"
 import { getClass, getRace } from "./Utilities"
 
 export type CharacterStorage = {
@@ -15,6 +15,7 @@ export type CharacterStorage = {
   weapons: string[],
   armor: string[],
   spells: { name: string, prepared: boolean }[],
+  knownSpells: string[],
   equipped: {
     meleeWeapon: string | null,
     rangeWeapon: string | null,
@@ -60,10 +61,20 @@ export const restoreCharacters = (a: CharacterStorage[]): { included: boolean, c
 
       if (c.spells) {
         if (c.charClass === 'Wizard') {
-          character.spells = c.spells.map((s) => ({ spell: getSpell(wizardSpells, s.name)!, prepared: s.prepared }))
+          character.spells = c.spells.filter((s) => s !== null && s.prepared).map((s) => getSpell(wizardSpells, s.name)!)
+          character.knownSpells = c.knownSpells
+            ? [
+              ...(c.knownSpells ?? []).map((s) => getSpell(wizardSpells, s)!),
+            ]
+            : [
+              ...c.spells.map((s) => getSpell(wizardSpells, s.name)!),
+            ]
         }
         else if (c.charClass === 'Cleric') {
-          character.spells = c.spells.map((s) => ({ spell: getSpell(clericSpells, s.name)!, prepared: s.prepared }))
+          character.spells = c.spells.filter((s) => s !== null && s.prepared).map((s) => getSpell(clericSpells, s.name)!)
+        }
+        else if (c.charClass === 'Druid') {
+          character.spells = c.spells.filter((s) => s !== null && s.prepared).map((s) => getSpell(druidSpells, s.name)!)
         }
       }
 
@@ -92,7 +103,8 @@ export const characterStorageParty = (party: Party): CharacterStorageParty => ({
       maxHitPoints: c.maxHitPoints,
       weapons: c.weapons.map((w) => w.name),
       armor: c.armor.map((a) => a.name),
-      spells: c.spells.map((s) => ({ name: s.spell.name, prepared: s.prepared})),
+      spells: c.spells.map((s) => ({ name: s.name, prepared: true })),
+      knownSpells: c.knownSpells !== null ? c.knownSpells.map((s) => s.spell.name) : [],
       equipped: {
         meleeWeapon: c.equipped.meleeWeapon?.name ?? null,
         rangeWeapon: c.equipped.rangeWeapon?.name ?? null,

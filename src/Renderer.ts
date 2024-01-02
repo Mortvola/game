@@ -686,9 +686,6 @@ class Renderer implements WorldInterface {
           activeActor.character.action.prepareInteraction(activeActor, actor ?? null, point ?? null, this)            
         }
       }
-      else {
-        console.log('no change')
-      }
     } else if (this.focused) {
       // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
       this.focused = null;

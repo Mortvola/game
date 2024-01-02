@@ -16,7 +16,7 @@ class MagicMissile extends Spell {
   targets: Actor[] = [];
 
   constructor() {
-    super('Magic Missle', 'Action', 1)
+    super('Magic Missile', 'Action', 1)
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
