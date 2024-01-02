@@ -42,6 +42,10 @@ class Grease extends Spell {
     if (this.center !== null) {
       world.occupants.push({ center: this.center, radius: this.radius })
 
+      if (this.level >= 1 && actor.character.spellSlots[this.level - 1] > 0) {
+        actor.character.spellSlots[this.level - 1] -= 1;
+      }
+
       return true;
     }
 

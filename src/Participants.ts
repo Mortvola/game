@@ -3,7 +3,7 @@ import Actor from "./Character/Actor";
 import { abilityModifier, diceRoll } from "./Dice";
 import { Party } from "./UserInterface/PartyList";
 import Goblin from "./Character/Monsters/Goblin";
-import { XPThreshold, clericSpellSlots, wizardSpellSlots, xpThresholds } from "./Tables";
+import { XPThreshold, xpThresholds } from "./Tables";
 import Kobold from "./Character/Monsters/Kobold";
 import Creature from "./Character/Creature";
 
@@ -124,20 +124,16 @@ class Participants {
       actor.character.hitPoints = actor.character.maxHitPoints;
       actor.character.conditions = [];
       
-      switch (actor.character.charClass.name) {
-        case 'Cleric':
-          for (const slots of clericSpellSlots[actor.character.charClass.level]) {
-            actor.character.spellSlots.push(slots)
-          }
-          
-          break;
+      actor.character.spellSlots = [];
+      
+      for (let spellLevel = 1;; spellLevel += 1) {
+        const slots = actor.character.getMaxSpellSlots(spellLevel);
 
-        case 'Wizard':
-          for (const slots of wizardSpellSlots[actor.character.charClass.level]) {
-            actor.character.spellSlots.push(slots)
-          }
-
+        if (slots === undefined) {
           break;
+        }
+
+        actor.character.spellSlots.push(slots)
       }
 
       actor.sceneNode.translate[0] = (i - ((numPlayers - 1) / 2))

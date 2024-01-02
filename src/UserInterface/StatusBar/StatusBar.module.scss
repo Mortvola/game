@@ -27,3 +27,21 @@
     background-color: black;
   }
 }
+
+.slots {
+  display: flex;
+  flex-direction: row;
+  column-gap: 1px;
+
+  >div {
+    width: 16px;
+    height: 32px;
+    background-color: #c0c000;
+    border: thin #c0c000 solid;
+    border-radius: 4px;
+
+    &.unavailable {
+      background-color: black;
+    }
+  }
+}

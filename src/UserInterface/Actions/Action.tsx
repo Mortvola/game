@@ -1,34 +1,33 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import Spell from '../../Character/Actions/Spells/Spell';
+import ActionClass from '../../Character/Actions/Action';
 import Creature from '../../Character/Creature';
-import { R } from '../../Character/Actions/Spells/Spells';
+import { A } from '../../Character/Actions/Actions';
 
 type PropsType = {
   character: Creature,
-  spell: R<Spell>,
+  action: A<ActionClass>,
 }
 
-const SpellAction: React.FC<PropsType> = ({
+const Action: React.FC<PropsType> = ({
   character,
-  spell,
+  action,
 }) => {
   const isAvailable = (): boolean => {
     return (
-      ((spell.time === 'Action' && character.actionsLeft > 0)
-      || (spell.time === 'Bonus' && character.bonusActionsLeft > 0))
-      && character.spellSlots[spell.level - 1] > 0
+      ((action.time === 'Action' && character.actionsLeft > 0)
+      || (action.time === 'Bonus' && character.bonusActionsLeft > 0))
     )
   }
 
   const handleClick = () => {
     if (isAvailable()) {
-      character.action = new spell.spell();
+      character.action = new action.action();
     }
   }
 
   let className = styles.action;
-  if (spell.time === 'Bonus') {
+  if (action.time === 'Bonus') {
     className = `${className} ${styles.bonus}`;
   }
 
@@ -41,9 +40,9 @@ const SpellAction: React.FC<PropsType> = ({
       className={className}
       onClick={handleClick}
     >
-      {spell.name}
+      {action.name}
     </div>
   )
 }
 
-export default SpellAction;
+export default Action;

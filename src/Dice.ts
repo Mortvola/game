@@ -1,8 +1,9 @@
 import CharacterClass from "./Character/Classes/CharacterClass";
 import Creature from "./Character/Creature";
-import Weapon, { weaponDamage } from "./Character/Equipment/Weapon";
+import Weapon, { WeaponType, weaponDamage } from "./Character/Equipment/Weapon";
 import { AbilityScores } from "./Character/Races/AbilityScores";
 import { Race } from "./Character/Races/Race";
+import { rageDamageBonus } from "./Tables";
 
 export const diceRoll = (numDice: number, sides: number): number => {
   let sum = 0;
@@ -67,9 +68,14 @@ export const attackRoll = (
 
   if (roll === 20) {
     // Critical hit
-    return [weaponDamage(weapon, attacker.abilityScores, twhoHanded)
-      + weaponDamage(weapon, attacker.abilityScores, twhoHanded),
-      true];
+    let damage = weaponDamage(weapon, attacker.abilityScores, twhoHanded)
+    + weaponDamage(weapon, attacker.abilityScores, twhoHanded);
+
+    if (attacker.hasCondition('Rage') && [WeaponType.Martial, WeaponType.Simple].includes(weapon.type)) {
+      damage += rageDamageBonus[attacker.charClass.level - 1];
+    }
+
+    return [damage, true];
   }
 
   roll += attacker.getAbilityModifier(weapon);
@@ -78,7 +84,13 @@ export const attackRoll = (
   roll += attacker.getWeaponProficiency(weapon);
 
   if (roll >= target.armorClass) {
-    return [weaponDamage(weapon, attacker.abilityScores, twhoHanded), false];
+    let damage = weaponDamage(weapon, attacker.abilityScores, twhoHanded);
+
+    if (attacker.hasCondition('Rage') && [WeaponType.Martial, WeaponType.Simple].includes(weapon.type)) {
+      damage += rageDamageBonus[attacker.charClass.level - 1];
+    }
+
+    return [damage, false];
   }
 
   return [0, false];

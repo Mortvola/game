@@ -1,4 +1,5 @@
 import { abilityModifier, getProficiencyBonus } from "../Dice";
+import { clericSpellSlots, wizardSpellSlots } from "../Tables";
 import { KnownSpell } from "../UserInterface/AddCharacter/Spells/KnownSpell";
 import Action from "./Actions/Action";
 import Condition from "./Actions/Conditions/Condition";
@@ -44,6 +45,8 @@ class Creature {
 
   spellSlots: number[] = [];
 
+  classActions: Action[] = [];
+  
   experiencePoints: number;
 
   equipped: Equipped = {
@@ -147,6 +150,16 @@ class Creature {
       - this.getAbilityModifier(weapon)
       - this.getWeaponProficiency(weapon))
       * 5, 5), 95)
+  }
+
+  getMaxSpellSlots(spellLevel: number) {
+    switch (this.charClass.name) {
+      case 'Cleric':
+        return clericSpellSlots[this.charClass.level - 1][spellLevel - 1];
+
+      case 'Wizard':
+        return wizardSpellSlots[this.charClass.level - 1][spellLevel - 1];
+    }
   }
 }
 

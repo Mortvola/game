@@ -4,6 +4,7 @@ import Creature from '../../Character/Creature';
 import MeleeAction from './MeleeAction';
 import RangeAction from './RangeAction';
 import SpellAction from './SpellAction';
+import Action from './Action';
 
 type PropsType = {
   character: Creature,
@@ -27,6 +28,11 @@ const ActionBar: React.FC<PropsType> = ({
       {
         character.spells.filter((s) => s.prepared).map((s) => (
           <SpellAction character={character} spell={s.spell} />
+        ))
+      }
+      {
+        character.charClass.actions.map((a) => (
+          <Action character={character} action={a} />
         ))
       }
     </div>

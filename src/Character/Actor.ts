@@ -14,7 +14,7 @@ import { Advantage, attackRoll } from "../Dice";
 import { qStore, workerQueue } from "../WorkerQueue";
 import Mover from "../Script/Mover";
 import Script from "../Script/Script";
-import Weapon, { WeaponType } from "./Equipment/Weapon";
+import Weapon, { DamageType, WeaponType } from "./Equipment/Weapon";
 import ContainerNode from "../Drawables/ContainerNode";
 import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
@@ -573,7 +573,14 @@ class Actor implements ActorInterface {
       }
     }
 
-    const [damage, critical] = attackRoll(this.character, targetActor.character, weapon, false, advantage);
+    let [damage, critical] = attackRoll(this.character, targetActor.character, weapon, false, advantage);
+
+    if (
+      targetActor.character.hasCondition('Rage')
+      && [DamageType.Bludgeoning, DamageType.Piercing, DamageType.Slashing].includes(weapon.damage)
+    ) {
+      damage = Math.trunc(damage / 2);
+    }
 
     targetActor.takeDamage(damage, critical, this, weapon.name, script);
 

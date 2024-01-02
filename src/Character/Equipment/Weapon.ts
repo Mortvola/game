@@ -13,7 +13,7 @@ export enum WeaponProperties {
   Special,
 }
 
-enum DamageType {
+export enum DamageType {
   Bludgeoning,
   Piercing,
   Slashing,

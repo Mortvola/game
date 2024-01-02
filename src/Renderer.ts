@@ -359,8 +359,9 @@ class Renderer implements WorldInterface {
             }
             
             if (winningTeam === 0) {
+              const xp = Math.trunc((this.participants.parties[1].experiencePoints ?? 0) / this.participants.parties[0].members.length)
               for (let character of this.participants.parties[0].members) {
-                character.experiencePoints += this.participants.parties[1].experiencePoints ?? 0;
+                character.experiencePoints += xp;
               }
             }
 

@@ -56,6 +56,10 @@ class MagicMissile extends Spell {
           world.actionInfoCallback(null);
         }
 
+        if (this.level >= 1 && actor.character.spellSlots[this.level - 1] > 0) {
+          actor.character.spellSlots[this.level - 1] -= 1;
+        }
+
         return true;
       }
     }

@@ -15,9 +15,17 @@ class CureWounds extends Spell {
   }
 
   interact(actor: Actor, script: Script, world: WorldInterface): boolean {
-    return this.zeroDistanceAction(actor, script, world, () => {
+    const result = this.zeroDistanceAction(actor, script, world, () => {
       this.target?.takeHealing(diceRoll(1, 8) + abilityModifier(actor.character.abilityScores.wisdom), actor, this.name, script)
     });
+
+    if (result) {
+      if (this.level >= 1 && actor.character.spellSlots[this.level - 1] > 0) {
+        actor.character.spellSlots[this.level - 1] -= 1;
+      }
+    }
+
+    return result;
   }
 }
 
