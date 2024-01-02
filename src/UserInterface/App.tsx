@@ -2,7 +2,6 @@ import React from 'react';
 import './App.scss';
 import { gpu, renderer } from '../Renderer';
 import { vec4 } from 'wgpu-matrix';
-import RewardChart from '../Chart';
 import DefineParties from './DefineParties';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
 import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
@@ -314,8 +313,6 @@ function App() {
     setInputMode((prev) => prev === 'Controller' ? 'Mouse' : 'Controller')
   }
 
-  const [showGraph, setShowGraph] = React.useState<boolean>(false);
-
   const [showPartyDefs, setShowPartyDefs] = React.useState<boolean>(false);
   const [parties, setParties] = React.useState<Party[]>([
     { members: [], automate: false },
@@ -350,7 +347,7 @@ function App() {
     >
       <div className="upper-left">
         <div className="controls">
-          <button type="button" onClick={handleDefinePartiesClick}>Define Parties</button>
+          <button type="button" onClick={handleDefinePartiesClick}>Define Party</button>
           {/* <button type="button" onClick={handlePlayClick}>play</button> */}
           <button type="button" onClick={handleInputModeClick}>
             {
