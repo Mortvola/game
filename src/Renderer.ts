@@ -363,6 +363,10 @@ class Renderer implements WorldInterface {
               for (let character of this.participants.parties[0].members) {
                 character.experiencePoints += xp;
               }
+
+              if (this.loggerCallback) {
+                this.loggerCallback(`Party members were awarded ${xp} experience points each.`);                 
+              }
             }
 
             if (winningTeam !== null) {
