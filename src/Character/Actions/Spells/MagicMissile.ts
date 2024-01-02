@@ -23,6 +23,9 @@ class MagicMissile extends Spell {
     if (target) {
       this.target = target;
     }
+    else {
+      this.target = null;
+    }
 
     if (world.actionInfoCallback) {
       world.actionInfoCallback({

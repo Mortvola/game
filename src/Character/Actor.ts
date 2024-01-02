@@ -26,6 +26,7 @@ import { findPath2, getOccupants } from "../Workers/PathPlannerQueue";
 import Creature from "./Creature";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
+import Charmed from "./Actions/Conditions/Charmed";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -290,9 +291,15 @@ class Actor implements ActorInterface {
       else {
         script.entries.push(new Delay(2000));
 
+        const charmed = this.character.getCondition('Charmed') as Charmed;
+
         let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
         const otherTeam = world.participants.participants[this.team ^ 1]
-          .filter((a) => a.character.hitPoints > 0 && !a.character.hasCondition('Sanctuary'));
+          .filter((a) => (
+            a.character.hitPoints > 0
+            && !a.character.hasCondition('Sanctuary')
+            && (!charmed || charmed.charmer !== a.character)
+          ));
 
         let targets = this.getTargets(otherTeam);
     
@@ -596,6 +603,8 @@ class Actor implements ActorInterface {
 
       if (damage > 0) {
         script.entries.push(new Logger(`${from.character.name} ${critical ? 'critically ' : ''}hit ${this.character.name} for ${damage} points with a ${weaponName}.`))
+
+        this.character.removeCondition('Charmed')
       }
       else {
         script.entries.push(new Logger(`${from.character.name} missed ${this.character.name} with a ${weaponName}.`))

@@ -13,7 +13,7 @@ class Rage extends Action {
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     let success = 0;
 
-    if (actor === target) {
+    if (actor === target && !target.character.hasCondition('Rage')) {
       this.target = target;
       success = 100;  
     }

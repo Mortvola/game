@@ -37,23 +37,46 @@ export const getProficiencyBonus = (level: number) => (
 
 export type Advantage = 'Disadvantage' | 'Neutral' | 'Advantage';
 
-export const attackRoll = (
-  attacker: Creature,
-  target: Creature,
-  weapon: Weapon,
-  twhoHanded: boolean,
-  advnatage: Advantage,
-): [number, boolean] => {
+export const savingThrow = (score: number, advantage: Advantage): number => {
   let roll = diceRoll(1, 20);
 
-  if (advnatage === 'Disadvantage') {
+  if (advantage === 'Disadvantage') {
     const roll2 = diceRoll(1, 2);
 
     if (roll > roll2) {
       roll = roll2;
     }
   }
-  else if (advnatage === 'Advantage') {
+  else if (advantage === 'Advantage') {
+    const roll2 = diceRoll(1, 2);
+
+    if (roll < roll2) {
+      roll = roll2;
+    }
+  }
+
+  roll += abilityModifier(score);
+
+  return roll;
+}
+
+export const attackRoll = (
+  attacker: Creature,
+  target: Creature,
+  weapon: Weapon,
+  twhoHanded: boolean,
+  advantage: Advantage,
+): [number, boolean] => {
+  let roll = diceRoll(1, 20);
+
+  if (advantage === 'Disadvantage') {
+    const roll2 = diceRoll(1, 2);
+
+    if (roll > roll2) {
+      roll = roll2;
+    }
+  }
+  else if (advantage === 'Advantage') {
     const roll2 = diceRoll(1, 2);
 
     if (roll < roll2) {

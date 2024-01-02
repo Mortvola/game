@@ -29,7 +29,7 @@ const CharacterDetails: React.FC<PropsType> = ({
       <div>
         <div>
           <Abilities character={character} />
-          <div className={styles.hitpoints}>
+          <div className={styles.section}>
             <div>
               <div>Hit Points</div>
               <div>{character?.maxHitPoints}</div>
@@ -37,6 +37,12 @@ const CharacterDetails: React.FC<PropsType> = ({
             <div>
               <div>Armor Class</div>
               <div>{character?.armorClass}</div>
+            </div>
+          </div>
+          <div className={styles.section}>
+            <div>
+              <div>Level</div>
+              <div>{character?.charClass.level}</div>
             </div>
             <div>
               <div>Exp Points</div>

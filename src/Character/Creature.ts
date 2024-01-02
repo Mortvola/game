@@ -113,6 +113,9 @@ class Creature {
     return this.conditions.some((c) => c.name === name);
   }
 
+  getCondition(name: string): Condition | undefined {
+    return this.conditions.find((c) => c.name === name);
+  }
 
   removeCondition(name: string): void {
     const index = this.conditions.findIndex((c) => c.name === name);
