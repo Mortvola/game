@@ -13,7 +13,7 @@
   padding: 0.25rem;
   user-select: none;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
 }
 
 .listWrapper {

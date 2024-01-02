@@ -51,7 +51,7 @@ self.onmessage = (event: MessageEvent<BaseMessage>) => {
   }
 }
 
-const learn = (parties: Character[][]) => {
+const learn = (parties: { included: boolean, character: Character }[][]) => {
   const environment = new Environment();
 
   const qLearn = new QLearn();

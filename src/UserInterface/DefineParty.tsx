@@ -10,7 +10,7 @@ type PropsType = {
   onSave: (parties: Party[]) => void,
 }
 
-const DefineParties: React.FC<PropsType> = ({
+const DefineParty: React.FC<PropsType> = ({
   parties,
   onHide,
   onSave,
@@ -30,20 +30,11 @@ const DefineParties: React.FC<PropsType> = ({
     setSelected(character);
   }
 
-  const handleParty1Change = (party: Party) => {
+  const handlePartyChange = (party: Party) => {
     setNewParties((prev) => {
       return ([
         party,
         prev[1],
-      ])
-    });
-  }
-
-  const handleParty2Change = (party: Party) => {
-    setNewParties((prev) => {
-      return ([
-        prev[0],
-        party,
       ])
     });
   }
@@ -59,7 +50,7 @@ const DefineParties: React.FC<PropsType> = ({
             label="Party 1"
             onSelect={handleSelect}
             selected={selected}
-            onPartyChange={handleParty1Change}
+            onPartyChange={handlePartyChange}
           />
         </div>
         <CharacterDetails character={selected} />
@@ -68,4 +59,4 @@ const DefineParties: React.FC<PropsType> = ({
   )
 }
 
-export default DefineParties;
+export default DefineParty;

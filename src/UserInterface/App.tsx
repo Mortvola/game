@@ -2,7 +2,7 @@ import React from 'react';
 import './App.scss';
 import { gpu, renderer } from '../Renderer';
 import { vec4 } from 'wgpu-matrix';
-import DefineParties from './DefineParties';
+import DefineParties from './DefineParty';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
 import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
 import Messages from './Messages';

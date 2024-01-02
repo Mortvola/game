@@ -3,30 +3,38 @@ import Character from '../Character/Character';
 
 type PropsType = {
   className?: string,
-  character: Character,
+  member: { included: boolean, character: Character },
   onClick: (character: Character) => void,
   onDelete: (character: Character) => void,
 }
 
 const CharacterEntry: React.FC<PropsType> = ({
   className,
-  character,
+  member,
   onClick,
   onDelete,
 }) => {
+  const [included, setIncluded] = React.useState<boolean>(member.included);
+
   const handleClick = () => {
-    onClick(character)
+    onClick(member.character)
   }
 
   const handleDeleteClick = () => {
-    onDelete(character)
+    onDelete(member.character)
+  }
+
+  const handleAutomateChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+    setIncluded(event.target.checked);
+    member.included = event.target.checked;
   }
 
   return (
     <div className={className}>
+      <input type="checkbox" checked={included} onChange={handleAutomateChange} />
       <div onClick={handleClick}>
-        <div>{character.name}</div>
-        <div>{`Level ${character.charClass.level} ${character.race.name} ${character.charClass.name}`}</div>
+        <div>{member.character.name}</div>
+        <div>{`Level ${member.character.charClass.level} ${member.character.race.name} ${member.character.charClass.name}`}</div>
       </div>
       <div onClick={handleDeleteClick}>X</div>
     </div>

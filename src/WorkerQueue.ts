@@ -42,7 +42,7 @@ class WorkerQueue {
 
     for (let i = 0; i < storageParties.length; i += 1) {
       for (let j = 0; j < storageParties[i].members.length; j += 1) {
-        storageParties[i].members[j].maxHitPoints = parties[i].members[j].hitPoints;
+        storageParties[i].members[j].maxHitPoints = parties[i].members[j].character.hitPoints;
       }
     }
 

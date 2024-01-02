@@ -6,7 +6,7 @@ import AddCharacter from './AddCharacter/AddCharacter';
 import Creature from '../Character/Creature';
 
 export type Party = {
-  members: Creature[],
+  members: { included: boolean, character: Creature }[],
   automate: boolean,
   experiencePoints?: number,
 }
@@ -47,7 +47,7 @@ const PartyList: React.FC<PropsType> = ({
     onPartyChange({
       members: [
         ...party.members,
-        character,  
+        { included: false, character, },  
       ],
       automate,
     })
@@ -55,13 +55,8 @@ const PartyList: React.FC<PropsType> = ({
     onSelect(character);
   }
 
-  const handleAutomateChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-    setAutomate(event.target.checked);
-    party.automate = event.target.checked;
-  }
-
   const handleDelete = (character: Character) => {
-    const index = party.members.findIndex((c) => c === character);
+    const index = party.members.findIndex((m) => m.character === character);
 
     if (index !== -1) {
       onPartyChange({
@@ -79,17 +74,13 @@ const PartyList: React.FC<PropsType> = ({
       <div className={styles.header}>
         {label}
         <button onClick={handleAddTeam1}>Add</button>
-        <label>
-          <input type="checkbox" checked={party.automate} onChange={handleAutomateChange} />
-          Automate
-        </label>
       </div>
       <div className={styles.list}>
         {
-          party.members.map((a) => (
+          party.members.map((m) => (
             <CharacterEntry
-              className={`${styles.listEntry} ${selected === a ? styles.selected : ''}`}
-              character={a as Character}
+              className={`${styles.listEntry} ${selected === m.character ? styles.selected : ''}`}
+              member={m}
               onClick={handleEntryClick}
               onDelete={handleDelete}
             />

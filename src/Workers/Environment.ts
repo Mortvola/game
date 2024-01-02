@@ -8,18 +8,18 @@ class Environment implements EnvironmentInterface {
 
   turns: Actor[] = [];
 
-  createTeams(parties: Character[][]) {
+  createTeams(parties: { included: boolean, character: Character }[][]) {
     const team1: Actor[] = [];
     const team2: Actor[] = [];
 
-    for (const character of parties[0]) {
-      character.hitPoints = character.maxHitPoints;
-      team1.push(new Actor(character, 0))
+    for (const member of parties[0]) {
+      member.character.hitPoints = member.character.maxHitPoints;
+      team1.push(new Actor(member.character, 0))
     }
 
-    for (const character of parties[1]) {
-      character.hitPoints = character.maxHitPoints;
-      team2.push(new Actor(character, 1))
+    for (const member of parties[1]) {
+      member.character.hitPoints = member.character.maxHitPoints;
+      team2.push(new Actor(member.character, 1))
     }
 
     this.teams[0] = team1;

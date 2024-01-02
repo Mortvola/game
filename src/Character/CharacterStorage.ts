@@ -20,7 +20,8 @@ export type CharacterStorage = {
     rangeWeapon: string | null,
     armor: string | null,
     shield: string | null,
-  }
+  },
+  included?: boolean,
 }
 
 export type CharacterStorageParty = {
@@ -28,7 +29,7 @@ export type CharacterStorageParty = {
   automate: boolean,
 }
 
-export const restoreCharacters = (a: CharacterStorage[]): Character[] => {
+export const restoreCharacters = (a: CharacterStorage[]): { included: boolean, character: Character }[] => {
   const team = a.map((c) => {
     const race = getRace(c.race);
     const charClass = getClass(c.charClass);
@@ -66,18 +67,23 @@ export const restoreCharacters = (a: CharacterStorage[]): Character[] => {
         }
       }
 
-      return character;
+      return ({
+        included: c.included ?? true,
+        character: character,
+      });
     }
 
     return undefined;
   })
-    .filter((entry) => entry !== undefined) as Character[]
+    .filter((entry) => entry !== undefined) as { included: boolean, character: Character }[]
 
   return team;
 }
 
 export const characterStorageParty = (party: Party): CharacterStorageParty => ({
-  members: party.members.map((c) => {
+  members: party.members.map((m) => {
+    const c = m.character;
+
     const s: CharacterStorage = {
       name: c.name,
       charClass: c.charClass.name,
@@ -92,7 +98,8 @@ export const characterStorageParty = (party: Party): CharacterStorageParty => ({
         rangeWeapon: c.equipped.rangeWeapon?.name ?? null,
         armor: c.equipped.armor?.name ?? null,
         shield: c.equipped.shield?.name ?? null,
-      }
+      },
+      included: m.included,
     }
 
     return s;

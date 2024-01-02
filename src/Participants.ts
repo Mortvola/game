@@ -15,10 +15,10 @@ function createParty<Type extends Creature>(thresholds: XPThreshold, c: new (nam
   }
 
   for (;;) {
-    party.members.push(new c(`${name} ${party.members.length + 1}`));
+    party.members.push({ included: true, character: new c(`${name} ${party.members.length + 1}`) });
 
     party.experiencePoints = party.members.reduce((sum, c) => (
-      sum + c.experiencePoints
+      sum + c.character.experiencePoints
     ), 0)
 
     if (party.experiencePoints === 0) {
@@ -119,13 +119,17 @@ class Participants {
     const playerWidth = 4;
 
     for (let i = 0; i < numPlayers; i += 1) {
-      const actor = await Actor.create(this.parties[team].members[i], color, teamColor, team, this.parties[team].automate);
+      if (!this.parties[team].members[i].included) {
+        continue;
+      }
+
+      const actor = await Actor.create(this.parties[team].members[i].character, color, teamColor, team, this.parties[team].automate);
 
       actor.character.hitPoints = actor.character.maxHitPoints;
       actor.character.conditions = [];
       
       actor.character.spellSlots = [];
-      
+
       for (let spellLevel = 1;; spellLevel += 1) {
         const slots = actor.character.getMaxSpellSlots(spellLevel);
 
@@ -158,10 +162,14 @@ class Participants {
     }
 
     for (const member of this.parties[0].members) {
-      thresholds.easy += xpThresholds[member.charClass.level].easy;
-      thresholds.medium += xpThresholds[member.charClass.level].medium;
-      thresholds.hard += xpThresholds[member.charClass.level].hard;
-      thresholds.deadly += xpThresholds[member.charClass.level].deadly;
+      if (!member.included) {
+        continue;
+      }
+  
+      thresholds.easy += xpThresholds[member.character.charClass.level].easy;
+      thresholds.medium += xpThresholds[member.character.charClass.level].medium;
+      thresholds.hard += xpThresholds[member.character.charClass.level].hard;
+      thresholds.deadly += xpThresholds[member.character.charClass.level].deadly;
     }
 
     let party: Party;
