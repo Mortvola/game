@@ -30,9 +30,11 @@ class Rage extends Action {
   interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     if (this.target && actor === this.target) {
       actor.character.conditions.push(new RageCondition())
+
+      return true;
     }
 
-    return true;
+    return false;
   }
 }
 
