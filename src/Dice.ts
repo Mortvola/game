@@ -75,14 +75,14 @@ export const attackRoll = (
   let roll = diceRoll(1, 20);
 
   if (advantage === 'Disadvantage') {
-    const roll2 = diceRoll(1, 2);
+    const roll2 = diceRoll(1, 20);
 
     if (roll > roll2) {
       roll = roll2;
     }
   }
   else if (advantage === 'Advantage') {
-    const roll2 = diceRoll(1, 2);
+    const roll2 = diceRoll(1, 20);
 
     if (roll < roll2) {
       roll = roll2;
@@ -121,6 +121,59 @@ export const attackRoll = (
     if (attacker.hasCondition('Rage') && [WeaponType.Martial, WeaponType.Simple].includes(weapon.type)) {
       damage += rageDamageBonus[attacker.charClass.level - 1];
     }
+
+    return [damage, false];
+  }
+
+  return [0, false];
+}
+
+export const spellAttackRoll = (
+  attacker: Creature,
+  target: Creature,
+  abilityScore: number,
+  damageRoll: () => number,
+  advantage: Advantage,
+): [number, boolean] => {
+  let roll = diceRoll(1, 20);
+
+  if (advantage === 'Disadvantage') {
+    const roll2 = diceRoll(1, 20);
+
+    if (roll > roll2) {
+      roll = roll2;
+    }
+  }
+  else if (advantage === 'Advantage') {
+    const roll2 = diceRoll(1, 20);
+
+    if (roll < roll2) {
+      roll = roll2;
+    }
+  }
+
+  if (roll === 1) {
+    // Critical miss
+    return [0, false];
+  }
+
+  if (roll === 20) {
+    let damage = damageRoll() + damageRoll();
+
+    return [damage, true];
+  }
+
+  roll += abilityModifier(abilityScore);
+
+  // Add in the weapon proficiency bonus.
+  roll += getProficiencyBonus(attacker.charClass.level)
+
+  if (attacker.hasCondition('Bane')) {
+    roll -= diceRoll(1, 4);
+  }
+
+  if (roll >= target.armorClass) {
+    let damage = damageRoll();
 
     return [damage, false];
   }

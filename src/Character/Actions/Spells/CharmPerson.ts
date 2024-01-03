@@ -13,9 +13,7 @@ class CharmPerson extends Spell {
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
-    if (target) {
-      this.target = target;
-    }
+    this.target = target;
 
     if (world.actionInfoCallback) {
       world.actionInfoCallback({
@@ -40,6 +38,10 @@ class CharmPerson extends Spell {
       }
       else if (world.loggerCallback) {
         world.loggerCallback(`${actor.character.name} failed to charm ${this.target.character.name}.`)
+      }
+
+      if (this.level >= 1 && actor.character.spellSlots[this.level - 1] > 0) {
+        actor.character.spellSlots[this.level - 1] -= 1;
       }
 
       return true;
