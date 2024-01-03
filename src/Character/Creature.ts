@@ -46,8 +46,6 @@ class Creature {
 
   knownSpells: R<Spell>[] | null = null;
 
-  private action: Action | null = null;
-
   actionsLeft = 0;
 
   bonusActionsLeft = 0;
@@ -68,8 +66,6 @@ class Creature {
   conditions: Condition[] = [];
 
   concentration: Concentration | null = null;
-
-  actor: ActorInterface | null = null;
 
   constructor(
     abilityScores: AbilityScores,
@@ -235,26 +231,6 @@ class Creature {
 
       this.concentration = null;
     }
-  }
-
-  setAction(action: Action | null) {
-    if (this.action) {
-      this.action.clear();
-    }
-
-    this.action = action;
-
-    // if (this.action && this.actor) {
-    //   this.action.initialize(this.actor);
-    // }
-  }
-
-  getAction(): Action | null {
-    return this.action;
-  }
-
-  setActor(actor: ActorInterface) {
-    this.actor = actor;
   }
 }
 

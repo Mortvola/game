@@ -1,29 +1,29 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
 import Spell from '../../Character/Actions/Spells/Spell';
-import Creature from '../../Character/Creature';
 import { R } from '../../Character/Actions/Spells/Spells';
+import Actor from '../../Character/Actor';
 
 type PropsType = {
-  character: Creature,
+  actor: Actor,
   spell: R<Spell>,
 }
 
 const SpellAction: React.FC<PropsType> = ({
-  character,
+  actor,
   spell,
 }) => {
   const isAvailable = (): boolean => {
     return (
-      ((spell.time === 'Action' && character.actionsLeft > 0)
-      || (spell.time === 'Bonus' && character.bonusActionsLeft > 0))
-      && character.spellSlots[spell.level - 1] > 0
+      ((spell.time === 'Action' && actor.character.actionsLeft > 0)
+      || (spell.time === 'Bonus' && actor.character.bonusActionsLeft > 0))
+      && actor.character.spellSlots[spell.level - 1] > 0
     )
   }
 
   const handleClick = () => {
     if (isAvailable()) {
-      character.setAction(new spell.spell());
+      actor.setAction(new spell.spell());
     }
   }
 

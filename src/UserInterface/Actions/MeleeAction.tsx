@@ -1,25 +1,25 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import Creature from '../../Character/Creature';
 import MeleeAttack from '../../Character/Actions/MeleeAttack';
+import Actor from '../../Character/Actor';
 
 type PropsType = {
-  character: Creature,
+  actor: Actor,
 }
 
 const MeleeAction: React.FC<PropsType> = ({
-  character,
+  actor,
 }) => {
   const isAvailable = (): boolean => (
-    character.actionsLeft > 0
+    actor.character.actionsLeft > 0
   )
 
   const handleClick = () => {
     if (isAvailable()) {
-      character.setAction(new MeleeAttack());
+      actor.setAction(new MeleeAttack());
     }
 
-    character.primaryWeapon = 'Melee';
+    actor.character.primaryWeapon = 'Melee';
   }
 
   let  className = styles.action;

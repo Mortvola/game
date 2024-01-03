@@ -9,7 +9,6 @@ import { ActorInterface } from "../ActorInterface";
 import Shot, { ShotData } from "../Script/Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
-import { Action, Key } from "../Workers/QStore";
 import { Advantage, attackRoll, savingThrow } from "../Dice";
 import { qStore, workerQueue } from "../WorkerQueue";
 import Mover from "../Script/Mover";
@@ -27,6 +26,7 @@ import Creature from "./Creature";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
 import Charmed from "./Actions/Conditions/Charmed";
+import Action from "./Actions/Action";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -81,6 +81,8 @@ class Actor implements ActorInterface {
 
   state = States.idle;
 
+  private action: Action | null = null;
+
   private constructor(
     character: Creature,
     mesh: SceneNode,
@@ -90,7 +92,6 @@ class Actor implements ActorInterface {
     automated: boolean,
   ) {
     this.character = character;
-    this.character.setActor(this);
     this.team = team;
     this.automated = automated;
     this.sceneNode.addNode(mesh, 'lit');
@@ -159,10 +160,10 @@ class Actor implements ActorInterface {
 
   setDefaultAction() {
     if (this.character.primaryWeapon === 'Melee') {
-      this.character.setAction(new MeleeAttack());
+      this.setAction(new MeleeAttack());
     }
     else {
-      this.character.setAction(new RangeAttack());
+      this.setAction(new RangeAttack());
     }
   }
 
@@ -190,49 +191,49 @@ class Actor implements ActorInterface {
     }
   }
 
-  takeAction(
-    action: Action | null, otherTeam: Actor[], timestamp: number, world: WorldInterface, script: Script,
-  ) {
-    const epsilon = 0.02; // Probability of a random action
+  // takeAction(
+  //   action: Action | null, otherTeam: Actor[], timestamp: number, world: WorldInterface, script: Script,
+  // ) {
+  //   const epsilon = 0.02; // Probability of a random action
 
-    if (action === null || Math.random() < epsilon) {
-      action = {
-        type: 'HitPoints',
-        opponent: Math.trunc(Math.random() * otherTeam.length),
-      }
-    }
+  //   if (action === null || Math.random() < epsilon) {
+  //     action = {
+  //       type: 'HitPoints',
+  //       opponent: Math.trunc(Math.random() * otherTeam.length),
+  //     }
+  //   }
 
-    let sortedActors: Actor[] = [];
+  //   let sortedActors: Actor[] = [];
 
-    sortedActors = otherTeam.map((a) => a).sort((a, b) => {
-      if (a.character.hitPoints === b.character.hitPoints) {
-        // hit points are equal, sort by armore class
+  //   sortedActors = otherTeam.map((a) => a).sort((a, b) => {
+  //     if (a.character.hitPoints === b.character.hitPoints) {
+  //       // hit points are equal, sort by armore class
 
-        if (a.character.armorClass === b.character.armorClass) {
-          // armor classes are equal so sort by weapon damage
-          const damageA = ((a.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * a.character.equipped.meleeWeapon!.die[0].numDice
-          const damageB = ((b.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * b.character.equipped.meleeWeapon!.die[0].numDice
-          return damageA - damageB
-        }
+  //       if (a.character.armorClass === b.character.armorClass) {
+  //         // armor classes are equal so sort by weapon damage
+  //         const damageA = ((a.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * a.character.equipped.meleeWeapon!.die[0].numDice
+  //         const damageB = ((b.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * b.character.equipped.meleeWeapon!.die[0].numDice
+  //         return damageA - damageB
+  //       }
 
-        return a.character.armorClass - b.character.armorClass;
-      }
+  //       return a.character.armorClass - b.character.armorClass;
+  //     }
 
-      return a.character.hitPoints - b.character.hitPoints
-    });
+  //     return a.character.hitPoints - b.character.hitPoints
+  //   });
 
-    const target = sortedActors[action.opponent];
-    this.attack(
-      target,
-      this.character.equipped.meleeWeapon!,
-      world,
-      script,
-    );
+  //   const target = sortedActors[action.opponent];
+  //   this.attack(
+  //     target,
+  //     this.character.equipped.meleeWeapon!,
+  //     world,
+  //     script,
+  //   );
 
-    if (this.character.actionsLeft > 0) {
-      this.character.actionsLeft -= 1;
-    }
-  }
+  //   if (this.character.actionsLeft > 0) {
+  //     this.character.actionsLeft -= 1;
+  //   }
+  // }
 
   useQLearning = false;
 
@@ -268,26 +269,26 @@ class Actor implements ActorInterface {
       const script = new Script();
 
       if (this.useQLearning) {
-        let action: Action | null = null;
+        // let action: Action | null = null;
 
-        if (this.team === 1 && qStore.store.size > 0) {
-          const state: Key = {
-            opponent: otherTeam.map((t) => ({
-              hitPoints: t.character.hitPoints,
-              weapon: ((t.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * t.character.equipped.meleeWeapon!.die[0].numDice,
-              armorClass: t.character.armorClass,
-            })),
-          };
+        // if (this.team === 1 && qStore.store.size > 0) {
+        //   const state: Key = {
+        //     opponent: otherTeam.map((t) => ({
+        //       hitPoints: t.character.hitPoints,
+        //       weapon: ((t.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * t.character.equipped.meleeWeapon!.die[0].numDice,
+        //       armorClass: t.character.armorClass,
+        //     })),
+        //   };
 
-          action = qStore.getBestAction(state);
+        //   action = qStore.getBestAction(state);
 
-          if (action === null) {
-            workerQueue.update(state, world.participants.parties)
-          }
-        }
+        //   if (action === null) {
+        //     workerQueue.update(state, world.participants.parties)
+        //   }
+        // }
 
-        this.takeAction(action, otherTeam, timestamp, world, script);
-        this.state = States.scripting;
+        // this.takeAction(action, otherTeam, timestamp, world, script);
+        // this.state = States.scripting;
       }
       else {
         script.entries.push(new Delay(2000));
@@ -691,6 +692,23 @@ class Actor implements ActorInterface {
       orientation,
       distance,
     });
+  }
+
+
+  setAction(action: Action | null) {
+    if (this.action) {
+      this.action.clear();
+    }
+
+    this.action = action;
+
+    if (this.action && this) {
+      this.action.initialize(this);
+    }
+  }
+
+  getAction(): Action | null {
+    return this.action;
   }
 }
 

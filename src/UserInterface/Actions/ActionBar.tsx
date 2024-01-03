@@ -1,38 +1,38 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import Creature from '../../Character/Creature';
 import MeleeAction from './MeleeAction';
 import RangeAction from './RangeAction';
 import SpellAction from './SpellAction';
 import Action from './Action';
+import Actor from '../../Character/Actor';
 
 type PropsType = {
-  character: Creature,
+  actor: Actor,
 }
 
 const ActionBar: React.FC<PropsType> = ({
-  character,
+  actor,
 }) => (
   <div>
     <div className={styles.list}>
       {
-        character.equipped.meleeWeapon
-          ? <MeleeAction character={character} />
+        actor.character.equipped.meleeWeapon
+          ? <MeleeAction actor={actor} />
           : null
       }
       {
-        character.equipped.rangeWeapon
-          ? <RangeAction character={character} />
+        actor.character.equipped.rangeWeapon
+          ? <RangeAction actor={actor} />
           : null
       }
       {
-        character.spells.map((s) => (
-          <SpellAction character={character} spell={s} />
+        actor.character.spells.map((s) => (
+          <SpellAction actor={actor} spell={s} />
         ))
       }
       {
-        character.charClass.actions.map((a) => (
-          <Action character={character} action={a} />
+        actor.character.charClass.actions.map((a) => (
+          <Action actor={actor} action={a} />
         ))
       }
     </div>

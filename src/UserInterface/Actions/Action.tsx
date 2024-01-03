@@ -3,26 +3,27 @@ import styles from './ActionBar.module.scss';
 import ActionClass from '../../Character/Actions/Action';
 import Creature from '../../Character/Creature';
 import { A } from '../../Character/Actions/Actions';
+import Actor from '../../Character/Actor';
 
 type PropsType = {
-  character: Creature,
+  actor: Actor,
   action: A<ActionClass>,
 }
 
 const Action: React.FC<PropsType> = ({
-  character,
+  actor,
   action,
 }) => {
   const isAvailable = (): boolean => {
     return (
-      ((action.time === 'Action' && character.actionsLeft > 0)
-      || (action.time === 'Bonus' && character.bonusActionsLeft > 0))
+      ((action.time === 'Action' && actor.character.actionsLeft > 0)
+      || (action.time === 'Bonus' && actor.character.bonusActionsLeft > 0))
     )
   }
 
   const handleClick = () => {
     if (isAvailable()) {
-      character.setAction(new action.action());
+      actor.setAction(new action.action());
     }
   }
 

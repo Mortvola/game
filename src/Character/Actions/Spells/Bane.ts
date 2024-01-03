@@ -18,10 +18,6 @@ class Bane extends Spell {
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
-    if (this.rangeCircle === null) {
-      this.showRangeCircle(actor)
-    }
-
     let description = `Select ${this.maxTargets - this.targets.length} more targets.`;
 
     if (target&& !this.targets.includes(target)) {

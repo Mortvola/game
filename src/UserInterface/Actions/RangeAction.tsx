@@ -2,24 +2,25 @@ import React from 'react';
 import styles from './ActionBar.module.scss';
 import Creature from '../../Character/Creature';
 import RangeAttack from '../../Character/Actions/RangeAttack';
+import Actor from '../../Character/Actor';
 
 type PropsType = {
-  character: Creature,
+  actor: Actor,
 }
 
 const RangeAction: React.FC<PropsType> = ({
-  character,
+  actor,
 }) => {
   const isAvailable = (): boolean => (
-    character.actionsLeft > 0
+    actor.character.actionsLeft > 0
   )
 
   const handleClick = () => {
     if (isAvailable()) {
-      character.setAction(new RangeAttack());
+      actor.setAction(new RangeAttack());
     }
 
-    character.primaryWeapon = 'Range';
+    actor.character.primaryWeapon = 'Range';
   }
 
   let  className = styles.action;

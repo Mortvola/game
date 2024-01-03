@@ -8,10 +8,10 @@ import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
 import Messages from './Messages';
 import { Party } from './PartyList';
 import ActionBar from './Actions/ActionBar';
-import Creature from '../Character/Creature';
 import { ActionInfo, FocusInfo } from '../WorldInterface';
 import StatusBar from './StatusBar/StatusBar';
 import Focused from './Focused';
+import Actor from '../Character/Actor';
 
 type DiretionKeys = {
   left: number,
@@ -72,10 +72,10 @@ function App() {
     setActionInfo(actionInfo);
   }, [])
 
-  const [character, setCharacter] = React.useState<Creature | null>(null);
+  const [actor, setActor] = React.useState<Actor | null>(null);
 
-  const characterChangeCallback = React.useCallback((character: Creature | null) => {
-    setCharacter(character)
+  const characterChangeCallback = React.useCallback((actor: Actor | null) => {
+    setActor(actor)
   }, [])
 
   React.useEffect(() => {
@@ -405,15 +405,15 @@ function App() {
       </div>
       <div className="lower-left">
         {
-          character
-            ? character.conditions.map((c) => (
+          actor
+            ? actor.character.conditions.map((c) => (
               <div>{c.name}</div>
             ))
             : null
         }
         {
-          character
-            ? <div>{character.name}</div>
+          actor?.character
+            ? <div>{actor.character.name}</div>
             : null
         }
       </div>
@@ -421,11 +421,11 @@ function App() {
         className="lower-center"
       >
         {
-          character
+          actor
             ? (
               <div>
-                <StatusBar character={character} />
-                <ActionBar character={character} />
+                <StatusBar character={actor.character} />
+                <ActionBar actor={actor} />
               </div>
             )
             : null

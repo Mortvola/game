@@ -25,7 +25,6 @@ import { ActionInfo, Delay, FocusInfo, WorldInterface } from './WorldInterface';
 import { EpisodeInfo } from './Character/Actor';
 import Script from './Script/Script';
 import { Occupant } from './Workers/PathPlannerQueue';
-import Creature from './Character/Creature';
 import { Party } from './UserInterface/PartyList';
 import Circle from './Drawables/Circle';
 import MoveAction from './Character/Actions/MoveAction';
@@ -113,7 +112,7 @@ class Renderer implements WorldInterface {
 
   actionInfoCallback: ((actionInfo: ActionInfo | null) => void) | null = null;
 
-  characterChangeCallback: ((character: Creature | null) => void) | null = null;
+  characterChangeCallback: ((character: Actor | null) => void) | null = null;
 
   animate = true;
 
@@ -187,7 +186,7 @@ class Renderer implements WorldInterface {
         }
 
         if (this.characterChangeCallback) {
-          this.characterChangeCallback(this.participants.activeActor.character);
+          this.characterChangeCallback(this.participants.activeActor);
         }
       }
 
@@ -683,7 +682,7 @@ class Renderer implements WorldInterface {
           }
         }  
 
-        const action = activeActor.character.getAction();
+        const action = activeActor.getAction();
 
         if (action) {
           action.prepareInteraction(activeActor, actor ?? null, point ?? null, this)            
@@ -716,7 +715,7 @@ class Renderer implements WorldInterface {
       const activeActor = this.participants.activeActor;
       const script = new Script();
 
-      const action = activeActor.character.getAction();
+      const action = activeActor.getAction();
 
       if (action) {
         if (action.interact(activeActor, script, this)) {
@@ -731,13 +730,13 @@ class Renderer implements WorldInterface {
             }
           }
 
-          activeActor.character.setAction(null);
+          activeActor.setAction(null);
 
           if (activeActor.character.actionsLeft > 0) {
             activeActor.setDefaultAction();
           }
           else if (activeActor.distanceLeft > 0) {
-            activeActor.character.setAction(new MoveAction());
+            activeActor.setAction(new MoveAction());
           }
           else if (this.actionInfoCallback) {
             this.actionInfoCallback(null)
@@ -816,7 +815,7 @@ class Renderer implements WorldInterface {
     this.actionInfoCallback = callback;
   }
 
-  setCharacterChangeCallback(callback: (character: Creature | null) => void) {
+  setCharacterChangeCallback(callback: (actor: Actor | null) => void) {
     this.characterChangeCallback = callback;
   }
 

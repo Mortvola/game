@@ -12,10 +12,6 @@ class HealingWord extends Spell {
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
-    if (this.rangeCircle === null) {
-      this.showRangeCircle(actor)
-    }
-
     if (target && this.withinRange(actor, target)) {
       this.target = target;
     }
