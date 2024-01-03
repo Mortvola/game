@@ -163,28 +163,6 @@ export const druidSpells: R<Spell>[][] = [
 // ]
 
 export const getSpell = (spells: R<Spell>[][], name: string): R<Spell> | null => {
-  if (name === 'BurningHands') {
-    name = 'Burning Hands'
-  }
-  else if (name === 'MageArmor') {
-    name = 'Mage Armor'
-  }
-  else if (name === 'MagicMissile') {
-    name = 'Magic Missile'
-  }
-  else if (name === 'CureWounds') {
-    name = 'Cure Wounds'
-  }
-  else if (name === 'WitchBolt') {
-    name = 'Witch Bolt'
-  }
-  else if (name === 'GuidingBolt') {
-    name = 'Guiding Bolt'
-  }
-  else if (name === 'HealingWord') {
-    name = 'Healing Word'
-  }
-
   for (const level of spells) {
     const spell = level.find((s) => s.name === name);
 

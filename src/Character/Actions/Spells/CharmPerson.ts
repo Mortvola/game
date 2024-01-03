@@ -1,53 +1,30 @@
-import { Vec4 } from "wgpu-matrix";
 import { abilityModifier, getProficiencyBonus, savingThrow } from "../../../Dice";
 import Script from "../../../Script/Script";
 import { WorldInterface } from "../../../WorldInterface";
 import Actor from "../../Actor";
-import Spell from "./Spell";
 import Charmed from "../Conditions/Charmed";
 import { feetToMeters } from "../../../Math";
+import RangeSpell from "./RangeSpell";
 
-class CharmPerson extends Spell {
+class CharmPerson extends RangeSpell {
   constructor() {
-    super('Charm Person', 'Action', 1, feetToMeters(30), 60 * 60, false);
+    super(1, true, 'Charm Person', 'Action', 1, feetToMeters(30), 60 * 60, false);
   }
 
-  prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
-    this.target = target;
+  cast(actor: Actor, script: Script, world: WorldInterface) {
+    const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.wisdom, 'Advantage');
+    const dc = 8 + getProficiencyBonus(actor.character.charClass.level) + abilityModifier(actor.character.abilityScores.wisdom);
 
-    if (world.actionInfoCallback) {
-      world.actionInfoCallback({
-        action: this.name,
-        description: `Select 1 target.`,
-        percentSuccess: target ? 100 : 0,
-      })
-    }              
-  }
-
-  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
-    if (this.target) {
-      const st = savingThrow(this.target.character, this.target.character.abilityScores.wisdom, 'Advantage');
-      const dc = 8 + getProficiencyBonus(actor.character.charClass.level) + abilityModifier(actor.character.abilityScores.wisdom);
-
-      if (st < dc) {
-        this.target.character.conditions.push(new Charmed(actor.character))
-        
-        if (world.loggerCallback) {
-          world.loggerCallback(`${actor.character.name} charmed ${this.target.character.name}.`)
-        }
+    if (st < dc) {
+      this.targets[0].character.conditions.push(new Charmed(actor.character))
+      
+      if (world.loggerCallback) {
+        world.loggerCallback(`${actor.character.name} charmed ${this.targets[0].character.name}.`)
       }
-      else if (world.loggerCallback) {
-        world.loggerCallback(`${actor.character.name} failed to charm ${this.target.character.name}.`)
-      }
-
-      if (this.level >= 1 && actor.character.spellSlots[this.level - 1] > 0) {
-        actor.character.spellSlots[this.level - 1] -= 1;
-      }
-
-      return true;
     }
-
-    return false;
+    else if (world.loggerCallback) {
+      world.loggerCallback(`${actor.character.name} failed to charm ${this.targets[0].character.name}.`)
+    }
   }
 }
 

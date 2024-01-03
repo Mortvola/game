@@ -37,6 +37,9 @@ class Spell extends Action {
     this.hideRangeCircle(getWorld());
   }
 
+  cast(actor: Actor, script: Script, world: WorldInterface) {
+  }
+
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
   }
 
