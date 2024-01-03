@@ -104,7 +104,7 @@ export const characterStorageParty = (party: Party): CharacterStorageParty => ({
       weapons: c.weapons.map((w) => w.name),
       armor: c.armor.map((a) => a.name),
       spells: c.spells.map((s) => ({ name: s.name, prepared: true })),
-      knownSpells: c.knownSpells !== null ? c.knownSpells.map((s) => s.spell.name) : [],
+      knownSpells: c.knownSpells !== null ? c.knownSpells.map((s) => s.name) : [],
       equipped: {
         meleeWeapon: c.equipped.meleeWeapon?.name ?? null,
         rangeWeapon: c.equipped.rangeWeapon?.name ?? null,

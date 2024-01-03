@@ -1,31 +1,16 @@
-import { Vec4 } from "wgpu-matrix";
 import Actor from "../../Actor";
-import Spell from "./Spell";
 import { WorldInterface } from "../../../WorldInterface";
 import Script from "../../../Script/Script";
 import { abilityModifier, diceRoll } from "../../../Dice";
+import TouchSpell from "./TouchSpell";
 
-class CureWounds extends Spell {
+class CureWounds extends TouchSpell {
   constructor() {
     super('Cure Wounds', 'Action', 1, 0, 0, false);
   }
 
-  prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
-    this.prepareZeroDistAction(100, actor, target, point, world);
-  }
-
-  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
-    const result = this.zeroDistanceAction(actor, script, world, () => {
-      this.target?.takeHealing(diceRoll(1, 8) + abilityModifier(actor.character.abilityScores.wisdom), actor, this.name, script)
-    });
-
-    if (result) {
-      if (this.level >= 1 && actor.character.spellSlots[this.level - 1] > 0) {
-        actor.character.spellSlots[this.level - 1] -= 1;
-      }
-    }
-
-    return result;
+  cast(actor: Actor, script: Script, world: WorldInterface) {
+    this.target?.takeHealing(diceRoll(1, 8) + abilityModifier(actor.character.abilityScores.wisdom), actor, this.name, script)
   }
 }
 
