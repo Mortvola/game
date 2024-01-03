@@ -1,11 +1,19 @@
-import { abilityModifier } from "../../../Dice";
+export type ConditionType = 
+  'Bane'
+  | 'Bless'
+  | 'Charmed'
+  | 'Mage Armor'
+  | 'Rage'
+  | 'Sanctuary'
+  | 'Shield of Faith'
+  ;
 
 class Condition {
-  name: string;
+  name: ConditionType;
 
   duration: number;
 
-  constructor(name: string, duration: number) {
+  constructor(name: ConditionType, duration: number) {
     this.name = name;
     this.duration = duration;
   }

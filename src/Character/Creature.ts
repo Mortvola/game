@@ -2,7 +2,7 @@ import { ActorInterface } from "../ActorInterface";
 import { abilityModifier, getProficiencyBonus } from "../Dice";
 import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from "../Tables";
 import Action from "./Actions/Action";
-import Condition from "./Actions/Conditions/Condition";
+import Condition, { ConditionType } from "./Actions/Conditions/Condition";
 import Spell from "./Actions/Spells/Spell";
 import { R, clericSpells, druidSpells } from "./Actions/Spells/Spells";
 import CharacterClass from "./Classes/CharacterClass";
@@ -91,8 +91,14 @@ class Creature {
   }
 
   get armorClass() {
+    let ac = 0;
+
+    if (this.hasCondition('Shield of Faith')) {
+      ac += 2;      
+    }
+
     if (this.equipped.armor) {
-      let ac = this.equipped.armor.armorClass + (this.equipped.shield?.armorClass ?? 0);
+      ac += this.equipped.armor.armorClass + (this.equipped.shield?.armorClass ?? 0);
 
       if (this.equipped.armor.dexterityModifier) {
         let modifier = abilityModifier(this.abilityScores.dexterity);
@@ -107,22 +113,22 @@ class Creature {
       return ac;
     }
   
-    if ( this.hasCondition('Mage Armor')) {
-      return 13 + abilityModifier(this.abilityScores.dexterity)
+    if (this.hasCondition('Mage Armor')) {
+      return ac + 13 + abilityModifier(this.abilityScores.dexterity)
     }
 
-    return this.charClass.unarmoredDefence(this.abilityScores);
+    return ac + this.charClass.unarmoredDefence(this.abilityScores);
   };
 
-  hasCondition(name: string): boolean {
+  hasCondition(name: ConditionType): boolean {
     return this.conditions.some((c) => c.name === name);
   }
 
-  getCondition(name: string): Condition | undefined {
+  getCondition(name: ConditionType): Condition | undefined {
     return this.conditions.find((c) => c.name === name);
   }
 
-  removeCondition(name: string): void {
+  removeCondition(name: ConditionType): void {
     const index = this.conditions.findIndex((c) => c.name === name);
 
     if (index !== -1) {
@@ -226,7 +232,7 @@ class Creature {
   stopConcentrating() {
     if (this.concentration) {
       for (const creature of this.concentration.targets) {
-        creature.removeCondition(this.concentration.name)
+        creature.removeCondition(this.concentration.name as ConditionType)
       }
 
       this.concentration = null;
