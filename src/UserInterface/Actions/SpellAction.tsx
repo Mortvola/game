@@ -23,7 +23,7 @@ const SpellAction: React.FC<PropsType> = ({
 
   const handleClick = () => {
     if (isAvailable()) {
-      character.action = new spell.spell();
+      character.setAction(new spell.spell());
     }
   }
 

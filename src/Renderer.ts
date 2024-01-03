@@ -675,6 +675,7 @@ class Renderer implements WorldInterface {
               hitpoints: this.focused.character.hitPoints,
               maxHitpoints: this.focused.character.maxHitPoints,
               armorClass: this.focused.character.armorClass,
+              conditions: this.focused.character.conditions.map((c) => ({ name: c.name, duration: c.duration }))
             })  
           }
           else {
@@ -682,8 +683,10 @@ class Renderer implements WorldInterface {
           }
         }  
 
-        if (activeActor.character.action) {
-          activeActor.character.action.prepareInteraction(activeActor, actor ?? null, point ?? null, this)            
+        const action = activeActor.character.getAction();
+
+        if (action) {
+          action.prepareInteraction(activeActor, actor ?? null, point ?? null, this)            
         }
       }
     } else if (this.focused) {
@@ -713,26 +716,28 @@ class Renderer implements WorldInterface {
       const activeActor = this.participants.activeActor;
       const script = new Script();
 
-      if (activeActor.character.action) {
-        if (activeActor.character.action.interact(activeActor, script, this)) {
-          if (activeActor.character.action.time === 'Action') {
+      const action = activeActor.character.getAction();
+
+      if (action) {
+        if (action.interact(activeActor, script, this)) {
+          if (action.time === 'Action') {
             if (activeActor.character.actionsLeft > 0) {
               activeActor.character.actionsLeft -= 1;
             }
           }
-          else if (activeActor.character.action.time === 'Bonus') {
+          else if (action.time === 'Bonus') {
             if (activeActor.character.bonusActionsLeft > 0) {
               activeActor.character.bonusActionsLeft -= 1;
             }
           }
 
-          activeActor.character.action = null;
+          activeActor.character.setAction(null);
 
           if (activeActor.character.actionsLeft > 0) {
             activeActor.setDefaultAction();
           }
           else if (activeActor.distanceLeft > 0) {
-            activeActor.character.action = new MoveAction();
+            activeActor.character.setAction(new MoveAction());
           }
           else if (this.actionInfoCallback) {
             this.actionInfoCallback(null)
@@ -823,5 +828,7 @@ class Renderer implements WorldInterface {
 export const gpu = await Gpu.create();
 export const bindGroups = new BindGroups();
 export const renderer = await Renderer.create();
+
+export const getWorld = (): WorldInterface => renderer;
 
 export default Renderer;

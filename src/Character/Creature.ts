@@ -1,6 +1,6 @@
+import { ActorInterface } from "../ActorInterface";
 import { abilityModifier, getProficiencyBonus } from "../Dice";
 import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from "../Tables";
-import { KnownSpell } from "../UserInterface/AddCharacter/Spells/KnownSpell";
 import Action from "./Actions/Action";
 import Condition from "./Actions/Conditions/Condition";
 import Spell from "./Actions/Spells/Spell";
@@ -16,6 +16,11 @@ export type Equipped = {
   rangeWeapon: Weapon | null,
   armor: Armor | null,
   shield: Armor | null,
+}
+
+export type Concentration = {
+  name: string,
+  targets: Creature[],
 }
 
 type PrimaryWeapon = 'Melee' | 'Range';
@@ -41,7 +46,7 @@ class Creature {
 
   knownSpells: R<Spell>[] | null = null;
 
-  action: Action | null = null;
+  private action: Action | null = null;
 
   actionsLeft = 0;
 
@@ -61,6 +66,10 @@ class Creature {
   primaryWeapon: PrimaryWeapon = 'Melee';
 
   conditions: Condition[] = [];
+
+  concentration: Concentration | null = null;
+
+  actor: ActorInterface | null = null;
 
   constructor(
     abilityScores: AbilityScores,
@@ -216,6 +225,36 @@ class Creature {
     }
 
     return 0;
+  }
+
+  stopConcentrating() {
+    if (this.concentration) {
+      for (const creature of this.concentration.targets) {
+        creature.removeCondition(this.concentration.name)
+      }
+
+      this.concentration = null;
+    }
+  }
+
+  setAction(action: Action | null) {
+    if (this.action) {
+      this.action.clear();
+    }
+
+    this.action = action;
+
+    // if (this.action && this.actor) {
+    //   this.action.initialize(this.actor);
+    // }
+  }
+
+  getAction(): Action | null {
+    return this.action;
+  }
+
+  setActor(actor: ActorInterface) {
+    this.actor = actor;
   }
 }
 

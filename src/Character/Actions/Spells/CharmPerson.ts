@@ -1,14 +1,15 @@
 import { Vec4 } from "wgpu-matrix";
-import { abilityModifier, abilityRoll, diceRoll, getProficiencyBonus, savingThrow } from "../../../Dice";
+import { abilityModifier, getProficiencyBonus, savingThrow } from "../../../Dice";
 import Script from "../../../Script/Script";
 import { WorldInterface } from "../../../WorldInterface";
 import Actor from "../../Actor";
 import Spell from "./Spell";
 import Charmed from "../Conditions/Charmed";
+import { feetToMeters } from "../../../Math";
 
 class CharmPerson extends Spell {
   constructor() {
-    super('Charm Person', 'Action', 1);
+    super('Charm Person', 'Action', 1, feetToMeters(30), 60 * 60, false);
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -27,7 +28,7 @@ class CharmPerson extends Spell {
 
   interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     if (this.target) {
-      const st = savingThrow(this.target.character.abilityScores.wisdom, 'Advantage');
+      const st = savingThrow(this.target.character, this.target.character.abilityScores.wisdom, 'Advantage');
       const dc = 8 + getProficiencyBonus(actor.character.charClass.level) + abilityModifier(actor.character.abilityScores.wisdom);
 
       if (st < dc) {

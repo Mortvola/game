@@ -7,7 +7,7 @@ import { abilityModifier, diceRoll } from "../../../Dice";
 
 class CureWounds extends Spell {
   constructor() {
-    super('Cure Wounds', 'Action', 1);
+    super('Cure Wounds', 'Action', 1, 0, 0, false);
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {

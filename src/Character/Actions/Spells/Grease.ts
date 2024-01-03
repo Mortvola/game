@@ -7,18 +7,12 @@ import Spell from "./Spell";
 import Actor from "../../Actor";
 
 class Grease extends Spell {
-  castingTime = 1;
-
-  range = feetToMeters(60);
-
-  duration = 60;
-
   radius = feetToMeters(10);
 
   center: Vec2 | null = null;
 
   constructor() {
-    super('Grease', 'Action', 1)
+    super('Grease', 'Action', 1, feetToMeters(60), 60, false)
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface) {

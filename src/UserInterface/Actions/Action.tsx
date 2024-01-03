@@ -22,7 +22,7 @@ const Action: React.FC<PropsType> = ({
 
   const handleClick = () => {
     if (isAvailable()) {
-      character.action = new action.action();
+      character.setAction(new action.action());
     }
   }
 

@@ -21,6 +21,7 @@ export type FocusInfo = {
   hitpoints: number,
   maxHitpoints: number,
   armorClass: number,
+  conditions: { name: string, duration: number }[],
 }
 
 export type Delay = {

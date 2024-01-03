@@ -7,16 +7,10 @@ import { WorldInterface } from "../../../WorldInterface";
 import { diceRoll } from "../../../Dice";
 
 class MagicMissile extends Spell {
-  castingTime = 1;
-
-  range = feetToMeters(120);
-
-  duration = 0;
-
   targets: Actor[] = [];
 
   constructor() {
-    super('Magic Missile', 'Action', 1)
+    super('Magic Missile', 'Action', 1, feetToMeters(120), 0, false)
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {

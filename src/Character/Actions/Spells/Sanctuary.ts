@@ -5,10 +5,11 @@ import { WorldInterface } from "../../../WorldInterface";
 import Script from "../../../Script/Script";
 import SanctuaryCondition from '../Conditions/Sanctuary'
 import Logger from "../../../Script/Logger";
+import { feetToMeters } from "../../../Math";
 
 class Sanctuary extends Spell {
   constructor() {
-    super('Sanctuary', 'Bonus', 1)
+    super('Sanctuary', 'Bonus', 1, feetToMeters(30), 60, false);
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {

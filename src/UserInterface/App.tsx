@@ -11,6 +11,7 @@ import ActionBar from './Actions/ActionBar';
 import Creature from '../Character/Creature';
 import { ActionInfo, FocusInfo } from '../WorldInterface';
 import StatusBar from './StatusBar/StatusBar';
+import Focused from './Focused';
 
 type DiretionKeys = {
   left: number,
@@ -359,11 +360,7 @@ function App() {
         </div>
       </div>
       <div className="upper-center">
-          {
-            focus
-              ? `${focus.name} HP: ${focus.hitpoints}/${focus.maxHitpoints} AC: ${focus.armorClass}`
-              : null
-          }
+        <Focused focused={focus} />
       </div>
       <div className="upper-right">
       </div>

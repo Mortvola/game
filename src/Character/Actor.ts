@@ -10,7 +10,7 @@ import Shot, { ShotData } from "../Script/Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
 import { Action, Key } from "../Workers/QStore";
-import { Advantage, attackRoll } from "../Dice";
+import { Advantage, attackRoll, savingThrow } from "../Dice";
 import { qStore, workerQueue } from "../WorkerQueue";
 import Mover from "../Script/Mover";
 import Script from "../Script/Script";
@@ -90,6 +90,7 @@ class Actor implements ActorInterface {
     automated: boolean,
   ) {
     this.character = character;
+    this.character.setActor(this);
     this.team = team;
     this.automated = automated;
     this.sceneNode.addNode(mesh, 'lit');
@@ -158,10 +159,10 @@ class Actor implements ActorInterface {
 
   setDefaultAction() {
     if (this.character.primaryWeapon === 'Melee') {
-      this.character.action = new MeleeAttack();
+      this.character.setAction(new MeleeAttack());
     }
     else {
-      this.character.action = new RangeAttack();
+      this.character.setAction(new RangeAttack());
     }
   }
 
@@ -605,6 +606,20 @@ class Actor implements ActorInterface {
         script.entries.push(new Logger(`${from.character.name} ${critical ? 'critically ' : ''}hit ${this.character.name} for ${damage} points with a ${weaponName}.`))
 
         this.character.removeCondition('Charmed')
+
+        if (this.character.concentration) {
+          const st = savingThrow(this.character, this.character.abilityScores.constitution, 'Neutral');
+
+          if (st < Math.min(10, damage / 2)) {
+            script.entries.push(new Logger(`${this.character.name} stopped concentrating on ${this.character.concentration.name}.`))
+
+            for (const target of this.character.concentration.targets) {
+              script.entries.push(new Logger(`${target.name} lost ${this.character.concentration.name}.`))
+            }
+  
+            this.character.stopConcentrating();
+          }
+        }
       }
       else {
         script.entries.push(new Logger(`${from.character.name} missed ${this.character.name} with a ${weaponName}.`))
@@ -614,6 +629,14 @@ class Actor implements ActorInterface {
         this.character.hitPoints = 0;
 
         script.entries.push(new Logger(`${this.character.name} died.`))
+
+        if (this.character.concentration) {
+          for (const target of this.character.concentration.targets) {
+            script.entries.push(new Logger(`${target.name} lost ${this.character.concentration.name}.`))
+          }
+          
+          this.character.stopConcentrating();
+        }
 
         script.entries.push(new Remover(this));
       }

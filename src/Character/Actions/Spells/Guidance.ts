@@ -2,7 +2,7 @@ import Spell from "./Spell";
 
 class Guidance extends Spell {
   constructor() {
-    super('Guidance', 'Action', 0)
+    super('Guidance', 'Action', 0, 0, 60, true)
   }
 }
 

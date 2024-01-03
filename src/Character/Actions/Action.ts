@@ -5,6 +5,7 @@ import Actor from "../Actor";
 import { findPath2, getOccupants } from "../../Workers/PathPlannerQueue";
 import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
+import { ActorInterface } from "../../ActorInterface";
 
 export type TimeType = 'Action' | 'Bonus' | 'Move';
 
@@ -30,6 +31,12 @@ class Action {
 
   interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     return true;
+  }
+
+  initialize(actor: Actor) {
+  }
+
+  clear() {
   }
 
   prepareZeroDistAction(actionPercent: number, actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {

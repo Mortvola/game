@@ -1,3 +1,4 @@
+import Actor from "./Character/Actor";
 import CharacterClass from "./Character/Classes/CharacterClass";
 import Creature from "./Character/Creature";
 import Weapon, { WeaponType, weaponDamage } from "./Character/Equipment/Weapon";
@@ -37,7 +38,7 @@ export const getProficiencyBonus = (level: number) => (
 
 export type Advantage = 'Disadvantage' | 'Neutral' | 'Advantage';
 
-export const savingThrow = (score: number, advantage: Advantage): number => {
+export const savingThrow = (creature: Creature, score: number, advantage: Advantage): number => {
   let roll = diceRoll(1, 20);
 
   if (advantage === 'Disadvantage') {
@@ -56,6 +57,10 @@ export const savingThrow = (score: number, advantage: Advantage): number => {
   }
 
   roll += abilityModifier(score);
+
+  if (creature.hasCondition('Bane')) {
+    roll -= diceRoll(1, 4);
+  }
 
   return roll;
 }
@@ -105,6 +110,10 @@ export const attackRoll = (
 
   // Add in the weapon proficiency bonus.
   roll += attacker.getWeaponProficiency(weapon);
+
+  if (attacker.hasCondition('Bane')) {
+    roll -= diceRoll(1, 4);
+  }
 
   if (roll >= target.armorClass) {
     let damage = weaponDamage(weapon, attacker.abilityScores, twhoHanded);

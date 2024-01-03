@@ -7,14 +7,8 @@ import Logger from "../../../Script/Logger";
 import MageArmorCondition from "../Conditions/MageArmor";
 
 class MageArmor extends Spell {
-  castingTime = 1;
-
-  range = 0;
-
-  duration = 8 * 60 * 60;
-
   constructor() {
-    super('Mage Armor', 'Action', 1)
+    super('Mage Armor', 'Action', 1, 0, 8 * 60 * 60, false)
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
