@@ -53,8 +53,6 @@ export interface WorldInterface {
 
   loggerCallback: ((message: string) => void) | null;
 
-  pathLines: Line | null;
-
   path2: Line | null;
 
   path3: Line | null;
@@ -64,8 +62,6 @@ export interface WorldInterface {
   occupants: Occupant[];
 
   circleAoE: Circle | null;
-
-  trajectory: Trajectory | null;
 
   focused: Actor | null;
 

@@ -35,15 +35,29 @@ worker.addEventListener('message', (evt: MessageEvent<MessageResponse>) => {
     const promise = findPathPromises[evt.data.id]
 
     if (promise) {
-      promise.resolve([
-        evt.data.path,
-        evt.data.distance,
-        evt.data.lines,
-        false,
-        evt.data.dbl,
-      ])
-  
+      if (evt.data.id <= requestId) {
+        promise.resolve([
+          evt.data.path,
+          evt.data.distance,
+          evt.data.lines,
+          false,
+          evt.data.dbl,
+        ])  
+      }
+      else {
+        promise.resolve([
+          [],
+          0,
+          [],
+          true,
+          [],
+        ])
+      }  
+
       delete findPathPromises[evt.data.id];  
+    }
+    else {
+      console.log('promise not found')
     }
 
     if (waiting) {

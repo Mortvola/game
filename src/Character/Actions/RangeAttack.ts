@@ -18,12 +18,12 @@ class RangeAttack extends Action {
     if (target) {
       const result = actor.computeShotData(target);
       
-      if (world.trajectory) {
-        world.mainRenderPass.removeDrawable(world.trajectory, 'trajectory');
-        world.trajectory = null;
+      if (this.trajectory) {
+        world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+        this.trajectory = null;
       }
     
-      world.trajectory = new Trajectory({
+      this.trajectory = new Trajectory({
         velocityVector: result.velocityVector,
         duration: result.duration,
         startPos: result.startPos,
@@ -31,11 +31,9 @@ class RangeAttack extends Action {
         distance: result.distance,
       });
   
-      world.mainRenderPass.addDrawable(world.trajectory, 'trajectory');
+      world.mainRenderPass.addDrawable(this.trajectory, 'trajectory');
   
-      if (world.pathLines) {
-        world.mainRenderPass.removeDrawable(world.pathLines, 'line');
-      }
+      this.showPathLines(null);
   
       if (world.actionInfoCallback) {
         world.actionInfoCallback({
@@ -51,9 +49,9 @@ class RangeAttack extends Action {
     else {
       this.target = null;
 
-      if (world.trajectory) {
-        world.mainRenderPass.removeDrawable(world.trajectory, 'trajectory');
-        world.trajectory = null;
+      if (this.trajectory) {
+        world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+        this.trajectory = null;
       }
 
       if (point) {
@@ -74,15 +72,7 @@ class RangeAttack extends Action {
           )
   
           if (!cancelled && !this.target) {
-            if (world.pathLines) {
-              world.mainRenderPass.removeDrawable(world.pathLines, 'line');
-            }
-  
-            if (path.length > 0) {
-              world.pathLines = new Line(lines);
-    
-              world.mainRenderPass.addDrawable(world.pathLines, 'line');
-            }
+            this.showPathLines(lines);
   
             this.path = path;
             this.distance = distance;
@@ -104,9 +94,7 @@ class RangeAttack extends Action {
       script.entries.push(new FollowPath(actor.sceneNode, this.path));    
       actor.distanceLeft -= this.distance;
 
-      if (world.pathLines) {
-        world.mainRenderPass.removeDrawable(world.pathLines, 'line');
-      }
+      this.showPathLines(null);
     }
     else if (this.target) {
       const shotData = actor.computeShotData(this.target);
@@ -128,9 +116,9 @@ class RangeAttack extends Action {
         script,
       );
 
-      if (world.trajectory) {
-        world.mainRenderPass.removeDrawable(world.trajectory, 'trajectory');
-        world.trajectory = null;
+      if (this.trajectory) {
+        world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+        this.trajectory = null;
       }
 
       return true;

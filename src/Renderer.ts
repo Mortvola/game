@@ -16,7 +16,6 @@ import Mesh from './Drawables/Mesh';
 import { box } from './Drawables/Shapes/box';
 import Reticle from './Drawables/Reticle';
 import Actor, { States } from './Character/Actor';
-import Trajectory from './Drawables/Trajectory';
 import Line from './Drawables/Line';
 import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
@@ -83,10 +82,6 @@ class Renderer implements WorldInterface {
   participants = new Participants();
 
   focused: Actor | null = null;
-
-  trajectory: Trajectory | null = null;
-
-  pathLines: Line | null = null;
 
   path2: Line | null = null;
 
@@ -213,15 +208,6 @@ class Renderer implements WorldInterface {
         this.actionInfoCallback(null);
       }
 
-      if (this.trajectory) {
-        this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
-        this.trajectory = null;
-      }
-
-      if (this.pathLines) {
-        this.mainRenderPass.removeDrawable(this.pathLines, 'line');
-      }
-
       this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
 
       // If one of the parties have been wiped out then end the round.
@@ -286,6 +272,8 @@ class Renderer implements WorldInterface {
   async prepareTeams() {
     // Remove any current participants
     for (const actor of this.participants.turns) {
+      actor.setAction(null);
+
       this.scene.removeNode(actor.sceneNode);
       actor.removeFromScene();
 
@@ -294,6 +282,10 @@ class Renderer implements WorldInterface {
     }
 
     this.actors = [];
+
+    if (this.focusCallback) {
+      this.focusCallback(null);
+    }
 
     // Set up teams.
     await this.participants.createTeams();

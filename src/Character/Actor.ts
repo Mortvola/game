@@ -173,6 +173,8 @@ class Actor implements ActorInterface {
     this.circle.color[2] = this.teamColor[2];
     this.circle.color[3] = this.teamColor[3];
 
+    this.setAction(null);
+    
     this.state = States.idle;
   }
 

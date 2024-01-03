@@ -5,7 +5,8 @@ import Actor from "../Actor";
 import { findPath2, getOccupants } from "../../Workers/PathPlannerQueue";
 import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
-import { ActorInterface } from "../../ActorInterface";
+import { getWorld } from "../../Renderer";
+import Trajectory from "../../Drawables/Trajectory";
 
 export type TimeType = 'Action' | 'Bonus' | 'Move';
 
@@ -19,6 +20,12 @@ class Action {
   distance = 0;
 
   target: Actor | null = null;
+
+  pathLines: Line | null = null;
+
+  trajectory: Trajectory | null = null;
+
+  cleared = false;
 
   constructor(name: string, time: TimeType) {
     this.name = name;
@@ -37,6 +44,29 @@ class Action {
   }
 
   clear() {
+    this.cleared = true;
+
+    const world = getWorld();
+
+    this.showPathLines(null);
+
+    if (this.trajectory) {
+      world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+      this.trajectory = null;
+    }
+  }
+
+  showPathLines(lines: number[][] | null) {
+    const world = getWorld();
+
+    if (this.pathLines) {
+      world.mainRenderPass.removeDrawable(this.pathLines, 'line');
+    }
+
+    if (lines !== null && !this.cleared && lines.length > 0) {
+      this.pathLines = new Line(lines);
+      world.mainRenderPass.addDrawable(this.pathLines, 'line');  
+    }
   }
 
   prepareZeroDistAction(actionPercent: number, actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -67,12 +97,7 @@ class Action {
 
           if (!cancelled) {
             if (path.length > 0) {
-              if (world.pathLines) {
-                world.mainRenderPass.removeDrawable(world.pathLines, 'line');
-              }
-
-              world.pathLines = new Line(lines);
-              world.mainRenderPass.addDrawable(world.pathLines, 'line');
+              this.showPathLines(lines);
 
               let distanceToTarget = vec2.distance(path[0], vec2.create(targetWp[0], targetWp[2]));
               distanceToTarget -= target.occupiedRadius  
@@ -107,14 +132,12 @@ class Action {
         })();
       }
       else {
-        if (world.trajectory) {
-          world.mainRenderPass.removeDrawable(world.trajectory, 'trajectory');
-          world.trajectory = null;
+        if (this.trajectory) {
+          world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+          this.trajectory = null;
         }
 
-        if (world.pathLines) {
-          world.mainRenderPass.removeDrawable(world.pathLines, 'line');
-        }
+        this.showPathLines(null);
 
         this.target = target;
         this.distance = 0;
@@ -131,9 +154,9 @@ class Action {
     else {
       this.target = null;
 
-      if (world.trajectory) {
-        world.mainRenderPass.removeDrawable(world.trajectory, 'trajectory');
-        world.trajectory = null;
+      if (this.trajectory) {
+        world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+        this.trajectory = null;
       }
 
       if (point) {
@@ -154,15 +177,7 @@ class Action {
           )
   
           if (!cancelled && !this.target) {
-            if (world.pathLines) {
-              world.mainRenderPass.removeDrawable(world.pathLines, 'line');
-            }
-  
-            if (path.length > 0) {
-              world.pathLines = new Line(lines);
-    
-              world.mainRenderPass.addDrawable(world.pathLines, 'line');
-            }
+            this.showPathLines(lines);
   
             this.path = path;
             this.distance = distance;
@@ -185,10 +200,7 @@ class Action {
       actor.distanceLeft -= this.distance;
     }
 
-    if (world.pathLines) {
-      world.mainRenderPass.removeDrawable(world.pathLines, 'line');
-      world.pathLines = null;
-    }
+    this.showPathLines(null);
 
     if (this.target) {
       action();

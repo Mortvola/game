@@ -34,6 +34,7 @@ class Spell extends Action {
   }
 
   clear() {
+    super.clear();
     this.hideRangeCircle(getWorld());
   }
 

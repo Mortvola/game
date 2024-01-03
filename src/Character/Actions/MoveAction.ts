@@ -17,9 +17,9 @@ class MoveAction extends Action {
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
-    if (world.trajectory) {
-      world.mainRenderPass.removeDrawable(world.trajectory, 'trajectory');
-      world.trajectory = null;
+    if (this.trajectory) {
+      world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+      this.trajectory = null;
     }
 
     const wp = actor.getWorldPosition();
@@ -49,15 +49,7 @@ class MoveAction extends Action {
       )
 
       if (!cancelled) { // && !this.target) {
-        if (world.pathLines) {
-          world.mainRenderPass.removeDrawable(world.pathLines, 'line');
-        }
-
-        if (path.length > 0) {
-          world.pathLines = new Line(lines);
-
-          world.mainRenderPass.addDrawable(world.pathLines, 'line');
-        }
+        this.showPathLines(lines);
 
         this.path = path;
         this.distance = distance;
@@ -76,9 +68,7 @@ class MoveAction extends Action {
     script.entries.push(new FollowPath(actor.sceneNode, this.path));    
     actor.distanceLeft -= this.distance;
 
-    if (world.pathLines) {
-      world.mainRenderPass.removeDrawable(world.pathLines, 'line');
-    }
+    this.showPathLines(null);
 
     if (world.actionInfoCallback) {
       world.actionInfoCallback(null)
