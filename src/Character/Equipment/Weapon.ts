@@ -15,7 +15,9 @@ export enum WeaponProperties {
 
 export enum DamageType {
   Bludgeoning,
+  Necrotic,
   Piercing,
+  Radiant,
   Slashing,
   None,
 }

@@ -61,6 +61,9 @@ export const savingThrow = (creature: Creature, score: number, advantage: Advant
   if (creature.hasCondition('Bane')) {
     roll -= diceRoll(1, 4);
   }
+  else if (creature.hasCondition('Bless')) {
+    roll += diceRoll(1, 4);
+  }
 
   return roll;
 }
@@ -113,6 +116,9 @@ export const attackRoll = (
 
   if (attacker.hasCondition('Bane')) {
     roll -= diceRoll(1, 4);
+  }
+  else if (attacker.hasCondition('Bless')) {
+    roll += diceRoll(1, 4);
   }
 
   if (roll >= target.armorClass) {
@@ -170,6 +176,9 @@ export const spellAttackRoll = (
 
   if (attacker.hasCondition('Bane')) {
     roll -= diceRoll(1, 4);
+  }
+  else if (attacker.hasCondition('Bless')) {
+    roll += diceRoll(1, 4);
   }
 
   if (roll >= target.armorClass) {

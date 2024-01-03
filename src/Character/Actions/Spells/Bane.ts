@@ -20,7 +20,7 @@ class Bane extends Spell {
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     let description = `Select ${this.maxTargets - this.targets.length} more targets.`;
 
-    if (target&& !this.targets.includes(target)) {
+    if (target && !this.targets.includes(target)) {
       if (this.withinRange(actor, target)) {
         this.target = target;
       }
