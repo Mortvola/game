@@ -1,8 +1,9 @@
+import Actor from "../Actor";
 import Action, { TimeType } from "./Action";
 import Rage from "./Rage";
 
 export type A<T> = {
-  action: new () => T;
+  action: new (actor: Actor) => T;
   name: string;
   time: TimeType,
 }

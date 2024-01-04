@@ -16,7 +16,7 @@ const MeleeAction: React.FC<PropsType> = ({
 
   const handleClick = () => {
     if (isAvailable()) {
-      actor.setAction(new MeleeAttack());
+      actor.setAction(new MeleeAttack(actor));
     }
 
     actor.character.primaryWeapon = 'Melee';

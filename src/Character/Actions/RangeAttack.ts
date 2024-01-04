@@ -5,18 +5,17 @@ import Action from "./Action";
 import Actor from "../Actor";
 import Trajectory from "../../Drawables/Trajectory";
 import { findPath2, getOccupants } from "../../Workers/PathPlannerQueue";
-import Line from "../../Drawables/Line";
 import Shot, { ShotData } from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
 
 class RangeAttack extends Action {
-  constructor() {
-    super('Range', 'Action')
+  constructor(actor: Actor) {
+    super(actor, 'Range', 'Action')
   }
   
-  prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     if (target) {
-      const result = actor.computeShotData(target);
+      const result = this.actor.computeShotData(target);
       
       if (this.trajectory) {
         world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
@@ -38,7 +37,7 @@ class RangeAttack extends Action {
       if (world.actionInfoCallback) {
         world.actionInfoCallback({
           action: this.name,
-          percentSuccess: actor.character.percentSuccess(target.character, actor.character.equipped.rangeWeapon!),
+          percentSuccess: this.actor.character.percentSuccess(target.character, this.actor.character.equipped.rangeWeapon!),
         })
       }
 
@@ -55,16 +54,16 @@ class RangeAttack extends Action {
       }
 
       if (point) {
-        const wp = actor.getWorldPosition();
+        const wp = this.actor.getWorldPosition();
         
         let targetWp = vec2.create(point[0], point[2])
 
         let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-        const occupants = getOccupants(actor, target, participants, []);
+        const occupants = getOccupants(this.actor, target, participants, []);
 
         (async () => {  
           const [path, distance, lines, cancelled] = await findPath2(
-            actor,
+            this.actor,
             vec2.create(wp[0], wp[2]),
             targetWp,
             null,
@@ -89,15 +88,15 @@ class RangeAttack extends Action {
     }
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
+  interact(script: Script, world: WorldInterface): boolean {
     if (this.path.length > 0) {
-      script.entries.push(new FollowPath(actor.sceneNode, this.path));    
-      actor.distanceLeft -= this.distance;
+      script.entries.push(new FollowPath(this.actor.sceneNode, this.path));    
+      this.actor.distanceLeft -= this.distance;
 
       this.showPathLines(null);
     }
     else if (this.target) {
-      const shotData = actor.computeShotData(this.target);
+      const shotData = this.actor.computeShotData(this.target);
       
       const data: ShotData = {
         velocityVector: shotData.velocityVector,
@@ -106,12 +105,12 @@ class RangeAttack extends Action {
         position: shotData.startPos,
       };
 
-      const shot = new Shot(world.shot, actor, data);
+      const shot = new Shot(world.shot, this.actor, data);
       script.entries.push(shot);
 
-      actor.attack(
+      this.actor.attack(
         this.target!,
-        actor.character.equipped.rangeWeapon!,
+        this.actor.character.equipped.rangeWeapon!,
         world,
         script,
       );

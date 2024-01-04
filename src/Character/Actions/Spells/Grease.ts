@@ -15,7 +15,7 @@ class Grease extends Spell {
     super(actor, 'Grease', 'Action', 1, feetToMeters(60), 60, false)
   }
 
-  prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface) {
+  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface) {
     if (world.circleAoE === null) {
       world.circleAoE = new Circle(feetToMeters(10), 0.1, vec4.create(0.5, 0.5, 0.5, 1))
       world.mainRenderPass.addDrawable(world.circleAoE, 'circle');
@@ -32,12 +32,12 @@ class Grease extends Spell {
     }
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
+  interact(script: Script, world: WorldInterface): boolean {
     if (this.center !== null) {
       world.occupants.push({ center: this.center, radius: this.radius })
 
-      if (this.level >= 1 && actor.character.spellSlots[this.level - 1] > 0) {
-        actor.character.spellSlots[this.level - 1] -= 1;
+      if (this.level >= 1 && this.actor.character.spellSlots[this.level - 1] > 0) {
+        this.actor.character.spellSlots[this.level - 1] -= 1;
       }
 
       return true;

@@ -10,7 +10,6 @@ import Shot, { ShotData } from "../Script/Shot";
 import { playShot } from "../Audio";
 import { WorldInterface } from "../WorldInterface";
 import { Advantage, attackRoll, savingThrow } from "../Dice";
-import { qStore, workerQueue } from "../WorkerQueue";
 import Mover from "../Script/Mover";
 import Script from "../Script/Script";
 import Weapon, { DamageType, WeaponType } from "./Equipment/Weapon";
@@ -160,10 +159,10 @@ class Actor implements ActorInterface {
 
   setDefaultAction() {
     if (this.character.primaryWeapon === 'Melee') {
-      this.setAction(new MeleeAttack());
+      this.setAction(new MeleeAttack(this));
     }
     else {
-      this.setAction(new RangeAttack());
+      this.setAction(new RangeAttack(this));
     }
   }
 
@@ -721,7 +720,7 @@ class Actor implements ActorInterface {
     this.action = action;
 
     if (this.action && this) {
-      this.action.initialize(this);
+      this.action.initialize();
     }
   }
 

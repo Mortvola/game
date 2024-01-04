@@ -8,8 +8,6 @@ import Circle from "../../../Drawables/Circle";
 import { getWorld } from "../../../Renderer";
 
 class Spell extends Action {
-  actor: Actor;
-
   level: number;
 
   castingTime = 1;
@@ -23,9 +21,8 @@ class Spell extends Action {
   rangeCircle: Circle | null = null;
 
   constructor(actor: Actor, name: string, time: TimeType, level: number, range: number, duration: number, concentration: boolean) {
-    super(name, time);
+    super(actor, name, time);
 
-    this.actor = actor;
     this.level = level;
     this.range = range;
     this.duration = duration;
@@ -44,10 +41,10 @@ class Spell extends Action {
   cast(script: Script, world: WorldInterface) {
   }
 
-  prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
+  interact(script: Script, world: WorldInterface): boolean {
     return true;
   }
 

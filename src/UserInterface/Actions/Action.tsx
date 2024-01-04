@@ -1,7 +1,6 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
 import ActionClass from '../../Character/Actions/Action';
-import Creature from '../../Character/Creature';
 import { A } from '../../Character/Actions/Actions';
 import Actor from '../../Character/Actor';
 
@@ -23,7 +22,7 @@ const Action: React.FC<PropsType> = ({
 
   const handleClick = () => {
     if (isAvailable()) {
-      actor.setAction(new action.action());
+      actor.setAction(new action.action(actor));
     }
   }
 

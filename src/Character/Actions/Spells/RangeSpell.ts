@@ -28,7 +28,7 @@ class RangeSpell extends Spell {
     this.uniqueTargets = uniqueTargets;
   }
 
-  prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     let description = `Select ${this.maxTargets  - this.targets.length} more targets.`;
 
     if (this.maxTargets === 1) {
@@ -57,7 +57,7 @@ class RangeSpell extends Spell {
     }              
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface) {
+  interact(script: Script, world: WorldInterface) {
     if (this.target) {
       this.targets.push(this.target);
       this.target = null;
@@ -75,7 +75,7 @@ class RangeSpell extends Spell {
         // End concentration of the curren spell if this spell 
         // requires concentration.
         if (this.concentration) {
-          actor.character.stopConcentrating();
+          this.actor.character.stopConcentrating();
         }
 
         this.cast(script, world);
@@ -84,8 +84,8 @@ class RangeSpell extends Spell {
           world.actionInfoCallback(null);
         }
 
-        if (this.level >= 1 && actor.character.spellSlots[this.level - 1] > 0) {
-          actor.character.spellSlots[this.level - 1] -= 1;
+        if (this.level >= 1 && this.actor.character.spellSlots[this.level - 1] > 0) {
+          this.actor.character.spellSlots[this.level - 1] -= 1;
         }
 
         return true;

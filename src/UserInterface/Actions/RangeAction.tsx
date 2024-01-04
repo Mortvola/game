@@ -17,7 +17,7 @@ const RangeAction: React.FC<PropsType> = ({
 
   const handleClick = () => {
     if (isAvailable()) {
-      actor.setAction(new RangeAttack());
+      actor.setAction(new RangeAttack(actor));
     }
 
     actor.character.primaryWeapon = 'Range';

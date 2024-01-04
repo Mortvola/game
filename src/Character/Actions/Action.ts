@@ -11,6 +11,8 @@ import Trajectory from "../../Drawables/Trajectory";
 export type TimeType = 'Action' | 'Bonus' | 'Move';
 
 class Action {
+  actor: Actor;
+
   name: string;
 
   time: TimeType;
@@ -27,20 +29,21 @@ class Action {
 
   cleared = false;
 
-  constructor(name: string, time: TimeType) {
+  constructor(actor: Actor, name: string, time: TimeType) {
+    this.actor = actor;
     this.name = name;
     this.time = time;
   }
   
-  prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
 
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
+  interact(script: Script, world: WorldInterface): boolean {
     return true;
   }
 
-  initialize(actor: Actor) {
+  initialize() {
   }
 
   clear() {
@@ -69,9 +72,9 @@ class Action {
     }
   }
 
-  prepareZeroDistAction(actionPercent: number, actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  prepareZeroDistAction(actionPercent: number, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     if (target) {
-      const wp = actor.getWorldPosition();
+      const wp = this.actor.getWorldPosition();
       const targetWp = target.getWorldPosition();
 
       const distance = vec2.distance(
@@ -79,19 +82,19 @@ class Action {
         vec2.create(targetWp[0], targetWp[2]),
       )
 
-      if (distance > actor.attackRadius + target.occupiedRadius) {
+      if (distance > this.actor.attackRadius + target.occupiedRadius) {
         // To far for a melee attack
         // Find a path to the target...
 
         let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-        const occupants = getOccupants(actor, target, participants, []);
+        const occupants = getOccupants(this.actor, target, participants, []);
 
         (async () => {
           const [path, distance, lines, cancelled] = await findPath2(
-            actor,
+            this.actor,
             vec2.create(wp[0], wp[2]),
             vec2.create(targetWp[0], targetWp[2]),
-            target.occupiedRadius + actor.occupiedRadius,
+            target.occupiedRadius + this.actor.occupiedRadius,
             target, occupants,
           )
 
@@ -105,7 +108,7 @@ class Action {
               this.path = path;
               this.distance = distance;
 
-              if (distanceToTarget < actor.attackRadius) {
+              if (distanceToTarget < this.actor.attackRadius) {
                 // this.type = 'MoveAndMelee';
                 this.target = target;
 
@@ -160,16 +163,16 @@ class Action {
       }
 
       if (point) {
-        const wp = actor.getWorldPosition();
+        const wp = this.actor.getWorldPosition();
         
         let targetWp = vec2.create(point[0], point[2])
 
         let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-        const occupants = getOccupants(actor, target, participants, []);
+        const occupants = getOccupants(this.actor, target, participants, []);
 
         (async () => {  
           const [path, distance, lines, cancelled] = await findPath2(
-            actor,
+            this.actor,
             vec2.create(wp[0], wp[2]),
             targetWp,
             null,
@@ -194,10 +197,10 @@ class Action {
     }
   }
 
-  zeroDistanceAction(actor: Actor, script: Script, world: WorldInterface, action: () => void): boolean {
+  zeroDistanceAction(script: Script, world: WorldInterface, action: () => void): boolean {
     if (this.path.length > 0) {
-      script.entries.push(new FollowPath(actor.sceneNode, this.path));    
-      actor.distanceLeft -= this.distance;
+      script.entries.push(new FollowPath(this.actor.sceneNode, this.path));    
+      this.actor.distanceLeft -= this.distance;
     }
 
     this.showPathLines(null);

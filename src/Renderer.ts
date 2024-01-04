@@ -677,7 +677,7 @@ class Renderer implements WorldInterface {
         const action = activeActor.getAction();
 
         if (action) {
-          action.prepareInteraction(activeActor, actor ?? null, point ?? null, this)            
+          action.prepareInteraction(actor ?? null, point ?? null, this)            
         }
       }
     } else if (this.focused) {
@@ -710,7 +710,7 @@ class Renderer implements WorldInterface {
       const action = activeActor.getAction();
 
       if (action) {
-        if (action.interact(activeActor, script, this)) {
+        if (action.interact(script, this)) {
           if (action.time === 'Action') {
             if (activeActor.character.actionsLeft > 0) {
               activeActor.character.actionsLeft -= 1;
@@ -728,7 +728,7 @@ class Renderer implements WorldInterface {
             activeActor.setDefaultAction();
           }
           else if (activeActor.distanceLeft > 0) {
-            activeActor.setAction(new MoveAction());
+            activeActor.setAction(new MoveAction(activeActor));
           }
           else if (this.actionInfoCallback) {
             this.actionInfoCallback(null)

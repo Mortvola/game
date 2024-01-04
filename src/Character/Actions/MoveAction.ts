@@ -4,7 +4,6 @@ import { WorldInterface } from "../../WorldInterface";
 import Action from "./Action";
 import Actor from "../Actor";
 import { findPath2, getOccupants } from "../../Workers/PathPlannerQueue";
-import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
 
 class MoveAction extends Action {
@@ -12,17 +11,17 @@ class MoveAction extends Action {
 
   distance = 0;
 
-  constructor() {
-    super('Move', 'Move')
+  constructor(actor: Actor) {
+    super(actor, 'Move', 'Move')
   }
 
-  prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     if (this.trajectory) {
       world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
       this.trajectory = null;
     }
 
-    const wp = actor.getWorldPosition();
+    const wp = this.actor.getWorldPosition();
     
     // If there isn't a point but there is a target
     // then use the target's location.
@@ -37,14 +36,14 @@ class MoveAction extends Action {
     }
 
     let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-    const occupants = getOccupants(actor, target, participants, []);
+    const occupants = getOccupants(this.actor, target, participants, []);
 
     (async () => {  
       const [path, distance, lines, cancelled] = await findPath2(
-        actor,
+        this.actor,
         vec2.create(wp[0], wp[2]),
         targetWp,
-        target ? target.occupiedRadius + actor.occupiedRadius : null,
+        target ? target.occupiedRadius + this.actor.occupiedRadius : null,
         target, occupants,
       )
 
@@ -64,9 +63,9 @@ class MoveAction extends Action {
     })();
   }
 
-  interact(actor: Actor, script: Script, world: WorldInterface): boolean {
-    script.entries.push(new FollowPath(actor.sceneNode, this.path));    
-    actor.distanceLeft -= this.distance;
+  interact(script: Script, world: WorldInterface): boolean {
+    script.entries.push(new FollowPath(this.actor.sceneNode, this.path));    
+    this.actor.distanceLeft -= this.distance;
 
     this.showPathLines(null);
 
