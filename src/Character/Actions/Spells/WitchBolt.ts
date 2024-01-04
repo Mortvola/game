@@ -3,6 +3,7 @@ import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
 import { WorldInterface } from "../../../WorldInterface";
 import Actor from "../../Actor";
+import { DamageType } from "../../Equipment/Weapon";
 import RangeSpell from "./RangeSpell";
 
 class WitchBolt extends RangeSpell {
@@ -14,8 +15,8 @@ class WitchBolt extends RangeSpell {
     const [damage, critical] = spellAttackRoll(
       actor.character,
       this.targets[0].character,
-      actor.character.abilityScores.wisdom,
       () => diceRoll(1, 12),
+      DamageType.Lightning,
       'Neutral'
     )
 

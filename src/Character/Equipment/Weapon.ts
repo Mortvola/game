@@ -14,11 +14,19 @@ export enum WeaponProperties {
 }
 
 export enum DamageType {
+  Acid,
   Bludgeoning,
+  Cold,
+  Fire,
+  Force,
+  Lightning,
   Necrotic,
   Piercing,
+  Poison,
+  Psycnic,
   Radiant,
   Slashing,
+  Thunder,
   None,
 }
 

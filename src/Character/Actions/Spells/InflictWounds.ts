@@ -3,6 +3,7 @@ import { WorldInterface } from "../../../WorldInterface";
 import Script from "../../../Script/Script";
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import TouchSpell from "./TouchSpell";
+import { DamageType } from "../../Equipment/Weapon";
 
 class InflictWounds extends TouchSpell {
   constructor() {
@@ -13,8 +14,8 @@ class InflictWounds extends TouchSpell {
     const [damage, critical] = spellAttackRoll(
       actor.character,
       this.target!.character,
-      actor.character.abilityScores.wisdom,
       () => diceRoll(3, 10),
+      DamageType.Necrotic,
       'Neutral'
     )
 

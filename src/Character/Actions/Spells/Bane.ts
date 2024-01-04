@@ -1,7 +1,7 @@
 import { feetToMeters } from "../../../Math";
 import Actor from "../../Actor";
 import { WorldInterface } from "../../../WorldInterface";
-import { abilityModifier, getProficiencyBonus, savingThrow } from "../../../Dice";
+import { savingThrow } from "../../../Dice";
 import BaneCondition from '../Conditions/Bane';
 import { Concentration } from "../../Creature";
 import RangeSpell from "./RangeSpell";
@@ -17,9 +17,8 @@ class Bane extends RangeSpell {
 
     for (const target of this.targets) {
       const st = savingThrow(target.character, target.character.abilityScores.charisma, 'Neutral');
-      const dc = 8 + getProficiencyBonus(actor.character.charClass.level) + abilityModifier(actor.character.abilityScores.wisdom);
 
-      if (st < dc) {
+      if (st < actor.character.spellCastingDc) {
         target.character.conditions.push(new BaneCondition())
         
         concentration.targets.push(target.character);

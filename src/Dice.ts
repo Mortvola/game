@@ -1,7 +1,6 @@
-import Actor from "./Character/Actor";
 import CharacterClass from "./Character/Classes/CharacterClass";
 import Creature from "./Character/Creature";
-import Weapon, { WeaponType, weaponDamage } from "./Character/Equipment/Weapon";
+import Weapon, { DamageType, WeaponType, weaponDamage } from "./Character/Equipment/Weapon";
 import { AbilityScores } from "./Character/Races/AbilityScores";
 import { Race } from "./Character/Races/Race";
 import { rageDamageBonus } from "./Tables";
@@ -137,8 +136,8 @@ export const attackRoll = (
 export const spellAttackRoll = (
   attacker: Creature,
   target: Creature,
-  abilityScore: number,
   damageRoll: () => number,
+  damageType: DamageType,
   advantage: Advantage,
 ): [number, boolean] => {
   let roll = diceRoll(1, 20);
@@ -169,7 +168,7 @@ export const spellAttackRoll = (
     return [damage, true];
   }
 
-  roll += abilityModifier(abilityScore);
+  roll += abilityModifier(attacker.spellcastingAbilityScore);
 
   // Add in the weapon proficiency bonus.
   roll += getProficiencyBonus(attacker.charClass.level)

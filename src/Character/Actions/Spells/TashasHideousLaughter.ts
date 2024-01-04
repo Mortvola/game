@@ -1,10 +1,10 @@
 import { feetToMeters } from "../../../Math";
 import Actor from "../../Actor";
 import { WorldInterface } from "../../../WorldInterface";
-import { abilityModifier, getProficiencyBonus, savingThrow } from "../../../Dice";
 import BaneCondition from '../Conditions/Bane';
 import RangeSpell from "./RangeSpell";
 import Script from "../../../Script/Script";
+import { savingThrow } from "../../../Dice";
 
 class TashasHideosLaughter extends RangeSpell {
   constructor() {
@@ -13,9 +13,8 @@ class TashasHideosLaughter extends RangeSpell {
 
   cast(actor: Actor, script: Script, world: WorldInterface) {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.wisdom, 'Neutral');
-    const dc = 8 + getProficiencyBonus(actor.character.charClass.level) + abilityModifier(actor.character.abilityScores.wisdom);
 
-    if (st < dc) {
+    if (st < actor.character.spellCastingDc) {
       this.targets[0].character.conditions.push(new BaneCondition())
       
       actor.character.concentration = { name: 'Tashas Hideous Laughter', targets: [this.targets[0].character] }

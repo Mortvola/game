@@ -4,6 +4,7 @@ import { WorldInterface } from "../../../WorldInterface";
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
+import { DamageType } from "../../Equipment/Weapon";
 
 class GuidingBolt extends RangeSpell {
   constructor() {
@@ -14,8 +15,8 @@ class GuidingBolt extends RangeSpell {
     const [damage, critical] = spellAttackRoll(
       actor.character,
       this.targets[0].character,
-      actor.character.abilityScores.wisdom,
       () => diceRoll(4, 6),
+      DamageType.Radiant,
       'Neutral'
     )
 

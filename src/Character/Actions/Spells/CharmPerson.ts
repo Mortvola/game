@@ -1,4 +1,4 @@
-import { abilityModifier, getProficiencyBonus, savingThrow } from "../../../Dice";
+import { savingThrow } from "../../../Dice";
 import Script from "../../../Script/Script";
 import { WorldInterface } from "../../../WorldInterface";
 import Actor from "../../Actor";
@@ -13,9 +13,8 @@ class CharmPerson extends RangeSpell {
 
   cast(actor: Actor, script: Script, world: WorldInterface) {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.wisdom, 'Advantage');
-    const dc = 8 + getProficiencyBonus(actor.character.charClass.level) + abilityModifier(actor.character.abilityScores.wisdom);
 
-    if (st < dc) {
+    if (st < actor.character.spellCastingDc) {
       this.targets[0].character.conditions.push(new Charmed(actor.character))
       
       if (world.loggerCallback) {

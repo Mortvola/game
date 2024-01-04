@@ -12,7 +12,7 @@ class HealingWord extends RangeSpell {
 
   cast(actor: Actor, script: Script, world: WorldInterface) {
     this.targets[0].takeHealing(
-      diceRoll(1, 4) + abilityModifier(actor.character.abilityScores.wisdom),
+      diceRoll(1, 4) + abilityModifier(actor.character.spellcastingAbilityScore),
       actor,
       this.name,
       script,

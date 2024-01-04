@@ -14,7 +14,6 @@ class ColorSpray extends RangeSpell {
     // const [damage, critical] = spellAttackRoll(
     //   actor.character,
     //   this.targets[0].character,
-    //   actor.character.abilityScores.wisdom,
     //   () => diceRoll(3, 8),
     //   'Neutral'
     // )

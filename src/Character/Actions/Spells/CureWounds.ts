@@ -10,7 +10,7 @@ class CureWounds extends TouchSpell {
   }
 
   cast(actor: Actor, script: Script, world: WorldInterface) {
-    this.target?.takeHealing(diceRoll(1, 8) + abilityModifier(actor.character.abilityScores.wisdom), actor, this.name, script)
+    this.target?.takeHealing(diceRoll(1, 8) + abilityModifier(actor.character.spellcastingAbilityScore), actor, this.name, script)
   }
 }
 

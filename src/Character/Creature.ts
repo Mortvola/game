@@ -222,12 +222,15 @@ class Creature {
 
   getMaxPreparedSpells(): number {
     switch (this.charClass.name) {
+      case "Bard":
+      case "Paladin":
+      case "Sorcerer":
+      case 'Warlock':
       case 'Druid':
       case 'Cleric':
-        return 1 + abilityModifier(this.abilityScores.wisdom);
-
+      case 'Ranger':
       case 'Wizard':
-        return 1 + abilityModifier(this.abilityScores.intelligence);
+        return 1 + abilityModifier(this.spellcastingAbilityScore);
     }
 
     return 0;
@@ -241,6 +244,30 @@ class Creature {
 
       this.concentration = null;
     }
+  }
+
+  get spellcastingAbilityScore() {
+    switch (this.charClass.name) {
+      case "Bard":
+      case "Paladin":
+      case "Sorcerer":
+      case 'Warlock':
+          return this.abilityScores.charisma;
+
+      case 'Druid':
+      case 'Cleric':
+      case 'Ranger':
+        return this.abilityScores.wisdom;
+
+      case 'Wizard':
+        return this.abilityScores.intelligence;
+    }
+
+    return 0;
+  }
+
+  get spellCastingDc() {
+    return 8 + getProficiencyBonus(this.charClass.level) + abilityModifier(this.spellcastingAbilityScore);
   }
 }
 
