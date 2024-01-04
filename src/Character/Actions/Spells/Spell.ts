@@ -18,11 +18,29 @@ class Spell extends Action {
 
   concentration: boolean;
 
+  targets: Actor[] = [];
+
+  maxTargets: number;
+
+  uniqueTargets: boolean;
+
   rangeCircle: Circle | null = null;
 
-  constructor(actor: Actor, name: string, time: TimeType, level: number, range: number, duration: number, concentration: boolean) {
+  constructor(
+    actor: Actor,
+    maxTargets: number,
+    uniqueTargets: boolean,
+    name: string,
+    time: TimeType,
+    level: number,
+    range: number,
+    duration: number,
+    concentration: boolean,
+  ) {
     super(actor, name, time);
 
+    this.maxTargets = maxTargets;
+    this.uniqueTargets = uniqueTargets;
     this.level = level;
     this.range = range;
     this.duration = duration;

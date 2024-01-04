@@ -2,7 +2,6 @@ import { savingThrow } from "../../../Dice";
 import Script from "../../../Script/Script";
 import { WorldInterface } from "../../../WorldInterface";
 import Actor from "../../Actor";
-import Charmed from "../Conditions/Charmed";
 import { feetToMeters } from "../../../Math";
 import RangeSpell from "./RangeSpell";
 
@@ -15,7 +14,7 @@ class CharmPerson extends RangeSpell {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.wisdom, 'Advantage');
 
     if (st < this.actor.character.spellCastingDc) {
-      this.targets[0].character.conditions.push(new Charmed(this.actor.character))
+      this.targets[0].character.addInfluencingSpell(this)
       
       if (world.loggerCallback) {
         world.loggerCallback(`${this.actor.character.name} charmed ${this.targets[0].character.name}.`)

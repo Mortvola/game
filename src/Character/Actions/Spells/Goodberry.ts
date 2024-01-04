@@ -5,7 +5,7 @@ import TouchSpell from "./TouchSpell";
 
 class Goodberry extends TouchSpell {
   constructor(actor: Actor) {
-    super(actor, 'Goodberry', 'Action', 1, 0, 0, false);
+    super(actor, 1, true, 'Goodberry', 'Action', 1, 0, 0, false);
   }
 
   cast(script: Script, world: WorldInterface) {

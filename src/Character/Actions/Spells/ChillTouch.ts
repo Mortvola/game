@@ -5,7 +5,6 @@ import { WorldInterface } from "../../../WorldInterface";
 import Actor from "../../Actor";
 import { DamageType } from "../../Equipment/Weapon";
 import RangeSpell from "./RangeSpell";
-import ChillTouchCondition from '../Conditions/ChillTouch';
 
 class ChillTouch extends RangeSpell {
   constructor(actor: Actor) {
@@ -24,7 +23,7 @@ class ChillTouch extends RangeSpell {
     this.targets[0].takeDamage(damage, critical, this.actor, this.name, script);
 
     if (damage > 0) {
-      this.targets[0].character.conditions.push(new ChillTouchCondition());
+      this.targets[0].character.addInfluencingSpell(this);
     }
 
     // TODO: apply disadvantage to undead.

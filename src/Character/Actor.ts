@@ -24,7 +24,6 @@ import { findPath2, getOccupants } from "../Workers/PathPlannerQueue";
 import Creature from "./Creature";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
-import Charmed from "./Actions/Conditions/Charmed";
 import Action from "./Actions/Action";
 
 // let findPathPromise: {
@@ -294,14 +293,14 @@ class Actor implements ActorInterface {
       else {
         script.entries.push(new Delay(2000));
 
-        const charmed = this.character.getCondition('Charmed') as Charmed;
+        const charmed = this.character.getInfluencingSpell('Charmed');
 
         let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
         const otherTeam = world.participants.participants[this.team ^ 1]
           .filter((a) => (
             a.character.hitPoints > 0
-            && !a.character.hasCondition('Sanctuary')
-            && (!charmed || charmed.charmer !== a.character)
+            && !a.character.hasInfluencingSpell('Sanctuary')
+            && (!charmed || charmed.actor !== a)
           ));
 
         let targets = this.getTargets(otherTeam);
@@ -586,7 +585,7 @@ class Actor implements ActorInterface {
     let [damage, critical] = attackRoll(this.character, targetActor.character, weapon, false, advantage);
 
     if (
-      (targetActor.character.hasCondition('Rage') || targetActor.character.hasCondition('Blade Ward'))
+      (targetActor.character.hasCondition('Rage') || targetActor.character.hasInfluencingSpell('Blade Ward'))
       && [DamageType.Bludgeoning, DamageType.Piercing, DamageType.Slashing].includes(weapon.damage)
     ) {
       damage = Math.trunc(damage / 2);
@@ -594,8 +593,8 @@ class Actor implements ActorInterface {
 
     targetActor.takeDamage(damage, critical, this, weapon.name, script);
 
-    if (this.character.hasCondition('Sanctuary')) {
-      this.character.removeCondition('Sanctuary')
+    if (this.character.hasInfluencingSpell('Sanctuary')) {
+      this.character.removeInfluencingSpell('Sanctuary')
       script.entries.push(new Logger(`${this.character.name} lost sanctuary.`))
     }
   }
@@ -618,7 +617,7 @@ class Actor implements ActorInterface {
       if (damage > 0) {
         script.entries.push(new Logger(`${from.character.name} ${critical ? 'critically ' : ''}hit ${this.character.name} for ${damage} points with a ${weaponName}.`))
 
-        this.character.removeCondition('Charmed')
+        this.character.removeInfluencingSpell('Charmed')
 
         if (this.character.concentration) {
           const st = savingThrow(this.character, this.character.abilityScores.constitution, 'Neutral');
@@ -627,7 +626,7 @@ class Actor implements ActorInterface {
             script.entries.push(new Logger(`${this.character.name} stopped concentrating on ${this.character.concentration.name}.`))
 
             for (const target of this.character.concentration.targets) {
-              script.entries.push(new Logger(`${target.name} lost ${this.character.concentration.name}.`))
+              script.entries.push(new Logger(`${target.character.name} lost ${this.character.concentration.name}.`))
             }
   
             this.character.stopConcentrating();
@@ -645,7 +644,7 @@ class Actor implements ActorInterface {
 
         if (this.character.concentration) {
           for (const target of this.character.concentration.targets) {
-            script.entries.push(new Logger(`${target.name} lost ${this.character.concentration.name}.`))
+            script.entries.push(new Logger(`${target.character.name} lost ${this.character.concentration.name}.`))
           }
           
           this.character.stopConcentrating();
@@ -657,7 +656,7 @@ class Actor implements ActorInterface {
   }
 
   takeHealing(hitPoints: number, from: Actor, by: string, script: Script) {
-    if (!this.character.hasCondition('Chill Touch')) {
+    if (!this.character.hasInfluencingSpell('Chill Touch')) {
       this.character.hitPoints = Math.min(this.character.hitPoints + hitPoints, this.character.maxHitPoints);
 
       script.entries.push(new Logger(`${this.character.name} healed ${hitPoints} hit points by ${by} from ${from.character.name}.`))  

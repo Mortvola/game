@@ -1,7 +1,6 @@
 import Actor from "../../Actor";
 import { WorldInterface } from "../../../WorldInterface";
 import Script from "../../../Script/Script";
-import SanctuaryCondition from '../Conditions/Sanctuary'
 import Logger from "../../../Script/Logger";
 import { feetToMeters } from "../../../Math";
 import RangeSpell from "./RangeSpell";
@@ -12,7 +11,7 @@ class Sanctuary extends RangeSpell {
   }
 
   cast(script: Script, world: WorldInterface) {
-    this.targets[0].character.conditions.push(new SanctuaryCondition())
+    this.targets[0].character.addInfluencingSpell(this);
     script.entries.push(new Logger(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))
   }
 }

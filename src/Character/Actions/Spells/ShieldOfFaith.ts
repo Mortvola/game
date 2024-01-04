@@ -3,7 +3,6 @@ import Script from "../../../Script/Script";
 import { WorldInterface } from "../../../WorldInterface";
 import Actor from "../../Actor";
 import RangeSpell from "./RangeSpell";
-import ShieldOfFaithCondition from '../Conditions/SheldOfFaith';
 import Logger from "../../../Script/Logger";
 
 class ShieldOfFaith extends RangeSpell {
@@ -12,10 +11,10 @@ class ShieldOfFaith extends RangeSpell {
   }
 
   cast(script: Script, world: WorldInterface) {
-    this.targets[0].character.conditions.push(new ShieldOfFaithCondition());
+    this.targets[0].character.addInfluencingSpell(this);
     script.entries.push(new Logger(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))
 
-    this.actor.character.concentration = { name: this.name, targets: [this.targets[0].character] };
+    this.actor.character.concentration = this;
   }
 }
 

@@ -16,11 +16,6 @@ export type Equipped = {
   shield: Armor | null,
 }
 
-export type Concentration = {
-  name: string,
-  targets: Creature[],
-}
-
 type PrimaryWeapon = 'Melee' | 'Range';
   
 class Creature {
@@ -65,9 +60,11 @@ class Creature {
 
   primaryWeapon: PrimaryWeapon = 'Melee';
 
+  influencingSpells: Spell[] = [];
+
   conditions: Condition[] = [];
 
-  concentration: Concentration | null = null;
+  concentration: Spell | null = null;
 
   constructor(
     abilityScores: AbilityScores,
@@ -95,7 +92,7 @@ class Creature {
   get armorClass() {
     let ac = 0;
 
-    if (this.hasCondition('Shield of Faith')) {
+    if (this.hasInfluencingSpell('Shield of Faith')) {
       ac += 2;      
     }
 
@@ -115,12 +112,12 @@ class Creature {
       return ac;
     }
   
-    if (this.hasCondition('Mage Armor')) {
+    if (this.hasInfluencingSpell('Mage Armor')) {
       return ac + 13 + abilityModifier(this.abilityScores.dexterity)
     }
 
     return ac + this.charClass.unarmoredDefence(this.abilityScores);
-  };
+  }
 
   hasCondition(name: ConditionType): boolean {
     return this.conditions.some((c) => c.name === name);
@@ -241,7 +238,7 @@ class Creature {
   stopConcentrating() {
     if (this.concentration) {
       for (const creature of this.concentration.targets) {
-        creature.removeCondition(this.concentration.name as ConditionType)
+        creature.character.removeInfluencingSpell(this.concentration.name)
       }
 
       this.concentration = null;
@@ -270,6 +267,31 @@ class Creature {
 
   get spellCastingDc() {
     return 8 + getProficiencyBonus(this.charClass.level) + abilityModifier(this.spellcastingAbilityScore);
+  }
+
+  addInfluencingSpell(spell: Spell) {
+    this.influencingSpells.push(spell);
+  }
+
+  removeInfluencingSpell(name: string) {
+    const index = this.influencingSpells.findIndex((s) => s.name === name);
+
+    if (index !== -1) {
+      this.influencingSpells = [
+        ...this.influencingSpells.slice(0, index),
+        ...this.influencingSpells.slice(index + 1),
+      ]
+    }
+  }
+
+  hasInfluencingSpell(name: string): boolean {
+    return this.influencingSpells.some((s) => s.name === name);
+  }
+
+  getInfluencingSpell(name: string): Spell | null {
+    const spell = this.influencingSpells.find((s) => s.name === name);
+
+    return spell ?? null;
   }
 }
 

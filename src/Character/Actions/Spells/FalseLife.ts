@@ -6,7 +6,7 @@ import SelfSpell from "./SelfSpell";
 
 class FalseLife extends SelfSpell {
   constructor(actor: Actor) {
-    super(actor, 'False Life', 'Action', 1, 0, 60 * 60, false)
+    super(actor, 1, true, 'False Life', 'Action', 1, 0, 60 * 60, false)
   }
 
   cast(script: Script, world: WorldInterface) {

@@ -406,6 +406,13 @@ function App() {
       <div className="lower-left">
         {
           actor
+            ? actor.character.influencingSpells.map((c) => (
+              <div>{c.name}</div>
+            ))
+            : null
+        }
+        {
+          actor
             ? actor.character.conditions.map((c) => (
               <div>{c.name}</div>
             ))

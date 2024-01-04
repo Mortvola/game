@@ -23,7 +23,7 @@ class WitchBolt extends RangeSpell {
     this.targets[0].takeDamage(damage, critical, this.actor, this.name, script);
 
     if (damage) {
-      this.actor.character.concentration = { name: this.name, targets: [this.targets[0].character] };
+      this.actor.character.concentration = this;
     }
   }
 }

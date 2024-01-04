@@ -2,32 +2,9 @@ import { Vec4 } from "wgpu-matrix";
 import Actor from "../../Actor";
 import Spell from "./Spell";
 import { WorldInterface } from "../../../WorldInterface";
-import { TimeType } from "../Action";
 import Script from "../../../Script/Script";
 
 class RangeSpell extends Spell {
-  targets: Actor[] = [];
-
-  maxTargets: number;
-
-  uniqueTargets: boolean;
-
-  constructor(
-    actor: Actor,
-    maxTargets: number,
-    uniqueTargets: boolean,
-    name: string,
-    time: TimeType,
-    level: number,
-    range: number,
-    duration: number,
-    concentration: boolean,
-  ) {
-    super(actor, name, time, level, range, duration, concentration)
-    this.maxTargets = maxTargets;
-    this.uniqueTargets = uniqueTargets;
-  }
-
   prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     let description = `Select ${this.maxTargets  - this.targets.length} more targets.`;
 

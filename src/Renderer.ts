@@ -666,7 +666,10 @@ class Renderer implements WorldInterface {
               hitpoints: this.focused.character.hitPoints,
               maxHitpoints: this.focused.character.maxHitPoints,
               armorClass: this.focused.character.armorClass,
-              conditions: this.focused.character.conditions.map((c) => ({ name: c.name, duration: c.duration }))
+              conditions: [
+                ...this.focused.character.influencingSpells.map((c) => ({ name: c.name, duration: c.duration })),
+                ...this.focused.character.conditions.map((c) => ({ name: c.name, duration: c.duration })),
+              ]
             })  
           }
           else {

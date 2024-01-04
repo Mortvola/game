@@ -4,7 +4,6 @@ import { WorldInterface } from "../../../WorldInterface";
 import RangeSpell from "./RangeSpell";
 import Script from "../../../Script/Script";
 import { savingThrow } from "../../../Dice";
-import TashasHideousLaughterCondition from "../Conditions/TashasHideousLaughter";
 
 class TashasHideosLaughter extends RangeSpell {
   constructor(actor: Actor) {
@@ -15,9 +14,9 @@ class TashasHideosLaughter extends RangeSpell {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.wisdom, 'Neutral');
 
     if (st < this.actor.character.spellCastingDc) {
-      this.targets[0].character.conditions.push(new TashasHideousLaughterCondition(this.actor.character))
+      this.targets[0].character.addInfluencingSpell(this);
       
-      this.actor.character.concentration = { name: this.name, targets: [this.targets[0].character] }
+      this.actor.character.concentration = this;
 
       if (world.loggerCallback) {
         world.loggerCallback(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`)

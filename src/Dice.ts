@@ -57,10 +57,10 @@ export const savingThrow = (creature: Creature, score: number, advantage: Advant
 
   roll += abilityModifier(score);
 
-  if (creature.hasCondition('Bane')) {
+  if (creature.hasInfluencingSpell('Bane')) {
     roll -= diceRoll(1, 4);
   }
-  else if (creature.hasCondition('Bless')) {
+  else if (creature.hasInfluencingSpell('Bless')) {
     roll += diceRoll(1, 4);
   }
 
@@ -113,10 +113,10 @@ export const attackRoll = (
   // Add in the weapon proficiency bonus.
   roll += attacker.getWeaponProficiency(weapon);
 
-  if (attacker.hasCondition('Bane')) {
+  if (attacker.hasInfluencingSpell('Bane')) {
     roll -= diceRoll(1, 4);
   }
-  else if (attacker.hasCondition('Bless')) {
+  else if (attacker.hasInfluencingSpell('Bless')) {
     roll += diceRoll(1, 4);
   }
 
@@ -173,10 +173,10 @@ export const spellAttackRoll = (
   // Add in the weapon proficiency bonus.
   roll += getProficiencyBonus(attacker.charClass.level)
 
-  if (attacker.hasCondition('Bane')) {
+  if (attacker.hasInfluencingSpell('Bane')) {
     roll -= diceRoll(1, 4);
   }
-  else if (attacker.hasCondition('Bless')) {
+  else if (attacker.hasInfluencingSpell('Bless')) {
     roll += diceRoll(1, 4);
   }
 

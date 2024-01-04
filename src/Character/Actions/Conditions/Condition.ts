@@ -1,22 +1,6 @@
 export type ConditionType = 
-  'Bane'
-  | 'Blade Ward'
-  | 'Bless'
-  | 'Chill Touch'
-  | 'Charmed'
-  | 'Expedititous Retreat'
-  | 'Guidance'
-  | 'Jump'
-  | 'Longstrider'
-  | 'Mage Armor'
+  'Rage'
   | 'Poisoned'
-  | 'Rage'
-  | 'Resistance'
-  | 'Sanctuary'
-  | 'Shield of Faith'
-  | 'Shillelagh'
-  | 'TashasHideosLaughter'
-  | 'True Strike'
   ;
 
 class Condition {
