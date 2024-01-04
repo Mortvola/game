@@ -13,9 +13,12 @@ class PoisonSpray extends RangeSpell {
   cast(actor: Actor, script: Script, world: WorldInterface) {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.constitution, 'Neutral');
 
+    let damage = 0;
     if (st < actor.character.spellCastingDc) {
-      this.targets[0].takeDamage(diceRoll(1, 12), false, actor, this.name, script);
+      damage = diceRoll(1, 12);
     }
+
+    this.targets[0].takeDamage(damage, false, actor, this.name, script);
   }
 }
 

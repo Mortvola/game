@@ -1,9 +1,24 @@
+import { diceRoll, savingThrow } from "../../../Dice";
 import { feetToMeters } from "../../../Math";
-import Spell from "./Spell";
+import Script from "../../../Script/Script";
+import { WorldInterface } from "../../../WorldInterface";
+import Actor from "../../Actor";
+import RangeSpell from "./RangeSpell";
 
-class AcidSplash extends Spell {
+class AcidSplash extends RangeSpell {
   constructor() {
-    super('Acid Splash', 'Action', 0, feetToMeters(60), 0, false)
+    super(1, true, 'Acid Splash', 'Action', 0, feetToMeters(60), 0, false)
+  }
+
+  cast(actor: Actor, script: Script, world: WorldInterface) {
+    const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.dexterity, 'Neutral');
+
+    let damage = 0;
+    if (st < actor.character.spellCastingDc) {
+      damage = diceRoll(1, 6);
+    }
+
+    this.targets[0].takeDamage(damage, false, actor, this.name, script);
   }
 }
 
