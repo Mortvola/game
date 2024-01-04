@@ -5,15 +5,15 @@ import TouchSpell from "./TouchSpell";
 import LongstriderCondition from '../Conditions/Longstrider';
 
 class Longstrider extends TouchSpell {
-  constructor() {
-    super('Longstrider', 'Action', 1, 0, 60 * 60, false);
+  constructor(actor: Actor) {
+    super(actor, 'Longstrider', 'Action', 1, 0, 60 * 60, false);
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
     this.target!.character.conditions.push(new LongstriderCondition());
 
     if (world.loggerCallback) {
-      world.loggerCallback(`${actor.character.name} cast ${this.name} on ${this.target!.character.name}.`)
+      world.loggerCallback(`${this.actor.character.name} cast ${this.name} on ${this.target!.character.name}.`)
     }
   }
 }

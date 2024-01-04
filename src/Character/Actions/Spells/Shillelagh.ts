@@ -5,12 +5,12 @@ import SelfSpell from "./SelfSpell";
 import ShillelaghCondition from "../Conditions/Shillelagh";
 
 class Shillelagh extends SelfSpell {
-  constructor() {
-    super('Shillelagh', 'Bonus', 0, 0, 60, false);
+  constructor(actor: Actor) {
+    super(actor, 'Shillelagh', 'Bonus', 0, 0, 60, false);
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
-    actor.character.conditions.push(new ShillelaghCondition())
+  cast(script: Script, world: WorldInterface) {
+    this.actor.character.conditions.push(new ShillelaghCondition())
   }
 }
 

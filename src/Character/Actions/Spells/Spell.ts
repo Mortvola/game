@@ -6,9 +6,10 @@ import Action, { TimeType } from "../Action";
 import Actor from "../../Actor";
 import Circle from "../../../Drawables/Circle";
 import { getWorld } from "../../../Renderer";
-import { ActorInterface } from "../../../ActorInterface";
 
 class Spell extends Action {
+  actor: Actor;
+
   level: number;
 
   castingTime = 1;
@@ -21,16 +22,18 @@ class Spell extends Action {
 
   rangeCircle: Circle | null = null;
 
-  constructor(name: string, time: TimeType, level: number, range: number, duration: number, concentration: boolean) {
+  constructor(actor: Actor, name: string, time: TimeType, level: number, range: number, duration: number, concentration: boolean) {
     super(name, time);
+
+    this.actor = actor;
     this.level = level;
     this.range = range;
     this.duration = duration;
     this.concentration = concentration;
   }
 
-  initialize(actor: Actor) {
-    this.showRangeCircle(actor);
+  initialize() {
+    this.showRangeCircle();
   }
 
   clear() {
@@ -38,7 +41,7 @@ class Spell extends Action {
     this.hideRangeCircle(getWorld());
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -48,12 +51,12 @@ class Spell extends Action {
     return true;
   }
 
-  showRangeCircle(actor: Actor) {
+  showRangeCircle() {
     if (this.range > 0) {
       const world = getWorld();
 
       this.rangeCircle = new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1))
-      this.rangeCircle.translate = vec3.copy(actor.sceneNode.translate)
+      this.rangeCircle.translate = vec3.copy(this.actor.sceneNode.translate)
   
       world.mainRenderPass.addDrawable(this.rangeCircle, 'circle');
       world.scene.addNode(this.rangeCircle, 'circle');
@@ -71,8 +74,8 @@ class Spell extends Action {
     }
   }
 
-  withinRange(actor: Actor, target: Actor) {
-    const wp = actor.getWorldPosition();
+  withinRange(target: Actor) {
+    const wp = this.actor.getWorldPosition();
     const targetWp = target.getWorldPosition();
 
     const distance = vec3.distance(wp, targetWp);

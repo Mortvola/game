@@ -7,15 +7,15 @@ import ShieldOfFaithCondition from '../Conditions/SheldOfFaith';
 import Logger from "../../../Script/Logger";
 
 class ShieldOfFaith extends RangeSpell {
-  constructor() {
-    super(1, true, 'Shield of Faith', 'Bonus', 1, feetToMeters(60), 10 * 60, true);
+  constructor(actor: Actor) {
+    super(actor, 1, true, 'Shield of Faith', 'Bonus', 1, feetToMeters(60), 10 * 60, true);
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
     this.targets[0].character.conditions.push(new ShieldOfFaithCondition());
-    script.entries.push(new Logger(`${actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))
+    script.entries.push(new Logger(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))
 
-    actor.character.concentration = { name: this.name, targets: [this.targets[0].character] };
+    this.actor.character.concentration = { name: this.name, targets: [this.targets[0].character] };
   }
 }
 

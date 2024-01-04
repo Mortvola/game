@@ -1,3 +1,4 @@
+import Actor from "../../Actor";
 import { TimeType } from "../Action";
 import AcidSplash from "./AcidSplash";
 import Bane from "./Bane";
@@ -45,7 +46,7 @@ import TrueStrike from "./TrueStrike";
 import WitchBolt from "./WitchBolt";
 
 export type R<T> = {
-  spell: new () => T;
+  spell: new (actor: Actor) => T;
   name: string;
   time: TimeType,
   level: number,

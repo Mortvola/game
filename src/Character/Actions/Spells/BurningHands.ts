@@ -1,9 +1,10 @@
 import { feetToMeters } from "../../../Math";
+import Actor from "../../Actor";
 import Spell from "./Spell";
 
 class BurningHands extends Spell {
-  constructor() {
-    super('Burning Hands', 'Action', 1, feetToMeters(15), 0, false)
+  constructor(actor: Actor) {
+    super(actor, 'Burning Hands', 'Action', 1, feetToMeters(15), 0, false)
   }
 }
 

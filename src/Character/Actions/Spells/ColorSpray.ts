@@ -1,4 +1,3 @@
-import { diceRoll, spellAttackRoll } from "../../../Dice";
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
 import { WorldInterface } from "../../../WorldInterface";
@@ -6,11 +5,11 @@ import Actor from "../../Actor";
 import RangeSpell from "./RangeSpell";
 
 class ColorSpray extends RangeSpell {
-  constructor() {
-    super(1, true, 'Color Spray', 'Action', 1, feetToMeters(15), 6, false)
+  constructor(actor: Actor) {
+    super(actor, 1, true, 'Color Spray', 'Action', 1, feetToMeters(15), 6, false)
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
     // const [damage, critical] = spellAttackRoll(
     //   actor.character,
     //   this.targets[0].character,

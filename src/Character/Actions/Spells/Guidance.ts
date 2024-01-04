@@ -5,15 +5,15 @@ import TouchSpell from "./TouchSpell";
 import GuidanceCondition from '../Conditions/Guidance';
 
 class Guidance extends TouchSpell {
-  constructor() {
-    super('Guidance', 'Action', 0, 0, 60, true)
+  constructor(actor: Actor) {
+    super(actor, 'Guidance', 'Action', 0, 0, 60, true)
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
     this.target!.character.conditions.push(new GuidanceCondition());
 
     if (world.loggerCallback) {
-      world.loggerCallback(`${actor.character.name} cast ${this.name} on ${this.target!.character.name}.`)
+      world.loggerCallback(`${this.actor.character.name} cast ${this.name} on ${this.target!.character.name}.`)
     }
   }
 }

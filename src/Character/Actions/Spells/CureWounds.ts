@@ -5,12 +5,18 @@ import { abilityModifier, diceRoll } from "../../../Dice";
 import TouchSpell from "./TouchSpell";
 
 class CureWounds extends TouchSpell {
-  constructor() {
-    super('Cure Wounds', 'Action', 1, 0, 0, false);
+  constructor(actor: Actor) {
+    super(actor, 'Cure Wounds', 'Action', 1, 0, 0, false);
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
-    this.target?.takeHealing(diceRoll(1, 8) + abilityModifier(actor.character.spellcastingAbilityScore), actor, this.name, script)
+  cast(script: Script, world: WorldInterface) {
+    this.target?.takeHealing(
+      diceRoll(1, 8)
+        + abilityModifier(this.actor.character.spellcastingAbilityScore),
+      this.actor,
+      this.name,
+      script,
+    )
   }
 }
 

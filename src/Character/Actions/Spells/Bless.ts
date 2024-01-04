@@ -7,11 +7,11 @@ import BlessCondition from '../Conditions/Bless';
 import RangeSpell from "./RangeSpell";
 
 class Bless extends RangeSpell {
-  constructor() {
-    super(3, true, 'Bless', 'Action', 1, feetToMeters(30), 60, true)
+  constructor(actor: Actor) {
+    super(actor, 3, true, 'Bless', 'Action', 1, feetToMeters(30), 60, true)
   }
   
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
     const concentration: Concentration = { name: this.name, targets: [] };
 
     for (const target of this.targets) {
@@ -20,12 +20,12 @@ class Bless extends RangeSpell {
       concentration.targets.push(target.character);
 
       if (world.loggerCallback) {
-        world.loggerCallback(`${actor.character.name} cast bless on ${target.character.name}.`)
+        world.loggerCallback(`${this.actor.character.name} cast bless on ${target.character.name}.`)
       }
     }
 
     if (concentration.targets.length > 0) {          
-      actor.character.concentration = concentration;
+      this.actor.character.concentration = concentration;
     }
   }
 }

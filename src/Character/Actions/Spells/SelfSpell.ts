@@ -24,7 +24,7 @@ class SelfSpell extends Spell {
 
   interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     if (this.target && actor === this.target) {
-      this.cast(actor, script, world);
+      this.cast(script, world);
 
       if (world.loggerCallback) {
         world.loggerCallback(`${actor.character.name} received ${this.name}.`)

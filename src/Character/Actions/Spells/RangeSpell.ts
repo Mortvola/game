@@ -13,6 +13,7 @@ class RangeSpell extends Spell {
   uniqueTargets: boolean;
 
   constructor(
+    actor: Actor,
     maxTargets: number,
     uniqueTargets: boolean,
     name: string,
@@ -22,7 +23,7 @@ class RangeSpell extends Spell {
     duration: number,
     concentration: boolean,
   ) {
-    super(name, time, level, range, duration, concentration)
+    super(actor, name, time, level, range, duration, concentration)
     this.maxTargets = maxTargets;
     this.uniqueTargets = uniqueTargets;
   }
@@ -35,7 +36,7 @@ class RangeSpell extends Spell {
     }
 
     if (target && (!this.uniqueTargets || !this.targets.includes(target))) {
-      if (this.withinRange(actor, target)) {
+      if (this.withinRange(target)) {
         this.target = target;
       }
       else {
@@ -77,7 +78,7 @@ class RangeSpell extends Spell {
           actor.character.stopConcentrating();
         }
 
-        this.cast(actor, script, world);
+        this.cast(script, world);
 
         if (world.actionInfoCallback) {
           world.actionInfoCallback(null);

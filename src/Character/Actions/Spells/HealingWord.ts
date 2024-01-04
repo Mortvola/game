@@ -6,14 +6,14 @@ import { feetToMeters } from "../../../Math";
 import RangeSpell from "./RangeSpell";
 
 class HealingWord extends RangeSpell {
-  constructor() {
-    super(1, true, 'Healing Word', 'Bonus', 1, feetToMeters(60), 0, false);
+  constructor(actor: Actor) {
+    super(actor, 1, true, 'Healing Word', 'Bonus', 1, feetToMeters(60), 0, false);
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
     this.targets[0].takeHealing(
-      diceRoll(1, 4) + abilityModifier(actor.character.spellcastingAbilityScore),
-      actor,
+      diceRoll(1, 4) + abilityModifier(this.actor.character.spellcastingAbilityScore),
+      this.actor,
       this.name,
       script,
     )

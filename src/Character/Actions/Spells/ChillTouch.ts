@@ -8,20 +8,20 @@ import RangeSpell from "./RangeSpell";
 import ChillTouchCondition from '../Conditions/ChillTouch';
 
 class ChillTouch extends RangeSpell {
-  constructor() {
-    super(1, true, 'Chill Touch', 'Action', 0, feetToMeters(120), 6, false);
+  constructor(actor: Actor) {
+    super(actor, 1, true, 'Chill Touch', 'Action', 0, feetToMeters(120), 6, false);
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
     const [damage, critical] = spellAttackRoll(
-      actor.character,
+      this.actor.character,
       this.targets[0].character,
       () => diceRoll(1, 8),
       DamageType.Necrotic,
       'Neutral'
     )
 
-    this.targets[0].takeDamage(damage, critical, actor, this.name, script);
+    this.targets[0].takeDamage(damage, critical, this.actor, this.name, script);
 
     if (damage > 0) {
       this.targets[0].character.conditions.push(new ChillTouchCondition());

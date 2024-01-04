@@ -11,7 +11,7 @@ class TouchSpell extends Spell {
 
   interact(actor: Actor, script: Script, world: WorldInterface): boolean {
     const result = this.zeroDistanceAction(actor, script, world, () => {
-      this.cast(actor, script, world);
+      this.cast(script, world);
     });
 
     if (result) {

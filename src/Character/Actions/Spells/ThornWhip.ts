@@ -7,20 +7,20 @@ import { DamageType } from "../../Equipment/Weapon";
 import RangeSpell from "./RangeSpell";
 
 class ThornWhip extends RangeSpell {
-  constructor() {
-    super(1, true, 'Thorn Whip', 'Action', 0, feetToMeters(30), 0, false);
+  constructor(actor: Actor) {
+    super(actor, 1, true, 'Thorn Whip', 'Action', 0, feetToMeters(30), 0, false);
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
     const [damage, critical] = spellAttackRoll(
-      actor.character,
+      this.actor.character,
       this.target!.character,
       () => diceRoll(1, 6),
       DamageType.Piercing,
       'Neutral'
     )
 
-    this.target!.takeDamage(damage, critical, actor, this.name, script);
+    this.target!.takeDamage(damage, critical, this.actor, this.name, script);
     
     // TODO: move target up to 10 feet closer if size is large or smaller.
   }

@@ -6,19 +6,19 @@ import Actor from "../../Actor";
 import RangeSpell from "./RangeSpell";
 
 class PoisonSpray extends RangeSpell {
-  constructor() {
-    super(1, true, 'Poison Spray', 'Action', 0, feetToMeters(10), 0, false);
+  constructor(actor: Actor) {
+    super(actor, 1, true, 'Poison Spray', 'Action', 0, feetToMeters(10), 0, false);
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.constitution, 'Neutral');
 
     let damage = 0;
-    if (st < actor.character.spellCastingDc) {
+    if (st < this.actor.character.spellCastingDc) {
       damage = diceRoll(1, 12);
     }
 
-    this.targets[0].takeDamage(damage, false, actor, this.name, script);
+    this.targets[0].takeDamage(damage, false, this.actor, this.name, script);
   }
 }
 

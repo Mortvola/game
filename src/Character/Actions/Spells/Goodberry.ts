@@ -4,12 +4,12 @@ import Actor from "../../Actor";
 import TouchSpell from "./TouchSpell";
 
 class Goodberry extends TouchSpell {
-  constructor() {
-    super('Goodberry', 'Action', 1, 0, 0, false);
+  constructor(actor: Actor) {
+    super(actor, 'Goodberry', 'Action', 1, 0, 0, false);
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
-    
+  cast(script: Script, world: WorldInterface) {
+
   }
 }
 

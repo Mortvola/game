@@ -11,8 +11,8 @@ class Sleep extends Spell {
 
   center: Vec2 | null = null;
 
-  constructor() {
-    super('Sleep', 'Action', 1, feetToMeters(90), 60, false)
+  constructor(actor: Actor) {
+    super(actor, 'Sleep', 'Action', 1, feetToMeters(90), 60, false)
   }
 
   prepareInteraction(actor: Actor, target: Actor | null, point: Vec4 | null, world: WorldInterface) {

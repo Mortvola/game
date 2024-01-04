@@ -7,20 +7,20 @@ import { DamageType } from "../../Equipment/Weapon";
 import RangeSpell from "./RangeSpell";
 
 class RayOfFrost extends RangeSpell {
-  constructor() {
-    super(1, true, 'Ray of Frost', 'Action', 0, feetToMeters(60), 0, false);
+  constructor(actor: Actor) {
+    super(actor, 1, true, 'Ray of Frost', 'Action', 0, feetToMeters(60), 0, false);
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
     const [damage, critical] = spellAttackRoll(
-      actor.character,
+      this.actor.character,
       this.targets[0].character,
       () => diceRoll(1, 8),
       DamageType.Cold,
       'Neutral'
     )
 
-    this.targets[0].takeDamage(damage, critical, actor, this.name, script);
+    this.targets[0].takeDamage(damage, critical, this.actor, this.name, script);
   }
 }
 

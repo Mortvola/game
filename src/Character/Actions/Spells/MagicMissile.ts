@@ -6,13 +6,13 @@ import { diceRoll } from "../../../Dice";
 import RangeSpell from "./RangeSpell";
 
 class MagicMissile extends RangeSpell {
-  constructor() {
-    super(3, false, 'Magic Missile', 'Action', 1, feetToMeters(120), 0, false)
+  constructor(actor: Actor) {
+    super(actor, 3, false, 'Magic Missile', 'Action', 1, feetToMeters(120), 0, false)
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface) {
     for (const target of this.targets) {
-      target.takeDamage(diceRoll(1, 4) + 1, false, actor, 'Magic Missle', script)
+      target.takeDamage(diceRoll(1, 4) + 1, false, this.actor, 'Magic Missle', script)
     }
   }
 }

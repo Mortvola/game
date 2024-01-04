@@ -5,12 +5,12 @@ import BladeWardCondition from '../Conditions/BladeWard';
 import SelfSpell from "./SelfSpell";
 
 class BladeWard extends SelfSpell {
-  constructor() {
-    super('Blade Ward', 'Action', 0, 0, 6, false)
+  constructor(actor: Actor) {
+    super(actor, 'Blade Ward', 'Action', 0, 0, 6, false)
   }
 
-  cast(actor: Actor, script: Script, world: WorldInterface) {
-    actor.character.conditions.push(new BladeWardCondition())
+  cast(script: Script, world: WorldInterface) {
+    this.actor.character.conditions.push(new BladeWardCondition())
   }
 }
 
