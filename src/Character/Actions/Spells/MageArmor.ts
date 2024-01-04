@@ -13,7 +13,7 @@ class MageArmor extends TouchSpell {
   cast(actor: Actor, script: Script, world: WorldInterface) {
     this.target?.character.conditions.push(new MageArmorCondition());
 
-    script.entries.push(new Logger(`${actor.character.name} cast Mage Armor on ${this.target?.character.name}.`))
+    script.entries.push(new Logger(`${actor.character.name} cast ${this.name} on ${this.target?.character.name}.`))
   }
 }
 

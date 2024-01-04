@@ -603,7 +603,18 @@ class Actor implements ActorInterface {
 
   takeDamage(damage: number, critical: boolean, from: Actor, weaponName: string, script: Script) {
     if (this.character.hitPoints > 0) {
-      this.character.hitPoints -= damage;
+      if (this.character.temporaryHitPoints > 0) {
+        if (damage <= this.character.temporaryHitPoints) {
+          this.character.temporaryHitPoints -= damage;
+        }
+        else {
+          this.character.hitPoints -= (damage - this.character.temporaryHitPoints);
+          this.character.temporaryHitPoints = 0;
+        }
+      }
+      else {
+        this.character.hitPoints -= damage;
+      }
 
       if (damage > 0) {
         script.entries.push(new Logger(`${from.character.name} ${critical ? 'critically ' : ''}hit ${this.character.name} for ${damage} points with a ${weaponName}.`))
@@ -647,9 +658,14 @@ class Actor implements ActorInterface {
   }
 
   takeHealing(hitPoints: number, from: Actor, by: string, script: Script) {
-    this.character.hitPoints = Math.min(this.character.hitPoints + hitPoints, this.character.maxHitPoints);
+    if (!this.character.hasCondition('Chill Touch')) {
+      this.character.hitPoints = Math.min(this.character.hitPoints + hitPoints, this.character.maxHitPoints);
 
-    script.entries.push(new Logger(`${this.character.name} healed ${hitPoints} hit points by ${by} from ${from.character.name}.`))
+      script.entries.push(new Logger(`${this.character.name} healed ${hitPoints} hit points by ${by} from ${from.character.name}.`))  
+    }
+    else {
+      script.entries.push(new Logger(`${this.character.name} could not be healed because of Bone Chill.`))  
+    }
   }
 
   computeShotData(targetActor: Actor) {

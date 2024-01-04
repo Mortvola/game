@@ -11,10 +11,6 @@ class BladeWard extends SelfSpell {
 
   cast(actor: Actor, script: Script, world: WorldInterface) {
     actor.character.conditions.push(new BladeWardCondition())
-
-    if (world.loggerCallback) {
-      world.loggerCallback(`${actor.character.name} received ${this.name}.`)
-    }
   }
 }
 

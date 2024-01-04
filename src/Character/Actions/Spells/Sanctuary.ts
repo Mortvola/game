@@ -13,7 +13,7 @@ class Sanctuary extends RangeSpell {
 
   cast(actor: Actor, script: Script, world: WorldInterface) {
     this.targets[0].character.conditions.push(new SanctuaryCondition())
-    script.entries.push(new Logger(`${actor.character.name} gained sanctuary.`))
+    script.entries.push(new Logger(`${actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))
   }
 }
 

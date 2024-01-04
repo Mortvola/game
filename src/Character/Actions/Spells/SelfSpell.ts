@@ -26,6 +26,10 @@ class SelfSpell extends Spell {
     if (this.target && actor === this.target) {
       this.cast(actor, script, world);
 
+      if (world.loggerCallback) {
+        world.loggerCallback(`${actor.character.name} received ${this.name}.`)
+      }
+  
       if (world.actionInfoCallback) {
         world.actionInfoCallback(null);
       }

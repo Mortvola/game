@@ -4,6 +4,7 @@ import { WorldInterface } from "../../../WorldInterface";
 import Actor from "../../Actor";
 import RangeSpell from "./RangeSpell";
 import ShieldOfFaithCondition from '../Conditions/SheldOfFaith';
+import Logger from "../../../Script/Logger";
 
 class ShieldOfFaith extends RangeSpell {
   constructor() {
@@ -12,6 +13,7 @@ class ShieldOfFaith extends RangeSpell {
 
   cast(actor: Actor, script: Script, world: WorldInterface) {
     this.targets[0].character.conditions.push(new ShieldOfFaithCondition());
+    script.entries.push(new Logger(`${actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))
 
     actor.character.concentration = { name: this.name, targets: [this.targets[0].character] };
   }

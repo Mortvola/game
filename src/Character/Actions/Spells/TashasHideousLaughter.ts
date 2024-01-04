@@ -1,10 +1,10 @@
 import { feetToMeters } from "../../../Math";
 import Actor from "../../Actor";
 import { WorldInterface } from "../../../WorldInterface";
-import BaneCondition from '../Conditions/Bane';
 import RangeSpell from "./RangeSpell";
 import Script from "../../../Script/Script";
 import { savingThrow } from "../../../Dice";
+import TashasHideousLaughterCondition from "../Conditions/TashasHideousLaughter";
 
 class TashasHideosLaughter extends RangeSpell {
   constructor() {
@@ -15,16 +15,16 @@ class TashasHideosLaughter extends RangeSpell {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.wisdom, 'Neutral');
 
     if (st < actor.character.spellCastingDc) {
-      this.targets[0].character.conditions.push(new BaneCondition())
+      this.targets[0].character.conditions.push(new TashasHideousLaughterCondition(actor.character))
       
-      actor.character.concentration = { name: 'Tashas Hideous Laughter', targets: [this.targets[0].character] }
+      actor.character.concentration = { name: this.name, targets: [this.targets[0].character] }
 
       if (world.loggerCallback) {
-        world.loggerCallback(`${actor.character.name} cast Tasha's Hideous Laughter on ${this.targets[0].character.name}.`)
+        world.loggerCallback(`${actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`)
       }
     }
     else if (world.loggerCallback) {
-      world.loggerCallback(`${actor.character.name} failed to cast Tasha's Hideous Laughter on ${this.targets[0].character.name}.`)
+      world.loggerCallback(`${actor.character.name} failed to cast ${this.name} on ${this.targets[0].character.name}.`)
     }    
   }
 }

@@ -1,24 +1,16 @@
-import { diceRoll, spellAttackRoll } from "../../../Dice";
-import { feetToMeters } from "../../../Math";
+import { diceRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import { WorldInterface } from "../../../WorldInterface";
 import Actor from "../../Actor";
-import RangeSpell from "./RangeSpell";
+import SelfSpell from "./SelfSpell";
 
-class FalseLife extends RangeSpell {
+class FalseLife extends SelfSpell {
   constructor() {
-    super(1, true, 'False Life', 'Action', 1, 0, 60 * 60, false)
+    super('False Life', 'Action', 1, 0, 60 * 60, false)
   }
 
   cast(actor: Actor, script: Script, world: WorldInterface) {
-    // const [damage, critical] = spellAttackRoll(
-    //   actor.character,
-    //   this.targets[0].character,
-    //   () => diceRoll(3, 8),
-    //   'Neutral'
-    // )
-
-    // this.targets[0].takeDamage(damage, critical, actor, this.name, script);
+    actor.character.temporaryHitPoints = diceRoll(1, 4) + 4;
   }
 }
 

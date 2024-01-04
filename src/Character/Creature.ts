@@ -36,6 +36,8 @@ class Creature {
 
   hitPoints: number;
 
+  temporaryHitPoints = 0;
+
   weapons: Weapon[];
 
   armor: Armor[];
