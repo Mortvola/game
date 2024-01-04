@@ -123,4 +123,6 @@ canvas {
   left: 0;
   width: max-content;
   height: max-content;
+  user-select: none;
+  pointer-events: none;
 }
