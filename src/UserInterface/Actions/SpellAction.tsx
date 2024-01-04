@@ -17,7 +17,7 @@ const SpellAction: React.FC<PropsType> = ({
     return (
       ((spell.time === 'Action' && actor.character.actionsLeft > 0)
       || (spell.time === 'Bonus' && actor.character.bonusActionsLeft > 0))
-      && actor.character.spellSlots[spell.level - 1] > 0
+      && (spell.level === 0 || actor.character.spellSlots[spell.level - 1] > 0)
     )
   }
 

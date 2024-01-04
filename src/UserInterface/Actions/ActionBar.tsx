@@ -31,6 +31,11 @@ const ActionBar: React.FC<PropsType> = ({
         ))
       }
       {
+        actor.character.cantrips.map((s) => (
+          <SpellAction actor={actor} spell={s} />
+        ))
+      }
+      {
         actor.character.charClass.actions.map((a) => (
           <Action actor={actor} action={a} />
         ))

@@ -35,9 +35,11 @@ import { abilityModifier, abilityRolls, addAbilityIncreases, assignAbilityScores
 import { AbilityScores } from '../../Character/Races/AbilityScores';
 import Spells from './Spells/Spells';
 import { KnownSpell } from './Spells/KnownSpell';
-import { R, clericSpells, wizardSpells } from '../../Character/Actions/Spells/Spells';
+import { R, clericSpells, druidSpells, wizardSpells } from '../../Character/Actions/Spells/Spells';
 import Spell from '../../Character/Actions/Spells/Spell';
 import Creature from '../../Character/Creature';
+import Cantrips from './Spells/Cantrips';
+import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from '../../Tables';
 
 type PropsType = {
   show: boolean,
@@ -58,8 +60,10 @@ const AddCharacter: React.FC<PropsType> = ({
   const [baseAbilityScores, setBaseAbilityScores] = React.useState<AbilityScores>(assignAbilityScores(rolls, charClass))
   const [abilityScores, setAbilityScores] = React.useState<AbilityScores>(addAbilityIncreases(baseAbilityScores, race))
   const [knownSpells, setKnownSpells] = React.useState<KnownSpell[]>([]);
+  const [cantrips, setCantrips] = React.useState<KnownSpell[]>([]);
   const [availableSpells, setAvailableSpells] = React.useState<R<Spell>[] | null>(null)
   const [maxPreparedSpells, setMaxPreparedSpells] = React.useState<number>(0)
+  const [numCantrips, setNumCantrips] = React.useState<number>(0);
 
   // React.useEffect(() => {
   //   if (abilityScores) {
@@ -82,8 +86,15 @@ const AddCharacter: React.FC<PropsType> = ({
 
       const character = new Character(abilityScores, race, charClass, weapons, armor);
 
-      character.spells = knownSpells.map((s) => s.spell);
-      
+      character.cantrips = cantrips.filter((s) => s.prepared).map((s) => s.spell);
+      character.spells = knownSpells.filter((s) => s.prepared).map((s) => s.spell);
+
+      character.knownSpells = null;
+
+      if (character.charClass.name === 'Wizard') {
+        character.knownSpells = knownSpells.map((s) => s.spell)
+      }
+
       onSave(character)
     }
   }
@@ -112,7 +123,7 @@ const AddCharacter: React.FC<PropsType> = ({
       case 'Stout Halfling':
         setRace(new StoutHalfling());
         break;
-      case 'Lighfoot Halfling':
+      case 'Lightfoot Halfling':
         setRace(new LightfootHalfling());
         break;
     }
@@ -127,6 +138,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
         setKnownSpells([])
+        setCantrips([])
         setEquipment(Barbarian.startingEquipment())
         break;
       }
@@ -138,6 +150,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
         setKnownSpells([])
+        setCantrips([])
         setEquipment(Bard.startingEquipment())
         break;
       }
@@ -151,7 +164,9 @@ const AddCharacter: React.FC<PropsType> = ({
         setCharClass(cc)
         setAvailableSpells(null)
         setKnownSpells(clericSpells[1].map((s) => ({ spell: s, prepared: false })))
+        setCantrips(clericSpells[0].map((s) => ({ spell: s, prepared: false })))
         setMaxPreparedSpells(1 + abilityModifier(adjustedScores.wisdom))
+        setNumCantrips(clericSpellSlots[0].cantrips)
         setEquipment(Cleric.startingEquipment())
         break;
       }
@@ -162,7 +177,9 @@ const AddCharacter: React.FC<PropsType> = ({
         setBaseAbilityScores(scores);
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
-        setKnownSpells([])
+        setKnownSpells(druidSpells[1].map((s) => ({ spell: s, prepared: false })))
+        setCantrips(druidSpells[0].map((s) => ({ spell: s, prepared: false })))
+        setNumCantrips(druidSpellSlots[0].cantrips)
         setEquipment(Druid.startingEquipment())
         break;
       }
@@ -174,6 +191,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
         setKnownSpells([])
+        setCantrips([])
         setEquipment(Fighter.startingEquipment())
         break;
       }
@@ -185,6 +203,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
         setKnownSpells([])
+        setCantrips([])
         setEquipment(Monk.startingEquipment())
         break;
       }
@@ -196,6 +215,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
         setKnownSpells([])
+        setCantrips([])
         setEquipment(Paladin.startingEquipment())
         break;
       }
@@ -207,6 +227,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
         setKnownSpells([])
+        setCantrips([])
         setEquipment(Ranger.startingEquipment())
         break;
       }
@@ -218,6 +239,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
         setKnownSpells([])
+        setCantrips([])
         setEquipment(Rogue.startingEquipment())
         break;
       }
@@ -229,6 +251,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
         setKnownSpells([])
+        setCantrips([])
         setEquipment(Sorcerer.startingEquipment())
         break;
       }
@@ -240,6 +263,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setAbilityScores(addAbilityIncreases(scores, race))
         setCharClass(cc)
         setKnownSpells([])
+        setCantrips([])
         setEquipment(Warlock.startingEquipment())
         break;
       }
@@ -252,7 +276,9 @@ const AddCharacter: React.FC<PropsType> = ({
         setCharClass(cc)
         setAvailableSpells(wizardSpells[1].filter((s) => s))
         setKnownSpells([])
+        setCantrips(wizardSpells[0].map((s) => ({ spell: s, prepared: false })))
         setMaxPreparedSpells(1 + abilityModifier(abilityScores.intelligence))
+        setNumCantrips(wizardSpellSlots[0].cantrips)
         setEquipment(Wizard.startingEquipment())
         break;
       }
@@ -289,9 +315,8 @@ const AddCharacter: React.FC<PropsType> = ({
         <div className={styles.dialog}>
           <div className={styles.body}>
             <div className={styles.tabs}>
-              <Tab title="Race" tabKey="Race" selected={tab} onSelect={handleSelect} />
-              <Tab title="Class" tabKey="Class" selected={tab} onSelect={handleSelect} />
-              <Tab title="Abilities" tabKey="Abilities" selected={tab} onSelect={handleSelect} />
+              <Tab title="Race/Class" tabKey="Race" selected={tab} onSelect={handleSelect} />
+              <Tab title="Cantrips" tabKey="Cantrips" selected={tab} onSelect={handleSelect} />
               {
                 charClass.name === 'Wizard' || charClass.name === 'Cleric'
                   ? (
@@ -302,13 +327,19 @@ const AddCharacter: React.FC<PropsType> = ({
               <Tab title="Equipment" tabKey="Equipment" selected={tab} onSelect={handleSelect} />
             </div>
             <div hidden={tab !== 'Race'}>
-              <RaceTab onChange={handleRaceChange} race={race} />
+              <RaceTab
+                onRaceChange={handleRaceChange}
+                race={race}
+                charClass={charClass}
+                scores={baseAbilityScores}
+                onClassChange={handleSelectClass}
+              />
             </div>
-            <div hidden={tab !== 'Class'}>
-              <CharClass value={charClass} onChange={handleSelectClass} />
-            </div>
-            <div hidden={tab !== 'Abilities'}>
-              <Abilities scores={baseAbilityScores} race={race} />
+            <div hidden={tab !== 'Cantrips'}>
+              <Cantrips
+                knownSpells={cantrips}
+                maxPreparedSpells={numCantrips}
+              />
             </div>
             <div hidden={tab !== 'Spells'}>
               <Spells

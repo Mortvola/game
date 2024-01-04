@@ -1,7 +1,5 @@
-import { ActorInterface } from "../ActorInterface";
 import { abilityModifier, getProficiencyBonus } from "../Dice";
 import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from "../Tables";
-import Action from "./Actions/Action";
 import Condition, { ConditionType } from "./Actions/Conditions/Condition";
 import Spell from "./Actions/Spells/Spell";
 import { R, clericSpells, druidSpells } from "./Actions/Spells/Spells";
@@ -41,6 +39,8 @@ class Creature {
   weapons: Weapon[];
 
   armor: Armor[];
+
+  cantrips: R<Spell>[] = [];
 
   spells: R<Spell>[] = [];
 
@@ -171,13 +171,13 @@ class Creature {
   getMaxSpellSlots(spellLevel: number) {
     switch (this.charClass.name) {
       case 'Cleric':
-        return clericSpellSlots[this.charClass.level - 1][spellLevel - 1];
+        return clericSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
 
       case 'Wizard':
-        return wizardSpellSlots[this.charClass.level - 1][spellLevel - 1];
+        return wizardSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
 
       case 'Druid':
-        return druidSpellSlots[this.charClass.level - 1][spellLevel - 1];
+        return druidSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
     }
   }
 
@@ -200,17 +200,21 @@ class Creature {
           prepared: isPrepared(s.name)
         }))
 
-        case 'Cleric':
+      case 'Cleric':
         return clericSpells[1].map((s) => ({
           spell: s,
           prepared: isPrepared(s.name)
         }))
 
       case 'Wizard':
-        return this.knownSpells!.map((s) => ({
-          spell: s,
-          prepared: isPrepared(s.name)
-        }))
+        if (this.knownSpells) {
+          return this.knownSpells.map((s) => ({
+            spell: s,
+            prepared: isPrepared(s.name)
+          }))  
+        }
+
+        break;
     }
 
     return [];

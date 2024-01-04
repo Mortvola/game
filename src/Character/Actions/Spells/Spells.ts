@@ -6,9 +6,13 @@ import Bless from "./Bless";
 import BurningHands from "./BurningHands";
 import CharmPerson from "./CharmPerson";
 import ChillTouch from "./ChillTouch";
+import ChromaticOrb from "./ChromaticOrb";
+import ColorSpray from "./ColorSpray";
 import CureWounds from "./CureWounds";
 import Entangle from "./Entangle";
+import ExpeditiousRetreat from "./ExpeditiousRetreat";
 import FaerieFire from "./FaerieFire";
+import FalseLife from "./FalseLife";
 import FireBolt from "./FireBolt";
 import FogCloud from "./FogCloud";
 import Goodberry from "./Goodberry";
@@ -26,6 +30,7 @@ import PoisonSpray from "./PoisonSpray";
 import ProduceFlame from "./ProduceFlame";
 import ProtectionFromGoodAndEvil from "./ProtectionFromGoodAndEvil";
 import RayOfFrost from "./RayOfFrost";
+import RayOfSickness from "./RayOfSickness";
 import Resistance from "./Resistance";
 import SacredFlame from "./SacredFlame";
 import Sanctuary from "./Sanctuary";
@@ -33,6 +38,7 @@ import ShieldOfFaith from "./ShieldOfFaith";
 import Shillelagh from "./Shillelagh";
 import ShockingGrasp from "./ShockingGrasp";
 import Spell from "./Spell";
+import TashasHideosLaughter from "./TashasHideousLaughter";
 import ThornWhip from "./ThornWhip";
 import Thunderwave from "./Thunderwave";
 import TrueStrike from "./TrueStrike";
@@ -59,9 +65,19 @@ export const wizardSpells: R<Spell>[][] = [
   ],
   [
     { spell: BurningHands, name: 'Burning Hands', time: 'Action', level: 1 },
+    { spell: ChromaticOrb, name: 'Chromatic Orb', time: 'Action', level: 1 },
+    { spell: ColorSpray, name: 'Color Spray', time: 'Action', level: 1 },
+    { spell: ExpeditiousRetreat, name: 'Expedititous Retreat', time: 'Bonus', level: 1 },
+    { spell: FalseLife, name: 'False Life', time: 'Action', level: 1 },
+    { spell: FogCloud, name: 'Fog Cloud', time: 'Action', level: 1 },
     { spell: Grease, name: 'Grease', time: 'Action', level: 1 },
+    { spell: Jump, name: 'Jump', time: 'Action', level: 1 },
+    { spell: Longstrider, name: 'Longstrider', time: 'Action', level: 1 },
     { spell: MageArmor, name: 'Mage Armor', time: 'Action', level: 1 },
     { spell: MagicMissile, name: 'Magic Missile', time: 'Action', level: 1 },
+    { spell: ProtectionFromGoodAndEvil, name: 'Protection from Good and Evil', time: 'Action', level: 1 },
+    { spell: RayOfSickness, name: 'Ray of Sickness', time: 'Action', level: 1 },
+    { spell: TashasHideosLaughter, name: 'Tasha\'s Hideous Laughter', time: 'Action', level: 1 },
     { spell: Thunderwave, name: 'Thunderwave', time: 'Action', level: 1 },
     { spell: WitchBolt, name: 'Witch Bolt', time: 'Action', level: 1 },
   ],

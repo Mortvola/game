@@ -2,6 +2,7 @@ import React from 'react';
 import Character from '../../Character/Character';
 import styles from './Inventory.module.scss';
 import KnownSpellComponent, { KnownSpell } from './KnownSpell';
+import Cantrip from './Cantrip';
 
 type PropsType = {
   character: Character,
@@ -56,6 +57,19 @@ const Inventory: React.FC<PropsType> = ({
                 <div>{a.name}</div>
                 <div>{a.armorClass}</div>
               </div>
+            ))
+          }
+        </div>
+      </div>
+      <div className={styles.section}>
+        <div className={styles.title}>Cantrips</div>
+        <div className={styles.knownSpells}>
+          {
+            character.cantrips.map((s) => (
+              <Cantrip
+                key={`${character.name} ${s.name}`}
+                spell={s}
+              />
             ))
           }
         </div>

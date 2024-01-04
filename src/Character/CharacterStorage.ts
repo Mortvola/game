@@ -14,6 +14,7 @@ export type CharacterStorage = {
   maxHitPoints: number,
   weapons: string[],
   armor: string[],
+  cantrips: string[],
   spells: { name: string, prepared: boolean }[],
   knownSpells: string[],
   equipped: {
@@ -57,6 +58,18 @@ export const restoreCharacters = (a: CharacterStorage[]): { included: boolean, c
 
       if (c.equipped.shield) {
         character.equipped.shield = getArmor(c.equipped.shield as ArmorName);
+      }
+
+      if (c.cantrips) {
+        if (c.charClass === 'Wizard') {
+          character.cantrips = c.cantrips.map((s) => getSpell(wizardSpells, s)!)
+        }
+        else if (c.charClass === 'Cleric') {
+          character.cantrips = c.cantrips.map((s) => getSpell(clericSpells, s)!)
+        }
+        else if (c.charClass === 'Druid') {
+          character.cantrips = c.cantrips.map((s) => getSpell(druidSpells, s)!)
+        }
       }
 
       if (c.spells) {
@@ -103,6 +116,7 @@ export const characterStorageParty = (party: Party): CharacterStorageParty => ({
       maxHitPoints: c.maxHitPoints,
       weapons: c.weapons.map((w) => w.name),
       armor: c.armor.map((a) => a.name),
+      cantrips: c.cantrips.map((s) => s.name ),
       spells: c.spells.map((s) => ({ name: s.name, prepared: true })),
       knownSpells: c.knownSpells !== null ? c.knownSpells.map((s) => s.name) : [],
       equipped: {
