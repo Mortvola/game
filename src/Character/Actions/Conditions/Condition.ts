@@ -1,5 +1,6 @@
 export type ConditionType = 
   'Bane'
+  | 'Blade Ward'
   | 'Bless'
   | 'Charmed'
   | 'Mage Armor'

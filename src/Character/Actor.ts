@@ -587,7 +587,7 @@ class Actor implements ActorInterface {
     let [damage, critical] = attackRoll(this.character, targetActor.character, weapon, false, advantage);
 
     if (
-      targetActor.character.hasCondition('Rage')
+      (targetActor.character.hasCondition('Rage') || targetActor.character.hasCondition('Blade Ward'))
       && [DamageType.Bludgeoning, DamageType.Piercing, DamageType.Slashing].includes(weapon.damage)
     ) {
       damage = Math.trunc(damage / 2);
