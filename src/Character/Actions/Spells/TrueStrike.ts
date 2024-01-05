@@ -7,14 +7,17 @@ import RangeSpell from "./RangeSpell";
 
 class TrueStrike extends RangeSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'True Strike', 'Action', 0, feetToMeters(30), 60, true);
+    super(actor, 1, true, 'True Strike', 'Action', 0, feetToMeters(30), 60, false, true);
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
     this.targets[0].character.addInfluencingSpell(this);
+
     script.entries.push(new Logger(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))
 
     this.actor.character.concentration = this;
+
+    return true;
   }
 }
 

@@ -14,30 +14,30 @@ class RangeSpell extends Spell {
 
     if (target && (!this.uniqueTargets || !this.targets.includes(target))) {
       if (this.withinRange(target)) {
-        this.target = target;
+        this.focused = target;
       }
       else {
-        this.target = null;
+        this.focused = null;
         description = 'Target is out of range.'
       }
     }
     else {
-      this.target = null;
+      this.focused = null;
     }
 
     if (world.actionInfoCallback) {
       world.actionInfoCallback({
         action: this.name,
         description,
-        percentSuccess: this.target ? 100 : 0,
+        percentSuccess: this.focused ? 100 : 0,
       })
     }              
   }
 
   interact(script: Script, world: WorldInterface) {
-    if (this.target) {
-      this.targets.push(this.target);
-      this.target = null;
+    if (this.focused) {
+      this.targets.push(this.focused);
+      this.focused = null;
 
       if (this.targets.length < this.maxTargets) {
         if (world.actionInfoCallback) {
@@ -55,7 +55,9 @@ class RangeSpell extends Spell {
           this.actor.character.stopConcentrating();
         }
 
-        this.cast(script, world);
+        if (this.cast(script, world) && this.duration > 0) {
+          this.actor.character.enduringActions.push(this);
+        }
 
         if (world.actionInfoCallback) {
           world.actionInfoCallback(null);

@@ -7,10 +7,10 @@ import RangeSpell from "./RangeSpell";
 
 class PoisonSpray extends RangeSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Poison Spray', 'Action', 0, feetToMeters(10), 0, false);
+    super(actor, 1, true, 'Poison Spray', 'Action', 0, feetToMeters(10), 0, false, false);
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.constitution, 'Neutral');
 
     let damage = 0;
@@ -19,6 +19,8 @@ class PoisonSpray extends RangeSpell {
     }
 
     this.targets[0].takeDamage(damage, false, this.actor, this.name, script);
+
+    return damage > 0;
   }
 }
 

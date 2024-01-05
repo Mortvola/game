@@ -664,6 +664,7 @@ class Renderer implements WorldInterface {
             this.focusCallback({
               name: this.focused.character.name,
               hitpoints: this.focused.character.hitPoints,
+              temporaryHitpoints: this.focused.character.temporaryHitPoints,
               maxHitpoints: this.focused.character.maxHitPoints,
               armorClass: this.focused.character.armorClass,
               conditions: [

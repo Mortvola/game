@@ -7,10 +7,10 @@ import Script from "../../../Script/Script";
 
 class Bane extends RangeSpell {
   constructor(actor: Actor) {
-    super(actor, 3, true, 'Bane', 'Action', 1, feetToMeters(30), 60, true)
+    super(actor, 3, true, 'Bane', 'Action', 1, feetToMeters(30), 60, false, true)
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
     for (let i = 0; i < this.targets.length; i += 1) {
       const st = savingThrow(this.targets[i].character, this.targets[i].character.abilityScores.charisma, 'Neutral');
 
@@ -35,7 +35,11 @@ class Bane extends RangeSpell {
 
     if (this.targets.length > 0) {          
       this.actor.character.concentration = this;
+
+      return true;
     }
+
+    return false;
   }
 }
 

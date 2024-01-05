@@ -12,7 +12,7 @@ class MoveAction extends Action {
   distance = 0;
 
   constructor(actor: Actor) {
-    super(actor, 'Move', 'Move')
+    super(actor, 0, 'Move', 'Move', 0, false)
   }
 
   prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {

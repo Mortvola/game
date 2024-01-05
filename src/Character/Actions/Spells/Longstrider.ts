@@ -5,15 +5,17 @@ import TouchSpell from "./TouchSpell";
 
 class Longstrider extends TouchSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Longstrider', 'Action', 1, 0, 60 * 60, false);
+    super(actor, 1, true, 'Longstrider', 'Action', 1, 0, 60 * 60, false, false);
   }
 
-  cast(script: Script, world: WorldInterface) {
-    this.target!.character.addInfluencingSpell(this);
+  cast(script: Script, world: WorldInterface): boolean {
+    this.targets[0].character.addInfluencingSpell(this);
 
     if (world.loggerCallback) {
-      world.loggerCallback(`${this.actor.character.name} cast ${this.name} on ${this.target!.character.name}.`)
+      world.loggerCallback(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`)
     }
+
+    return true;
   }
 }
 

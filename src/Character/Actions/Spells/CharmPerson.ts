@@ -7,22 +7,27 @@ import RangeSpell from "./RangeSpell";
 
 class CharmPerson extends RangeSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Charm Person', 'Action', 1, feetToMeters(30), 60 * 60, false);
+    super(actor, 1, true, 'Charm Person', 'Action', 1, feetToMeters(30), 60 * 60, false, false);
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.wisdom, 'Advantage');
 
     if (st < this.actor.character.spellCastingDc) {
       this.targets[0].character.addInfluencingSpell(this)
-      
+
       if (world.loggerCallback) {
         world.loggerCallback(`${this.actor.character.name} charmed ${this.targets[0].character.name}.`)
       }
+
+      return true;
     }
-    else if (world.loggerCallback) {
+
+    if (world.loggerCallback) {
       world.loggerCallback(`${this.actor.character.name} failed to charm ${this.targets[0].character.name}.`)
     }
+
+    return false;
   }
 }
 

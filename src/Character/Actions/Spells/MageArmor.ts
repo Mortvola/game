@@ -6,13 +6,15 @@ import TouchSpell from "./TouchSpell";
 
 class MageArmor extends TouchSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Mage Armor', 'Action', 1, 0, 8 * 60 * 60, false)
+    super(actor, 1, true, 'Mage Armor', 'Action', 1, 0, 8 * 60 * 60, false, false)
   }
 
-  cast(script: Script, world: WorldInterface) {
-    this.target?.character.addInfluencingSpell(this);
+  cast(script: Script, world: WorldInterface): boolean {
+    this.targets[0].character.addInfluencingSpell(this);
 
-    script.entries.push(new Logger(`${this.actor.character.name} cast ${this.name} on ${this.target?.character.name}.`))
+    script.entries.push(new Logger(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))
+
+    return true;
   }
 }
 

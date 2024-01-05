@@ -8,10 +8,10 @@ import RangeSpell from "./RangeSpell";
 
 class FireBolt extends RangeSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Fire Bolt', 'Action', 0, feetToMeters(120), 0, false);
+    super(actor, 1, true, 'Fire Bolt', 'Action', 0, feetToMeters(120), 0, false, false);
   }
 
-  cast(script: Script, world:WorldInterface) {
+  cast(script: Script, world:WorldInterface): boolean {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,
@@ -21,6 +21,8 @@ class FireBolt extends RangeSpell {
     )
 
     this.targets[0].takeDamage(damage, critical, this.actor, this.name, script);
+
+    return damage > 0;
   }
 }
 

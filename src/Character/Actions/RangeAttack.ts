@@ -10,7 +10,7 @@ import FollowPath from "../../Script/FollowPath";
 
 class RangeAttack extends Action {
   constructor(actor: Actor) {
-    super(actor, 'Range', 'Action')
+    super(actor, 1, 'Range', 'Action', 0, false)
   }
   
   prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -41,12 +41,12 @@ class RangeAttack extends Action {
         })
       }
 
-      this.target = target;
+      this.focused = target;
       this.path = [];
       this.distance = 0;
     }
     else {
-      this.target = null;
+      this.focused = null;
 
       if (this.trajectory) {
         world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
@@ -70,7 +70,7 @@ class RangeAttack extends Action {
             target, occupants,
           )
   
-          if (!cancelled && !this.target) {
+          if (!cancelled && !this.focused) {
             this.showPathLines(lines);
   
             this.path = path;
@@ -95,8 +95,11 @@ class RangeAttack extends Action {
 
       this.showPathLines(null);
     }
-    else if (this.target) {
-      const shotData = this.actor.computeShotData(this.target);
+    else if (this.focused) {
+      this.targets.push(this.focused);
+      this.focused = null;
+
+      const shotData = this.actor.computeShotData(this.targets[0]);
       
       const data: ShotData = {
         velocityVector: shotData.velocityVector,
@@ -109,7 +112,7 @@ class RangeAttack extends Action {
       script.entries.push(shot);
 
       this.actor.attack(
-        this.target!,
+        this.targets[0],
         this.actor.character.equipped.rangeWeapon!,
         world,
         script,
@@ -125,7 +128,7 @@ class RangeAttack extends Action {
 
     this.path = [];
     this.distance = 0;
-    this.target = null;
+    this.targets = [];
 
     return false;
   }

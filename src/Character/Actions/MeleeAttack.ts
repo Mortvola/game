@@ -6,7 +6,7 @@ import Actor from "../Actor";
 
 class MeleeAttack extends Action {
   constructor(actor: Actor) {
-    super(actor, 'Melee', 'Action')
+    super(actor, 1, 'Melee', 'Action', 0, false)
   }
   
   prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -20,9 +20,14 @@ class MeleeAttack extends Action {
   }
 
   interact(script: Script, world: WorldInterface): boolean {
+    if (this.focused) {
+      this.targets.push(this.focused);
+      this.focused = null;
+    }
+
     return this.zeroDistanceAction(script, world, () => {
       this.actor.attack(
-        this.target!,
+        this.targets[0],
         this.actor.character.equipped.meleeWeapon!,
         world,
         script,

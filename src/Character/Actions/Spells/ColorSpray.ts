@@ -6,10 +6,10 @@ import RangeSpell from "./RangeSpell";
 
 class ColorSpray extends RangeSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Color Spray', 'Action', 1, feetToMeters(15), 6, false)
+    super(actor, 1, true, 'Color Spray', 'Action', 1, feetToMeters(15), 6, true, false)
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
     // const [damage, critical] = spellAttackRoll(
     //   actor.character,
     //   this.targets[0].character,
@@ -18,6 +18,8 @@ class ColorSpray extends RangeSpell {
     // )
 
     // this.targets[0].takeDamage(damage, critical, actor, this.name, script);
+
+    return true;
   }
 }
 

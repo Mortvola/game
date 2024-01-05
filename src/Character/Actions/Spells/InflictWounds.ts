@@ -7,19 +7,21 @@ import { DamageType } from "../../Equipment/Weapon";
 
 class InflictWounds extends TouchSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Inflict Wounds', 'Action', 1, 0, 0, false)
+    super(actor, 1, true, 'Inflict Wounds', 'Action', 1, 0, 0, false, false)
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
-      this.target!.character,
+      this.targets[0].character,
       () => diceRoll(3, 10),
       DamageType.Necrotic,
       'Neutral'
     )
 
-    this.target!.takeDamage(damage, critical, this.actor, this.name, script);
+    this.targets[0].takeDamage(damage, critical, this.actor, this.name, script);
+
+    return damage > 0;
   }
 }
 

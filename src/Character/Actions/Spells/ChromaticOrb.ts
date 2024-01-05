@@ -8,10 +8,10 @@ import RangeSpell from "./RangeSpell";
 
 class ChromaticOrb extends RangeSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Chromatic Orb', 'Action', 1, feetToMeters(90), 0, false)
+    super(actor, 1, true, 'Chromatic Orb', 'Action', 1, feetToMeters(90), 0, false, false)
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,
@@ -21,6 +21,8 @@ class ChromaticOrb extends RangeSpell {
     )
 
     this.targets[0].takeDamage(damage, critical, this.actor, this.name, script);
+
+    return damage > 0;
   }
 }
 

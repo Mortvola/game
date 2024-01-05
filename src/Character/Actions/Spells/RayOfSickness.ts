@@ -8,10 +8,10 @@ import { DamageType } from "../../Equipment/Weapon";
 
 class RayOfSickness extends RangeSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Ray of Sickness', 'Action', 1, feetToMeters(60), 0, false)
+    super(actor, 1, true, 'Ray of Sickness', 'Action', 1, feetToMeters(60), 0, false, false)
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,
@@ -26,9 +26,12 @@ class RayOfSickness extends RangeSpell {
       const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.constitution, 'Neutral');
 
       if (st < this.actor.character.spellCastingDc) {
-        this.targets[0].character.addInfluencingSpell(this);
+        // this.targets[0].character.addInfluencingSpell(this);
+        // TODO: Add poisened condition
       }
     }
+
+    return damage > 0;
   }
 }
 

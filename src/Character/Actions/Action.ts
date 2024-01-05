@@ -17,11 +17,19 @@ class Action {
 
   time: TimeType;
 
+  duration: number;
+
+  endOfTurn: boolean;
+
   path: Vec2[] = [];
 
   distance = 0;
 
-  target: Actor | null = null;
+  focused: Actor | null = null;
+
+  targets: Actor[] = [];
+
+  maxTargets: number;
 
   pathLines: Line | null = null;
 
@@ -29,10 +37,15 @@ class Action {
 
   cleared = false;
 
-  constructor(actor: Actor, name: string, time: TimeType) {
+  constructor(actor: Actor, maxTargets: number, name: string, time: TimeType, duration: number, endOfTurn: boolean) {
     this.actor = actor;
+    this.maxTargets = maxTargets;
+
     this.name = name;
     this.time = time;
+
+    this.duration = duration;
+    this.endOfTurn = endOfTurn;
   }
   
   prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
@@ -110,7 +123,7 @@ class Action {
 
               if (distanceToTarget < this.actor.attackRadius) {
                 // this.type = 'MoveAndMelee';
-                this.target = target;
+                this.focused = target;
 
                 if (world.actionInfoCallback) {
                   world.actionInfoCallback({
@@ -121,7 +134,7 @@ class Action {
               }
               else {
                 // this.type = 'Move';
-                this.target = null;
+                this.focused = null;
 
                 if (world.actionInfoCallback) {
                   world.actionInfoCallback({
@@ -142,7 +155,7 @@ class Action {
 
         this.showPathLines(null);
 
-        this.target = target;
+        this.focused = target;
         this.distance = 0;
         this.path = [];
 
@@ -155,7 +168,7 @@ class Action {
       }
     }
     else {
-      this.target = null;
+      this.focused = null;
 
       if (this.trajectory) {
         world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
@@ -179,7 +192,7 @@ class Action {
             target, occupants,
           )
   
-          if (!cancelled && !this.target) {
+          if (!cancelled && !this.focused) {
             this.showPathLines(lines);
   
             this.path = path;
@@ -205,15 +218,11 @@ class Action {
 
     this.showPathLines(null);
 
-    if (this.target) {
+    if (this.targets.length > 0) {
       action();
 
       return true;
     }
-
-    this.path = [];
-    this.target = null;
-    this.distance = 0;
 
     return false;
   }

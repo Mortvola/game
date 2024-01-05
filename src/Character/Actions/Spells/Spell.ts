@@ -14,13 +14,7 @@ class Spell extends Action {
 
   range: number;
 
-  duration: number;
-
   concentration: boolean;
-
-  targets: Actor[] = [];
-
-  maxTargets: number;
 
   uniqueTargets: boolean;
 
@@ -35,15 +29,14 @@ class Spell extends Action {
     level: number,
     range: number,
     duration: number,
+    endOfTurn: boolean,
     concentration: boolean,
   ) {
-    super(actor, name, time);
+    super(actor, maxTargets, name, time, duration, endOfTurn);
 
-    this.maxTargets = maxTargets;
     this.uniqueTargets = uniqueTargets;
     this.level = level;
     this.range = range;
-    this.duration = duration;
     this.concentration = concentration;
   }
 
@@ -56,7 +49,8 @@ class Spell extends Action {
     this.hideRangeCircle(getWorld());
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
+    return false;
   }
 
   prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {

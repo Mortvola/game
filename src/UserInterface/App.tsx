@@ -407,7 +407,7 @@ function App() {
         {
           actor
             ? actor.character.influencingSpells.map((c) => (
-              <div>{c.name}</div>
+              <div>{`${c.name} (${c.duration / 6})`}</div>
             ))
             : null
         }
@@ -419,8 +419,23 @@ function App() {
             : null
         }
         {
+          actor?.character.concentration
+            ? <div>{`Concetrating: ${actor.character.concentration.name} (${actor.character.concentration.duration / 6})`}</div>
+            : null
+        }
+        {
           actor?.character
-            ? <div>{actor.character.name}</div>
+            ? (
+              <div>
+                <div>{actor.character.name}</div>
+                {`${actor.character.hitPoints}/${actor.character.maxHitPoints}`}
+                {
+                  actor.character.temporaryHitPoints
+                    ? ` + ${actor.character.temporaryHitPoints}`
+                    : ''
+                }
+              </div>
+            )
             : null
         }
       </div>

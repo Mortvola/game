@@ -63,7 +63,7 @@ class Actor implements ActorInterface {
 
   occupiedRadius = feetToMeters(2.5);
 
-  attackRadius = this.occupiedRadius + feetToMeters(0.8);
+  attackRadius = this.occupiedRadius + feetToMeters(2.5);
 
   sceneNode = new ContainerNode();
 
@@ -151,6 +151,8 @@ class Actor implements ActorInterface {
 
     this.state = States.idle;
 
+    this.decrementDurations(false);
+
     if (!this.automated) {
       this.setDefaultAction();
     }
@@ -174,6 +176,36 @@ class Actor implements ActorInterface {
     this.setAction(null);
     
     this.state = States.idle;
+
+    this.decrementDurations(true);
+  }
+
+  decrementDurations(endofTurn: boolean) {
+    for (let i = 0; i < this.character.enduringActions.length; i += 1) {
+      if (
+        (endofTurn && this.character.enduringActions[i].endOfTurn)
+        || (!endofTurn && !this.character.enduringActions[i].endOfTurn)
+      ) {
+        const action = this.character.enduringActions[i];
+        action.duration -= 6;
+
+        if (action.duration <= 0) {
+          if (this.character.concentration === action) {
+            this.character.stopConcentrating();
+          }
+          else {
+            for (const target of action.targets) {
+              target.character.removeInfluencingSpell(action.name)
+            }
+          }
+        
+          this.character.enduringActions = [
+            ...this.character.enduringActions.slice(0, i),
+            ...this.character.enduringActions.slice(i + 1),
+          ]  
+        }
+      }
+    }
   }
 
   nextState(state: number) {
@@ -293,7 +325,7 @@ class Actor implements ActorInterface {
       else {
         script.entries.push(new Delay(2000));
 
-        const charmed = this.character.getInfluencingSpell('Charmed');
+        const charmed = this.character.getInfluencingSpell('Charm Person');
 
         let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
         const otherTeam = world.participants.participants[this.team ^ 1]
@@ -617,7 +649,7 @@ class Actor implements ActorInterface {
       if (damage > 0) {
         script.entries.push(new Logger(`${from.character.name} ${critical ? 'critically ' : ''}hit ${this.character.name} for ${damage} points with a ${weaponName}.`))
 
-        this.character.removeInfluencingSpell('Charmed')
+        this.character.removeInfluencingSpell('Charm Person')
 
         if (this.character.concentration) {
           const st = savingThrow(this.character, this.character.abilityScores.constitution, 'Neutral');

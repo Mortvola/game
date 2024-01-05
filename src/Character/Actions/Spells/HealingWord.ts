@@ -7,16 +7,18 @@ import RangeSpell from "./RangeSpell";
 
 class HealingWord extends RangeSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Healing Word', 'Bonus', 1, feetToMeters(60), 0, false);
+    super(actor, 1, true, 'Healing Word', 'Bonus', 1, feetToMeters(60), 0, false, false);
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
     this.targets[0].takeHealing(
       diceRoll(1, 4) + abilityModifier(this.actor.character.spellcastingAbilityScore),
       this.actor,
       this.name,
       script,
     )
+
+    return true;
   }
 }
 

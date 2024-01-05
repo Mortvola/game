@@ -7,14 +7,17 @@ import Logger from "../../../Script/Logger";
 
 class ShieldOfFaith extends RangeSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Shield of Faith', 'Bonus', 1, feetToMeters(60), 10 * 60, true);
+    super(actor, 1, true, 'Shield of Faith', 'Bonus', 1, feetToMeters(60), 10 * 60, false, true);
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
     this.targets[0].character.addInfluencingSpell(this);
+
     script.entries.push(new Logger(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))
 
     this.actor.character.concentration = this;
+
+    return true;
   }
 }
 

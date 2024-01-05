@@ -9,7 +9,7 @@ class SelfSpell extends Spell {
     let success = 0;
 
     if (this.actor === target) {
-      this.target = target;
+      this.focused = target;
       success = 100;  
     }
 
@@ -23,8 +23,13 @@ class SelfSpell extends Spell {
   }
 
   interact(script: Script, world: WorldInterface): boolean {
-    if (this.target && this.actor === this.target) {
-      this.cast(script, world);
+    if (this.focused && this.actor === this.focused) {
+      this.targets.push(this.focused);
+      this.focused = null;
+      
+      if (this.cast(script, world) && this.duration > 0) {
+        this.actor.character.enduringActions.push(this);
+      }
 
       if (world.loggerCallback) {
         world.loggerCallback(`${this.actor.character.name} received ${this.name}.`)

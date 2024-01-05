@@ -7,14 +7,14 @@ import RageCondition from './Conditions/Rage'
 
 class Rage extends Action {
   constructor(actor: Actor) {
-    super(actor, 'Rage', 'Bonus')
+    super(actor, 1, 'Rage', 'Bonus', 60, false)
   }
 
   prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     let success = 0;
 
     if (this.actor === target && !target.character.hasCondition('Rage')) {
-      this.target = target;
+      this.focused = target;
       success = 100;  
     }
 
@@ -28,9 +28,12 @@ class Rage extends Action {
   }
 
   interact(script: Script, world: WorldInterface): boolean {
-    if (this.target && this.actor === this.target) {
+    if (this.focused && this.actor === this.focused) {
+      this.targets.push(this.focused);
+      this.focused = null;
+      
       this.actor.character.conditions.push(new RageCondition())
-
+      this.actor.character.enduringActions.push(this)
       return true;
     }
 

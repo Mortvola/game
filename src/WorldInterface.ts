@@ -5,7 +5,6 @@ import Circle from "./Drawables/Circle";
 import ContainerNode from "./Drawables/ContainerNode";
 import Line from "./Drawables/Line";
 import Mesh from "./Drawables/Mesh";
-import Trajectory from "./Drawables/Trajectory";
 import Participants from "./Participants";
 import RenderPass from "./RenderPass";
 import { Occupant } from "./Workers/PathPlannerQueue";
@@ -19,6 +18,7 @@ export type ActionInfo = {
 export type FocusInfo = {
   name: string,
   hitpoints: number,
+  temporaryHitpoints: number,
   maxHitpoints: number,
   armorClass: number,
   conditions: { name: string, duration: number }[],

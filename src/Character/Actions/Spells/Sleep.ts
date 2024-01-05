@@ -12,7 +12,7 @@ class Sleep extends Spell {
   center: Vec2 | null = null;
 
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Sleep', 'Action', 1, feetToMeters(90), 60, false)
+    super(actor, 1, true, 'Sleep', 'Action', 1, feetToMeters(90), 60, false, false)
   }
 
   prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface) {
@@ -35,6 +35,8 @@ class Sleep extends Spell {
   interact(script: Script, world: WorldInterface): boolean {
     if (this.center !== null) {
       world.occupants.push({ center: this.center, radius: this.radius })
+
+      this.actor.character.enduringActions.push(this);
 
       if (this.level >= 1 && this.actor.character.spellSlots[this.level - 1] > 0) {
         this.actor.character.spellSlots[this.level - 1] -= 1;

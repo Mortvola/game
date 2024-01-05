@@ -1,5 +1,6 @@
 import { abilityModifier, getProficiencyBonus } from "../Dice";
 import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from "../Tables";
+import Action from "./Actions/Action";
 import Condition, { ConditionType } from "./Actions/Conditions/Condition";
 import Spell from "./Actions/Spells/Spell";
 import { R, clericSpells, druidSpells } from "./Actions/Spells/Spells";
@@ -65,6 +66,8 @@ class Creature {
   conditions: Condition[] = [];
 
   concentration: Spell | null = null;
+
+  enduringActions: Action[] = [];
 
   constructor(
     abilityScores: AbilityScores,

@@ -8,10 +8,10 @@ import RangeSpell from "./RangeSpell";
 
 class ChillTouch extends RangeSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Chill Touch', 'Action', 0, feetToMeters(120), 6, false);
+    super(actor, 1, true, 'Chill Touch', 'Action', 0, feetToMeters(120), 6, false, false);
   }
 
-  cast(script: Script, world: WorldInterface) {
+  cast(script: Script, world: WorldInterface): boolean {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,
@@ -27,6 +27,8 @@ class ChillTouch extends RangeSpell {
     }
 
     // TODO: apply disadvantage to undead.
+
+    return damage > 0;
   }
 }
 
