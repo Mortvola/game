@@ -633,11 +633,7 @@ class Renderer implements WorldInterface {
   prevPoint: Vec4 | null = null;
   
   checkActorFocus() {
-    if (
-      this.participants.activeActor
-      && !this.participants.activeActor.automated
-      && this.participants.activeActor.state !== States.scripting
-    ) {
+    if (this.participants.activeActor) {
       let activeActor = this.participants.activeActor;
       const { actor, point } = this.cameraHitTest();
 
@@ -678,10 +674,16 @@ class Renderer implements WorldInterface {
           }
         }  
 
-        const action = activeActor.getAction();
+        if (
+          !activeActor.automated
+          && activeActor.state !== States.scripting
+        ) {
+    
+          const action = activeActor.getAction();
 
-        if (action) {
-          action.prepareInteraction(actor ?? null, point ?? null, this)            
+          if (action) {
+            action.prepareInteraction(actor ?? null, point ?? null, this)            
+          }
         }
       }
     } else if (this.focused) {
