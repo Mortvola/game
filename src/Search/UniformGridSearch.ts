@@ -6,7 +6,7 @@ export type Element = {
   y: number,
   gCost: number,
   hCost: number,
-  actors: Object[],
+  actors: { id: number }[],
   parent: Element | null,
 }
 
@@ -20,6 +20,8 @@ class UniformGridSearch {
   center: Vec2;
 
   scale: number;
+
+  target: { id: number } | null = null;
 
   lines: Vec4[] = [];
 
@@ -42,21 +44,24 @@ class UniformGridSearch {
     this.width = width;
     this.height = height;
 
-    this.clear();
+    this.clear(true);
   }
 
-  clear() {
+  clear(all: boolean) {
     for (let y = 0; y < this.height; y += 1) {
       for (let x = 0; x < this.width; x += 1) {
         this.grid[y][x].gCost = Number.MAX_VALUE;
         this.grid[y][x].hCost = Number.MAX_VALUE;
         this.grid[y][x].parent = null;
-        this.grid[y][x].actors = [];
+
+        if (all) {
+          this.grid[y][x].actors = [];
+        }
       }
     }
   }
 
-  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: Object | null): Vec2[] {
+  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: { id: number } | null, actor: { id: number }): Vec2[] {
     throw new Error('Not implemented')
   }
 
@@ -71,17 +76,19 @@ class UniformGridSearch {
     return this.grid[y][x]
   }
 
-  nodeBlocked(node: Element | null | undefined, target?: Object | null): boolean {
+  nodeBlocked(node: Element | null | undefined): boolean {
     if (node === null || node === undefined) {
       return true;
     }
 
-    return (node.actors.length > 0
-      && (node.actors.length !== 1 || node.actors[0] !== target))
+    return (
+      node.actors.length > 0
+      && (node.actors.length !== 1 || this.target === null || node.actors[0].id !== this.target.id)
+    )
   }
 
   // Line of sight algorithm from Movel AI News.
-  LineOfSight(p1: Vec2, p2: Vec2, target: Object | null) {
+  LineOfSight(p1: Vec2, p2: Vec2) {
     let x0 = p1[0]
     let y0 = p1[1];
     const x1 = p2[0]
@@ -117,7 +124,7 @@ class UniformGridSearch {
             y0 + s2[1],
           );
 
-          if (this.nodeBlocked(node, target)) { 
+          if (this.nodeBlocked(node)) { 
               return false
           }
 
@@ -131,7 +138,7 @@ class UniformGridSearch {
             y0 + s2[1],
           );
 
-          if (this.nodeBlocked(node, target)) {
+          if (this.nodeBlocked(node)) {
             return false
           }
         }
@@ -147,7 +154,7 @@ class UniformGridSearch {
             y0 - 1,
           );
 
-          if (this.nodeBlocked(node1, target) && this.nodeBlocked(node2, target)) {
+          if (this.nodeBlocked(node1) && this.nodeBlocked(node2)) {
             return false
           }
         }
@@ -163,7 +170,7 @@ class UniformGridSearch {
               y0 + s2[1],
           );
 
-          if (this.nodeBlocked(node, target)) {
+          if (this.nodeBlocked(node)) {
               return false;
           }
 
@@ -177,7 +184,7 @@ class UniformGridSearch {
             y0 + s2[1],
           );
             
-          if (this.nodeBlocked(node, target)) {
+          if (this.nodeBlocked(node)) {
             return false;
           }
         }
@@ -193,7 +200,7 @@ class UniformGridSearch {
             y0 + s2[1],
           );
 
-          if (this.nodeBlocked(node1, target) && this.nodeBlocked(node2, target)) {
+          if (this.nodeBlocked(node1) && this.nodeBlocked(node2)) {
             return false
           }
         }
@@ -205,7 +212,7 @@ class UniformGridSearch {
     return true
   }
 
-  fillCircle(actor: Object, c: Vec2, r: number): number[][] {
+  fillCircle(actor: { id: number }, c: Vec2, r: number): number[][] {
     let debugLines: number[][] = [];
 
     const center = this.positionToGrid(c);
@@ -284,7 +291,7 @@ class UniformGridSearch {
     return debugLines;
   }
 
-  horizontalLine(actor: Object, x1: number, x2: number, y: number): [number[], number[]] {
+  horizontalLine(actor: { id: number }, x1: number, x2: number, y: number): [number[], number[]] {
     x1 = Math.max(x1, 0);
     x2 = Math.min(x2, this.width - 1);
 
@@ -295,7 +302,7 @@ class UniformGridSearch {
     return [[x1, y], [x2, y]]
   }
 
-  smoothPath(path: Vec2[], target: Object | null): Vec2[] {
+  smoothPath(path: Vec2[], target: { id: number } | null): Vec2[] {
     const smoothedPath: Vec2[] = [];
 
     if (path.length > 0) {
@@ -306,7 +313,6 @@ class UniformGridSearch {
           const blocked = !this.LineOfSight(
             this.positionToGrid(smoothedPath[smoothedPath.length - 1]),
             this.positionToGrid(path[i + 1]),
-            target,
           );
 
           if (blocked) {

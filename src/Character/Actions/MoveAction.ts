@@ -3,7 +3,7 @@ import Script from "../../Script/Script";
 import { WorldInterface } from "../../WorldInterface";
 import Action from "./Action";
 import Actor from "../Actor";
-import { findPath2, getOccupants } from "../../Workers/PathPlannerQueue";
+import { findPath2 } from "../../Workers/PathPlannerQueue";
 import FollowPath from "../../Script/FollowPath";
 
 class MoveAction extends Action {
@@ -35,16 +35,13 @@ class MoveAction extends Action {
       targetWp = vec2.create(tmp[0], tmp[2])
     }
 
-    let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-    const occupants = getOccupants(this.actor, target, participants, []);
-
     (async () => {  
       const [path, distance, lines, cancelled] = await findPath2(
         this.actor,
         vec2.create(wp[0], wp[2]),
         targetWp,
         target ? target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75 : null,
-        target, occupants,
+        target,
       )
 
       if (!cancelled) { // && !this.target) {

@@ -1,6 +1,6 @@
 import { Vec2, vec2 } from "wgpu-matrix";
 import UniformGridSearch, { Element as Node } from "./UniformGridSearch";
-import { feetToMeters, lineCircleIntersection2 } from "../Math";
+import { lineCircleIntersection2 } from "../Math";
 
 class Set {
   nodes: Node[] = [];
@@ -33,33 +33,20 @@ class JumpPointSearch extends UniformGridSearch {
 
   lines2: Vec2[] = [];
 
-  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: Object | null): Vec2[] {
+  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: { id: number } | null): Vec2[] {
+    this.target = target;
+
     this.lines = [];
     this.lines2 = [];
-
-    // console.log(`start: ${s[0]}, ${s[1]}, `)
-    // console.log(`goal: ${g[0]}, ${g[1]}, `)
 
     const start = this.positionToGrid(s);
     const goal = this.positionToGrid(g);
 
-    const sn = this.getNode(start[0], start[1]);
     const gn = this.getNode(goal[0], goal[1]);
 
     if (!gn) {
       return [];
     }
-
-    // if (this.nodeBlocked(sn)) {
-    //   console.log('start node blocked');
-    // }
-
-    // if (this.nodeBlocked(gn)) {
-    //   console.log('goal node blocked');
-    // }
-
-    sn!.actors = [];
-    gn!.actors = [];
 
     const openSet = new Set();
     const closedSet = new Set();

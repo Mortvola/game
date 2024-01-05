@@ -4,9 +4,12 @@ import { Vec2, vec2 } from "wgpu-matrix";
 import JumpPointSearch from "../Search/JumpPointSearch";
 
 type Occupant = {
+  id: number,
   center: Vec2,
   radius: number,
 }
+
+const pathFinder = new JumpPointSearch(512, 512, 4)
 
 const trimPath = (path: Vec2[], maxDistance: number): [Vec2[], number, number[][]] => {
   let totalDistance = 0;
@@ -73,16 +76,13 @@ const trimPath = (path: Vec2[], maxDistance: number): [Vec2[], number, number[][
   return [path, totalDistance, lines];
 }
 
-const findPath = (
-  start: Vec2, goal: Vec2, goalRadius: number | null, target: Object | null, occupants: Occupant[], maxDistance: number,
-): [Vec2[], number, number[][], number[][]] => {
-  let path: Vec2[] = [];
+const populateGrid = (occupants: Occupant[]): number[][] => {
   let debugLines: number[][] = [];
 
-  const pathFinder = new JumpPointSearch(512, 512, 4)
+  pathFinder.clear(true);
 
-  for (const a of occupants) {
-    const lines = pathFinder.fillCircle(a, a.center, a.radius);
+  for (const occupant of occupants) {
+    const lines = pathFinder.fillCircle({ id: occupant.id }, occupant.center, occupant.radius);
     debugLines = debugLines.concat(lines)
   }
 
@@ -97,35 +97,87 @@ const findPath = (
     )
   })
 
-  path = pathFinder.findPath(start, goal, goalRadius, target);
-
-  // Trim the path to the extent the character can move in a single turn.
-  return [...trimPath(path, maxDistance), dbl];
+  return dbl;
 }
 
-export type MessageRequest = {
-  type: string,
+const findPath = (
   start: Vec2,
   goal: Vec2,
   goalRadius: number | null,
-  target: Object | null,
-  occupants: Occupant[],
+  target: { id: number } | null,
   maxDistance: number,
+): [Vec2[], number, number[][], number[][]] => {
+  let path: Vec2[] = [];
+
+  // const dbl = populateGrid(occupants);
+  pathFinder.clear(false);
+
+  path = pathFinder.findPath(start, goal, goalRadius, target);
+
+  // Trim the path to the extent the character can move in a single turn.
+  return [...trimPath(path, maxDistance), []];
+}
+
+export type MessageType = {
+  type: 'PopulateGrid' | 'FindPath',
   id: number,
 }
 
-self.onmessage = (event: MessageEvent<MessageRequest>) => {
-  const [path, distance, lines, dbl] = findPath(
-    event.data.start, event.data.goal, event.data.goalRadius, event.data.target, event.data.occupants, event.data.maxDistance,
-  );
+export type PopulateGridRequest = MessageType & {
+  occupants: Occupant[],
+}
 
-  postMessage({
-    type: 'FindPath',
-    path,
-    distance,
-    lines,
-    id: event.data.id,
-    dbl,
-  })
+export type FindPathRequest = MessageType & {
+  start: Vec2,
+  goal: Vec2,
+  goalRadius: number | null,
+  target: { id: number } | null,
+  maxDistance: number,
+}
+
+export type FindPathResponse = MessageType & {
+  path: Vec2[],
+  distance: number,
+  lines: number[][],
+  dbl: number[][],
+}
+
+export type PopulateGridResponse = MessageType& {
+  lines: number[][]
+}
+
+
+self.onmessage = (event: MessageEvent<MessageType>) => {
+  if (event.data.type === 'FindPath') {
+    const data = event.data as FindPathRequest;
+
+    const [path, distance, lines, dbl] = findPath(
+      data.start, data.goal, data.goalRadius, data.target, data.maxDistance,
+    );  
+
+    const response: FindPathResponse = {
+      type: data.type,
+      id: data.id,
+      path,
+      distance,
+      lines,
+      dbl,
+    };
+    
+    postMessage(response)  
+  }
+  else if (event.data.type === 'PopulateGrid') {
+    const data = event.data as PopulateGridRequest;
+
+    const lines = populateGrid(data.occupants);
+
+    const response: PopulateGridResponse = {
+      type: data.type,
+      id: data.id,
+      lines,
+    }
+
+    postMessage(response)  
+  }
 }
 

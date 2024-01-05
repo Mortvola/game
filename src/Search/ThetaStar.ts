@@ -28,7 +28,7 @@ class Set {
 }
 
 class ThetaStarSearch extends UniformGridSearch {
-  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: Object): Vec2[] {
+  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: { id: number }): Vec2[] {
     const start = this.positionToGrid(s);
     const goal =this.positionToGrid(g);
     
@@ -88,7 +88,7 @@ class ThetaStarSearch extends UniformGridSearch {
 
               if (
                 !neighborNode
-                || this.nodeBlocked(neighborNode, target)
+                || this.nodeBlocked(neighborNode)
                 || closedSet.contains(neighborNode)
               ) {
                 continue;
@@ -97,7 +97,6 @@ class ThetaStarSearch extends UniformGridSearch {
               if (currentNode.parent && this.LineOfSight(
                 vec2.create(currentNode.parent.x, currentNode.parent.y),
                 vec2.create(neighborNode.x, neighborNode.y),
-                target,
               )) {
                 const cost = currentNode.parent.gCost + this.costEstimate(
                   currentNode.parent.x, currentNode.parent.y, neighborNode.x, neighborNode.y,

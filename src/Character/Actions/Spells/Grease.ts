@@ -34,7 +34,7 @@ class Grease extends Spell {
 
   interact(script: Script, world: WorldInterface): boolean {
     if (this.center !== null) {
-      world.occupants.push({ center: this.center, radius: this.radius })
+      world.occupants.push({ id: -1, center: this.center, radius: this.radius })
 
       this.actor.character.enduringActions.push(this);
 

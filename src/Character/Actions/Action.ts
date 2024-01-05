@@ -2,7 +2,7 @@ import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import Script from "../../Script/Script";
 import { WorldInterface } from "../../WorldInterface";
 import Actor from "../Actor";
-import { findPath2, getOccupants } from "../../Workers/PathPlannerQueue";
+import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
 import { getWorld } from "../../Renderer";
@@ -99,16 +99,13 @@ class Action {
         // To far for a melee attack
         // Find a path to the target...
 
-        let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-        const occupants = getOccupants(this.actor, target, participants, []);
-
         (async () => {
           const [path, distance, lines, cancelled] = await findPath2(
             this.actor,
             vec2.create(wp[0], wp[2]),
             vec2.create(targetWp[0], targetWp[2]),
             target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75,
-            target, occupants,
+            target,
           )
 
           if (!cancelled) {
@@ -178,18 +175,15 @@ class Action {
       if (point) {
         const wp = this.actor.getWorldPosition();
         
-        let targetWp = vec2.create(point[0], point[2])
+        let targetWp = vec2.create(point[0], point[2]);
 
-        let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-        const occupants = getOccupants(this.actor, target, participants, []);
-
-        (async () => {  
+        (async () => {
           const [path, distance, lines, cancelled] = await findPath2(
             this.actor,
             vec2.create(wp[0], wp[2]),
             targetWp,
             null,
-            target, occupants,
+            target,
           )
   
           if (!cancelled && !this.focused) {

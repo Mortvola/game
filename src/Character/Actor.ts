@@ -20,7 +20,7 @@ import Delay from "../Script/Delay";
 import FollowPath from "../Script/FollowPath";
 import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
-import { findPath2, getOccupants } from "../Workers/PathPlannerQueue";
+import { findPath2, getOccupants, populateGrid } from "../Workers/PathPlannerQueue";
 import Creature from "./Creature";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
@@ -44,7 +44,11 @@ export enum States {
   scripting,
 }
 
+let actorId = 0;
+
 class Actor implements ActorInterface {
+  id: number;
+
   character: Creature;
 
   team: number;
@@ -89,6 +93,9 @@ class Actor implements ActorInterface {
     team: number,
     automated: boolean,
   ) {
+    this.id = actorId;
+    actorId += 1;
+
     this.character = character;
     this.team = team;
     this.automated = automated;
@@ -155,6 +162,11 @@ class Actor implements ActorInterface {
 
     if (!this.automated) {
       this.setDefaultAction();
+
+      const participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
+      const occupants = getOccupants(this, participants, []);
+
+      populateGrid(occupants);
     }
   }
 
@@ -385,9 +397,12 @@ class Actor implements ActorInterface {
               //   world.path2 = null;
               // }
 
-              const occupants = getOccupants(this, target, participants, world.occupants);
+              const occupants = getOccupants(this, participants, world.occupants);
+
+              populateGrid(occupants);
+
               const [path, dist] = await findPath2(
-                this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius) * 0.75, target, occupants,
+                this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius) * 0.75, target,
               );
               
               if (this !== world.participants.activeActor) {
@@ -483,9 +498,12 @@ class Actor implements ActorInterface {
               //   world.path2 = null;
               // }
 
-              const occupants = getOccupants(this, target, participants, world.occupants);
+              const occupants = getOccupants(this, participants, world.occupants);
+
+              populateGrid(occupants);
+
               const [path, dist] = await findPath2(
-                this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius)  * 0.75, target, occupants,
+                this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius)  * 0.75, target,
               );
 
               if (this !== world.participants.activeActor) {

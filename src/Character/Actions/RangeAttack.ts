@@ -4,7 +4,7 @@ import { WorldInterface } from "../../WorldInterface";
 import Action from "./Action";
 import Actor from "../Actor";
 import Trajectory from "../../Drawables/Trajectory";
-import { findPath2, getOccupants } from "../../Workers/PathPlannerQueue";
+import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Shot, { ShotData } from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
 
@@ -56,18 +56,16 @@ class RangeAttack extends Action {
       if (point) {
         const wp = this.actor.getWorldPosition();
         
-        let targetWp = vec2.create(point[0], point[2])
-
-        let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-        const occupants = getOccupants(this.actor, target, participants, []);
+        let targetWp = vec2.create(point[0], point[2]);
 
         (async () => {  
+
           const [path, distance, lines, cancelled] = await findPath2(
             this.actor,
             vec2.create(wp[0], wp[2]),
             targetWp,
             null,
-            target, occupants,
+            target,
           )
   
           if (!cancelled && !this.focused) {
