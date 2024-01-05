@@ -23,7 +23,7 @@ class ChillTouch extends RangeSpell {
     this.targets[0].takeDamage(damage, critical, this.actor, this.name, script);
 
     if (damage > 0) {
-      this.targets[0].character.addInfluencingSpell(this);
+      this.targets[0].character.addInfluencingAction(this);
     }
 
     // TODO: apply disadvantage to undead.

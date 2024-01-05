@@ -57,10 +57,10 @@ export const savingThrow = (creature: Creature, score: number, advantage: Advant
 
   roll += abilityModifier(score);
 
-  if (creature.hasInfluencingSpell('Bane')) {
+  if (creature.hasInfluencingAction('Bane')) {
     roll -= diceRoll(1, 4);
   }
-  else if (creature.hasInfluencingSpell('Bless')) {
+  else if (creature.hasInfluencingAction('Bless')) {
     roll += diceRoll(1, 4);
   }
 
@@ -101,7 +101,7 @@ export const attackRoll = (
     let damage = weaponDamage(weapon, attacker.abilityScores, twhoHanded)
     + weaponDamage(weapon, attacker.abilityScores, twhoHanded);
 
-    if (attacker.hasCondition('Rage') && [WeaponType.Martial, WeaponType.Simple].includes(weapon.type)) {
+    if (attacker.hasInfluencingAction('Rage') && [WeaponType.Martial, WeaponType.Simple].includes(weapon.type)) {
       damage += rageDamageBonus[attacker.charClass.level - 1];
     }
 
@@ -113,17 +113,17 @@ export const attackRoll = (
   // Add in the weapon proficiency bonus.
   roll += attacker.getWeaponProficiency(weapon);
 
-  if (attacker.hasInfluencingSpell('Bane')) {
+  if (attacker.hasInfluencingAction('Bane')) {
     roll -= diceRoll(1, 4);
   }
-  else if (attacker.hasInfluencingSpell('Bless')) {
+  else if (attacker.hasInfluencingAction('Bless')) {
     roll += diceRoll(1, 4);
   }
 
   if (roll >= target.armorClass) {
     let damage = weaponDamage(weapon, attacker.abilityScores, twhoHanded);
 
-    if (attacker.hasCondition('Rage') && [WeaponType.Martial, WeaponType.Simple].includes(weapon.type)) {
+    if (attacker.hasInfluencingAction('Rage') && [WeaponType.Martial, WeaponType.Simple].includes(weapon.type)) {
       damage += rageDamageBonus[attacker.charClass.level - 1];
     }
 
@@ -173,10 +173,10 @@ export const spellAttackRoll = (
   // Add in the weapon proficiency bonus.
   roll += getProficiencyBonus(attacker.charClass.level)
 
-  if (attacker.hasInfluencingSpell('Bane')) {
+  if (attacker.hasInfluencingAction('Bane')) {
     roll -= diceRoll(1, 4);
   }
-  else if (attacker.hasInfluencingSpell('Bless')) {
+  else if (attacker.hasInfluencingAction('Bless')) {
     roll += diceRoll(1, 4);
   }
 

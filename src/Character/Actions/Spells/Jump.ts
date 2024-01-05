@@ -9,7 +9,7 @@ class Jump extends TouchSpell {
   }
 
   cast(script: Script, world: WorldInterface): boolean {
-    this.targets[0].character.addInfluencingSpell(this);
+    this.targets[0].character.addInfluencingAction(this);
 
     return true;
   }

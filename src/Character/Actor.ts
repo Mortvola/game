@@ -195,7 +195,7 @@ class Actor implements ActorInterface {
           }
           else {
             for (const target of action.targets) {
-              target.character.removeInfluencingSpell(action.name)
+              target.character.removeInfluencingAction(action.name)
             }
           }
         
@@ -325,13 +325,13 @@ class Actor implements ActorInterface {
       else {
         script.entries.push(new Delay(2000));
 
-        const charmed = this.character.getInfluencingSpell('Charm Person');
+        const charmed = this.character.getInfluencingAction('Charm Person');
 
         let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
         const otherTeam = world.participants.participants[this.team ^ 1]
           .filter((a) => (
             a.character.hitPoints > 0
-            && !a.character.hasInfluencingSpell('Sanctuary')
+            && !a.character.hasInfluencingAction('Sanctuary')
             && (!charmed || charmed.actor !== a)
           ));
 
@@ -617,7 +617,7 @@ class Actor implements ActorInterface {
     let [damage, critical] = attackRoll(this.character, targetActor.character, weapon, false, advantage);
 
     if (
-      (targetActor.character.hasCondition('Rage') || targetActor.character.hasInfluencingSpell('Blade Ward'))
+      (targetActor.character.hasInfluencingAction('Rage') || targetActor.character.hasInfluencingAction('Blade Ward'))
       && [DamageType.Bludgeoning, DamageType.Piercing, DamageType.Slashing].includes(weapon.damage)
     ) {
       damage = Math.trunc(damage / 2);
@@ -625,8 +625,8 @@ class Actor implements ActorInterface {
 
     targetActor.takeDamage(damage, critical, this, weapon.name, script);
 
-    if (this.character.hasInfluencingSpell('Sanctuary')) {
-      this.character.removeInfluencingSpell('Sanctuary')
+    if (this.character.hasInfluencingAction('Sanctuary')) {
+      this.character.removeInfluencingAction('Sanctuary')
       script.entries.push(new Logger(`${this.character.name} lost sanctuary.`))
     }
   }
@@ -649,7 +649,7 @@ class Actor implements ActorInterface {
       if (damage > 0) {
         script.entries.push(new Logger(`${from.character.name} ${critical ? 'critically ' : ''}hit ${this.character.name} for ${damage} points with a ${weaponName}.`))
 
-        this.character.removeInfluencingSpell('Charm Person')
+        this.character.removeInfluencingAction('Charm Person')
 
         if (this.character.concentration) {
           const st = savingThrow(this.character, this.character.abilityScores.constitution, 'Neutral');
@@ -688,7 +688,7 @@ class Actor implements ActorInterface {
   }
 
   takeHealing(hitPoints: number, from: Actor, by: string, script: Script) {
-    if (!this.character.hasInfluencingSpell('Chill Touch')) {
+    if (!this.character.hasInfluencingAction('Chill Touch')) {
       this.character.hitPoints = Math.min(this.character.hitPoints + hitPoints, this.character.maxHitPoints);
 
       script.entries.push(new Logger(`${this.character.name} healed ${hitPoints} hit points by ${by} from ${from.character.name}.`))  

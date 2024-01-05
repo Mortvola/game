@@ -26,7 +26,7 @@ class RayOfSickness extends RangeSpell {
       const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.constitution, 'Neutral');
 
       if (st < this.actor.character.spellCastingDc) {
-        // this.targets[0].character.addInfluencingSpell(this);
+        // this.targets[0].character.addInfluencingAction(this);
         // TODO: Add poisened condition
       }
     }

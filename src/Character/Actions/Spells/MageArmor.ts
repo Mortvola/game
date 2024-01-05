@@ -10,7 +10,7 @@ class MageArmor extends TouchSpell {
   }
 
   cast(script: Script, world: WorldInterface): boolean {
-    this.targets[0].character.addInfluencingSpell(this);
+    this.targets[0].character.addInfluencingAction(this);
 
     script.entries.push(new Logger(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))
 

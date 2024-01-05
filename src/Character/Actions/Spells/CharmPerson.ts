@@ -14,7 +14,7 @@ class CharmPerson extends RangeSpell {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.wisdom, 'Advantage');
 
     if (st < this.actor.character.spellCastingDc) {
-      this.targets[0].character.addInfluencingSpell(this)
+      this.targets[0].character.addInfluencingAction(this)
 
       if (world.loggerCallback) {
         world.loggerCallback(`${this.actor.character.name} charmed ${this.targets[0].character.name}.`)

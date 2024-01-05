@@ -11,7 +11,7 @@ class Bless extends RangeSpell {
   
   cast(script: Script, world: WorldInterface): boolean {
     for (const target of this.targets) {
-      target.character.addInfluencingSpell(this)
+      target.character.addInfluencingAction(this)
         
       if (world.loggerCallback) {
         world.loggerCallback(`${this.actor.character.name} cast bless on ${target.character.name}.`)

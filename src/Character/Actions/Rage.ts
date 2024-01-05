@@ -3,7 +3,6 @@ import Actor from "../Actor";
 import Action from "./Action";
 import { WorldInterface } from "../../WorldInterface";
 import Script from "../../Script/Script";
-import RageCondition from './Conditions/Rage'
 
 class Rage extends Action {
   constructor(actor: Actor) {
@@ -13,7 +12,7 @@ class Rage extends Action {
   prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     let success = 0;
 
-    if (this.actor === target && !target.character.hasCondition('Rage')) {
+    if (this.actor === target && !target.character.hasInfluencingAction('Rage')) {
       this.focused = target;
       success = 100;  
     }
@@ -32,7 +31,7 @@ class Rage extends Action {
       this.targets.push(this.focused);
       this.focused = null;
       
-      this.actor.character.conditions.push(new RageCondition())
+      this.actor.character.addInfluencingAction(this)
       this.actor.character.enduringActions.push(this)
       return true;
     }

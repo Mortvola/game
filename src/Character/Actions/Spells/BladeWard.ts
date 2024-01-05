@@ -9,7 +9,7 @@ class BladeWard extends SelfSpell {
   }
 
   cast(script: Script, world: WorldInterface): boolean {
-    this.actor.character.addInfluencingSpell(this)
+    this.actor.character.addInfluencingAction(this)
 
     return true;
   }

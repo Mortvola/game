@@ -61,7 +61,7 @@ class Creature {
 
   primaryWeapon: PrimaryWeapon = 'Melee';
 
-  influencingSpells: Spell[] = [];
+  influencingActions: Action[] = [];
 
   conditions: Condition[] = [];
 
@@ -95,7 +95,7 @@ class Creature {
   get armorClass() {
     let ac = 0;
 
-    if (this.hasInfluencingSpell('Shield of Faith')) {
+    if (this.hasInfluencingAction('Shield of Faith')) {
       ac += 2;      
     }
 
@@ -115,7 +115,7 @@ class Creature {
       return ac;
     }
   
-    if (this.hasInfluencingSpell('Mage Armor')) {
+    if (this.hasInfluencingAction('Mage Armor')) {
       return ac + 13 + abilityModifier(this.abilityScores.dexterity)
     }
 
@@ -241,7 +241,7 @@ class Creature {
   stopConcentrating() {
     if (this.concentration) {
       for (const creature of this.concentration.targets) {
-        creature.character.removeInfluencingSpell(this.concentration.name)
+        creature.character.removeInfluencingAction(this.concentration.name)
       }
 
       this.concentration = null;
@@ -272,27 +272,27 @@ class Creature {
     return 8 + getProficiencyBonus(this.charClass.level) + abilityModifier(this.spellcastingAbilityScore);
   }
 
-  addInfluencingSpell(spell: Spell) {
-    this.influencingSpells.push(spell);
+  addInfluencingAction(spell: Action) {
+    this.influencingActions.push(spell);
   }
 
-  removeInfluencingSpell(name: string) {
-    const index = this.influencingSpells.findIndex((s) => s.name === name);
+  removeInfluencingAction(name: string) {
+    const index = this.influencingActions.findIndex((s) => s.name === name);
 
     if (index !== -1) {
-      this.influencingSpells = [
-        ...this.influencingSpells.slice(0, index),
-        ...this.influencingSpells.slice(index + 1),
+      this.influencingActions = [
+        ...this.influencingActions.slice(0, index),
+        ...this.influencingActions.slice(index + 1),
       ]
     }
   }
 
-  hasInfluencingSpell(name: string): boolean {
-    return this.influencingSpells.some((s) => s.name === name);
+  hasInfluencingAction(name: string): boolean {
+    return this.influencingActions.some((s) => s.name === name);
   }
 
-  getInfluencingSpell(name: string): Spell | null {
-    const spell = this.influencingSpells.find((s) => s.name === name);
+  getInfluencingAction(name: string): Action | null {
+    const spell = this.influencingActions.find((s) => s.name === name);
 
     return spell ?? null;
   }

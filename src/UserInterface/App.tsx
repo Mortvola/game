@@ -406,7 +406,7 @@ function App() {
       <div className="lower-left">
         {
           actor
-            ? actor.character.influencingSpells.map((c) => (
+            ? actor.character.influencingActions.map((c) => (
               <div>{`${c.name} (${c.duration / 6})`}</div>
             ))
             : null

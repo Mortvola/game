@@ -1,6 +1,5 @@
 export type ConditionType = 
-  'Rage'
-  | 'Poisoned'
+  'Poisoned'
   ;
 
 class Condition {

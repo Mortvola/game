@@ -15,7 +15,7 @@ class Bane extends RangeSpell {
       const st = savingThrow(this.targets[i].character, this.targets[i].character.abilityScores.charisma, 'Neutral');
 
       if (st < this.actor.character.spellCastingDc) {
-        this.targets[i].character.addInfluencingSpell(this)
+        this.targets[i].character.addInfluencingAction(this)
         
         if (world.loggerCallback) {
           world.loggerCallback(`${this.actor.character.name} cast bane on ${this.targets[i].character.name}.`)
