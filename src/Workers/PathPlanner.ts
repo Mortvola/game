@@ -86,12 +86,16 @@ const findPath = (
     debugLines = debugLines.concat(lines)
   }
 
-  let dbl = debugLines.map((p) => (
-    [
-      (p[0] - pathFinder.center[0]) / pathFinder.scale, 0.1, (p[1] - pathFinder.center[1]) / pathFinder.scale, 1,
-      1, 1, 1, 1,
-    ]
-  ))
+  let dbl = debugLines.map((p) => {
+    const p2 = pathFinder.gridToPosition(p);
+
+    return (
+      [
+        p2[0], 0.1, p2[1], 1,
+        1, 1, 1, 1,
+      ]
+    )
+  })
 
   path = pathFinder.findPath(start, goal, goalRadius, target);
 

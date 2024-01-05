@@ -30,8 +30,8 @@ class UniformGridSearch {
 
     this.grid = Array.from({ length: height }, (_, y) => (
       Array.from({ length: width }, (_, x) => ({
-        x: x - this.center[0],
-        y: y - this.center[1],
+        x,
+        y,
         gCost: 0,
         hCost: 0,
         actors: [],
@@ -60,10 +60,7 @@ class UniformGridSearch {
     throw new Error('Not implemented')
   }
 
-  getNode(v: Vec2): Element | undefined {
-    const x = v[0] + this.center[0];
-    const y = v[1] + this.center[0];
-
+  getNode(x: number, y: number): Element | undefined {
     if (
       x < 0 || x >= this.width
       || y < 0 || y >= this.height
@@ -96,15 +93,18 @@ class UniformGridSearch {
     let f = 0
 
     const s: number[] = [1, 1];
+    const s2: number[] = [0, 0];
 
     if (dy < 0) {
         dy = -dy
         s[1] = -1
+        s2[1] = -1
     }
 
     if (dx < 0) {
         dx = -dx
         s[0] = -1
+        s2[0] = -1
     }
 
     if (dx >= dy) {
@@ -113,10 +113,8 @@ class UniformGridSearch {
 
         if (f >= dx ) {
           const node = this.getNode(
-            vec2.create(
-              x0 + Math.floor((s[0] - 1) / 2),
-              y0 + Math.floor((s[1] - 1) / 2),
-            )
+            x0 + s2[0],
+            y0 + s2[1],
           );
 
           if (this.nodeBlocked(node, target)) { 
@@ -127,30 +125,26 @@ class UniformGridSearch {
           f = f - dx
         }
 
-        const node = this.getNode(
-          vec2.create(
-            x0 + Math.floor((s[0] - 1) / 2),
-            y0 + Math.floor((s[1] - 1) / 2),
-          )
-        );
+        if (f !== 0) {
+          const node = this.getNode(
+            x0 + s2[0],
+            y0 + s2[1],
+          );
 
-        if (f !== 0 && this.nodeBlocked(node, target)) {
+          if (this.nodeBlocked(node, target)) {
             return false
+          }
         }
 
         if (dy === 0) {
           const node1 = this.getNode(
-            vec2.create(
-              x0 + Math.floor((s[0] - 1) / 2),
-              y0,
-            )
+            x0 + s2[0],
+            y0,
           );
 
           const node2 = this.getNode(
-            vec2.create(
-              x0 + Math.floor((s[0] - 1) / 2),
-              y0 - 1,
-            )
+            x0 + s2[0],
+            y0 - 1,
           );
 
           if (this.nodeBlocked(node1, target) && this.nodeBlocked(node2, target)) {
@@ -165,10 +159,8 @@ class UniformGridSearch {
         f = f + dx
         if (f >= dy) {
           const node = this.getNode(
-            vec2.create(
-              x0 + Math.floor((s[0] - 1) / 2),
-              y0 + Math.floor((s[1] - 1) / 2),
-            )
+              x0 + s2[0],
+              y0 + s2[1],
           );
 
           if (this.nodeBlocked(node, target)) {
@@ -179,30 +171,26 @@ class UniformGridSearch {
           f = f - dy
         }
 
-        const node = this.getNode(
-          vec2.create(
-            x0 + Math.floor((s[0] - 1) / 2),
-            y0 + Math.floor((s[1] - 1) / 2),
-          )
-        );
-
-        if (f !== 0 && this.nodeBlocked(node, target)) {
-          return false;
+        if (f !== 0) {
+          const node = this.getNode(
+            x0 + s2[0],
+            y0 + s2[1],
+          );
+            
+          if (this.nodeBlocked(node, target)) {
+            return false;
+          }
         }
 
         if (dx === 0) {
           const node1 = this.getNode(
-            vec2.create(
-              x0 + Math.floor((s[0] - 1) / 2),
-              y0,
-            )
+            x0,
+            y0 + s2[1],
           );
 
           const node2 = this.getNode(
-            vec2.create(
-              x0 + Math.floor((s[0] - 1) / 2),
-              y0 - 1,
-            )
+            x0 - 1,
+            y0 + s2[1],
           );
 
           if (this.nodeBlocked(node1, target) && this.nodeBlocked(node2, target)) {
@@ -220,30 +208,26 @@ class UniformGridSearch {
   fillCircle(actor: Object, c: Vec2, r: number): number[][] {
     let debugLines: number[][] = [];
 
-    const center = vec2.create(
-      Math.floor(c[0] * this.scale + 0.5) + this.center[0],
-      Math.floor(c[1] * this.scale + 0.5) + this.center[1],
-    )
-    // const center = this.positionToGrid(c);
+    const center = this.positionToGrid(c);
     const radius = Math.floor(r * this.scale + 0.5);
 
     let x = radius;
     let y = 0;
   
     // (-radius, 0) and (radius, 0) points.
-    if (0 <= y + center[1] && y + center[1] < this.height) {
-      const lines = this.horizontalLine(actor, -x + center[0], x + center[0], y + center[1])
+    if (0 <= center[1] && center[1] < this.height) {
+      const lines = this.horizontalLine(actor, -x + center[0], x + center[0], center[1])
       debugLines = debugLines.concat(lines);
     }
 
     // (0, -radius) and (0, radius) points
-    if (0 <= y + center[0] && y + center[0] < this.width) {
+    if (0 <= center[0] && center[0] < this.width) {
       if (0 <= x + center[1] && x + center[1] < this.height) {
-        this.grid[x + center[1]][y + center[0]].actors.push(actor);
+        this.grid[x + center[1]][center[0]].actors.push(actor);
       }
 
       if (0 <= -x + center[1] && -x + center[1] < this.height) {
-        this.grid[-x + center[1]][y + center[0]].actors.push(actor);
+        this.grid[-x + center[1]][center[0]].actors.push(actor);
       }
     }
     
@@ -264,24 +248,34 @@ class UniformGridSearch {
         break;
       }
   
-      if (0 <= y + center[1] && y + center[1] < this.height) {
-        const lines = this.horizontalLine(actor, -x + center[0], x + center[0], y + center[1])
+      let x1 = -x + center[0];
+      let x2 = x + center[0];
+      let y1 = y + center[1];
+      let y2 = -y + center[1];
+
+      if (0 <= y1 && y1 < this.height) {
+        const lines = this.horizontalLine(actor, x1, x2, y1)
         debugLines = debugLines.concat(lines);
       }
 
-      if (0 <= -y + center[1] && -y + center[1] < this.height) {
-        const lines = this.horizontalLine(actor, -x + center[0], x + center[0], -y + center[1])
+      if (0 <= y2 && y2 < this.height) {
+        const lines = this.horizontalLine(actor, x1, x2, y2)
         debugLines = debugLines.concat(lines);
       }
 
       if (x !== y) {
-        if (0 <= x + center[1] && x + center[1] < this.height) {
-          const lines = this.horizontalLine(actor, -y + center[0], y + center[0], x + center[1])
+        x1 = -y + center[0];
+        x2 = y + center[0];
+        y1 = x + center[1];
+        y2 = -x + center[1];
+  
+        if (0 <= y1 && y1 < this.height) {
+          const lines = this.horizontalLine(actor, x1, x2, y1)
           debugLines = debugLines.concat(lines);
         }
 
-        if (0 <= -x + center[1] && -x + center[1] < this.height) {
-          const lines = this.horizontalLine(actor, -y + center[0], y + center[0], -x + center[1])
+        if (0 <= y2 && y2 < this.height) {
+          const lines = this.horizontalLine(actor, x1, x2, y2)
           debugLines = debugLines.concat(lines);
         }
       }
@@ -310,8 +304,8 @@ class UniformGridSearch {
       if (path.length > 2) {
         for (let i = 1; i < path.length - 1; i += 1) {
           const blocked = !this.LineOfSight(
-            vec2.create(Math.floor(smoothedPath[smoothedPath.length - 1][0] * this.scale), Math.floor(smoothedPath[smoothedPath.length - 1][1] * this.scale)),
-            vec2.create(Math.floor(path[i + 1][0] * this.scale), Math.floor(path[i + 1][1] * this.scale)),
+            this.positionToGrid(smoothedPath[smoothedPath.length - 1]),
+            this.positionToGrid(path[i + 1]),
             target,
           );
 
@@ -331,8 +325,15 @@ class UniformGridSearch {
 
   positionToGrid(position: Vec2): Vec2 {
     return vec2.create(
-      Math.floor(position[0] * this.scale + 0.5),
-      Math.floor(position[1] * this.scale + 0.5),
+      Math.floor(position[0] * this.scale + 0.5) + this.center[0],
+      Math.floor(position[1] * this.scale + 0.5) + this.center[1],
+    );
+  }
+
+  gridToPosition(position: Vec2): Vec2 {
+    return vec2.create(
+      (position[0] - this.center[0]) / this.scale,
+      (position[1] - this.center[1]) / this.scale,
     );
   }
 }

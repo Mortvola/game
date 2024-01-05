@@ -43,7 +43,7 @@ class MoveAction extends Action {
         this.actor,
         vec2.create(wp[0], wp[2]),
         targetWp,
-        target ? target.occupiedRadius + this.actor.occupiedRadius : null,
+        target ? target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75 : null,
         target, occupants,
       )
 

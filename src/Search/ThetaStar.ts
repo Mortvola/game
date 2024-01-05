@@ -29,19 +29,19 @@ class Set {
 
 class ThetaStarSearch extends UniformGridSearch {
   findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: Object): Vec2[] {
-    const start = vec2.create(Math.floor(s[0] * this.scale + 0.5), Math.floor(s[1] * this.scale + 0.5))
-    const goal = vec2.create(Math.floor(g[0] * this.scale + 0.5), Math.floor(g[1] * this.scale + 0.5))
+    const start = this.positionToGrid(s);
+    const goal =this.positionToGrid(g);
     
     const openSet = new Set();
     const closedSet = new Set();
 
-    const goalNode = this.getNode(goal);
+    const goalNode = this.getNode(goal[0], goal[1]);
 
     if (!goalNode) {
       throw new Error('invalid goal node')
     }
 
-    const startNode = this.getNode(start);
+    const startNode = this.getNode(start[0], start[1]);
 
     if (!startNode) {
       throw new Error('invalid start node')
@@ -64,7 +64,7 @@ class ThetaStarSearch extends UniformGridSearch {
           const path: Vec2[] = [];
 
           while (currentNode) {
-            path.push(vec2.create(currentNode.x / this.scale, currentNode.y / this.scale));
+            path.push(this.gridToPosition(vec2.create(currentNode.x, currentNode.y)));
             currentNode = currentNode.parent
           }
 
@@ -78,13 +78,13 @@ class ThetaStarSearch extends UniformGridSearch {
             }
 
             if (
-              x + currentNode.x + this.center[0] >= 0
-              && x + currentNode.x + this.center[0] < this.width
-              && y + currentNode.y + this.center[1] >= 0
-              && y + currentNode.y + this.center[1] < this.height
+              x + currentNode.x >= 0
+              && x + currentNode.x < this.width
+              && y + currentNode.y >= 0
+              && y + currentNode.y < this.height
             ) {
               const neighbor = vec2.create(currentNode.x + x, currentNode.y + y);
-              const neighborNode = this.getNode(neighbor);
+              const neighborNode = this.getNode(neighbor[0], neighbor[1]);
 
               if (
                 !neighborNode

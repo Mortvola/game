@@ -61,9 +61,9 @@ class Actor implements ActorInterface {
 
   chestHeight = 1.45;
 
-  occupiedRadius = feetToMeters(2.5);
+  occupiedRadius = 0.75; // 0.707106781186548; // feetToMeters(2.5);
 
-  attackRadius = this.occupiedRadius + feetToMeters(2.5);
+  attackRadius = this.occupiedRadius + feetToMeters(5);
 
   sceneNode = new ContainerNode();
 
@@ -386,7 +386,9 @@ class Actor implements ActorInterface {
               // }
 
               const occupants = getOccupants(this, target, participants, world.occupants);
-              const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.occupiedRadius, target, occupants);
+              const [path, dist] = await findPath2(
+                this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius) * 0.75, target, occupants,
+              );
               
               if (this !== world.participants.activeActor) {
                 return;
@@ -482,7 +484,9 @@ class Actor implements ActorInterface {
               // }
 
               const occupants = getOccupants(this, target, participants, world.occupants);
-              const [path, dist] = await findPath2(this, start, goal, target.occupiedRadius + this.occupiedRadius, target, occupants);
+              const [path, dist] = await findPath2(
+                this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius)  * 0.75, target, occupants,
+              );
 
               if (this !== world.participants.activeActor) {
                 return;

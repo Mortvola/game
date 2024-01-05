@@ -107,7 +107,7 @@ class Action {
             this.actor,
             vec2.create(wp[0], wp[2]),
             vec2.create(targetWp[0], targetWp[2]),
-            target.occupiedRadius + this.actor.occupiedRadius,
+            target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75,
             target, occupants,
           )
 
