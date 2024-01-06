@@ -1,10 +1,10 @@
 import { feetToMeters } from "../../../Math";
 import Actor from "../../Actor";
-import Spell from "./Spell";
+import AreaSpell from "./AreaSpell";
 
-class BurningHands extends Spell {
+class BurningHands extends AreaSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Burning Hands', 'Action', 1, feetToMeters(15), 0, false, false)
+    super(actor, 'Burning Hands', 'Action', 1, feetToMeters(15), 0, 0, false, false)
   }
 }
 

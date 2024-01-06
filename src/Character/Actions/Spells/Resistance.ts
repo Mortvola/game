@@ -5,7 +5,7 @@ import TouchSpell from "./TouchSpell";
 
 class Resistance extends TouchSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Resistance', 'Action', 0, 0, 60, false, true)
+    super(actor, 1, true, 'Resistance', 'Action', 0, 60, false, true)
   }
 
   cast(script: Script, world: WorldInterface): boolean {

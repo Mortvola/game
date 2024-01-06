@@ -1,10 +1,10 @@
 import { feetToMeters } from "../../../Math";
 import Actor from "../../Actor";
-import Spell from "./Spell";
+import AreaSpell from "./AreaSpell";
 
-class Thunderwave extends Spell {
+class Thunderwave extends AreaSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Thunderwave', 'Action', 1, feetToMeters(15), 0, false, false);
+    super(actor, 'Thunderwave', 'Action', 1, feetToMeters(15), feetToMeters(15), 0, false, false);
   }
 }
 

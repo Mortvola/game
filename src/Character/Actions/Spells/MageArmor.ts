@@ -6,7 +6,7 @@ import TouchSpell from "./TouchSpell";
 
 class MageArmor extends TouchSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Mage Armor', 'Action', 1, 0, 8 * 60 * 60, false, false)
+    super(actor, 1, true, 'Mage Armor', 'Action', 1, 8 * 60 * 60, false, false)
   }
 
   cast(script: Script, world: WorldInterface): boolean {

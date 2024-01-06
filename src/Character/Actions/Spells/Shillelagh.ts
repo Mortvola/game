@@ -5,7 +5,7 @@ import SelfSpell from "./SelfSpell";
 
 class Shillelagh extends SelfSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Shillelagh', 'Bonus', 0, 0, 60, false, false);
+    super(actor, 1, true, 'Shillelagh', 'Bonus', 0, 60, false, false);
   }
 
   cast(script: Script, world: WorldInterface): boolean {

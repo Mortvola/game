@@ -1,10 +1,43 @@
-import { Vec4 } from "wgpu-matrix";
+import { Vec4, mat4, quat, vec3, vec4 } from "wgpu-matrix";
 import Actor from "../../Actor";
 import Spell from "./Spell";
 import { WorldInterface } from "../../../WorldInterface";
 import Script from "../../../Script/Script";
+import { getWorld } from "../../../Renderer";
+import Circle from "../../../Drawables/Circle";
+import { degToRad } from "../../../Math";
+import { TimeType } from "../Action";
 
 class RangeSpell extends Spell {
+  range: number;
+
+  rangeCircle: Circle | null = null;
+
+  constructor(
+    actor: Actor,
+    maxTargets: number,
+    uniqueTargets: boolean,
+    name: string,
+    time: TimeType,
+    level: number,
+    range: number,
+    duration: number,
+    endOfTurn: boolean,
+    concentration: boolean,
+  ) {
+    super(actor, maxTargets, uniqueTargets, name, time, level, duration, endOfTurn, concentration);
+    this.range = range;
+  }
+
+  initialize() {
+    this.showRangeCircle();
+  }
+
+  clear() {
+    super.clear();
+    this.hideRangeCircle();
+  }
+
   prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
     let description = `Select ${this.maxTargets  - this.targets.length} more targets.`;
 
@@ -72,6 +105,39 @@ class RangeSpell extends Spell {
     }
 
     return false;
+  }
+
+  showRangeCircle() {
+    if (this.range > 0) {
+      const world = getWorld();
+
+      this.rangeCircle = new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1))
+      this.rangeCircle.translate = vec3.copy(this.actor.sceneNode.translate)
+  
+      world.mainRenderPass.addDrawable(this.rangeCircle, 'circle');
+      world.scene.addNode(this.rangeCircle, 'circle');
+  
+      const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
+      this.rangeCircle.postTransforms.push(mat4.fromQuat(q));  
+    }
+  }
+
+  hideRangeCircle() {
+    if (this.rangeCircle) {
+      const world = getWorld();
+      world.mainRenderPass.removeDrawable(this.rangeCircle, 'circle');
+      world.scene.removeNode(this.rangeCircle)
+      this.rangeCircle = null;
+    }
+  }
+
+  withinRange(target: Actor) {
+    const wp = this.actor.getWorldPosition();
+    const targetWp = target.getWorldPosition();
+
+    const distance = vec3.distance(wp, targetWp);
+
+    return (distance <= this.range);
   }
 }
 

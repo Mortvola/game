@@ -7,7 +7,7 @@ import TouchSpell from "./TouchSpell";
 
 class ShockingGrasp extends TouchSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Shocking Grasp', 'Action', 0, 0, 0, false, false);
+    super(actor, 1, true, 'Shocking Grasp', 'Action', 0, 0, false, false);
   }
 
   cast(script: Script, world: WorldInterface) {

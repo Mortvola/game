@@ -5,7 +5,7 @@ import SelfSpell from "./SelfSpell";
 
 class BladeWard extends SelfSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Blade Ward', 'Action', 0, 0, 6, true, false)
+    super(actor, 1, true, 'Blade Ward', 'Action', 0, 6, true, false)
   }
 
   cast(script: Script, world: WorldInterface): boolean {

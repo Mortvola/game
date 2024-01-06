@@ -5,7 +5,7 @@ import SelfSpell from "./SelfSpell";
 
 class ExpeditiousRetreat extends SelfSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Expeditious Retreat', 'Bonus', 1, 0, 10 * 60, false, true)
+    super(actor, 1, true, 'Expeditious Retreat', 'Bonus', 1, 10 * 60, false, true)
   }
 
   cast(script: Script, world: WorldInterface): boolean {

@@ -7,7 +7,7 @@ import { DamageType } from "../../Equipment/Weapon";
 
 class InflictWounds extends TouchSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Inflict Wounds', 'Action', 1, 0, 0, false, false)
+    super(actor, 1, true, 'Inflict Wounds', 'Action', 1, 0, false, false)
   }
 
   cast(script: Script, world: WorldInterface): boolean {

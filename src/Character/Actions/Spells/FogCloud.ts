@@ -1,10 +1,10 @@
 import { feetToMeters } from "../../../Math";
 import Actor from "../../Actor";
-import Spell from "./Spell";
+import AreaSpell from "./AreaSpell";
 
-class FogCloud extends Spell {
+class FogCloud extends AreaSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Fog Cloud', 'Action', 1, feetToMeters(120), 60 * 60, false, true);
+    super(actor, 'Fog Cloud', 'Action', 1, feetToMeters(20), feetToMeters(120), 60 * 60, false, true);
   }
 }
 

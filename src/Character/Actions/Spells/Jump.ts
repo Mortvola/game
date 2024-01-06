@@ -5,7 +5,7 @@ import TouchSpell from "./TouchSpell";
 
 class Jump extends TouchSpell {
   constructor(actor: Actor) {
-    super(actor, 1, true, 'Jump', 'Action', 1, 0, 60, false, false);
+    super(actor, 1, true, 'Jump', 'Action', 1, 60, false, false);
   }
 
   cast(script: Script, world: WorldInterface): boolean {

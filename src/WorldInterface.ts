@@ -61,8 +61,6 @@ export interface WorldInterface {
 
   occupants: Occupant[];
 
-  circleAoE: Circle | null;
-
   focused: Actor | null;
 
   focusCallback: ((focusInfo: FocusInfo | null) => void) | null;
