@@ -69,7 +69,24 @@ class UniformGridSearch {
     return this.grid[y][x]
   }
 
-  nodeBlocked(node: GridNode | null | undefined): boolean {
+  nodeBlocked(x: number, y: number): boolean;
+  nodeBlocked(node?: GridNode | null): boolean;
+  nodeBlocked(arg1?: number | GridNode | null, arg2?: number): boolean {
+    let node = arg1 as GridNode;
+
+    if (typeof arg1 === 'number' && typeof arg2 === 'number') {
+      const x = arg1;
+      const y = arg2;
+      if (
+        x < 0 || x >= this.width
+        || y < 0 || y >= this.height
+      ) {
+        return true;
+      }
+  
+      node = this.grid[y][x];
+    }
+
     if (node === null || node === undefined) {
       return true;
     }
@@ -78,7 +95,7 @@ class UniformGridSearch {
 
     if (node.occupants.filter((o) => (avoidTerrain || o.type !== 'Terrain') && o.id !== this.target?.id).length > 0) {
       return true;
-    }
+    }        
 
     return false;
   }
@@ -115,12 +132,7 @@ class UniformGridSearch {
         f = f + dy;
 
         if (f >= dx ) {
-          const node = this.getNode(
-            x0 + s2[0],
-            y0 + s2[1],
-          );
-
-          if (this.nodeBlocked(node)) { 
+          if (this.nodeBlocked(x0 + s2[0], y0 + s2[1])) { 
               return false
           }
 
@@ -128,31 +140,12 @@ class UniformGridSearch {
           f = f - dx
         }
 
-        if (f !== 0) {
-          const node = this.getNode(
-            x0 + s2[0],
-            y0 + s2[1],
-          );
-
-          if (this.nodeBlocked(node)) {
-            return false
-          }
+        if (f !== 0 && this.nodeBlocked(x0 + s2[0], y0 + s2[1])) {
+          return false
         }
 
-        if (dy === 0) {
-          const node1 = this.getNode(
-            x0 + s2[0],
-            y0,
-          );
-
-          const node2 = this.getNode(
-            x0 + s2[0],
-            y0 - 1,
-          );
-
-          if (this.nodeBlocked(node1) && this.nodeBlocked(node2)) {
-            return false
-          }
+        if (dy === 0 && this.nodeBlocked(x0 + s2[0], y0) && this.nodeBlocked(x0 + s2[0], y0 - 1)) {
+          return false
         }
 
         x0 = x0 + s[0];
@@ -161,12 +154,7 @@ class UniformGridSearch {
       while (y0 !== y1) {
         f = f + dx
         if (f >= dy) {
-          const node = this.getNode(
-              x0 + s2[0],
-              y0 + s2[1],
-          );
-
-          if (this.nodeBlocked(node)) {
+          if (this.nodeBlocked(x0 + s2[0], y0 + s2[1])) {
               return false;
           }
 
@@ -174,31 +162,12 @@ class UniformGridSearch {
           f = f - dy
         }
 
-        if (f !== 0) {
-          const node = this.getNode(
-            x0 + s2[0],
-            y0 + s2[1],
-          );
-            
-          if (this.nodeBlocked(node)) {
-            return false;
-          }
+        if (f !== 0 && this.nodeBlocked(x0 + s2[0], y0 + s2[1])) {
+          return false;
         }
 
-        if (dx === 0) {
-          const node1 = this.getNode(
-            x0,
-            y0 + s2[1],
-          );
-
-          const node2 = this.getNode(
-            x0 - 1,
-            y0 + s2[1],
-          );
-
-          if (this.nodeBlocked(node1) && this.nodeBlocked(node2)) {
-            return false
-          }
+        if (dx === 0 && this.nodeBlocked(x0, y0 + s2[1]) && this.nodeBlocked(x0 - 1, y0 + s2[1])) {
+          return false
         }
 
         y0 = y0 + s[1];

@@ -153,8 +153,7 @@ class JumpPointSearch extends UniformGridSearch {
           path[0] = result[0];
 
           const t = this.positionToGrid(path[0]);
-          const n = this.getNode(t[0], t[1]);
-          if (this.nodeBlocked(n)) {
+          if (this.nodeBlocked(t[0], t[1])) {
             console.log('**** still blocked ***');
           }
 
@@ -191,14 +190,9 @@ class JumpPointSearch extends UniformGridSearch {
 
     if (dx !== 0 && dy !== 0) {
       // Diagonal travel
-      const neighbor1 = this.getNode(node.x - dx, node.y + dy)
-      const neighbor2 = this.getNode(node.x - dx, node.y)
-      const neighbor3 = this.getNode(node.x + dx, node.y - dy)
-      const neighbor4 = this.getNode(node.x, node.y - dy)
-
       if (
-        (!this.nodeBlocked(neighbor1) && this.nodeBlocked(neighbor2))
-        || (!this.nodeBlocked(neighbor3) && this.nodeBlocked(neighbor4))
+        (!this.nodeBlocked(node.x - dx, node.y + dy) && this.nodeBlocked(node.x - dx, node.y))
+        || (!this.nodeBlocked(node.x + dx, node.y - dy) && this.nodeBlocked(node.x, node.y - dy))
       ) {
         return node;
       }
@@ -219,13 +213,9 @@ class JumpPointSearch extends UniformGridSearch {
 
       // If the node above/below is blocked but the one forward and above/below is not
       // then add the current node as a jump point.
-      const neighbor1 = this.getNode(node.x, node.y + 1)
-      const neighbor2 = this.getNode(node.x + dx, node.y + 1)
-      const neighbor3 = this.getNode(node.x, node.y - 1)
-      const neighbor4 = this.getNode(node.x + dx, node.y - 1)
       if (
-        (this.nodeBlocked(neighbor1) && !this.nodeBlocked(neighbor2))
-        || (this.nodeBlocked(neighbor3) && !this.nodeBlocked(neighbor4))
+        (this.nodeBlocked(node.x, node.y + 1) && !this.nodeBlocked(node.x + dx, node.y + 1))
+        || (this.nodeBlocked(node.x, node.y - 1) && !this.nodeBlocked(node.x + dx, node.y - 1))
       ) {
         return node;
       }
@@ -235,13 +225,9 @@ class JumpPointSearch extends UniformGridSearch {
 
       // If the node left/righ is blocked but the one forward and left/right is not
       // then add the current node as a jump point.
-      const neighbor1 = this.getNode(node.x + 1, node.y)
-      const neighbor2 = this.getNode(node.x + 1, node.y + dy)
-      const neighbor3 = this.getNode(node.x - 1, node.y)
-      const neighbor4 = this.getNode(node.x - 1, node.y + dy)
       if (
-        (this.nodeBlocked(neighbor1) && !this.nodeBlocked(neighbor2))
-        || (this.nodeBlocked(neighbor3) && !this.nodeBlocked(neighbor4))
+        (this.nodeBlocked(node.x + 1, node.y) && !this.nodeBlocked(node.x + 1, node.y + dy))
+        || (this.nodeBlocked(node.x - 1, node.y) && !this.nodeBlocked(node.x - 1, node.y + dy))
       ) {
         return node;
       }
@@ -254,7 +240,10 @@ class JumpPointSearch extends UniformGridSearch {
   getNeighbors(node: GridNode): GridNode[] {
     const neighbors: GridNode[] = [];
 
+    // Is this node the starting node?
     if (node.parent) {
+      // Not the starting node.
+
       // Get normalized directions of travel.
       const dx = (node.x - node.parent.x) / Math.max(Math.abs(node.x - node.parent.x), 1);
       const dy = (node.y - node.parent.y) / Math.max(Math.abs(node.y - node.parent.y), 1);
@@ -276,8 +265,7 @@ class JumpPointSearch extends UniformGridSearch {
           neighbors.push(neighbor);
         }
 
-        neighbor = this.getNode(node.x - dx, node.y);
-        if (neighbor && this.nodeBlocked(neighbor)) {
+        if (this.nodeBlocked(node.x - dx, node.y)) {
           neighbor = this.getNode(node.x - dx, node.y + dy);
 
           if (neighbor) {
@@ -285,8 +273,7 @@ class JumpPointSearch extends UniformGridSearch {
           }
         }
 
-        neighbor = this.getNode(node.x, node.y - dy);
-        if (neighbor && this.nodeBlocked(neighbor)) {
+        if (this.nodeBlocked(node.x, node.y - dy)) {
           neighbor = this.getNode(node.x + dx, node.y - dy);
 
           if (neighbor) {
@@ -301,8 +288,7 @@ class JumpPointSearch extends UniformGridSearch {
           neighbors.push(neighbor);
         }
 
-        neighbor = this.getNode(node.x, node.y + 1);
-        if (neighbor && this.nodeBlocked(neighbor)) {
+        if (this.nodeBlocked(node.x, node.y + 1)) {
           let neighbor = this.getNode(node.x + dx, node.y + 1);
 
           if (neighbor) {
@@ -310,8 +296,7 @@ class JumpPointSearch extends UniformGridSearch {
           }
         }
 
-        neighbor = this.getNode(node.x, node.y - 1);
-        if (neighbor && this.nodeBlocked(neighbor)) {
+        if (this.nodeBlocked(node.x, node.y - 1)) {
           let neighbor = this.getNode(node.x + dx, node.y - 1);
 
           if (neighbor) {
@@ -326,8 +311,7 @@ class JumpPointSearch extends UniformGridSearch {
           neighbors.push(neighbor);
         }
 
-        neighbor = this.getNode(node.x + 1, node.y);
-        if (neighbor && this.nodeBlocked(neighbor)) {
+        if (neighbor && this.nodeBlocked(node.x + 1, node.y)) {
           let neighbor = this.getNode(node.x + 1, node.y + dy);
 
           if (neighbor) {
@@ -335,8 +319,7 @@ class JumpPointSearch extends UniformGridSearch {
           }
         }
 
-        neighbor = this.getNode(node.x - 1, node.y);
-        if (neighbor && this.nodeBlocked(neighbor)) {
+        if (neighbor && this.nodeBlocked(node.x - 1, node.y)) {
           let neighbor = this.getNode(node.x - 1, node.y + dy);
 
           if (neighbor) {
@@ -346,6 +329,7 @@ class JumpPointSearch extends UniformGridSearch {
       }
     }
     else {
+      // Node is the starting node
       for (let y = -1; y <= 1; y += 1) {
         for (let x = -1; x <= 1; x += 1) {
           if (x !== 0 || y !== 0) {
