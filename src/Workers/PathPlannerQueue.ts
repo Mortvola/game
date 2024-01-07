@@ -1,30 +1,26 @@
 import { Vec2, vec2 } from "wgpu-matrix";
 import Actor from "../Character/Actor";
-import { FindPathRequest, FindPathResponse, MessageType, PopulateGridRequest, PopulateGridResponse } from "./PathPlanner";
-import { getWorld } from "../Renderer";
-import Line from "../Drawables/Line";
+import { AddOccupantdRequest, FindPathRequest, FindPathResponse, MessageType, Occupant, PopulateGridRequest } from "./PathPlannerTypes";
 
 const worker: Worker = new Worker(new URL("../Workers/PathPlanner.ts", import.meta.url));
 
 let requestId = 0;
 
-export type Occupant = {
-  id: number,
-  center: Vec2,
-  radius: number,
-}
+type FindPathReturn = [Vec2[], number, number[][], boolean, number[][]];
 
 type FindPathPromise = {
-  resolve: ((value: [Vec2[], number, number[][], boolean, number[][]]) => void),
+  resolve: ((value: FindPathReturn) => void),
 }
-
-const findPathPromises: Record<number, FindPathPromise> = {};
 
 type PopulateGridPromise = {
   resolve: (() => void),
 }
 
-const populateGridPromises: Record<number, PopulateGridPromise> = {};
+type AddOccupantPromise = {
+  resolve: (() => void)
+}
+
+const promises: Record<number, FindPathPromise | PopulateGridPromise | AddOccupantPromise> = {};
 
 
 let processing = false;
@@ -35,7 +31,7 @@ worker.addEventListener('message', (evt: MessageEvent<MessageType>) => {
   if (evt.data.type === 'FindPath') {
     const data = evt.data as FindPathResponse;
 
-    const promise = findPathPromises[evt.data.id]
+    const promise = promises[evt.data.id] as FindPathPromise;
 
     if (promise) {
       if (data.id <= requestId) {
@@ -57,7 +53,7 @@ worker.addEventListener('message', (evt: MessageEvent<MessageType>) => {
         ])
       }  
 
-      delete findPathPromises[evt.data.id];  
+      delete promises[evt.data.id];  
     }
     else {
       console.log('promise not found')
@@ -104,10 +100,24 @@ worker.addEventListener('message', (evt: MessageEvent<MessageType>) => {
 
     processing = false;
   }
+  else if (evt.data.type === 'AddOccupant') {
+    // const data = evt.data as AddOccupantResponse;
+
+    const promise = promises[evt.data.id] as AddOccupantPromise;
+
+    if (promise) {
+      promise.resolve()
+
+      delete promises[evt.data.id];  
+    }
+    else {
+      console.log('promise not found')
+    }
+  }
 })
 
 export const getOccupants = (actor: Actor, participants: Actor[], others: Occupant[]): Occupant[] => {
-  const occupants = participants
+  const occupants: Occupant[] = participants
     .filter((p) => p !== actor)
     .map((p) => {
       const point = p.getWorldPosition();
@@ -115,11 +125,19 @@ export const getOccupants = (actor: Actor, participants: Actor[], others: Occupa
       return ({
         id: p.id,
         center: vec2.create(point[0], point[2]),
-        radius: p.occupiedRadius + actor.occupiedRadius
+        radius: p.occupiedRadius + actor.occupiedRadius,
+        type: 'Creature',
+        name: '',
       })
     })
 
-  return occupants.concat(others.map((o) => ({ id: o.id, center: o.center, radius: o.radius + actor.occupiedRadius})));
+  return occupants.concat(others.map((o) => ({
+    id: o.id,
+    center: o.center,
+    radius: o.radius + actor.occupiedRadius,
+    type: o.type,
+    name: o.name,
+  })));
 }
 
 export const populateGrid = (
@@ -142,13 +160,33 @@ export const populateGrid = (
   // return promise;
 }
 
+export const addOccupant = (
+  occupant: Occupant,
+) => {
+  requestId += 1;
+
+  const message: AddOccupantdRequest = {
+    type: 'AddOccupant',
+    id: requestId,
+    occupant,
+  };
+
+  worker.postMessage(message);
+
+  const promise: Promise<void> = new Promise((resolve, reject) => {
+    promises[requestId] = { resolve };
+  })
+
+  return promise;
+}
+
 export const findPath2 = async (
   actor: Actor,
   start: Vec2,
   goal: Vec2,
   goalRadius: number | null,
   target: Actor | null,
-): Promise<[Vec2[], number, number[][], boolean, number[][]]> => {
+): Promise<FindPathReturn> => {
 
   requestId += 1;
 
@@ -168,24 +206,26 @@ export const findPath2 = async (
   }
   else {
     if (waiting) {
-      const promise = findPathPromises[waiting.id]
+      const promise = promises[waiting.id] as FindPathPromise
 
-      promise.resolve([
-        [],
-        0,
-        [],
-        true,
-        [],
-      ])  
-
-      delete findPathPromises[waiting.id];  
+      if (promise) {
+        promise.resolve([
+          [],
+          0,
+          [],
+          true,
+          [],
+        ])  
+  
+        delete promises[waiting.id];    
+      }
     }
 
     waiting = message;
   }
 
-  const promise: Promise<[Vec2[], number, number[][], boolean, number[][]]> = new Promise((resolve, reject) => {
-    findPathPromises[requestId] = { resolve };
+  const promise: Promise<FindPathReturn> = new Promise((resolve, reject) => {
+    promises[requestId] = { resolve };
   })
 
   return promise;

@@ -5,7 +5,7 @@ import { WorldInterface } from "../../../WorldInterface";
 import Script from "../../../Script/Script";
 
 class SelfSpell extends Spell {
-  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     let success = 0;
 
     if (this.actor === target) {

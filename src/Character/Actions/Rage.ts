@@ -9,7 +9,7 @@ class Rage extends Action {
     super(actor, 1, 'Rage', 'Bonus', 60, false)
   }
 
-  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     let success = 0;
 
     if (this.actor === target && !target.character.hasInfluencingAction('Rage')) {

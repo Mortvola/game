@@ -38,7 +38,7 @@ class RangeSpell extends Spell {
     this.hideRangeCircle();
   }
 
-  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     let description = `Select ${this.maxTargets  - this.targets.length} more targets.`;
 
     if (this.maxTargets === 1) {

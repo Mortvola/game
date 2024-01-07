@@ -15,7 +15,7 @@ class MoveAction extends Action {
     super(actor, 0, 'Move', 'Move', 0, false)
   }
 
-  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     if (this.trajectory) {
       world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
       this.trajectory = null;
@@ -35,29 +35,27 @@ class MoveAction extends Action {
       targetWp = vec2.create(tmp[0], tmp[2])
     }
 
-    (async () => {  
-      const [path, distance, lines, cancelled] = await findPath2(
-        this.actor,
-        vec2.create(wp[0], wp[2]),
-        targetWp,
-        target ? target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75 : null,
-        target,
-      )
+    const [path, distance, lines, cancelled] = await findPath2(
+      this.actor,
+      vec2.create(wp[0], wp[2]),
+      targetWp,
+      target ? target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75 : null,
+      target,
+    )
 
-      if (!cancelled) { // && !this.target) {
-        this.showPathLines(lines);
+    if (!cancelled) { // && !this.target) {
+      this.showPathLines(lines);
 
-        this.path = path;
-        this.distance = distance;
+      this.path = path;
+      this.distance = distance;
 
-        if (world.actionInfoCallback) {
-          world.actionInfoCallback({
-            action: 'Move',
-            percentSuccess: null,
-          })
-        }              
-      }
-    })();
+      if (world.actionInfoCallback) {
+        world.actionInfoCallback({
+          action: 'Move',
+          percentSuccess: null,
+        })
+      }              
+    }
   }
 
   interact(script: Script, world: WorldInterface): boolean {

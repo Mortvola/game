@@ -41,7 +41,7 @@ class Spell extends Action {
     return false;
   }
 
-  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
   }
 
   interact(script: Script, world: WorldInterface): boolean {

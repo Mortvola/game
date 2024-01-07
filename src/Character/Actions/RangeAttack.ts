@@ -13,7 +13,7 @@ class RangeAttack extends Action {
     super(actor, 1, 'Range', 'Action', 0, false)
   }
   
-  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     if (target) {
       const result = this.actor.computeShotData(target);
       
@@ -58,30 +58,27 @@ class RangeAttack extends Action {
         
         let targetWp = vec2.create(point[0], point[2]);
 
-        (async () => {  
+        const [path, distance, lines, cancelled] = await findPath2(
+          this.actor,
+          vec2.create(wp[0], wp[2]),
+          targetWp,
+          null,
+          target,
+        )
 
-          const [path, distance, lines, cancelled] = await findPath2(
-            this.actor,
-            vec2.create(wp[0], wp[2]),
-            targetWp,
-            null,
-            target,
-          )
-  
-          if (!cancelled && !this.focused) {
-            this.showPathLines(lines);
-  
-            this.path = path;
-            this.distance = distance;
+        if (!cancelled && !this.focused) {
+          this.showPathLines(lines);
 
-            if (world.actionInfoCallback) {
-              world.actionInfoCallback({
-                action: 'Move',
-                percentSuccess: null,
-              })
-            }              
-          }
-        })();
+          this.path = path;
+          this.distance = distance;
+
+          if (world.actionInfoCallback) {
+            world.actionInfoCallback({
+              action: 'Move',
+              percentSuccess: null,
+            })
+          }              
+        }
       }  
     }
   }

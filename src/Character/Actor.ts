@@ -549,7 +549,7 @@ class Actor implements ActorInterface {
     }
   }
 
-  update(elapsedTime: number, timestamp: number, world: WorldInterface): boolean {
+  async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
     if (this.automated) {
       if (this.character.hitPoints > 0) {
         if (world.participants.activeActor === this) {

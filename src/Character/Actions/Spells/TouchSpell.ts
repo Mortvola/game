@@ -5,8 +5,8 @@ import { WorldInterface } from "../../../WorldInterface";
 import Script from "../../../Script/Script";
 
 class TouchSpell extends Spell {
-  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
-    this.prepareZeroDistAction(100, target, point, world);
+  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+    await this.prepareZeroDistAction(100, target, point, world);
   }
 
   interact(script: Script, world: WorldInterface): boolean {

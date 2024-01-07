@@ -18,7 +18,7 @@ class Mover implements ActorInterface {
     this.onFinish = onFinish ?? null;
   }
 
-  update(elapsedTime: number, timestamp: number, world: WorldInterface): boolean {
+  async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
     // Get the distance to target Using the mesh's world
     // position (found in mesh.translate) and the target location
     const distanceToTarget = vec2.distance(

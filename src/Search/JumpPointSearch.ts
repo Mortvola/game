@@ -1,35 +1,11 @@
 import { Vec2, vec2 } from "wgpu-matrix";
-import UniformGridSearch, { Element as Node } from "./UniformGridSearch";
+import UniformGridSearch from "./UniformGridSearch";
 import { lineCircleIntersection2 } from "../Math";
-
-class Set {
-  nodes: Node[] = [];
-
-  push(v: Node) {
-    this.nodes.push(v);
-  }
-
-  contains(v: Node): boolean {
-    return this.nodes.some((c) => c.x === v.x && c.y === v.y)
-  }
-
-  empty(): boolean {
-    return this.nodes.length === 0;
-  }
-
-  pop(): Node | null {
-    return this.nodes.pop() ?? null;
-  }
-
-  sort() {
-    this.nodes.sort((a, b) => (
-      (b.gCost + b.hCost) - (a.gCost + a.hCost)
-    ))
-  }
-}
+import { GridNode } from "./GridNode";
+import GridNodeSet from "./GridNodeSet";
 
 class JumpPointSearch extends UniformGridSearch {
-  goalNode: Node | null | undefined = null;
+  goalNode: GridNode | null | undefined = null;
 
   lines2: Vec2[] = [];
 
@@ -48,8 +24,8 @@ class JumpPointSearch extends UniformGridSearch {
       return [];
     }
 
-    const openSet = new Set();
-    const closedSet = new Set();
+    const openSet = new GridNodeSet();
+    const closedSet = new GridNodeSet();
 
     this.goalNode = this.getNode(goal[0], goal[1]);
 
@@ -101,52 +77,25 @@ class JumpPointSearch extends UniformGridSearch {
           const jumpPoint = this.findSuccessor(neighbor, currentNode);
 
           if (jumpPoint) {
-            // if (currentNode.parent && this.LineOfSight(
-            //   vec2.create(currentNode.parent.x, currentNode.parent.y),
-            //   vec2.create(jumpPoint.x, jumpPoint.y),
-            //   target,
-            // )) {
-            //   const cost = currentNode.parent.gCost + this.costEstimate(
-            //     currentNode.parent.x, currentNode.parent.y, jumpPoint.x, jumpPoint.y,
-            //   );
-    
-            //   if (cost < jumpPoint.gCost) { // || !openSet.contains(neighborNode)) {
-            //     jumpPoint.gCost = cost;
-            //     jumpPoint.hCost = this.costEstimate(jumpPoint.x, jumpPoint.y, this.goalNode.x, this.goalNode.y);
-            //     jumpPoint.parent = currentNode.parent;
+            const cost = currentNode.gCost + this.costEstimate(
+              currentNode.x, currentNode.y, jumpPoint.x, jumpPoint.y,
+            );
 
-            //     this.lines.push(vec4.create(jumpPoint.x / this.scale, 0.01, jumpPoint.y / this.scale, 1));
-            //     this.lines.push(vec4.create(currentNode.parent.x / this.scale, 0.01, currentNode.parent.y / this.scale, 1));
+            if (cost < jumpPoint.gCost) { // || !openSet.contains(neighborNode)) {
+              jumpPoint.gCost = cost;
+              jumpPoint.hCost = this.costEstimate(jumpPoint.x, jumpPoint.y, this.goalNode.x, this.goalNode.y);
+              jumpPoint.parent = currentNode;
 
-            //     this.lines2.push(vec2.create(jumpPoint.x / this.scale, jumpPoint.y / this.scale));
-            //     this.lines2.push(vec2.create(currentNode.parent.x / this.scale, currentNode.parent.y / this.scale));
+              // this.lines.push(vec4.create(jumpPoint.x / this.scale, 0.01, jumpPoint.y / this.scale, 1));
+              // this.lines.push(vec4.create(currentNode.x / this.scale, 0.01, currentNode.y / this.scale, 1));
 
-            //     if (!openSet.contains(jumpPoint)) {
-            //       openSet.push(jumpPoint);
-            //     }
-            //   }
-            // }
-            // else {
-              const cost = currentNode.gCost + this.costEstimate(
-                currentNode.x, currentNode.y, jumpPoint.x, jumpPoint.y,
-              );
+              // this.lines2.push(vec2.create(jumpPoint.x / this.scale, jumpPoint.y / this.scale));
+              // this.lines2.push(vec2.create(currentNode.x / this.scale, currentNode.y / this.scale));
 
-              if (cost < jumpPoint.gCost) { // || !openSet.contains(neighborNode)) {
-                jumpPoint.gCost = cost;
-                jumpPoint.hCost = this.costEstimate(jumpPoint.x, jumpPoint.y, this.goalNode.x, this.goalNode.y);
-                jumpPoint.parent = currentNode;
-
-                // this.lines.push(vec4.create(jumpPoint.x / this.scale, 0.01, jumpPoint.y / this.scale, 1));
-                // this.lines.push(vec4.create(currentNode.x / this.scale, 0.01, currentNode.y / this.scale, 1));
-
-                // this.lines2.push(vec2.create(jumpPoint.x / this.scale, jumpPoint.y / this.scale));
-                // this.lines2.push(vec2.create(currentNode.x / this.scale, currentNode.y / this.scale));
-
-                if (!openSet.contains(jumpPoint)) {
-                  openSet.push(jumpPoint);
-                }
+              if (!openSet.contains(jumpPoint)) {
+                openSet.push(jumpPoint);
               }
-            // }
+            }
           }
         }
       }
@@ -224,7 +173,7 @@ class JumpPointSearch extends UniformGridSearch {
     return path;
   }
 
-  findSuccessor(node: Node | null | undefined, prev: Node): Node | null {
+  findSuccessor(node: GridNode | null | undefined, prev: GridNode): GridNode | null {
     if (!node) {
       return null;
     }
@@ -302,8 +251,8 @@ class JumpPointSearch extends UniformGridSearch {
     return this.findSuccessor(next, node)
   }
 
-  getNeighbors(node: Node): Node[] {
-    const neighbors: Node[] = [];
+  getNeighbors(node: GridNode): GridNode[] {
+    const neighbors: GridNode[] = [];
 
     if (node.parent) {
       // Get normalized directions of travel.

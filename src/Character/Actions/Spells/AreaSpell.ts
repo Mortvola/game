@@ -35,7 +35,7 @@ class AreaSpell extends RangeSpell {
     this.hideAreaOfEffect()
   }
 
-  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface) {
+  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     this.showAreaOfEffect();
 
     if (point && this.areaOfEffect) {

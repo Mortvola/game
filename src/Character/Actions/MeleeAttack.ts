@@ -9,14 +9,14 @@ class MeleeAttack extends Action {
     super(actor, 1, 'Melee', 'Action', 0, false)
   }
   
-  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     let actionPercent = 0;
 
     if (target) {
       actionPercent = this.actor.character.percentSuccess(target.character, this.actor.character.equipped.meleeWeapon!);
     }
 
-    this.prepareZeroDistAction(actionPercent, target, point, world);
+    await this.prepareZeroDistAction(actionPercent, target, point, world);
   }
 
   interact(script: Script, world: WorldInterface): boolean {

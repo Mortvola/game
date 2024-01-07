@@ -1,39 +1,14 @@
 import { Vec2, vec2 } from "wgpu-matrix";
-import UniformGridSearch, { Element } from "./UniformGridSearch";
-
-class Set {
-  private nodes: Element[] = [];
-
-  push(v: Element) {
-    this.nodes.push(v);
-  }
-
-  contains(v: Element): boolean {
-    return this.nodes.some((c) => c.x === v.x && c.y === v.y)
-  }
-
-  empty(): boolean {
-    return this.nodes.length === 0;
-  }
-
-  pop(): Element | null {
-    return this.nodes.pop() ?? null;
-  }
-
-  sort() {
-    this.nodes.sort((a, b) => (
-      (b.gCost + b.hCost) - (a.gCost + a.hCost)
-    ))
-  }
-}
+import UniformGridSearch from "./UniformGridSearch";
+import GridNodeSet from "./GridNodeSet";
 
 class ThetaStarSearch extends UniformGridSearch {
   findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: { id: number }): Vec2[] {
     const start = this.positionToGrid(s);
     const goal =this.positionToGrid(g);
     
-    const openSet = new Set();
-    const closedSet = new Set();
+    const openSet = new GridNodeSet();
+    const closedSet = new GridNodeSet();
 
     const goalNode = this.getNode(goal[0], goal[1]);
 
@@ -59,7 +34,7 @@ class ThetaStarSearch extends UniformGridSearch {
       if (currentNode) {
         closedSet.push(currentNode);
 
-        if (currentNode.actors.length === 1 && currentNode.actors[0] === target) {
+        if (currentNode.occupants.length === 1 && currentNode.occupants[0] === target) {
           // Found goal
           const path: Vec2[] = [];
 

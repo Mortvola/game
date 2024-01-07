@@ -48,7 +48,7 @@ class Action {
     this.endOfTurn = endOfTurn;
   }
   
-  prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
 
   }
 
@@ -85,7 +85,7 @@ class Action {
     }
   }
 
-  prepareZeroDistAction(actionPercent: number, target: Actor | null, point: Vec4 | null, world: WorldInterface): void {
+  async prepareZeroDistAction(actionPercent: number, target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     if (target) {
       const wp = this.actor.getWorldPosition();
       const targetWp = target.getWorldPosition();
@@ -99,50 +99,48 @@ class Action {
         // To far for a melee attack
         // Find a path to the target...
 
-        (async () => {
-          const [path, distance, lines, cancelled] = await findPath2(
-            this.actor,
-            vec2.create(wp[0], wp[2]),
-            vec2.create(targetWp[0], targetWp[2]),
-            target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75,
-            target,
-          )
+        const [path, distance, lines, cancelled] = await findPath2(
+          this.actor,
+          vec2.create(wp[0], wp[2]),
+          vec2.create(targetWp[0], targetWp[2]),
+          target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75,
+          target,
+        )
 
-          if (!cancelled) {
-            if (path.length > 0) {
-              this.showPathLines(lines);
+        if (!cancelled) {
+          if (path.length > 0) {
+            this.showPathLines(lines);
 
-              let distanceToTarget = vec2.distance(path[0], vec2.create(targetWp[0], targetWp[2]));
-              distanceToTarget -= target.occupiedRadius  
+            let distanceToTarget = vec2.distance(path[0], vec2.create(targetWp[0], targetWp[2]));
+            distanceToTarget -= target.occupiedRadius  
 
-              this.path = path;
-              this.distance = distance;
+            this.path = path;
+            this.distance = distance;
 
-              if (distanceToTarget < this.actor.attackRadius) {
-                // this.type = 'MoveAndMelee';
-                this.focused = target;
+            if (distanceToTarget < this.actor.attackRadius) {
+              // this.type = 'MoveAndMelee';
+              this.focused = target;
 
-                if (world.actionInfoCallback) {
-                  world.actionInfoCallback({
-                    action: this.name,
-                    percentSuccess: actionPercent,
-                  })
-                }          
-              }
-              else {
-                // this.type = 'Move';
-                this.focused = null;
+              if (world.actionInfoCallback) {
+                world.actionInfoCallback({
+                  action: this.name,
+                  percentSuccess: actionPercent,
+                })
+              }          
+            }
+            else {
+              // this.type = 'Move';
+              this.focused = null;
 
-                if (world.actionInfoCallback) {
-                  world.actionInfoCallback({
-                    action: this.name,
-                    percentSuccess: actionPercent,
-                  })
-                }                  
-              }
+              if (world.actionInfoCallback) {
+                world.actionInfoCallback({
+                  action: this.name,
+                  percentSuccess: actionPercent,
+                })
+              }                  
             }
           }
-        })();
+        }
       }
       else {
         if (this.trajectory) {
@@ -177,29 +175,27 @@ class Action {
         
         let targetWp = vec2.create(point[0], point[2]);
 
-        (async () => {
-          const [path, distance, lines, cancelled] = await findPath2(
-            this.actor,
-            vec2.create(wp[0], wp[2]),
-            targetWp,
-            null,
-            target,
-          )
-  
-          if (!cancelled && !this.focused) {
-            this.showPathLines(lines);
-  
-            this.path = path;
-            this.distance = distance;
+        const [path, distance, lines, cancelled] = await findPath2(
+          this.actor,
+          vec2.create(wp[0], wp[2]),
+          targetWp,
+          null,
+          target,
+        )
 
-            if (world.actionInfoCallback) {
-              world.actionInfoCallback({
-                action: 'Move',
-                percentSuccess: null,
-              })
-            }              
-          }
-        })();
+        if (!cancelled && !this.focused) {
+          this.showPathLines(lines);
+
+          this.path = path;
+          this.distance = distance;
+
+          if (world.actionInfoCallback) {
+            world.actionInfoCallback({
+              action: 'Move',
+              percentSuccess: null,
+            })
+          }              
+        }
       }  
     }
   }

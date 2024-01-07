@@ -23,10 +23,10 @@ import { ActorInterface } from './ActorInterface';
 import { ActionInfo, Delay, FocusInfo, WorldInterface } from './WorldInterface';
 import { EpisodeInfo } from './Character/Actor';
 import Script from './Script/Script';
-import { Occupant } from './Workers/PathPlannerQueue';
 import { Party } from './UserInterface/PartyList';
 import Circle from './Drawables/Circle';
 import MoveAction from './Character/Actions/MoveAction';
+import { Occupant } from './Workers/PathPlannerTypes';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -232,12 +232,12 @@ class Renderer implements WorldInterface {
     }
   }
 
-  updateActors(elapsedTime: number, timestamp: number) {
+  async updateActors(elapsedTime: number, timestamp: number) {
     // Update shot positions
     for (let i = 0; i < this.actors.length; i += 1) {
       const actor = this.actors[i];
 
-      const remove = actor.update(elapsedTime, timestamp, this);
+      const remove = await actor.update(elapsedTime, timestamp, this);
 
       if (remove) {
         this.actors = [
@@ -337,7 +337,7 @@ class Renderer implements WorldInterface {
           this.camera.updatePosition(elapsedTime, timestamp);
 
           if (this.participants.state === ParticipantsState.ready) {
-            this.updateActors(elapsedTime, timestamp);
+            await this.updateActors(elapsedTime, timestamp);
           }
 
           if (this.participants.state === ParticipantsState.ready && this.endOfRound) {
@@ -632,7 +632,7 @@ class Renderer implements WorldInterface {
   prevActor: Actor | null = null;
   prevPoint: Vec4 | null = null;
   
-  checkActorFocus() {
+  async checkActorFocus() {
     if (this.participants.activeActor) {
       let activeActor = this.participants.activeActor;
       const { actor, point } = this.cameraHitTest();
@@ -682,7 +682,7 @@ class Renderer implements WorldInterface {
           const action = activeActor.getAction();
 
           if (action) {
-            action.prepareInteraction(actor ?? null, point ?? null, this)            
+            await action.prepareInteraction(actor ?? null, point ?? null, this)            
           }
         }
       }

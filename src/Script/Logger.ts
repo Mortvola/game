@@ -8,7 +8,7 @@ class Logger implements ActorInterface {
     this.message = message;
   }
 
-  update(elapsedTime: number, timestamp: number, world: WorldInterface): boolean {
+  async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
     if (world.loggerCallback) {
       world.loggerCallback(this.message)
     }

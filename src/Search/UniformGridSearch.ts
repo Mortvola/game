@@ -1,17 +1,10 @@
 import { debug } from "console";
 import { Vec2, Vec4, vec2 } from "wgpu-matrix";
-
-export type Element = {
-  x: number,
-  y: number,
-  gCost: number,
-  hCost: number,
-  actors: { id: number }[],
-  parent: Element | null,
-}
+import { Occupant } from "../Workers/PathPlannerTypes";
+import { GridNode } from "./GridNode";
 
 class UniformGridSearch {
-  grid: Element[][];
+  grid: GridNode[][];
 
   width: number;
   
@@ -36,7 +29,7 @@ class UniformGridSearch {
         y,
         gCost: 0,
         hCost: 0,
-        actors: [],
+        occupants: [],
         parent: null,
       }))
     ))
@@ -55,7 +48,7 @@ class UniformGridSearch {
         this.grid[y][x].parent = null;
 
         if (all) {
-          this.grid[y][x].actors = [];
+          this.grid[y][x].occupants = [];
         }
       }
     }
@@ -65,7 +58,7 @@ class UniformGridSearch {
     throw new Error('Not implemented')
   }
 
-  getNode(x: number, y: number): Element | undefined {
+  getNode(x: number, y: number): GridNode | undefined {
     if (
       x < 0 || x >= this.width
       || y < 0 || y >= this.height
@@ -76,15 +69,18 @@ class UniformGridSearch {
     return this.grid[y][x]
   }
 
-  nodeBlocked(node: Element | null | undefined): boolean {
+  nodeBlocked(node: GridNode | null | undefined): boolean {
     if (node === null || node === undefined) {
       return true;
     }
 
-    return (
-      node.actors.length > 0
-      && (node.actors.length !== 1 || this.target === null || node.actors[0].id !== this.target.id)
-    )
+    const avoidTerrain = true;
+
+    if (node.occupants.filter((o) => (avoidTerrain || o.type !== 'Terrain') && o.id !== this.target?.id).length > 0) {
+      return true;
+    }
+
+    return false;
   }
 
   // Line of sight algorithm from Movel AI News.
@@ -212,7 +208,7 @@ class UniformGridSearch {
     return true
   }
 
-  fillCircle(actor: { id: number }, c: Vec2, r: number): number[][] {
+  fillCircle(occupant: Occupant, c: Vec2, r: number): number[][] {
     let debugLines: number[][] = [];
 
     const center = this.positionToGrid(c);
@@ -223,18 +219,18 @@ class UniformGridSearch {
   
     // (-radius, 0) and (radius, 0) points.
     if (0 <= center[1] && center[1] < this.height) {
-      const lines = this.horizontalLine(actor, -x + center[0], x + center[0], center[1])
+      const lines = this.horizontalLine(occupant, -x + center[0], x + center[0], center[1])
       debugLines = debugLines.concat(lines);
     }
 
     // (0, -radius) and (0, radius) points
     if (0 <= center[0] && center[0] < this.width) {
       if (0 <= x + center[1] && x + center[1] < this.height) {
-        this.grid[x + center[1]][center[0]].actors.push(actor);
+        this.grid[x + center[1]][center[0]].occupants.push(occupant);
       }
 
       if (0 <= -x + center[1] && -x + center[1] < this.height) {
-        this.grid[-x + center[1]][center[0]].actors.push(actor);
+        this.grid[-x + center[1]][center[0]].occupants.push(occupant);
       }
     }
     
@@ -261,12 +257,12 @@ class UniformGridSearch {
       let y2 = -y + center[1];
 
       if (0 <= y1 && y1 < this.height) {
-        const lines = this.horizontalLine(actor, x1, x2, y1)
+        const lines = this.horizontalLine(occupant, x1, x2, y1)
         debugLines = debugLines.concat(lines);
       }
 
       if (0 <= y2 && y2 < this.height) {
-        const lines = this.horizontalLine(actor, x1, x2, y2)
+        const lines = this.horizontalLine(occupant, x1, x2, y2)
         debugLines = debugLines.concat(lines);
       }
 
@@ -277,12 +273,12 @@ class UniformGridSearch {
         y2 = -x + center[1];
   
         if (0 <= y1 && y1 < this.height) {
-          const lines = this.horizontalLine(actor, x1, x2, y1)
+          const lines = this.horizontalLine(occupant, x1, x2, y1)
           debugLines = debugLines.concat(lines);
         }
 
         if (0 <= y2 && y2 < this.height) {
-          const lines = this.horizontalLine(actor, x1, x2, y2)
+          const lines = this.horizontalLine(occupant, x1, x2, y2)
           debugLines = debugLines.concat(lines);
         }
       }
@@ -291,12 +287,12 @@ class UniformGridSearch {
     return debugLines;
   }
 
-  horizontalLine(actor: { id: number }, x1: number, x2: number, y: number): [number[], number[]] {
+  horizontalLine(occupant: Occupant, x1: number, x2: number, y: number): [number[], number[]] {
     x1 = Math.max(x1, 0);
     x2 = Math.min(x2, this.width - 1);
 
     for (let x = x1; x <= x2; x += 1) {
-      this.grid[y][x].actors.push(actor);
+      this.grid[y][x].occupants.push(occupant);
     }
 
     return [[x1, y], [x2, y]]

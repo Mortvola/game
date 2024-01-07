@@ -15,7 +15,7 @@ class FollowPath implements ActorInterface {
     this.path = path;
   }
 
-  update(elapsedTime: number, timestamp: number, world: WorldInterface): boolean {
+  async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
     if (this.path.length === 0) {
       return true;
     }

@@ -2,12 +2,7 @@
 
 import { Vec2, vec2 } from "wgpu-matrix";
 import JumpPointSearch from "../Search/JumpPointSearch";
-
-type Occupant = {
-  id: number,
-  center: Vec2,
-  radius: number,
-}
+import { AddOccupantResponse, AddOccupantdRequest, FindPathRequest, FindPathResponse, MessageType, Occupant, PopulateGridRequest, PopulateGridResponse } from "./PathPlannerTypes";
 
 const pathFinder = new JumpPointSearch(512, 512, 4)
 
@@ -82,7 +77,7 @@ const populateGrid = (occupants: Occupant[]): number[][] => {
   pathFinder.clear(true);
 
   for (const occupant of occupants) {
-    const lines = pathFinder.fillCircle({ id: occupant.id }, occupant.center, occupant.radius);
+    const lines = pathFinder.fillCircle(occupant, occupant.center, occupant.radius);
     debugLines = debugLines.concat(lines)
   }
 
@@ -98,6 +93,10 @@ const populateGrid = (occupants: Occupant[]): number[][] => {
   })
 
   return dbl;
+}
+
+const addOccupant = (occupant: Occupant) => {
+  pathFinder.fillCircle(occupant, occupant.center, occupant.radius);
 }
 
 const findPath = (
@@ -117,35 +116,6 @@ const findPath = (
   // Trim the path to the extent the character can move in a single turn.
   return [...trimPath(path, maxDistance), []];
 }
-
-export type MessageType = {
-  type: 'PopulateGrid' | 'FindPath',
-  id: number,
-}
-
-export type PopulateGridRequest = MessageType & {
-  occupants: Occupant[],
-}
-
-export type FindPathRequest = MessageType & {
-  start: Vec2,
-  goal: Vec2,
-  goalRadius: number | null,
-  target: { id: number } | null,
-  maxDistance: number,
-}
-
-export type FindPathResponse = MessageType & {
-  path: Vec2[],
-  distance: number,
-  lines: number[][],
-  dbl: number[][],
-}
-
-export type PopulateGridResponse = MessageType& {
-  lines: number[][]
-}
-
 
 self.onmessage = (event: MessageEvent<MessageType>) => {
   if (event.data.type === 'FindPath') {
@@ -175,6 +145,18 @@ self.onmessage = (event: MessageEvent<MessageType>) => {
       type: data.type,
       id: data.id,
       lines,
+    }
+
+    postMessage(response)  
+  }
+  else if (event.data.type === 'AddOccupant') {
+    const data = event.data as AddOccupantdRequest;
+
+    addOccupant(data.occupant);
+
+    const response: AddOccupantResponse = {
+      type: data.type,
+      id: data.id,
     }
 
     postMessage(response)  

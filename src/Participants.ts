@@ -114,7 +114,7 @@ class Participants {
 
   async createTeam(team: number, z: number, color: Vec4, teamColor: Vec4): Promise<Actor[]> {
     const actors: Actor[] = [];
-    const numPlayers = this.parties[team].members.length;
+    const numPlayers = this.parties[team].members.filter((t) => t.included).length;
     const spaceBetween = 4;
     const playerWidth = 4;
 
