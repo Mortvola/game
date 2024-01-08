@@ -58,7 +58,7 @@ const trimPath = (path: Vec2[], maxDistance: number): [PathPoint[], number, numb
   let color = [1, 1, 1, 1];
   let difficultColor = [0, 0, 1, 1];
 
-  let trimmed = false;
+  // let trimmed = false;
   // let trimPoint = 0;
   let distanceLeft = maxDistance;
 
@@ -67,116 +67,78 @@ const trimPath = (path: Vec2[], maxDistance: number): [PathPoint[], number, numb
   newPath.push({ point: path[path.length - 1], difficult: isInTerrain(path[path.length - 1]) });
 
   for (let i = path.length - 1; i > 0; i -= 1) {
-    const distance = vec2.distance(path[i], path[i - 1]);
-
-    // First point of line segment
-    lines.push([
-      path[i][0], 0.1, path[i][1], 1,
-      ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
-    ])
-
-    if (totalDistance + distance < distanceLeft) {
-      totalDistance += distance;
-
+    if (totalDistance < distanceLeft) {
       const newPoints = intersectTerrain(
         newPath[newPath.length - 1],
         { point: path[i - 1], difficult: isInTerrain(path[i - 1]) },
       );
+
+      for (let k = 1; k < newPoints.length; k += 1) {
+        const distance = vec2.distance(newPath[newPath.length - 1].point, newPoints[k].point);
+
+        if (totalDistance + distance < distanceLeft) {
+          totalDistance += distance;
+
+          lines.push([
+            newPath[newPath.length - 1].point[0], 0.1, newPath[newPath.length - 1].point[1], 1,
+            ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
+          ])
+
+          lines.push([
+            newPoints[k].point[0], 0.1, newPoints[k].point[1], 1,
+            ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
+          ])  
+
+          newPath.push(newPoints[k])
+        }
+        else {
+          const remainingDistance = distanceLeft - totalDistance;
+
+          if (remainingDistance > 0) {
+            const v = vec2.normalize(vec2.subtract(newPoints[k].point, newPath[newPath.length - 1].point));
+            const newPoint = vec2.add(newPath[newPath.length - 1].point, vec2.mulScalar(v, remainingDistance));
       
-      // Terminate the current line at the first new point from the terrain intersection.
-      // (this may or may not be the same next point before the terrain intersection)
-      lines.push([
-        newPoints[1].point[0], 0.1, newPoints[1].point[1], 1,
-        ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
-      ])
+            lines.push([
+              newPath[newPath.length - 1].point[0], 0.1, newPath[newPath.length - 1].point[1], 1,
+              ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
+            ])
 
-      newPath.push(...newPoints);
+            lines.push([
+              newPoint[0], 0.1, newPoint[1], 1,
+              ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
+            ])  
 
-      // Generate the lines along the new points from the terrain 
-      // intersection (if any).
-      for (let k = 1; k < newPoints.length - 1; k += 1) {
-        const p1 = newPoints[k];
-        const p2 = newPoints[k + 1]
+            newPath.push({ point: newPoint, difficult: newPath[newPath.length - 1].difficult });
 
-        lines.push([
-          p1.point[0], 0.1, p1.point[1], 1,
-          ...(p1.difficult ? difficultColor : color),
-        ])    
+            totalDistance += remainingDistance;
+          }
 
-        lines.push([
-          p2.point[0], 0.1, p2.point[1], 1,
-          ...(p1.difficult ? difficultColor : color),
-        ])
+          color = [1, 0, 0, 1];
+
+          lines.push([
+            ...lines[lines.length - 1].slice(0, 4),
+            ...color,
+          ]);
+
+          lines.push([
+            newPoints[k].point[0], 0.1, newPoints[k].point[1], 1,
+            ...color,
+          ])
+        }
       }
-    }
-    else if (!trimmed) {
-      const remainingDistance = distanceLeft - totalDistance;
-      const v = vec2.normalize(vec2.subtract(path[i - 1], path[i]));
-      const newPoint = vec2.add(path[i], vec2.mulScalar(v, remainingDistance));
-
-      const newPoints = intersectTerrain(
-        newPath[newPath.length - 1],
-        { point: newPoint, difficult: isInTerrain(newPoint) },
-      );
-
-      // Terminate the current line at the first new point from the terrain intersection.
-      // (this may or may not be the same new next point before the terrain intersection)
-      lines.push([
-        newPoints[1].point[0], 0.1, newPoints[1].point[1], 1,
-        ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
-      ])
-
-      newPath.push(...newPoints);
-
-      // Generate the lines along the new points from the terrain 
-      // intersection (if any).
-      for (let k = 1; k < newPoints.length - 1; k += 1) {
-        const p1 = newPoints[k];
-        const p2 = newPoints[k + 1]
-
-        lines.push([
-          p1.point[0], 0.1, p1.point[1], 1,
-          ...(p1.difficult ? difficultColor : color),
-        ])    
-
-        lines.push([
-          p2.point[0], 0.1, p2.point[1], 1,
-          ...(p1.difficult ? difficultColor : color),
-        ])
-      }
-
-      path = [
-        ...path.slice(0, i),
-        newPoint,
-        ...path.slice(i),
-      ]
-
-      // trimPoint = i;
-
-      i += 1;
-
-      // lines.push([
-      //   path[i - 1][0], 0.1, path[i - 1][1], 1,
-      //   ...color,
-      // ])  
-
-      totalDistance += remainingDistance;
-
-      trimmed = true;
-      color = [1, 0, 0, 1];
     }
     else {
       lines.push([
+        path[i][0], 0.1, path[i][1], 1,
+        ...color,
+      ]);
+
+      lines.push([
         path[i - 1][0], 0.1, path[i - 1][1], 1,
         ...color,
-      ])  
+      ])
     }
   }
-
-  // Do the trimming
-  // if (trimPoint !== 0) {
-  //   path = path.slice(trimPoint);
-  // }
 
   return [newPath.reverse(), totalDistance, lines];
 }
