@@ -1,8 +1,8 @@
-import { Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
+import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import Mesh from "../Drawables/Mesh";
 import { box } from "../Drawables/Shapes/box";
 import SceneNode from "../Drawables/SceneNode";
-import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, timeToTarget } from "../Math";
+import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, pointWithinCircle, timeToTarget } from "../Math";
 import Circle from "../Drawables/Circle";
 import RenderPass from "../RenderPass";
 import { ActorInterface } from "../ActorInterface";
@@ -25,6 +25,8 @@ import Creature from "./Creature";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
 import Action from "./Actions/Action";
+import { getWorld } from "../Renderer";
+import { PathPoint } from "../Workers/PathPlannerTypes";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -175,6 +177,12 @@ class Actor implements ActorInterface {
 
       populateGrid(occupants);
     }
+
+    if (this.character.hasCondition('Prone')) {
+      this.distanceLeft -= this.character.race.speed / 2;
+      this.character.removeCondition('Prone')
+      console.log(`${this.character.name} stood up: ${this.distanceLeft}.`)
+    }
   }
 
   setDefaultAction() {
@@ -187,6 +195,31 @@ class Actor implements ActorInterface {
   }
 
   endTurn() {
+    // If the actor is not currently prone then
+    // check if the actor is standing on grease. If so,
+    // do the dexterity saving throw to see if they fall prone.
+    if (!this.character.hasCondition('Prone')) {
+      const world = getWorld();
+      const wp = this.getWorldPosition();
+      const wpV2 = vec2.create(wp[0], wp[2]);
+  
+      for (const occupant of world.occupants) {
+        if (occupant.name === 'Grease' && pointWithinCircle(occupant.center, occupant.radius, wpV2)) {
+          const st = savingThrow(this.character, this.character.abilityScores.dexterity, 'Neutral');
+
+          if (st < occupant.dc!) {
+            console.log(`${this.character.name} fell prone.`)
+            this.character.addCondition('Prone')
+          }
+          else {
+            console.log('succeeded at saving throw.')
+          }
+
+          break;
+        }
+      }
+    }
+
     this.circle.color[0] = this.teamColor[0];
     this.circle.color[1] = this.teamColor[1];
     this.circle.color[2] = this.teamColor[2];
@@ -414,7 +447,7 @@ class Actor implements ActorInterface {
 
               populateGrid(occupants);
 
-              const [path, dist] = await findPath2(
+              let [path] = await findPath2(
                 this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius) * 0.75, target,
               );
               
@@ -430,8 +463,10 @@ class Actor implements ActorInterface {
                 distanceToTarget -= target.occupiedRadius
 
                 if (distanceToTarget < this.attackRadius) {
+                  path = this.processPath(path, script);
+
                   script.entries.push(new FollowPath(this.sceneNode, path));  
-                  this.distanceLeft -= dist;  
+
                   myPosition = vec4.create(path[0].point[0], 0, path[0].point[1], 1);
 
                   this.attack(
@@ -487,8 +522,9 @@ class Actor implements ActorInterface {
                     }
                   }
   
+                  path = this.processPath(path, script);
                   script.entries.push(new FollowPath(this.sceneNode, path));
-                  this.distanceLeft -= dist;  
+
                   done = true;
                 }
               }
@@ -515,7 +551,7 @@ class Actor implements ActorInterface {
 
               populateGrid(occupants);
 
-              const [path, dist] = await findPath2(
+              let [path] = await findPath2(
                 this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius)  * 0.75, target,
               );
 
@@ -527,8 +563,9 @@ class Actor implements ActorInterface {
               // world.mainRenderPass.addDrawable(world.path2, 'line')
 
               if (path.length > 0) {
+                path = this.processPath(path, script);
                 script.entries.push(new FollowPath(this.sceneNode, path));    
-                this.distanceLeft -= dist;  
+
                 done = true;
               }
               else {
@@ -792,6 +829,82 @@ class Actor implements ActorInterface {
 
   getAction(): Action | null {
     return this.action;
+  }
+
+  processPath(path: PathPoint[], script: Script): PathPoint[] {
+        // Process the path looking for situations (such as grease) that
+    // may affect the final destination.
+    const getNewPoint = (p1: Vec2, p2: Vec2, distanceLeft: number)  => {
+      let v = vec2.normalize(vec2.subtract(p2, p1));
+  
+      // Scale by the distance left to move
+      v = vec2.mulScalar(v, distanceLeft / 2);
+
+      // Add it to the current position to get the new position.
+      return vec2.add(p1, v);
+    }
+
+    for (let i = path.length - 1; i > 0; i -= 1) {
+      const distance = vec2.distance(path[i].point, path[i - 1].point)
+
+      if (path[i].difficult) {
+        if (distance * 2 > this.distanceLeft) {
+          const newPoint = getNewPoint(path[i].point, path[i - 1].point, this.distanceLeft)
+
+          this.distanceLeft = 0;
+
+          return [
+            { point: newPoint, difficult: path[i].difficult, type: path[i].type },
+            ...path.slice(i),
+          ]
+        }
+
+        this.distanceLeft -= distance * 2;
+      }
+      else {
+        if (distance > this.distanceLeft) {
+          const newPoint = getNewPoint(path[i].point, path[i - 1].point, this.distanceLeft)
+
+          this.distanceLeft = 0;
+
+          return [
+            { point: newPoint, difficult: path[i].difficult, type: path[i].type },
+            ...path.slice(i),
+          ]
+        }
+
+        this.distanceLeft -= distance;
+      }
+
+      // Are we transitioning from non-grease to grease?
+      // If so, roll a dexterity saving throw
+      if (
+        path[i - 1].type !== path[i].type
+        && path[i - 1].type === 'Grease'
+      ) {
+        const st = savingThrow(this.character, this.character.abilityScores.dexterity, 'Neutral');
+
+        if (st < this.character.spellCastingDc) {
+          script.entries.push(new Logger(`${this.character.name} fell prone.`))
+          this.character.addCondition('Prone')
+
+          if (this.distanceLeft >= this.character.race.speed / 2) {
+            this.distanceLeft -= this.character.race.speed / 2;
+            this.character.removeCondition('Prone')
+            script.entries.push(new Logger(`${this.character.name} stood up.`))
+          }
+          else {
+            this.distanceLeft = 0;
+            break;
+          }
+        }
+        else {
+          script.entries.push(new Logger(`${this.character.name} succeeded a dexterity saving throw.`))
+        }
+      }
+    }
+
+    return path;
   }
 }
 

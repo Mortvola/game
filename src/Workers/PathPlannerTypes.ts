@@ -8,9 +8,10 @@ export type Occupant = {
   radius: number,
   type: OccupantType,
   name: string,
+  dc?: number,
 }
 
-export type PathPoint = { point: Vec2, difficult: boolean };
+export type PathPoint = { point: Vec2, difficult: boolean, type: string, dc?: number };
 
 export type MessageType = {
   type: 'PopulateGrid' | 'FindPath' | 'AddOccupant',

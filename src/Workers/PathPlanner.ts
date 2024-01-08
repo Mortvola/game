@@ -12,6 +12,16 @@ const pathFinder = new JumpPointSearch(512, 512, 4)
 
 let terrain: Occupant[] = [];
 
+const getTerrain = (p: Vec2): Occupant | null => {
+  for (const t of terrain) {
+    if (vec2.distance(p, t.center) <= t.radius) {
+      return t;
+    }
+  }
+
+  return null;
+}
+
 const isInTerrain = (p: Vec2): boolean => {
   for (const t of terrain) {
     if (vec2.distance(p, t.center) <= t.radius) {
@@ -38,6 +48,8 @@ const intersectTerrain = (p1: PathPoint, p2: PathPoint): PathPoint[] => {
           ...result.slice(1, -1).map((p, index) => ({
             point: p,
             difficult: index === 0 ? !inside[index] : inside[index],
+            type: t.name,
+            dc: t.dc,
           })),
           ...points.slice(i + 1),
         ]
@@ -56,7 +68,7 @@ const trimPath = (path: Vec2[], maxDistance: number): [PathPoint[], number, numb
   let totalDistance = 0;
   const lines: number[][] = [];
   let color = [1, 1, 1, 1];
-  let difficultColor = [0, 0, 1, 1];
+  let difficultColor = [1, 0.75, 0, 1];
 
   // let trimmed = false;
   // let trimPoint = 0;
@@ -64,79 +76,107 @@ const trimPath = (path: Vec2[], maxDistance: number): [PathPoint[], number, numb
 
   const newPath: PathPoint[] = [];
 
-  newPath.push({ point: path[path.length - 1], difficult: isInTerrain(path[path.length - 1]) });
+  if (maxDistance > 0) {
+    const terrain = getTerrain(path[path.length - 1]);
 
-  for (let i = path.length - 1; i > 0; i -= 1) {
-    if (totalDistance < distanceLeft) {
-      const newPoints = intersectTerrain(
-        newPath[newPath.length - 1],
-        { point: path[i - 1], difficult: isInTerrain(path[i - 1]) },
-      );
+    newPath.push({
+      point: path[path.length - 1],
+      difficult: !!terrain,
+      type: terrain?.name ?? '',
+      dc: terrain?.dc,
+    });
 
-      for (let k = 1; k < newPoints.length; k += 1) {
-        const distance = vec2.distance(newPath[newPath.length - 1].point, newPoints[k].point);
+    for (let i = path.length - 1; i > 0; i -= 1) {
+      if (distanceLeft > 0) {
+        const terrain = getTerrain(path[i - 1]);
 
-        if (totalDistance + distance < distanceLeft) {
-          totalDistance += distance;
+        const newPoints = intersectTerrain(
+          newPath[newPath.length - 1],
+          {
+            point: path[i - 1],
+            difficult: !!terrain,
+            type: terrain?.name ?? '',
+            dc: terrain?.dc,
+          },
+        );
 
-          lines.push([
-            newPath[newPath.length - 1].point[0], 0.1, newPath[newPath.length - 1].point[1], 1,
-            ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
-          ])
+        for (let k = 1; k < newPoints.length; k += 1) {
+          const distance = vec2.distance(newPath[newPath.length - 1].point, newPoints[k].point);
 
-          lines.push([
-            newPoints[k].point[0], 0.1, newPoints[k].point[1], 1,
-            ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
-          ])  
+          let terrainFactor = 1.0;
+          if (newPath[newPath.length - 1].difficult) {
+            terrainFactor = 2.0;
+          }
 
-          newPath.push(newPoints[k])
-        }
-        else {
-          const remainingDistance = distanceLeft - totalDistance;
+          if (distance * terrainFactor < distanceLeft) {
+            totalDistance += distance;
+            distanceLeft -= distance * terrainFactor;
 
-          if (remainingDistance > 0) {
-            const v = vec2.normalize(vec2.subtract(newPoints[k].point, newPath[newPath.length - 1].point));
-            const newPoint = vec2.add(newPath[newPath.length - 1].point, vec2.mulScalar(v, remainingDistance));
-      
             lines.push([
               newPath[newPath.length - 1].point[0], 0.1, newPath[newPath.length - 1].point[1], 1,
               ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
             ])
 
             lines.push([
-              newPoint[0], 0.1, newPoint[1], 1,
+              newPoints[k].point[0], 0.1, newPoints[k].point[1], 1,
               ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
             ])  
 
-            newPath.push({ point: newPoint, difficult: newPath[newPath.length - 1].difficult });
-
-            totalDistance += remainingDistance;
+            newPath.push(newPoints[k])
           }
+          else {
+            // const remainingDistance = distanceLeft - totalDistance;
 
-          color = [1, 0, 0, 1];
+            if (distanceLeft > 0) {
+              const v = vec2.normalize(vec2.subtract(newPoints[k].point, newPath[newPath.length - 1].point));
+              const newPoint = vec2.add(newPath[newPath.length - 1].point, vec2.mulScalar(v, distanceLeft / terrainFactor));
+        
+              lines.push([
+                newPath[newPath.length - 1].point[0], 0.1, newPath[newPath.length - 1].point[1], 1,
+                ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
+              ])
 
-          lines.push([
-            ...lines[lines.length - 1].slice(0, 4),
-            ...color,
-          ]);
+              lines.push([
+                newPoint[0], 0.1, newPoint[1], 1,
+                ...(newPath[newPath.length - 1].difficult ? difficultColor : color),
+              ])  
 
-          lines.push([
-            newPoints[k].point[0], 0.1, newPoints[k].point[1], 1,
-            ...color,
-          ])
+              newPath.push({
+                point: newPoint,
+                difficult: newPath[newPath.length - 1].difficult,
+                type: newPath[newPath.length - 1].type,
+                dc: newPath[newPath.length - 1].dc,
+              });
+
+              totalDistance += distanceLeft / terrainFactor;
+              distanceLeft = 0;
+            }
+
+            color = [1, 0, 0, 1];
+
+            lines.push([
+              ...lines[lines.length - 1].slice(0, 4),
+              ...color,
+            ]);
+
+            lines.push([
+              newPoints[k].point[0], 0.1, newPoints[k].point[1], 1,
+              ...color,
+            ])
+          }
         }
       }
-    }
-    else {
-      lines.push([
-        path[i][0], 0.1, path[i][1], 1,
-        ...color,
-      ]);
+      else {
+        lines.push([
+          path[i][0], 0.1, path[i][1], 1,
+          ...color,
+        ]);
 
-      lines.push([
-        path[i - 1][0], 0.1, path[i - 1][1], 1,
-        ...color,
-      ])
+        lines.push([
+          path[i - 1][0], 0.1, path[i - 1][1], 1,
+          ...color,
+        ])
+      }
     }
   }
 

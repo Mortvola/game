@@ -6,6 +6,8 @@ import Actor from "../Actor";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import FollowPath from "../../Script/FollowPath";
 import { PathPoint } from "../../Workers/PathPlannerTypes";
+import { savingThrow } from "../../Dice";
+import Logger from "../../Script/Logger";
 
 class MoveAction extends Action {
   path: PathPoint[] = [];
@@ -61,8 +63,8 @@ class MoveAction extends Action {
   }
 
   interact(script: Script, world: WorldInterface): boolean {
-    script.entries.push(new FollowPath(this.actor.sceneNode, this.path));    
-    this.actor.distanceLeft -= this.distance;
+    const path = this.actor.processPath(this.path, script);
+    script.entries.push(new FollowPath(this.actor.sceneNode, path));    
 
     this.showPathLines(null);
 

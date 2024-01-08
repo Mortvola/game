@@ -86,8 +86,8 @@ class RangeAttack extends Action {
 
   interact(script: Script, world: WorldInterface): boolean {
     if (this.path.length > 0) {
-      script.entries.push(new FollowPath(this.actor.sceneNode, this.path));    
-      this.actor.distanceLeft -= this.distance;
+      const path = this.actor.processPath(this.path, script);
+      script.entries.push(new FollowPath(this.actor.sceneNode, path));    
 
       this.showPathLines(null);
     }

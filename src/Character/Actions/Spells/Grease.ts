@@ -7,6 +7,7 @@ import { WorldInterface } from "../../../WorldInterface";
 import Actor, { getActorId } from "../../Actor";
 import AreaSpell from "./AreaSpell";
 import { savingThrow } from "../../../Dice";
+import Logger from "../../../Script/Logger";
 
 class Grease extends AreaSpell {
   constructor(actor: Actor) {
@@ -21,6 +22,7 @@ class Grease extends AreaSpell {
         radius: this.radius,
         type: 'Terrain',
         name: 'Grease',
+        dc: this.actor.character.spellCastingDc,
       };
   
       world.occupants.push(occupant)
@@ -35,11 +37,11 @@ class Grease extends AreaSpell {
             const st = savingThrow(member.character, member.character.abilityScores.dexterity, 'Neutral');
 
             if (st < this.actor.character.spellCastingDc) {
-              console.log(`target failed dc: ${member.character.name} fell prone`)
+              script.entries.push(new Logger(`${member.character.name} fell prone`))
               member.character.addCondition('Prone')
             }
             else {
-              console.log(`target succeeded dc: ${member.character.name}`)
+              script.entries.push(new Logger(`${member.character.name} succeeded at a dexterity saving throw.`))
             }
           }
         }
