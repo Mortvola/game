@@ -7,6 +7,7 @@ import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
 import { getWorld } from "../../Renderer";
 import Trajectory from "../../Drawables/Trajectory";
+import { PathPoint } from "../../Workers/PathPlannerTypes";
 
 export type TimeType = 'Action' | 'Bonus' | 'Move';
 
@@ -21,7 +22,7 @@ class Action {
 
   endOfTurn: boolean;
 
-  path: Vec2[] = [];
+  path: PathPoint[] = [];
 
   distance = 0;
 
@@ -105,13 +106,14 @@ class Action {
           vec2.create(targetWp[0], targetWp[2]),
           target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75,
           target,
+          true,
         )
 
         if (!cancelled) {
           if (path.length > 0) {
             this.showPathLines(lines);
 
-            let distanceToTarget = vec2.distance(path[0], vec2.create(targetWp[0], targetWp[2]));
+            let distanceToTarget = vec2.distance(path[0].point, vec2.create(targetWp[0], targetWp[2]));
             distanceToTarget -= target.occupiedRadius  
 
             this.path = path;
@@ -181,6 +183,7 @@ class Action {
           targetWp,
           null,
           target,
+          true,
         )
 
         if (!cancelled && !this.focused) {

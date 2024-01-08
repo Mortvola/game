@@ -2,15 +2,16 @@ import { Vec2, vec2, vec3 } from "wgpu-matrix";
 import { ActorInterface } from "../ActorInterface";
 import { WorldInterface } from "../WorldInterface";
 import SceneNode from "../Drawables/SceneNode";
+import { PathPoint } from "../Workers/PathPlannerTypes";
 
 class FollowPath implements ActorInterface {
-  path: Vec2[];
+  path: PathPoint[];
 
   sceneNode: SceneNode;
 
   metersPerSecond = 6;
 
-  constructor(sceneNode: SceneNode, path: Vec2[]) {
+  constructor(sceneNode: SceneNode, path: PathPoint[]) {
     this.sceneNode = sceneNode;
     this.path = path;
   }
@@ -21,7 +22,7 @@ class FollowPath implements ActorInterface {
     }
 
     for (;;) {
-      const moveTo = this.path[this.path.length - 1];
+      const moveTo = this.path[this.path.length - 1].point;
 
       // Get the distance to target Using the mesh's world
       // position (found in mesh.translate) and the target location

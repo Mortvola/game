@@ -1,12 +1,14 @@
 import { Vec2, vec2 } from "wgpu-matrix";
 import Actor from "../Character/Actor";
-import { AddOccupantdRequest, FindPathRequest, FindPathResponse, MessageType, Occupant, PopulateGridRequest } from "./PathPlannerTypes";
+import { AddOccupantdRequest, FindPathRequest, FindPathResponse, MessageType, Occupant, PathPoint, PopulateGridRequest, PopulateGridResponse } from "./PathPlannerTypes";
+import { getWorld } from "../Renderer";
+import Line from "../Drawables/Line";
 
 const worker: Worker = new Worker(new URL("../Workers/PathPlanner.ts", import.meta.url));
 
 let requestId = 0;
 
-type FindPathReturn = [Vec2[], number, number[][], boolean, number[][]];
+type FindPathReturn = [PathPoint[], number, number[][], boolean, number[][]];
 
 type FindPathPromise = {
   resolve: ((value: FindPathReturn) => void),
@@ -68,17 +70,17 @@ worker.addEventListener('message', (evt: MessageEvent<MessageType>) => {
     }
   }
   else if (evt.data.type === 'PopulateGrid') {
-    // const data = evt.data as PopulateGridResponse;
+    const data = evt.data as PopulateGridResponse;
 
-    // const world = getWorld();
+    const world = getWorld();
 
-    // if (world.path2) {
-    //   world.mainRenderPass.removeDrawable(world.path2, 'line')
-    //   world.path2 = null;
-    // }
+    if (world.path2) {
+      world.mainRenderPass.removeDrawable(world.path2, 'line')
+      world.path2 = null;
+    }
 
-    // world.path2 = new Line(data.lines);
-    // world.mainRenderPass.addDrawable(world.path2, 'line')
+    world.path2 = new Line(data.lines);
+    world.mainRenderPass.addDrawable(world.path2, 'line')
 
     // const data = evt.data as PopulateGridResponse;
 
@@ -186,9 +188,12 @@ export const findPath2 = async (
   goal: Vec2,
   goalRadius: number | null,
   target: Actor | null,
+  ignoreTerrain = false,
 ): Promise<FindPathReturn> => {
 
   requestId += 1;
+
+  const targetWp = target?.getWorldPosition();
 
   const message: FindPathRequest = {
     type: 'FindPath',
@@ -196,8 +201,15 @@ export const findPath2 = async (
     start,
     goal,
     goalRadius,
-    target: target === null ? null : { id: target.id },
+    target: target === null ? null : ({
+      type: 'Creature',
+      id: target.id,
+      name: target.character.name,
+      center: vec2.create(targetWp![0], targetWp![2]),
+      radius: goalRadius!,
+    }),
     maxDistance: actor.distanceLeft,
+    ignoreTerrain,
   };
 
   if (!processing) {

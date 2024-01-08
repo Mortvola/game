@@ -1,16 +1,24 @@
 import { Vec2, vec2 } from "wgpu-matrix";
 import UniformGridSearch from "./UniformGridSearch";
-import { lineCircleIntersection2 } from "../Math";
+import { lineCircleIntersection } from "../Math";
 import { GridNode } from "./GridNode";
 import GridNodeSet from "./GridNodeSet";
+import { Occupant } from "../Workers/PathPlannerTypes";
 
 class JumpPointSearch extends UniformGridSearch {
   goalNode: GridNode | null | undefined = null;
 
   lines2: Vec2[] = [];
 
-  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: { id: number } | null): Vec2[] {
+  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: Occupant | null, ignoreTerrain = false): Vec2[] {
     this.target = target;
+
+    this.ignoreTerrain = ignoreTerrain;
+
+    this.ignore = [];
+    if (target) {
+      this.ignore = [target.id];
+    }
 
     this.lines = [];
     this.lines2 = [];
@@ -43,6 +51,10 @@ class JumpPointSearch extends UniformGridSearch {
 
     openSet.push(startNode);
 
+    while (this.nodeBlocked(startNode)) {
+      this.ignore = this.ignore.concat(startNode.occupants.map((o) => o.id))
+    }
+
     while (!openSet.empty()) {
       openSet.sort();
 
@@ -59,15 +71,25 @@ class JumpPointSearch extends UniformGridSearch {
             path.push(this.gridToPosition(vec2.create(currentNode.x, currentNode.y)));
             currentNode = currentNode.parent
           }
+          
+          for (;;) {
+            const l = path.length;
+            path = this.smoothPath(path);
+
+            if (path.length === l) {
+              break;
+            }
+          }
 
           if (goalRadius) {
             if (path.length < 2) {
               console.log('malformed path');
             }
+
             path = this.trimPath(path, g, goalRadius);
           }
 
-          return this.smoothPath(path, target);
+          return path;
           // return path;
         }
 
@@ -115,7 +137,7 @@ class JumpPointSearch extends UniformGridSearch {
         break;
       }
 
-      const result = lineCircleIntersection2(g, goalRadius, path[0], path[1]);
+      const result = lineCircleIntersection(g, goalRadius, path[0], path[1]);
 
       if (result === null || result.length === 1) {
         break;
@@ -149,7 +171,7 @@ class JumpPointSearch extends UniformGridSearch {
         const squaredLength = vec2.lenSq(v1);
 
         if (dotProduct < squaredLength) {
-          // lineCircleIntersection2(g, feetToMeters(2.5) * 2, path[0], path[1]);
+          // lineCircleIntersection(g, feetToMeters(2.5) * 2, path[0], path[1]);
           path[0] = result[0];
 
           const t = this.positionToGrid(path[0]);

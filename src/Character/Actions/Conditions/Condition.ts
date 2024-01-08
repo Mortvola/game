@@ -1,16 +1,17 @@
 export type ConditionType = 
   'Poisoned'
+  | 'Prone'
   ;
 
-class Condition {
-  name: ConditionType;
+// class Condition {
+//   name: ConditionType;
 
-  duration: number;
+//   duration: number;
 
-  constructor(name: ConditionType, duration: number) {
-    this.name = name;
-    this.duration = duration;
-  }
-}
+//   constructor(name: ConditionType, duration: number) {
+//     this.name = name;
+//     this.duration = duration;
+//   }
+// }
 
-export default Condition;
+// export default Condition;

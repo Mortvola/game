@@ -665,7 +665,7 @@ class Renderer implements WorldInterface {
               armorClass: this.focused.character.armorClass,
               conditions: [
                 ...this.focused.character.influencingActions.map((c) => ({ name: c.name, duration: c.duration })),
-                ...this.focused.character.conditions.map((c) => ({ name: c.name, duration: c.duration })),
+                ...this.focused.character.conditions.map((c) => ({ name: c, duration: 0 })),
               ]
             })  
           }

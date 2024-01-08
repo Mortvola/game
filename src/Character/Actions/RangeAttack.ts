@@ -64,6 +64,7 @@ class RangeAttack extends Action {
           targetWp,
           null,
           target,
+          true,
         )
 
         if (!cancelled && !this.focused) {

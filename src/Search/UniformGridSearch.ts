@@ -14,9 +14,13 @@ class UniformGridSearch {
 
   scale: number;
 
-  target: { id: number } | null = null;
+  target: Occupant | null = null;
 
   lines: Vec4[] = [];
+
+  ignore: number[] = [];
+
+  ignoreTerrain = false;
 
   constructor(width: number, height: number, scale: number) {
     this.scale = scale;
@@ -54,7 +58,7 @@ class UniformGridSearch {
     }
   }
 
-  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: { id: number } | null, actor: { id: number }): Vec2[] {
+  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: Occupant | null, ignoreTerrain = false): Vec2[] {
     throw new Error('Not implemented')
   }
 
@@ -72,6 +76,10 @@ class UniformGridSearch {
   nodeBlocked(x: number, y: number): boolean;
   nodeBlocked(node?: GridNode | null): boolean;
   nodeBlocked(arg1?: number | GridNode | null, arg2?: number): boolean {
+    if (arg1 === null || arg1 === undefined) {
+      return true;
+    }
+
     let node = arg1 as GridNode;
 
     if (typeof arg1 === 'number' && typeof arg2 === 'number') {
@@ -87,13 +95,14 @@ class UniformGridSearch {
       node = this.grid[y][x];
     }
 
-    if (node === null || node === undefined) {
-      return true;
-    }
-
-    const avoidTerrain = true;
-
-    if (node.occupants.filter((o) => (avoidTerrain || o.type !== 'Terrain') && o.id !== this.target?.id).length > 0) {
+    if (
+      node.occupants
+        .filter((o) => (
+          (!this.ignoreTerrain || o.type !== 'Terrain')
+          && !this.ignore.includes(o.id)
+        ))
+        .length > 0
+    ) {
       return true;
     }        
 
@@ -267,7 +276,7 @@ class UniformGridSearch {
     return [[x1, y], [x2, y]]
   }
 
-  smoothPath(path: Vec2[], target: { id: number } | null): Vec2[] {
+  smoothPath(path: Vec2[]): Vec2[] {
     const smoothedPath: Vec2[] = [];
 
     if (path.length > 0) {

@@ -1,9 +1,10 @@
 import { Vec2, vec2 } from "wgpu-matrix";
 import UniformGridSearch from "./UniformGridSearch";
 import GridNodeSet from "./GridNodeSet";
+import { Occupant } from "../Workers/PathPlannerTypes";
 
 class ThetaStarSearch extends UniformGridSearch {
-  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: { id: number }): Vec2[] {
+  findPath(s: Vec2, g: Vec2, goalRadius: number | null, target: Occupant, ignoreTerrain = false): Vec2[] {
     const start = this.positionToGrid(s);
     const goal =this.positionToGrid(g);
     

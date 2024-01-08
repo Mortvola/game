@@ -414,7 +414,7 @@ function App() {
         {
           actor
             ? actor.character.conditions.map((c) => (
-              <div>{c.name}</div>
+              <div>{c}</div>
             ))
             : null
         }

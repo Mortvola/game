@@ -45,6 +45,12 @@ export enum States {
 }
 
 let actorId = 0;
+export const getActorId = () => {
+  const r = actorId;
+  actorId += 1;
+
+  return r;
+}
 
 class Actor implements ActorInterface {
   id: number;
@@ -93,10 +99,11 @@ class Actor implements ActorInterface {
     team: number,
     automated: boolean,
   ) {
-    this.id = actorId;
-    actorId += 1;
+    this.id = getActorId();
 
     this.character = character;
+    this.character.actor = this;
+
     this.team = team;
     this.automated = automated;
     this.sceneNode.addNode(mesh, 'lit');
@@ -137,7 +144,7 @@ class Actor implements ActorInterface {
     return new Actor(character, mesh, playerHeight, teamColor, team, automated);
   }
 
-  getWorldPosition() {
+  getWorldPosition(): Vec4 {
     // Transforms the position to world space.
     return vec4.transformMat4(
       vec4.create(0, 0, 0, 1),
@@ -164,7 +171,7 @@ class Actor implements ActorInterface {
       this.setDefaultAction();
 
       const participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-      const occupants = getOccupants(this, participants, []);
+      const occupants = getOccupants(this, participants, world.occupants);
 
       populateGrid(occupants);
     }
@@ -364,6 +371,12 @@ class Actor implements ActorInterface {
           const closest = targets[0];
           const target = otherTeam[closest.index];
 
+          if (this.character.hasCondition('Prone') && this.distanceLeft >= this.character.race.speed / 2) {
+            script.entries.push(new Logger(`${this.character.name} stood up`));
+            this.character.removeCondition('Prone');
+            this.distanceLeft -= this.character.race.speed / 2;
+          }
+
           if (this.character.actionsLeft > 0) {
             if (closest.distance <= this.attackRadius + target.occupiedRadius) {
               // The target is already in range.
@@ -413,13 +426,13 @@ class Actor implements ActorInterface {
               // world.mainRenderPass.addDrawable(world.path2, 'line')
 
               if (path.length > 0) {
-                let distanceToTarget = vec2.distance(path[0], goal);
+                let distanceToTarget = vec2.distance(path[0].point, goal);
                 distanceToTarget -= target.occupiedRadius
 
                 if (distanceToTarget < this.attackRadius) {
                   script.entries.push(new FollowPath(this.sceneNode, path));  
                   this.distanceLeft -= dist;  
-                  myPosition = vec4.create(path[0][0], 0, path[0][1], 1);
+                  myPosition = vec4.create(path[0].point[0], 0, path[0].point[1], 1);
 
                   this.attack(
                     target,

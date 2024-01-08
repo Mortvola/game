@@ -5,9 +5,10 @@ import Action from "./Action";
 import Actor from "../Actor";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import FollowPath from "../../Script/FollowPath";
+import { PathPoint } from "../../Workers/PathPlannerTypes";
 
 class MoveAction extends Action {
-  path: Vec2[] = [];
+  path: PathPoint[] = [];
 
   distance = 0;
 
@@ -41,6 +42,7 @@ class MoveAction extends Action {
       targetWp,
       target ? target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75 : null,
       target,
+      true,
     )
 
     if (!cancelled) { // && !this.target) {

@@ -133,8 +133,13 @@ export const feetToMeters = (feet: number) => (
   feet * 0.3048
 )
 
+export const pointWithinCircle = (center: Vec2, radius: number, p: Vec2): boolean => {
+  const distSquared = vec2.distSq(center, p);
 
-export const lineCircleIntersection2 = (center: Vec2, radius: number, p1: Vec2, p2: Vec2) => {
+  return distSquared <= radius * radius;
+}
+
+export const lineCircleIntersection = (center: Vec2, radius: number, p1: Vec2, p2: Vec2) => {
   const p1x = p1[0] - center[0];
   const p1y = p1[1] - center[1];
   const p2x = p2[0] - center[0];
@@ -144,6 +149,8 @@ export const lineCircleIntersection2 = (center: Vec2, radius: number, p1: Vec2, 
   let dy = p2y - p1y;
 
   if (dx === 0) {
+    // Line is vertical
+
     let A = 1;
     let C = (p1x * p1x - radius * radius);
 
@@ -175,18 +182,22 @@ export const lineCircleIntersection2 = (center: Vec2, radius: number, p1: Vec2, 
   const discriminate = B * B - 4 * A * C;
 
   if (discriminate < 0) {
+    // Line does not intersect circle
     return null;
   }
 
   if (discriminate === 0) {
+    // Line is a tangent of the circle (touches at one point)
     const x = -B / (2 * A);
     const y = m * x + b;
 
     return [vec2.create(x + center[0], y + center[1])];
   }
 
-  const x1 = (-B + Math.sqrt(discriminate)) / (2 * A);
-  const x2 = (-B - Math.sqrt(discriminate)) / (2 * A);
+  // Line intersects circle (two points)
+
+  const x1 = (-B - Math.sqrt(discriminate)) / (2 * A);
+  const x2 = (-B + Math.sqrt(discriminate)) / (2 * A);
 
   const y1 = m * x1 + b;
   const y2 = m * x2 + b;
@@ -194,13 +205,88 @@ export const lineCircleIntersection2 = (center: Vec2, radius: number, p1: Vec2, 
   return [vec2.create(x1 + center[0], y1 + center[1]), vec2.create(x2 + center[0], y2 + center[1])];
 }
 
+// A line segment may be split from
+// 1 (no intersection or a tangent) to
+// 3 (two intersections with the circle) segments.
+export const lineSegmentCircleIntersection = (center: Vec2, radius: number, p1: Vec2, p2: Vec2): [Vec2[], boolean[]] => {
+  const result = lineCircleIntersection(center, radius, p1, p2);
+
+  if (result === null || result.length === 1) {
+    return [[p1, p2], [false, false]];
+  }
+
+  const v = vec2.subtract(p2, p1);
+
+  const points: Vec2[] = [p1];
+  const inside: boolean[] = [true, true];
+
+  const computeT = (point: Vec2) => {
+    if (v[0] === 0) {
+      return (point[1] - p1[1]) / v[1];
+    }
+
+    return (point[0] - p1[0]) / v[0];
+  }
+
+  const t1 = computeT(result[0]);
+  const t2 = computeT(result[1]);
+
+  if (t1 < t2) {
+    if (t1 > 0 && t1 < 1) {
+      points.push(result[0]);
+      inside[0] = false;
+    }
+
+    if (t2 > 0 && t2 < 1) {
+      points.push(result[1]);
+      inside[1] = false;
+    }
+
+    if (t2 < 0 || t1 > 1) {
+      inside[0] = false;
+      inside[1] = false;
+    }
+  }
+  else {
+    if (t2 > 0 && t2 < 1) {
+      points.push(result[1]);
+      inside[0] = false;
+    }
+
+    if (t1 > 0 && t1 < 1) {
+      points.push(result[0]);
+      inside[1] = false;
+    }
+
+    if (t1 < 0 || t2 > 1) {
+      inside[0] = false;
+      inside[1] = false;
+    }
+  }
+
+  points.push(p2);
+
+  return [points, inside];
+}
+
+// const p1 = vec2.create(0, -1.1);
+// const p2 = vec2.create(1.1, 0);
+// const center = vec2.create(0, 0);
+// const radius = 1;
+
+// const points = lineSegmentCircleIntersection(center, radius, p1, p2);
+
+// for (const point of points) {
+//   console.log(`${point}`)
+// }
+
 // const center = vec2.create(0.16735833883285522, -6.719706058502197);
 // const radius = 1.524;
 
 // const p1 = vec2.create(0.1875, -6.75);
 // const p2 = vec2.create(0.1875, -6.375);
 
-// const result2 = lineCircleIntersection2(center, radius, p1, p2);
+// const result2 = lineCircleIntersection(center, radius, p1, p2);
 
 // if (result2) {
 //   console.log(vec2.distance(center, result2[0]))

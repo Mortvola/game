@@ -1,7 +1,9 @@
+import { Vec4 } from "wgpu-matrix";
+import { CreatureActorInterface } from "../ActorInterface";
 import { abilityModifier, getProficiencyBonus } from "../Dice";
 import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from "../Tables";
 import Action from "./Actions/Action";
-import Condition, { ConditionType } from "./Actions/Conditions/Condition";
+import { ConditionType } from "./Actions/Conditions/Condition";
 import Spell from "./Actions/Spells/Spell";
 import { R, clericSpells, druidSpells } from "./Actions/Spells/Spells";
 import CharacterClass from "./Classes/CharacterClass";
@@ -52,6 +54,8 @@ class Creature {
   
   experiencePoints: number;
 
+  actor: CreatureActorInterface | null = null;
+
   equipped: Equipped = {
     meleeWeapon: null,
     rangeWeapon: null,
@@ -63,7 +67,7 @@ class Creature {
 
   influencingActions: Action[] = [];
 
-  conditions: Condition[] = [];
+  conditions: ConditionType[] = [];
 
   concentration: Spell | null = null;
 
@@ -122,16 +126,22 @@ class Creature {
     return ac + this.charClass.unarmoredDefence(this.abilityScores);
   }
 
-  hasCondition(name: ConditionType): boolean {
-    return this.conditions.some((c) => c.name === name);
+  addCondition(name: ConditionType) {
+    if (!this.conditions.includes(name)) {
+      this.conditions.push(name)
+    }
   }
 
-  getCondition(name: ConditionType): Condition | undefined {
-    return this.conditions.find((c) => c.name === name);
+  hasCondition(name: ConditionType): boolean {
+    return this.conditions.some((c) => c === name);
   }
+
+  // getCondition(name: ConditionType): ConditionType | undefined {
+  //   return this.conditions.find((c) => c === name);
+  // }
 
   removeCondition(name: ConditionType): void {
-    const index = this.conditions.findIndex((c) => c.name === name);
+    const index = this.conditions.findIndex((c) => c === name);
 
     if (index !== -1) {
       this.conditions = [
@@ -295,6 +305,14 @@ class Creature {
     const spell = this.influencingActions.find((s) => s.name === name);
 
     return spell ?? null;
+  }
+
+  getWorldPosition(): Vec4 {
+    if (!this.actor) {
+      throw new Error('actor not set')
+    }
+
+    return this.actor.getWorldPosition();
   }
 }
 

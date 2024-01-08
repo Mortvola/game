@@ -10,6 +10,8 @@ export type Occupant = {
   name: string,
 }
 
+export type PathPoint = { point: Vec2, difficult: boolean };
+
 export type MessageType = {
   type: 'PopulateGrid' | 'FindPath' | 'AddOccupant',
   id: number,
@@ -27,12 +29,13 @@ export type FindPathRequest = MessageType & {
   start: Vec2,
   goal: Vec2,
   goalRadius: number | null,
-  target: { id: number } | null,
+  target: Occupant | null,
   maxDistance: number,
+  ignoreTerrain: boolean,
 }
 
 export type FindPathResponse = MessageType & {
-  path: Vec2[],
+  path: PathPoint[],
   distance: number,
   lines: number[][],
   dbl: number[][],
