@@ -16,16 +16,8 @@ class TouchSpell extends Spell {
     }
 
     const result = this.zeroDistanceAction(script, world, () => {
-      if (this.cast(script, world) && this.duration > 0) {
-        this.actor.character.enduringActions.push(this);
-      }
+      this.castSpell(script)
     });
-
-    if (result) {
-      if (this.level >= 1 && this.actor.character.spellSlots[this.level - 1] > 0) {
-        this.actor.character.spellSlots[this.level - 1] -= 1;
-      }
-    }
 
     return result;
   }

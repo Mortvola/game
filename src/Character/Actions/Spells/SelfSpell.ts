@@ -27,23 +27,7 @@ class SelfSpell extends Spell {
       this.targets.push(this.focused);
       this.focused = null;
       
-      if (this.cast(script, world) && this.duration > 0) {
-        this.actor.character.enduringActions.push(this);
-      }
-
-      if (world.loggerCallback) {
-        world.loggerCallback(`${this.actor.character.name} received ${this.name}.`)
-      }
-  
-      if (world.actionInfoCallback) {
-        world.actionInfoCallback(null);
-      }
-
-      if (this.level >= 1 && this.actor.character.spellSlots[this.level - 1] > 0) {
-        this.actor.character.spellSlots[this.level - 1] -= 1;
-      }
-
-      return true;
+      return this.castSpell(script);
     }
 
     return false;

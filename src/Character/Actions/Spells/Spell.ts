@@ -3,6 +3,7 @@ import Script from "../../../Script/Script";
 import { WorldInterface } from "../../../WorldInterface";
 import Action, { TimeType } from "../Action";
 import Actor from "../../Actor";
+import { getWorld } from "../../../Renderer";
 
 class Spell extends Action {
   level: number;
@@ -39,6 +40,30 @@ class Spell extends Action {
 
   cast(script: Script, world: WorldInterface): boolean {
     return false;
+  }
+
+  castSpell(script: Script): boolean {
+    const world = getWorld();
+
+    // End concentration of the curren spell if this spell 
+    // requires concentration.
+    if (this.concentration) {
+      this.actor.character.stopConcentrating();
+    }
+
+    if (this.cast(script, world) && this.duration > 0) {
+      this.actor.character.enduringActions.push(this);
+    }
+
+    if (world.actionInfoCallback) {
+      world.actionInfoCallback(null);
+    }
+
+    if (this.level >= 1 && this.actor.character.spellSlots[this.level - 1] > 0) {
+      this.actor.character.spellSlots[this.level - 1] -= 1;
+    }
+
+    return true;
   }
 
   async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {

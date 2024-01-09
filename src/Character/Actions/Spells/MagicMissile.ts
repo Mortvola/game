@@ -123,25 +123,7 @@ class MagicMissile extends RangeSpell {
         }
       }
       else {
-        // End concentration of the curren spell if this spell 
-        // requires concentration.
-        if (this.concentration) {
-          this.actor.character.stopConcentrating();
-        }
-
-        if (this.cast(script, world) && this.duration > 0) {
-          this.actor.character.enduringActions.push(this);
-        }
-
-        if (world.actionInfoCallback) {
-          world.actionInfoCallback(null);
-        }
-
-        if (this.level >= 1 && this.actor.character.spellSlots[this.level - 1] > 0) {
-          this.actor.character.spellSlots[this.level - 1] -= 1;
-        }
-
-        return true;
+        return this.castSpell(script);
       }
     }
 

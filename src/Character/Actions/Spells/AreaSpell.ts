@@ -47,15 +47,7 @@ class AreaSpell extends RangeSpell {
 
   interact(script: Script, world: WorldInterface): boolean {
     if (this.center !== null) {
-      if (this.cast(script, world) && this.duration > 0) {
-        this.actor.character.enduringActions.push(this);
-      }
-
-      if (this.level >= 1 && this.actor.character.spellSlots[this.level - 1] > 0) {
-        this.actor.character.spellSlots[this.level - 1] -= 1;
-      }
-
-      return true;
+      return this.castSpell(script);
     }
 
     return false;
