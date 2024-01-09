@@ -41,16 +41,16 @@ fn vertex_circle(@builtin(vertex_index) vertexIndex : u32) -> VertexOut
     y = (radius - thickness) * sin(radians);
   }
   else if (segmentVertIndex == 1 || segmentVertIndex == 4) {
-    x = (radius + thickness) * cos(radians);
-    y = (radius + thickness) * sin(radians);
+    x = (radius) * cos(radians);
+    y = (radius) * sin(radians);
   }
   else if (segmentVertIndex == 2 || segmentVertIndex == 3) {
     x = (radius - thickness) * cos(radians + radiansPerSegment);
     y = (radius - thickness) * sin(radians + radiansPerSegment);
   }
   else if (segmentVertIndex == 5) {
-    x = (radius + thickness) * cos(radians + radiansPerSegment);
-    y = (radius + thickness) * sin(radians + radiansPerSegment);
+    x = (radius) * cos(radians + radiansPerSegment);
+    y = (radius) * sin(radians + radiansPerSegment);
   }
 
   output.position = projectionMatrix * viewMatrix * modelMatrix * vec4f(x, y, 0, 1);

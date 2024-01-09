@@ -1,8 +1,8 @@
 import { Vec2, vec2 } from "wgpu-matrix";
 import Actor from "../Character/Actor";
-import { AddOccupantdRequest, FindPathRequest, FindPathResponse, MessageType, Occupant, PathPoint, PopulateGridRequest, PopulateGridResponse } from "./PathPlannerTypes";
-import { getWorld } from "../Renderer";
-import Line from "../Drawables/Line";
+import {
+  AddOccupantdRequest, FindPathRequest, FindPathResponse, MessageType, Occupant, PathPoint, PopulateGridRequest,
+} from "./PathPlannerTypes";
 
 const worker: Worker = new Worker(new URL("../Workers/PathPlanner.ts", import.meta.url));
 
@@ -70,17 +70,17 @@ worker.addEventListener('message', (evt: MessageEvent<MessageType>) => {
     }
   }
   else if (evt.data.type === 'PopulateGrid') {
-    const data = evt.data as PopulateGridResponse;
+    // const data = evt.data as PopulateGridResponse;
 
-    const world = getWorld();
+    // const world = getWorld();
 
-    if (world.path2) {
-      world.mainRenderPass.removeDrawable(world.path2, 'line')
-      world.path2 = null;
-    }
+    // if (world.path2) {
+    //   world.mainRenderPass.removeDrawable(world.path2, 'line')
+    //   world.path2 = null;
+    // }
 
-    world.path2 = new Line(data.lines);
-    world.mainRenderPass.addDrawable(world.path2, 'line')
+    // world.path2 = new Line(data.lines);
+    // world.mainRenderPass.addDrawable(world.path2, 'line')
 
     // const data = evt.data as PopulateGridResponse;
 
@@ -118,38 +118,46 @@ worker.addEventListener('message', (evt: MessageEvent<MessageType>) => {
   }
 })
 
+const getOccupant = (actor: Actor): Occupant => {
+  const point = actor.getWorldPosition();
+
+  return ({
+    id: actor.id,
+    center: vec2.create(point[0], point[2]),
+    radius: actor.occupiedRadius,
+    type: 'Creature',
+    name: '',
+  })
+}
+
 export const getOccupants = (actor: Actor, participants: Actor[], others: Occupant[]): Occupant[] => {
   const occupants: Occupant[] = participants
     .filter((p) => p !== actor)
-    .map((p) => {
-      const point = p.getWorldPosition();
-
-      return ({
-        id: p.id,
-        center: vec2.create(point[0], point[2]),
-        radius: p.occupiedRadius + actor.occupiedRadius,
-        type: 'Creature',
-        name: '',
-      })
-    })
+    .map((p) => (
+      getOccupant(p)
+    ))
 
   return occupants.concat(others.map((o) => ({
     id: o.id,
     center: o.center,
-    radius: o.radius + actor.occupiedRadius,
+    radius: o.radius,
     type: o.type,
     name: o.name,
   })));
 }
 
 export const populateGrid = (
+  actor: Actor,
   occupants: Occupant[],
 ) => {
   // requestId += 1;
 
+  const actorOccupant = getOccupant(actor);
+
   const message: PopulateGridRequest = {
     type: 'PopulateGrid',
     id: requestId,
+    actor: actorOccupant,
     occupants,
   };
 

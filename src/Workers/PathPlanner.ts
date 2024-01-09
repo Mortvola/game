@@ -10,6 +10,8 @@ import { lineSegmentCircleIntersection } from "../Math";
 
 const pathFinder = new JumpPointSearch(512, 512, 4)
 
+let actorOccupant: Occupant | null = null;
+
 let terrain: Occupant[] = [];
 
 const getTerrain = (p: Vec2): Occupant | null => {
@@ -183,14 +185,15 @@ const trimPath = (path: Vec2[], maxDistance: number): [PathPoint[], number, numb
   return [newPath.reverse(), totalDistance, lines];
 }
 
-const populateGrid = (occupants: Occupant[]): number[][] => {
+const populateGrid = (actor: Occupant, occupants: Occupant[]): number[][] => {
   let debugLines: number[][] = [];
 
   pathFinder.clear(true);
+  actorOccupant = actor;
   terrain = [];
 
   for (const occupant of occupants) {
-    const lines = pathFinder.fillCircle(occupant, occupant.center, occupant.radius);
+    const lines = pathFinder.fillCircle(occupant, occupant.center, occupant.radius + actorOccupant.radius);
     debugLines = debugLines.concat(lines)
 
     if (occupant.type === 'Terrain') {
@@ -213,7 +216,7 @@ const populateGrid = (occupants: Occupant[]): number[][] => {
 }
 
 const addOccupant = (occupant: Occupant) => {
-  pathFinder.fillCircle(occupant, occupant.center, occupant.radius);
+  pathFinder.fillCircle(occupant, occupant.center, occupant.radius + (actorOccupant?.radius ?? 0));
 
   if (occupant.type === 'Terrain') {
     terrain.push(occupant)
@@ -261,7 +264,7 @@ self.onmessage = (event: MessageEvent<MessageType>) => {
   else if (event.data.type === 'PopulateGrid') {
     const data = event.data as PopulateGridRequest;
 
-    const lines = populateGrid(data.occupants);
+    const lines = populateGrid(data.actor, data.occupants);
 
     const response: PopulateGridResponse = {
       type: data.type,

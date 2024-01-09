@@ -19,6 +19,7 @@ export type MessageType = {
 }
 
 export type PopulateGridRequest = MessageType & {
+  actor: Occupant,
   occupants: Occupant[],
 }
 

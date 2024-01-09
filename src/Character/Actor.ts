@@ -175,7 +175,7 @@ class Actor implements ActorInterface {
       const participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
       const occupants = getOccupants(this, participants, world.occupants);
 
-      populateGrid(occupants);
+      populateGrid(this, occupants);
     }
 
     if (this.character.hasCondition('Prone')) {
@@ -445,7 +445,7 @@ class Actor implements ActorInterface {
 
               const occupants = getOccupants(this, participants, world.occupants);
 
-              populateGrid(occupants);
+              populateGrid(this, occupants);
 
               let [path] = await findPath2(
                 this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius) * 0.75, target,
@@ -549,7 +549,7 @@ class Actor implements ActorInterface {
 
               const occupants = getOccupants(this, participants, world.occupants);
 
-              populateGrid(occupants);
+              populateGrid(this, occupants);
 
               let [path] = await findPath2(
                 this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius)  * 0.75, target,

@@ -1,5 +1,5 @@
-import { vec2 } from "wgpu-matrix";
-import { feetToMeters, pointWithinCircle } from "../../../Math";
+import { mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
+import { degToRad, feetToMeters, pointWithinCircle } from "../../../Math";
 import Script from "../../../Script/Script";
 import { addOccupant } from "../../../Workers/PathPlannerQueue";
 import { Occupant } from "../../../Workers/PathPlannerTypes";
@@ -8,6 +8,7 @@ import Actor, { getActorId } from "../../Actor";
 import AreaSpell from "./AreaSpell";
 import { savingThrow } from "../../../Dice";
 import Logger from "../../../Script/Logger";
+import Circle from "../../../Drawables/Circle";
 
 class Grease extends AreaSpell {
   constructor(actor: Actor) {
@@ -16,6 +17,15 @@ class Grease extends AreaSpell {
 
   cast(script: Script, world: WorldInterface): boolean {
     if (this.center) {
+      const obj = new Circle(this.radius, this.radius, vec4.create(0.2, 0.2, 0.2, 1))
+      obj.translate = vec3.create(this.center[0], 0, this.center[1])
+  
+      world.mainRenderPass.addDrawable(obj, 'circle');
+      world.scene.addNode(obj, 'circle');
+  
+      const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
+      obj.postTransforms.push(mat4.fromQuat(q));  
+
       const occupant: Occupant = {
         id: getActorId(),
         center: this.center,
