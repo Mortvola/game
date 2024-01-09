@@ -346,6 +346,31 @@ class Actor implements ActorInterface {
     script.entries.push(mover);
   }
 
+  rangeAttack(target: Actor, script: Script, world: WorldInterface) {
+    const shotData = this.computeShotData(target);
+  
+    const data: ShotData = {
+      velocityVector: shotData.velocityVector,
+      orientation: shotData.orientation,
+      startPos: shotData.startPos,
+      position: shotData.startPos,
+    };
+
+    const shot = new Shot(world.shot, this, data);
+    script.entries.push(shot);
+
+    this.attack(
+      target,
+      this.character.equipped.rangeWeapon!,
+      world,
+      script,
+    );
+
+    if (this.character.actionsLeft > 0) {
+      this.character.actionsLeft -= 1;
+    }
+  }
+
   async chooseAction(timestamp: number, world: WorldInterface) {
     const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
     
@@ -411,7 +436,7 @@ class Actor implements ActorInterface {
           }
 
           if (this.character.actionsLeft > 0) {
-            if (closest.distance <= this.attackRadius + target.occupiedRadius) {
+            if (closest.distance <= this.attackRadius) {
               // The target is already in range.
               this.attack(
                 target,
@@ -492,28 +517,7 @@ class Actor implements ActorInterface {
                   // Moving to towards the target won't get us close enough 
                   // for a melee attack.
                   if (this.character.equipped.rangeWeapon) {
-                    const shotData = this.computeShotData(target);
-  
-                    const data: ShotData = {
-                      velocityVector: shotData.velocityVector,
-                      orientation: shotData.orientation,
-                      startPos: shotData.startPos,
-                      position: shotData.startPos,
-                    };
-  
-                    const shot = new Shot(world.shot, this, data);
-                    script.entries.push(shot);
-  
-                    this.attack(
-                      target,
-                      this.character.equipped.rangeWeapon!,
-                      world,
-                      script,
-                    );
-  
-                    if (this.character.actionsLeft > 0) {
-                      this.character.actionsLeft -= 1;
-                    }
+                    this.rangeAttack(target, script, world);
       
                     if (target.character.hitPoints === 0) {
                       targets = targets.filter((t) => t !== closest);
@@ -529,14 +533,24 @@ class Actor implements ActorInterface {
                 }
               }
               else {
-                // Can't find path to target. Try another
-                targets = targets.slice(1)
+                if (this.character.equipped.rangeWeapon) {
+                  this.rangeAttack(target, script, world);
+
+                  if (target.character.hitPoints === 0) {
+                    targets = targets.filter((t) => t !== closest);
+                    participants = participants.filter((t) => t !== target)
+                  }
+                }
+                else {
+                  // Can't find path to target. Try another
+                  targets = targets.slice(1)
+                }
               }
             }
           }
           else {
             // No action to excute but we can move closer to the target if needed.
-            if (closest.distance > this.attackRadius + target.occupiedRadius) {
+            if (this.distanceLeft > 0 && closest.distance > this.attackRadius) {
               // Find path to the closest
               const start = vec2.create(myPosition[0], myPosition[2]);
               const t = target.getWorldPosition();
@@ -838,7 +852,7 @@ class Actor implements ActorInterface {
       let v = vec2.normalize(vec2.subtract(p2, p1));
   
       // Scale by the distance left to move
-      v = vec2.mulScalar(v, distanceLeft / 2);
+      v = vec2.mulScalar(v, distanceLeft);
 
       // Add it to the current position to get the new position.
       return vec2.add(p1, v);
@@ -849,7 +863,7 @@ class Actor implements ActorInterface {
 
       if (path[i].difficult) {
         if (distance * 2 > this.distanceLeft) {
-          const newPoint = getNewPoint(path[i].point, path[i - 1].point, this.distanceLeft)
+          const newPoint = getNewPoint(path[i].point, path[i - 1].point, this.distanceLeft / 2)
 
           this.distanceLeft = 0;
 
