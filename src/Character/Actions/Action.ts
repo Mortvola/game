@@ -101,11 +101,11 @@ class Action {
         // Find a path to the target...
 
         const [path, distance, lines, cancelled] = await findPath2(
-          this.actor,
           vec2.create(wp[0], wp[2]),
           vec2.create(targetWp[0], targetWp[2]),
           target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75,
           target,
+          this.actor.distanceLeft,
           true,
         )
 
@@ -178,11 +178,11 @@ class Action {
         let targetWp = vec2.create(point[0], point[2]);
 
         const [path, distance, lines, cancelled] = await findPath2(
-          this.actor,
           vec2.create(wp[0], wp[2]),
           targetWp,
           null,
           target,
+          this.actor.distanceLeft,
           true,
         )
 

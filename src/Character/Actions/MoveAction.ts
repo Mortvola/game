@@ -39,11 +39,11 @@ class MoveAction extends Action {
     }
 
     const [path, distance, lines, cancelled] = await findPath2(
-      this.actor,
       vec2.create(wp[0], wp[2]),
       targetWp,
       target ? target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75 : null,
       target,
+      this.actor.distanceLeft,
       true,
     )
 

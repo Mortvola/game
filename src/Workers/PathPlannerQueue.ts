@@ -191,11 +191,11 @@ export const addOccupant = (
 }
 
 export const findPath2 = async (
-  actor: Actor,
   start: Vec2,
   goal: Vec2,
   goalRadius: number | null,
   target: Actor | null,
+  maxDistance: number,
   ignoreTerrain = false,
 ): Promise<FindPathReturn> => {
 
@@ -216,7 +216,7 @@ export const findPath2 = async (
       center: vec2.create(targetWp![0], targetWp![2]),
       radius: goalRadius!,
     }),
-    maxDistance: actor.distanceLeft,
+    maxDistance,
     ignoreTerrain,
   };
 

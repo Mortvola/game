@@ -473,7 +473,11 @@ class Actor implements ActorInterface {
               populateGrid(this, occupants);
 
               let [path] = await findPath2(
-                this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius) * 0.75, target,
+                start,
+                goal,
+                target.occupiedRadius + (this.attackRadius - this.occupiedRadius) * 0.75,
+                target,
+                this.distanceLeft,
               );
               
               if (this !== world.participants.activeActor) {
@@ -566,7 +570,11 @@ class Actor implements ActorInterface {
               populateGrid(this, occupants);
 
               let [path] = await findPath2(
-                this, start, goal, target.occupiedRadius + (this.attackRadius - this.occupiedRadius)  * 0.75, target,
+                start,
+                goal,
+                target.occupiedRadius + (this.attackRadius - this.occupiedRadius)  * 0.75,
+                target,
+                this.distanceLeft,
               );
 
               if (this !== world.participants.activeActor) {
