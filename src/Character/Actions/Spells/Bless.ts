@@ -9,7 +9,7 @@ class Bless extends RangeSpell {
     super(actor, 3, true, 'Bless', 'Action', 1, feetToMeters(30), 60, false, true)
   }
   
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     for (const target of this.targets) {
       target.character.addInfluencingAction(this)
         

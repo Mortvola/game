@@ -102,6 +102,12 @@ class ModelManager {
         break;
       }
 
+      case 'Shot': {
+        mesh = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
+        
+        break;
+      }
+
       default:
         throw new Error(`model not found: ${name}`)
     }

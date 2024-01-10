@@ -8,7 +8,7 @@ class Longstrider extends TouchSpell {
     super(actor, 1, true, 'Longstrider', 'Action', 1, 60 * 60, false, false);
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     this.targets[0].character.addInfluencingAction(this);
 
     if (world.loggerCallback) {

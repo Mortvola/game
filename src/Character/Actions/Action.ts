@@ -54,7 +54,7 @@ class Action {
 
   }
 
-  interact(script: Script, world: WorldInterface): boolean {
+  async interact(script: Script, world: WorldInterface): Promise<boolean> {
     return true;
   }
 
@@ -204,7 +204,7 @@ class Action {
     }
   }
 
-  zeroDistanceAction(script: Script, world: WorldInterface, action: () => void): boolean {
+  async zeroDistanceAction(script: Script, world: WorldInterface, action: () => Promise<boolean>): Promise<boolean> {
     if (this.path.length > 0) {
       const path = this.actor.processPath(this.path, script);
       script.entries.push(new FollowPath(this.actor.sceneNode, path));    
@@ -213,9 +213,7 @@ class Action {
     this.showPathLines(null);
 
     if (this.targets.length > 0) {
-      action();
-
-      return true;
+      return action();
     }
 
     return false;

@@ -10,7 +10,7 @@ class Bane extends RangeSpell {
     super(actor, 3, true, 'Bane', 'Action', 1, feetToMeters(30), 60, false, true)
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     for (let i = 0; i < this.targets.length; i += 1) {
       const st = savingThrow(this.targets[i].character, this.targets[i].character.abilityScores.charisma, 'Neutral');
 

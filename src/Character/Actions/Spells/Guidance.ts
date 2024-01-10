@@ -8,7 +8,7 @@ class Guidance extends TouchSpell {
     super(actor, 1, true, 'Guidance', 'Action', 0, 60, false, true)
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     this.targets[0].character.addInfluencingAction(this);
 
     if (world.loggerCallback) {

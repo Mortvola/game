@@ -11,7 +11,7 @@ class GuidingBolt extends RangeSpell {
     super(actor, 1, true, 'Guiding Bolt', 'Action', 1, feetToMeters(120), 6, true, false)
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,

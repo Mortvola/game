@@ -9,7 +9,7 @@ class Sleep extends AreaSpell {
     super(actor, 'Sleep', 'Action', 1, feetToMeters(20), feetToMeters(90), 60, false, false)
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     return true;
   }
 }

@@ -62,7 +62,7 @@ class MoveAction extends Action {
     }
   }
 
-  interact(script: Script, world: WorldInterface): boolean {
+  async interact(script: Script, world: WorldInterface): Promise<boolean> {
     const path = this.actor.processPath(this.path, script);
     script.entries.push(new FollowPath(this.actor.sceneNode, path));    
 

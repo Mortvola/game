@@ -28,6 +28,7 @@ import Circle from './Drawables/Circle';
 import MoveAction from './Character/Actions/MoveAction';
 import { Occupant } from './Workers/PathPlannerTypes';
 import DrawableNode from './Drawables/DrawableNode';
+import { modelManager } from './Main';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -140,7 +141,7 @@ class Renderer implements WorldInterface {
   }
 
   static async create(gpu: Gpu, bindGroups: BindGroups) {
-    const shot = new DrawableNode(await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1))));
+    const shot = new DrawableNode(await modelManager.getModel('Shot'));
 
     // const reticle = new DrawableNode(await Reticle.create(0.05));
 
@@ -714,7 +715,7 @@ class Renderer implements WorldInterface {
     this.camera.moveDirection = direction;
   }
 
-  interact() {
+  async interact() {
     if (
       this.participants.activeActor
       && !this.participants.activeActor.automated
@@ -726,7 +727,7 @@ class Renderer implements WorldInterface {
       const action = activeActor.getAction();
 
       if (action) {
-        if (action.interact(script, this)) {
+        if (await action.interact(script, this)) {
           if (action.time === 'Action') {
             if (activeActor.character.actionsLeft > 0) {
               activeActor.character.actionsLeft -= 1;

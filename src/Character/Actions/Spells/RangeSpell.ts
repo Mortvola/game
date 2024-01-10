@@ -68,7 +68,7 @@ class RangeSpell extends Spell {
     }              
   }
 
-  interact(script: Script, world: WorldInterface) {
+  async interact(script: Script, world: WorldInterface): Promise<boolean> {
     if (this.focused) {
       this.targets.push(this.focused);
       this.focused = null;

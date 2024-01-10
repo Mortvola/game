@@ -10,7 +10,7 @@ class TashasHideosLaughter extends RangeSpell {
     super(actor, 1, true, 'Tasha\'s Hideous Laughter', 'Action', 1, feetToMeters(30), 60, false, true)
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.wisdom, 'Neutral');
 
     if (st < this.actor.character.spellCastingDc) {

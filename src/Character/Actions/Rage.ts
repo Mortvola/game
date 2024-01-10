@@ -26,7 +26,7 @@ class Rage extends Action {
     }              
   }
 
-  interact(script: Script, world: WorldInterface): boolean {
+  async interact(script: Script, world: WorldInterface): Promise<boolean> {
     if (this.focused && this.actor === this.focused) {
       this.targets.push(this.focused);
       this.focused = null;

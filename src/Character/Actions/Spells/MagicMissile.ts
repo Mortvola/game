@@ -8,7 +8,7 @@ import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import { findPath2 } from "../../../Workers/PathPlannerQueue";
 import { PathPoint } from "../../../Workers/PathPlannerTypes";
 import Line from "../../../Drawables/Line";
-import { getWorld } from "../../../Main";
+import { getWorld, modelManager } from "../../../Main";
 import FollowPath from "../../../Script/FollowPath";
 import DrawableNode from "../../../Drawables/DrawableNode";
 
@@ -32,18 +32,22 @@ class MagicMissile extends RangeSpell {
     }
   }
 
-  cast(script: Script, world: WorldInterface): true {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     for (const target of this.targets) {
       target.takeDamage(diceRoll(1, 4) + 1, false, this.actor, 'Magic Missle', script)
     }
 
-    world.shot.translate[0] = this.paths[0][this.paths[0].length - 1].point[0];
-    world.shot.translate[1] = 1;
-    world.shot.translate[2] = this.paths[0][this.paths[0].length - 1].point[1];
+    const shot = new DrawableNode(await modelManager.getModel('Shot'));
 
-    world.mainRenderPass.addDrawable(world.shot, 'lit');
+    shot.translate[0] = this.paths[0][this.paths[0].length - 1].point[0];
+    shot.translate[1] = 1;
+    shot.translate[2] = this.paths[0][this.paths[0].length - 1].point[1];
 
-    script.entries.push(new FollowPath(world.shot, this.paths[0]))
+    world.scene.addNode(shot, 'lit');
+
+    world.mainRenderPass.addDrawable(shot, 'lit');
+
+    script.entries.push(new FollowPath(shot, this.paths[0]))
 
     return true;
   }
@@ -113,7 +117,7 @@ class MagicMissile extends RangeSpell {
     }
   }
 
-  interact(script: Script, world: WorldInterface) {
+  async interact(script: Script, world: WorldInterface): Promise<boolean> {
     if (this.focused) {
       this.targets.push(this.focused);
       this.paths.push(this.path)

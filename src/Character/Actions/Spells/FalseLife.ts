@@ -9,7 +9,7 @@ class FalseLife extends SelfSpell {
     super(actor, 1, true, 'False Life', 'Action', 1, 60 * 60, false, false)
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     this.actor.character.temporaryHitPoints = diceRoll(1, 4) + 4;
     this.actor.character.addInfluencingAction(this)
 

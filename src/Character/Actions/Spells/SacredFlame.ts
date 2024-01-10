@@ -10,7 +10,7 @@ class SacredFlame extends RangeSpell {
     super(actor, 1, true, 'Sacred Flame', 'Action', 0, feetToMeters(60), 0, false, false);
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.dexterity, 'Neutral');
 
     let damage = 0;

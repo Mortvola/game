@@ -11,7 +11,7 @@ class WitchBolt extends RangeSpell {
     super(actor, 1, true, 'Witch Bolt', 'Action', 1, feetToMeters(30), 60, false, true);
   }
 
-  cast(script: Script, wolrd: WorldInterface): boolean {
+  async cast(script: Script, wolrd: WorldInterface): Promise<boolean> {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,

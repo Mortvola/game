@@ -9,14 +9,14 @@ class TouchSpell extends Spell {
     await this.prepareZeroDistAction(100, target, point, world);
   }
 
-  interact(script: Script, world: WorldInterface): boolean {
+  async interact(script: Script, world: WorldInterface): Promise<boolean> {
     if (this.focused) {
       this.targets.push(this.focused)
       this.focused = null;
     }
 
-    const result = this.zeroDistanceAction(script, world, () => {
-      this.castSpell(script)
+    const result = this.zeroDistanceAction(script, world, async () => {
+      return this.castSpell(script)
     });
 
     return result;

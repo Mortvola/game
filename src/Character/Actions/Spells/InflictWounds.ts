@@ -10,7 +10,7 @@ class InflictWounds extends TouchSpell {
     super(actor, 1, true, 'Inflict Wounds', 'Action', 1, 0, false, false)
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,

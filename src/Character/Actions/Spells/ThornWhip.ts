@@ -11,7 +11,7 @@ class ThornWhip extends RangeSpell {
     super(actor, 1, true, 'Thorn Whip', 'Action', 0, feetToMeters(30), 0, false, false);
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,

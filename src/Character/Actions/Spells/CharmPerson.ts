@@ -10,7 +10,7 @@ class CharmPerson extends RangeSpell {
     super(actor, 1, true, 'Charm Person', 'Action', 1, feetToMeters(30), 60 * 60, false, false);
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.wisdom, 'Advantage');
 
     if (st < this.actor.character.spellCastingDc) {

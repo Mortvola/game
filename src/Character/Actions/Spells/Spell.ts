@@ -38,11 +38,11 @@ class Spell extends Action {
   clear() {
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     return false;
   }
 
-  castSpell(script: Script): boolean {
+  async castSpell(script: Script): Promise<boolean> {
     const world = getWorld();
 
     // End concentration of the curren spell if this spell 
@@ -51,7 +51,7 @@ class Spell extends Action {
       this.actor.character.stopConcentrating();
     }
 
-    if (this.cast(script, world) && this.duration > 0) {
+    if (await this.cast(script, world) && this.duration > 0) {
       this.actor.character.enduringActions.push(this);
     }
 
@@ -69,7 +69,7 @@ class Spell extends Action {
   async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
   }
 
-  interact(script: Script, world: WorldInterface): boolean {
+  async interact(script: Script, world: WorldInterface): Promise<boolean> {
     return true;
   }
 }

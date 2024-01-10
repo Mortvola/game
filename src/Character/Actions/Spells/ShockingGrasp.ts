@@ -10,7 +10,7 @@ class ShockingGrasp extends TouchSpell {
     super(actor, 1, true, 'Shocking Grasp', 'Action', 0, 0, false, false);
   }
 
-  cast(script: Script, world: WorldInterface) {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,

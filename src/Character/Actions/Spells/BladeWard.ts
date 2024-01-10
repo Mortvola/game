@@ -8,7 +8,7 @@ class BladeWard extends SelfSpell {
     super(actor, 1, true, 'Blade Ward', 'Action', 0, 6, true, false)
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     this.actor.character.addInfluencingAction(this)
 
     return true;

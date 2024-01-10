@@ -8,7 +8,7 @@ class Shillelagh extends SelfSpell {
     super(actor, 1, true, 'Shillelagh', 'Bonus', 0, 60, false, false);
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     this.actor.character.addInfluencingAction(this);
 
     return true;

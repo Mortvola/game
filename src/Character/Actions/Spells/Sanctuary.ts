@@ -10,7 +10,7 @@ class Sanctuary extends RangeSpell {
     super(actor, 1, true, 'Sanctuary', 'Bonus', 1, feetToMeters(30), 60, false, false);
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     this.targets[0].character.addInfluencingAction(this);
 
     script.entries.push(new Logger(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))

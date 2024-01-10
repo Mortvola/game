@@ -9,7 +9,7 @@ class CureWounds extends TouchSpell {
     super(actor, 1, true, 'Cure Wounds', 'Action', 1, 0, false, false);
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     this.targets[0].takeHealing(
       diceRoll(1, 8)
         + abilityModifier(this.actor.character.spellcastingAbilityScore),

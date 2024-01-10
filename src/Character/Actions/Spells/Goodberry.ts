@@ -8,7 +8,7 @@ class Goodberry extends TouchSpell {
     super(actor, 1, true, 'Goodberry', 'Action', 1, 0, false, false);
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     return true;
   }
 }

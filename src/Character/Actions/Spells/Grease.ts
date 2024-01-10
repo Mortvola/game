@@ -16,7 +16,7 @@ class Grease extends AreaSpell {
     super(actor, 'Grease', 'Action', 1, feetToMeters(10), feetToMeters(60), 60, false, false)
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     if (this.center) {
       const obj = new DrawableNode(new Circle(this.radius, this.radius, vec4.create(0.2, 0.2, 0.2, 1)))
       obj.translate = vec3.create(this.center[0], 0, this.center[1])

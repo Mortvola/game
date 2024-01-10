@@ -10,7 +10,7 @@ class PoisonSpray extends RangeSpell {
     super(actor, 1, true, 'Poison Spray', 'Action', 0, feetToMeters(10), 0, false, false);
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     const st = savingThrow(this.targets[0].character, this.targets[0].character.abilityScores.constitution, 'Neutral');
 
     let damage = 0;

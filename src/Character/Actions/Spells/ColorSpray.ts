@@ -9,7 +9,7 @@ class ColorSpray extends RangeSpell {
     super(actor, 1, true, 'Color Spray', 'Action', 1, feetToMeters(15), 6, true, false)
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     // const [damage, critical] = spellAttackRoll(
     //   actor.character,
     //   this.targets[0].character,

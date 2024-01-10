@@ -8,7 +8,7 @@ class ExpeditiousRetreat extends SelfSpell {
     super(actor, 1, true, 'Expeditious Retreat', 'Bonus', 1, 10 * 60, false, true)
   }
 
-  cast(script: Script, world: WorldInterface): boolean {
+  async cast(script: Script, world: WorldInterface): Promise<boolean> {
     this.actor.character.addInfluencingAction(this);
 
     return true;

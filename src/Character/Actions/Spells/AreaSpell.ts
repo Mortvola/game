@@ -46,7 +46,7 @@ class AreaSpell extends RangeSpell {
     }
   }
 
-  interact(script: Script, world: WorldInterface): boolean {
+  async interact(script: Script, world: WorldInterface): Promise<boolean> {
     if (this.center !== null) {
       return this.castSpell(script);
     }

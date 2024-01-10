@@ -19,19 +19,21 @@ class MeleeAttack extends Action {
     await this.prepareZeroDistAction(actionPercent, target, point, world);
   }
 
-  interact(script: Script, world: WorldInterface): boolean {
+  async interact(script: Script, world: WorldInterface): Promise<boolean> {
     if (this.focused) {
       this.targets.push(this.focused);
       this.focused = null;
     }
 
-    return this.zeroDistanceAction(script, world, () => {
+    return this.zeroDistanceAction(script, world, async () => {
       this.actor.attack(
         this.targets[0],
         this.actor.character.equipped.meleeWeapon!,
         world,
         script,
       );
+
+      return true;
     });
   }
 }
