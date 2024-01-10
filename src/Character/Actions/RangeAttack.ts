@@ -104,6 +104,7 @@ class RangeAttack extends Action {
         orientation: shotData.orientation,
         startPos: shotData.startPos,
         position: shotData.startPos,
+        distance: shotData.distance,
       };
 
       script.entries.push(new Shot(await modelManager.getModel('Shot'), this.actor, data));

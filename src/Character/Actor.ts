@@ -291,6 +291,7 @@ class Actor implements ActorInterface {
       orientation: shotData.orientation,
       startPos: shotData.startPos,
       position: shotData.startPos,
+      distance: shotData.distance,
     };
 
     const shot = new Shot(await modelManager.getModel('Shot'), this, data);

@@ -10,6 +10,7 @@ export type ShotData = {
   startPos: Vec3,
   position: Vec4,
   orientation: Vec4,
+  distance: number,
 };
 
 class Shot implements ActorInterface {
@@ -52,7 +53,7 @@ class Shot implements ActorInterface {
 
       const result = world.collidees.detectCollision(this.data.position, newPosition, (actor: Actor) => actor !== this.actor);
 
-      if (result || newPosition[1] < 0) {
+      if (result || newPosition[1] < 0 || xPos >= this.data.distance) {
         this.removeFromScene(world);
         return true;
       }
