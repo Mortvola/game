@@ -48,7 +48,7 @@ class MagicMissile extends RangeSpell {
       world.scene.addNode(shot, 'lit');
       world.mainRenderPass.addDrawable(shot, 'lit');
   
-      script.entries.push(new FollowPath(shot, this.paths[i]))  
+      script.entries.push(new FollowPath(shot, this.paths[i], false, 24))  
 
       this.targets[i].takeDamage(diceRoll(1, 4) + 1, false, this.actor, 'Magic Missle', script)
 

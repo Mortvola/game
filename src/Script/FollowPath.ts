@@ -9,11 +9,15 @@ class FollowPath implements ActorInterface {
 
   sceneNode: SceneNodeInterface;
 
-  metersPerSecond = 6;
+  metersPerSecond: number;
 
-  constructor(sceneNode: SceneNodeInterface, path: PathPoint[]) {
+  ground: boolean;
+
+  constructor(sceneNode: SceneNodeInterface, path: PathPoint[], ground = true, metersPerSecond = 6) {
     this.sceneNode = sceneNode;
     this.path = path;
+    this.ground = ground;
+    this.metersPerSecond = metersPerSecond;
   }
 
   async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
@@ -23,7 +27,7 @@ class FollowPath implements ActorInterface {
 
     for (;;) {
       let speedFactor = 1.0;
-      if (this.path[this.path.length - 1].difficult) {
+      if (this.ground && this.path[this.path.length - 1].difficult) {
         speedFactor = 0.5;
       }
 
