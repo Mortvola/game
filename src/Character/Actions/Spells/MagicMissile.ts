@@ -39,14 +39,14 @@ class MagicMissile extends RangeSpell {
     for (let i = 0; i < this.paths.length; i += 1) {
       const script = new Script();
 
-      const shot = new DrawableNode(await modelManager.getModel('Shot'), 'lit');
+      const shot = await modelManager.getModel('Shot');
 
       shot.translate[0] = this.paths[i][this.paths[i].length - 1].point[0];
       shot.translate[1] = 1;
       shot.translate[2] = this.paths[i][this.paths[i].length - 1].point[1];
   
       world.scene.addNode(shot);
-      world.mainRenderPass.addDrawable(shot);
+      world.mainRenderPass.addDrawables(shot);
   
       script.entries.push(new FollowPath(shot, this.paths[i], false, 24))  
 
@@ -54,7 +54,7 @@ class MagicMissile extends RangeSpell {
 
       script.onFinish = () => {
         world.scene.removeNode(shot);
-        world.mainRenderPass.removeDrawable(shot)
+        world.mainRenderPass.removeDrawables(shot)
       };
 
       parallel.entries.push(script)  

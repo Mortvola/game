@@ -4,7 +4,7 @@ import { gravity } from "../Math";
 import RenderPass from "../RenderPass";
 import { ActorInterface } from "../ActorInterface";
 import { WorldInterface } from "../WorldInterface";
-import { DrawableNodeInterface } from "../Drawables/DrawableNodeInterface";
+import { SceneNodeInterface } from "../Drawables/SceneNodeInterface";
 
 export type ShotData = {
   velocityVector: Vec2,
@@ -16,7 +16,7 @@ export type ShotData = {
 class Shot implements ActorInterface {
   startTime: number | null = null;
 
-  mesh: DrawableNodeInterface;
+  mesh: SceneNodeInterface;
 
   data: ShotData;
 
@@ -25,7 +25,7 @@ class Shot implements ActorInterface {
   renderPass: RenderPass | null = null;
 
   constructor(
-    mesh: DrawableNodeInterface,
+    mesh: SceneNodeInterface,
     actor: Actor,
     data: ShotData,
   ) {
@@ -72,12 +72,12 @@ class Shot implements ActorInterface {
 
   addToScene(renderPass: RenderPass) {
     this.renderPass = renderPass;
-    this.renderPass.addDrawable(this.mesh);
+    this.renderPass.addDrawables(this.mesh);
   }
 
   removeFromScene() {
     if (this.renderPass) {
-      this.renderPass.removeDrawable(this.mesh);
+      this.renderPass.removeDrawables(this.mesh);
     }
   }
 }

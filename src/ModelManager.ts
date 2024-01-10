@@ -2,30 +2,35 @@ import { vec4 } from "wgpu-matrix";
 import Mesh from "./Drawables/Mesh";
 import { box } from "./Drawables/Shapes/box";
 import { feetToMeters } from "./Math";
+import SceneNode from "./Drawables/SceneNode";
+import DrawableNode from "./Drawables/DrawableNode";
+import Drawable from "./Drawables/Drawable";
 
 type Model = {
   name: string,
-  mesh: Mesh,
+  mesh: Drawable,
 }
 
 class ModelManager {
   models: Model[] = []
 
-  async getModel(name: string) {
+  async getModel(name: string): Promise<SceneNode> {
     let model = this.models.find((m) => m.name === name);
 
-    if (model) {
-      return model.mesh;
-    }
-
-    let mesh: Mesh | null = null;
+    let node: SceneNode | null = null;
 
     switch (name) {
       case 'Human': {
         const playerWidth = 1;
         const playerHeight = feetToMeters(5.75);
     
-        mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+        if (!model) {
+          const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+          model = { name, mesh };
+          this.models.push(model)
+        }
+
+        node = new DrawableNode(model.mesh, 'lit');
 
         break;
       }
@@ -33,8 +38,14 @@ class ModelManager {
       case 'High Elf': {
         const playerWidth = 1;
         const playerHeight = feetToMeters(5.75);
-    
-        mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+
+        if (!model) {
+          const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+          model = { name, mesh };
+          this.models.push(model)
+        }
+
+        node = new DrawableNode(model.mesh, 'lit');
 
         break;
       }
@@ -43,7 +54,13 @@ class ModelManager {
         const playerWidth = 1;
         const playerHeight = feetToMeters(4.5);
     
-        mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+        if (!model) {
+          const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+          model = { name, mesh };
+          this.models.push(model)
+        }
+
+        node = new DrawableNode(model.mesh, 'lit');
 
         break;
       }
@@ -52,7 +69,13 @@ class ModelManager {
         const playerWidth = 1;
         const playerHeight = feetToMeters(4.5);
     
-        mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+        if (!model) {
+          const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+          model = { name, mesh };
+          this.models.push(model)
+        }
+
+        node = new DrawableNode(model.mesh, 'lit');
 
         break;
       }
@@ -61,7 +84,13 @@ class ModelManager {
         const playerWidth = 1;
         const playerHeight = feetToMeters(5.75);
     
-        mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+        if (!model) {
+          const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+          model = { name, mesh };
+          this.models.push(model)
+        }
+
+        node = new DrawableNode(model.mesh, 'lit');
 
         break;
       }
@@ -70,7 +99,13 @@ class ModelManager {
         const playerWidth = 1;
         const playerHeight = feetToMeters(3);
     
-        mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+        if (!model) {
+          const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+          model = { name, mesh };
+          this.models.push(model)
+        }
+
+        node = new DrawableNode(model.mesh, 'lit');
 
         break;
       }
@@ -79,7 +114,13 @@ class ModelManager {
         const playerWidth = 1;
         const playerHeight = feetToMeters(3);
     
-        mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+        if (!model) {
+          const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
+          model = { name, mesh };
+          this.models.push(model)
+        }
+
+        node = new DrawableNode(model.mesh, 'lit');
 
         break;
       }
@@ -88,7 +129,13 @@ class ModelManager {
         const playerWidth = 1;
         const playerHeight = feetToMeters(3);
     
-        mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0.5, 0, 0, 1)))
+        if (!model) {
+          const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0.5, 0, 0, 1)))
+          model = { name, mesh };
+          this.models.push(model)
+        }
+
+        node = new DrawableNode(model.mesh, 'lit');
 
         break;
       }
@@ -97,14 +144,26 @@ class ModelManager {
         const playerWidth = 1;
         const playerHeight = feetToMeters(3);
     
-        mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0.5, 0, 0, 1)))
+        if (!model) {
+          const mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0.5, 0, 0, 1)))
+          model = { name, mesh };
+          this.models.push(model)
+        }
+
+        node = new DrawableNode(model.mesh, 'lit');
 
         break;
       }
 
       case 'Shot': {
-        mesh = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
-        
+        if (!model) {
+          const mesh = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
+          model = { name, mesh };
+          this.models.push(model)
+        }
+
+        node = new DrawableNode(model.mesh, 'lit');
+
         break;
       }
 
@@ -112,11 +171,7 @@ class ModelManager {
         throw new Error(`model not found: ${name}`)
     }
 
-    if (mesh) {
-      this.models.push({ name, mesh })
-    }
-
-    return mesh;
+    return node;
   }
 }
 

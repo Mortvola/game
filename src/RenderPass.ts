@@ -1,8 +1,9 @@
 import PipelineInterface from "./Pipelines/PipelineInterface";
-import ContainerNode, { isContainerNode } from "./Drawables/ContainerNode";
-import PipelineManager, { PipelineType } from "./Pipelines/PipelineManager";
+import { isContainerNode } from "./Drawables/ContainerNode";
+import PipelineManager from "./Pipelines/PipelineManager";
 import { bindGroups } from "./Main";
 import { DrawableNodeInterface, isDrawableNode } from "./Drawables/DrawableNodeInterface";
+import { SceneNodeInterface } from "./Drawables/SceneNodeInterface";
 
 type PipelineEntry = {
   pipeline: PipelineInterface,
@@ -50,25 +51,25 @@ class RenderPass {
     }
   }
 
-  addDrawables(drawables: ContainerNode) {
-    for (const drawable of drawables.nodes) {
-      if (isContainerNode(drawable)) {
+  addDrawables(node: SceneNodeInterface) {
+    if (isContainerNode(node)) {
+      for (const drawable of node.nodes) {
         this.addDrawables(drawable)
-      }
-      else if (isDrawableNode(drawable)) {
-        this.addDrawable(drawable);
-      }
+      }  
+    }
+    else if (isDrawableNode(node)) {
+      this.addDrawable(node);
     }
   }
 
-  removeDrawables(container: ContainerNode) {
-    for (const drawable of container.nodes) {
-      if (isContainerNode(drawable)) {
+  removeDrawables(node: SceneNodeInterface) {
+    if (isContainerNode(node)) {
+      for (const drawable of node.nodes) {
         this.removeDrawables(drawable)
-      }  
-      else if (isDrawableNode(drawable)) {
-        this.removeDrawable(drawable);
       }
+    }
+    else if (isDrawableNode(node)) {
+      this.removeDrawable(node);
     }
   }
 

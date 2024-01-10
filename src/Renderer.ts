@@ -29,6 +29,7 @@ import MoveAction from './Character/Actions/MoveAction';
 import { Occupant } from './Workers/PathPlannerTypes';
 import DrawableNode from './Drawables/DrawableNode';
 import { modelManager } from './Main';
+import SceneNode from './Drawables/SceneNode';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -81,7 +82,7 @@ class Renderer implements WorldInterface {
 
   removeActors: ActorInterface[] = [];
 
-  shot: DrawableNode;
+  shot: SceneNode;
 
   lights: Light[] = [];
 
@@ -125,7 +126,7 @@ class Renderer implements WorldInterface {
 
   occupants: Occupant[] = [];
 
-  constructor(shot: DrawableNode, gpu: Gpu, bindGroups: BindGroups) {
+  constructor(shot: SceneNode, gpu: Gpu, bindGroups: BindGroups) {
     this.gpu = gpu;
     this.bindGroups = bindGroups;
 
@@ -141,7 +142,7 @@ class Renderer implements WorldInterface {
   }
 
   static async create(gpu: Gpu, bindGroups: BindGroups) {
-    const shot = new DrawableNode(await modelManager.getModel('Shot'), 'lit');
+    const shot = await modelManager.getModel('Shot');
 
     // const reticle = new DrawableNode(await Reticle.create(0.05));
 

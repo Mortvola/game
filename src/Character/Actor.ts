@@ -25,6 +25,7 @@ import Action from "./Actions/Action";
 import { getWorld, modelManager } from "../Main";
 import { PathPoint } from "../Workers/PathPlannerTypes";
 import DrawableNode from "../Drawables/DrawableNode";
+import SceneNode from "../Drawables/SceneNode";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -93,7 +94,7 @@ class Actor implements ActorInterface {
 
   private constructor(
     character: Creature,
-    mesh: DrawableNode,
+    mesh: SceneNode,
     height: number,
     color: Vec4,
     team: number,
@@ -131,15 +132,8 @@ class Actor implements ActorInterface {
   ) {
     const playerHeight = character.race.height;
 
-    let mesh: DrawableNode;
-    // if (pointActors) {
-    //   mesh = await Mesh.create(box(0.125, 0.125, 0.125, vec4.create(1, 1, 1, 1)))
-    //   mesh.translate[1] = 0
-    // }
-    // else {
-      mesh = new DrawableNode(await modelManager.getModel(character.race.name), 'lit');
-      mesh.translate[1] = playerHeight / 2;  
-    // }
+    const mesh = await modelManager.getModel(character.race.name)
+    mesh.translate[1] = playerHeight / 2;  
 
     return new Actor(character, mesh, playerHeight, teamColor, team, automated);
   }
