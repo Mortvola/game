@@ -261,7 +261,6 @@ class Renderer implements WorldInterface {
       this.participants.remove(removedActor as Actor);
 
       this.collidees.remove(removedActor as Actor);
-      (removedActor as Actor).removeFromScene();
       this.scene.removeNode((removedActor as Actor).sceneNode);
     }
 
@@ -274,7 +273,6 @@ class Renderer implements WorldInterface {
       actor.setAction(null);
 
       this.scene.removeNode(actor.sceneNode);
-      actor.removeFromScene();
 
       this.collidees.remove(actor);
       this.actors.push(actor);
@@ -293,7 +291,6 @@ class Renderer implements WorldInterface {
 
     for (const actor of this.participants.turns) {
       this.scene.addNode(actor.sceneNode);
-      actor.addToScene(this.mainRenderPass);
       this.collidees.actors.push(actor);
       this.actors.push(actor);
     }

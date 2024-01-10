@@ -46,7 +46,6 @@ class MagicMissile extends RangeSpell {
       shot.translate[2] = this.paths[i][this.paths[i].length - 1].point[1];
   
       world.scene.addNode(shot);
-      world.mainRenderPass.addDrawables(shot);
   
       script.entries.push(new FollowPath(shot, this.paths[i], false, 24))  
 

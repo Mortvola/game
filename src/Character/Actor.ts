@@ -92,6 +92,8 @@ class Actor implements ActorInterface {
 
   private action: Action | null = null;
 
+  private useQLearning = false;
+
   private constructor(
     character: Creature,
     mesh: SceneNode,
@@ -255,63 +257,6 @@ class Actor implements ActorInterface {
   nextState(state: number) {
 
   }
-
-  addToScene(renderPass: RenderPass) {
-    this.renderPass = renderPass;
-    this.renderPass.addDrawables(this.sceneNode);
-  }
-
-  removeFromScene() {
-    if (this.renderPass) {
-      this.renderPass.removeDrawables(this.sceneNode);
-    }
-  }
-
-  // takeAction(
-  //   action: Action | null, otherTeam: Actor[], timestamp: number, world: WorldInterface, script: Script,
-  // ) {
-  //   const epsilon = 0.02; // Probability of a random action
-
-  //   if (action === null || Math.random() < epsilon) {
-  //     action = {
-  //       type: 'HitPoints',
-  //       opponent: Math.trunc(Math.random() * otherTeam.length),
-  //     }
-  //   }
-
-  //   let sortedActors: Actor[] = [];
-
-  //   sortedActors = otherTeam.map((a) => a).sort((a, b) => {
-  //     if (a.character.hitPoints === b.character.hitPoints) {
-  //       // hit points are equal, sort by armore class
-
-  //       if (a.character.armorClass === b.character.armorClass) {
-  //         // armor classes are equal so sort by weapon damage
-  //         const damageA = ((a.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * a.character.equipped.meleeWeapon!.die[0].numDice
-  //         const damageB = ((b.character.equipped.meleeWeapon!.die[0].die + 1) / 2) * b.character.equipped.meleeWeapon!.die[0].numDice
-  //         return damageA - damageB
-  //       }
-
-  //       return a.character.armorClass - b.character.armorClass;
-  //     }
-
-  //     return a.character.hitPoints - b.character.hitPoints
-  //   });
-
-  //   const target = sortedActors[action.opponent];
-  //   this.attack(
-  //     target,
-  //     this.character.equipped.meleeWeapon!,
-  //     world,
-  //     script,
-  //   );
-
-  //   if (this.character.actionsLeft > 0) {
-  //     this.character.actionsLeft -= 1;
-  //   }
-  // }
-
-  useQLearning = false;
 
   getTargets(otherTeam: Actor[]) {
     const myPosition = this.getWorldPosition();
