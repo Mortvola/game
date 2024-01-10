@@ -1,8 +1,9 @@
 import { Vec4, Mat4 } from 'wgpu-matrix';
 import Drawable from './Drawable';
-import { bindGroups, gpu } from '../Renderer';
+import { bindGroups, gpu } from '../Main';
 import { circleShader } from '../shaders/circle';
 import { makeShaderDataDefinitions, makeStructuredView } from 'webgpu-utils';
+import { maxInstances } from './DrawableInterface';
 
 const defs = makeShaderDataDefinitions(circleShader);
 
@@ -17,7 +18,7 @@ class Circle extends Drawable {
 
   bindGroup: GPUBindGroup;
 
-  uniformBuffer: GPUBuffer;
+  modelMatrixBuffer: GPUBuffer;
 
   colorBuffer: GPUBuffer;
 
@@ -42,15 +43,15 @@ class Circle extends Drawable {
     this.color[2] = color[2];
     this.color[3] = color[3];
     
-    this.uniformBuffer = gpu.device.createBuffer({
+    this.modelMatrixBuffer = gpu.device.createBuffer({
       label: 'Circle',
-      size: 16 * Float32Array.BYTES_PER_ELEMENT * 16,
+      size: 16 * Float32Array.BYTES_PER_ELEMENT * maxInstances,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
     this.colorBuffer = gpu.device.createBuffer({
       label: 'color',
-      size: 4 * Float32Array.BYTES_PER_ELEMENT * 16,
+      size: 4 * Float32Array.BYTES_PER_ELEMENT * maxInstances,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
@@ -58,7 +59,7 @@ class Circle extends Drawable {
       label: 'Circle',
       layout: bindGroups.bindGroupLayout1,
       entries: [
-        { binding: 0, resource: { buffer: this.uniformBuffer }},
+        { binding: 0, resource: { buffer: this.modelMatrixBuffer }},
         { binding: 1, resource: { buffer: this.colorBuffer }},
       ],
     });
@@ -92,7 +93,8 @@ class Circle extends Drawable {
       color: this.color,
     });
 
-    gpu.device.queue.writeBuffer(this.uniformBuffer, 0, this.getTransform() as Float32Array);
+    // gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.getTransform() as Float32Array);
+    gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.modelMatrices);
     gpu.device.queue.writeBuffer(this.circleDataBuffer, 0, this.circleStructure.arrayBuffer);
 
     passEncoder.setBindGroup(1, this.bindGroup);

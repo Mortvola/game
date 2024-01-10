@@ -1,7 +1,7 @@
-import { gpu, bindGroups } from "../Renderer";
+import { gpu, bindGroups } from "../Main";
 import PipelineInterface from "./PipelineInterface";
 import { reticleShader } from '../shaders/reticle';
-import DrawableInterface from "../Drawables/DrawableInterface";
+import { DrawableNodeInterface } from "../Drawables/DrawableNodeInterface";
 
 const label = 'reticle';
 
@@ -67,12 +67,12 @@ class ReticlePipeline implements PipelineInterface {
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
   }
 
-  render(passEncoder: GPURenderPassEncoder, drawables: DrawableInterface[]) {
+  render(passEncoder: GPURenderPassEncoder, drawables: DrawableNodeInterface[]) {
     passEncoder.setPipeline(this.pipeline);
 
-    drawables.forEach((drawable) => {
-      drawable.render(passEncoder);
-    })
+    for (const drawableNode of drawables) {
+      drawableNode.drawable.render(passEncoder);
+    }
   }
 }
 

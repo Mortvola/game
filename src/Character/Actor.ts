@@ -1,7 +1,4 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
-import Mesh from "../Drawables/Mesh";
-import { box } from "../Drawables/Shapes/box";
-import SceneNode from "../Drawables/SceneNode";
 import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, pointWithinCircle, timeToTarget } from "../Math";
 import Circle from "../Drawables/Circle";
 import RenderPass from "../RenderPass";
@@ -25,16 +22,15 @@ import Creature from "./Creature";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
 import Action from "./Actions/Action";
-import { getWorld } from "../Renderer";
+import { getWorld, modelManager } from "../Main";
 import { PathPoint } from "../Workers/PathPlannerTypes";
+import DrawableNode from "../Drawables/DrawableNode";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
 // } | null = null
 
 export const pathFinder: UniformGridSearch = new JumpPointSearch(512, 512, 16);
-
-const pointActors = false;
 
 export type EpisodeInfo = {
   winningTeam: number,
@@ -79,9 +75,11 @@ class Actor implements ActorInterface {
 
   sceneNode = new ContainerNode();
 
-  circle: Circle;
+  circleDrawable: Circle;
 
-  outerCircle: Circle;
+  circle: DrawableNode;
+
+  outerCircle: DrawableNode;
 
   teamColor: Vec4;
 
@@ -95,7 +93,7 @@ class Actor implements ActorInterface {
 
   private constructor(
     character: Creature,
-    mesh: SceneNode,
+    mesh: DrawableNode,
     height: number,
     color: Vec4,
     team: number,
@@ -117,10 +115,11 @@ class Actor implements ActorInterface {
 
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
-    this.circle = new Circle(this.occupiedRadius, 0.025, color);
+    this.circleDrawable = new Circle(this.occupiedRadius, 0.025, color);
+    this.circle = new DrawableNode(this.circleDrawable);
     this.circle.postTransforms.push(mat4.fromQuat(q));
 
-    this.outerCircle = new Circle(this.attackRadius, 0.01, color);
+    this.outerCircle = new DrawableNode(new Circle(this.attackRadius, 0.01, color));
     this.outerCircle.postTransforms.push(mat4.fromQuat(q));
 
     this.sceneNode.addNode(this.circle, 'circle')
@@ -130,18 +129,17 @@ class Actor implements ActorInterface {
   static async create(
     character: Creature, color: Vec4, teamColor: Vec4, team: number, automated: boolean,
   ) {
-    const playerWidth = 1;
     const playerHeight = character.race.height;
 
-    let mesh: Mesh;
-    if (pointActors) {
-      mesh = await Mesh.create(box(0.125, 0.125, 0.125, vec4.create(1, 1, 1, 1)))
-      mesh.translate[1] = 0
-    }
-    else {
-      mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, color))
+    let mesh: DrawableNode;
+    // if (pointActors) {
+    //   mesh = await Mesh.create(box(0.125, 0.125, 0.125, vec4.create(1, 1, 1, 1)))
+    //   mesh.translate[1] = 0
+    // }
+    // else {
+      mesh = new DrawableNode(await modelManager.getModel(character.race.name));
       mesh.translate[1] = playerHeight / 2;  
-    }
+    // }
 
     return new Actor(character, mesh, playerHeight, teamColor, team, automated);
   }
@@ -160,10 +158,10 @@ class Actor implements ActorInterface {
 
     this.distanceLeft = this.character.race.speed;
 
-    this.circle.color[0] = 1;
-    this.circle.color[1] = 1;
-    this.circle.color[2] = 1;
-    this.circle.color[3] = 1;
+    this.circleDrawable.color[0] = 1;
+    this.circleDrawable.color[1] = 1;
+    this.circleDrawable.color[2] = 1;
+    this.circleDrawable.color[3] = 1;
 
     this.state = States.idle;
 
@@ -220,10 +218,10 @@ class Actor implements ActorInterface {
       }
     }
 
-    this.circle.color[0] = this.teamColor[0];
-    this.circle.color[1] = this.teamColor[1];
-    this.circle.color[2] = this.teamColor[2];
-    this.circle.color[3] = this.teamColor[3];
+    this.circleDrawable.color[0] = this.teamColor[0];
+    this.circleDrawable.color[1] = this.teamColor[1];
+    this.circleDrawable.color[2] = this.teamColor[2];
+    this.circleDrawable.color[3] = this.teamColor[3];
 
     this.setAction(null);
     

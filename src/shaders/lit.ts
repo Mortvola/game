@@ -29,7 +29,7 @@ fn vertex_simple(
 {
   var output: VertexOut;
 
-  output.position = projectionMatrix * viewMatrix * modelMatrix[0] * vert.position;
+  output.position = projectionMatrix * viewMatrix * modelMatrix[instanceIndex] * vert.position;
 
   output.color = color[0];
   output.fragPos = viewMatrix * modelMatrix[0] * vert.position;

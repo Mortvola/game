@@ -1,4 +1,4 @@
-import { gpu } from "./Renderer";
+import { gpu } from "./Main";
 import {
   makeShaderDataDefinitions,
   makeStructuredView,

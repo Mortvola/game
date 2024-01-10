@@ -2,9 +2,9 @@ import { Vec2, Vec3, Vec4, vec4 } from "wgpu-matrix";
 import Actor from "../Character/Actor";
 import { gravity } from "../Math";
 import RenderPass from "../RenderPass";
-import Mesh from "../Drawables/Mesh";
 import { ActorInterface } from "../ActorInterface";
 import { WorldInterface } from "../WorldInterface";
+import { DrawableNodeInterface } from "../Drawables/DrawableNodeInterface";
 
 export type ShotData = {
   velocityVector: Vec2,
@@ -16,7 +16,7 @@ export type ShotData = {
 class Shot implements ActorInterface {
   startTime: number | null = null;
 
-  mesh: Mesh;
+  mesh: DrawableNodeInterface;
 
   data: ShotData;
 
@@ -25,7 +25,7 @@ class Shot implements ActorInterface {
   renderPass: RenderPass | null = null;
 
   constructor(
-    mesh: Mesh,
+    mesh: DrawableNodeInterface,
     actor: Actor,
     data: ShotData,
   ) {

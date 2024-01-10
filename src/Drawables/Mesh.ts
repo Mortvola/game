@@ -1,7 +1,8 @@
 import { mat4, vec4, Vec4 } from 'wgpu-matrix';
-import { bindGroups, gpu } from "../Renderer";
+import { bindGroups, gpu } from '../Main';
 import SurfaceMesh from "./SurfaceMesh";
 import Drawable from './Drawable';
+import DrawableInterface, { maxInstances } from './DrawableInterface';
 
 class Mesh extends Drawable {
   mesh: SurfaceMesh;
@@ -89,13 +90,13 @@ class Mesh extends Drawable {
 
     this.modelMatrixBuffer = gpu.device.createBuffer({
       label: 'model Matrix',
-      size: 16 * Float32Array.BYTES_PER_ELEMENT * 16,
+      size: 16 * Float32Array.BYTES_PER_ELEMENT * maxInstances,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
     this.colorBuffer = gpu.device.createBuffer({
       label: 'color',
-      size: 4 * Float32Array.BYTES_PER_ELEMENT * 16,
+      size: 4 * Float32Array.BYTES_PER_ELEMENT * maxInstances,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
@@ -126,17 +127,22 @@ class Mesh extends Drawable {
     return this.color;
   }
 
+  hitTest(origin: Vec4, vector: Vec4): { point: Vec4, t: number, drawable: DrawableInterface} | null {
+    const result = this.mesh.hitTest(origin, vector);
+
+    if (result) {
+      return { point: result.point, t: result.t, drawable: this };      
+    }
+
+    return null;
+  }
+
   render(passEncoder: GPURenderPassEncoder) {
     if (!gpu) {
       throw new Error('gpu devcie not set.')
     }
 
-    if (this.numInstances > 0) {
-      gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.modelMatrices);
-    }
-    else {
-      gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.getTransform() as Float32Array);
-    }
+    gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.modelMatrices);
     gpu.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
 
     passEncoder.setBindGroup(1, this.bindGroup);
@@ -145,25 +151,7 @@ class Mesh extends Drawable {
     passEncoder.setVertexBuffer(1, this.normalBuffer);
 
     passEncoder.setIndexBuffer(this.indexBuffer, this.indexFormat);
-    passEncoder.drawIndexed(this.mesh.indexes.length, 1);
-  }
-
-  hitTest(origin: Vec4, vector: Vec4): { point: Vec4, t: number, drawable: Drawable} | null {
-    // Transform origin and ray into model space.
-    const inverseTransform = mat4.inverse(this.getTransform());
-    const localVector = vec4.transformMat4(vector, inverseTransform);
-    const localOrigin = vec4.transformMat4(origin, inverseTransform);
-
-    const result = this.mesh.hitTest(localOrigin, localVector);
-
-    if (result) {
-      // Convert the intersection point into world coordinates.
-      const point = vec4.transformMat4(result.point, this.getTransform());
-
-      return { point, t: result.t, drawable: this };      
-    }
-
-    return null;
+    passEncoder.drawIndexed(this.mesh.indexes.length, this.numInstances);
   }
 
   computeCentroid(): Vec4 {

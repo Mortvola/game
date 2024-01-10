@@ -1,17 +1,17 @@
 import { vec2, vec3 } from "wgpu-matrix";
 import { ActorInterface } from "../ActorInterface";
 import { WorldInterface } from "../WorldInterface";
-import SceneNode from "../Drawables/SceneNode";
 import { PathPoint } from "../Workers/PathPlannerTypes";
+import { SceneNodeInterface } from "../Drawables/SceneNodeInterface";
 
 class FollowPath implements ActorInterface {
   path: PathPoint[];
 
-  sceneNode: SceneNode;
+  sceneNode: SceneNodeInterface;
 
   metersPerSecond = 6;
 
-  constructor(sceneNode: SceneNode, path: PathPoint[]) {
+  constructor(sceneNode: SceneNodeInterface, path: PathPoint[]) {
     this.sceneNode = sceneNode;
     this.path = path;
   }

@@ -1,19 +1,20 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import Circle from "../../../Drawables/Circle";
-import { getWorld } from "../../../Renderer";
+import { getWorld } from "../../../Main";
 import { degToRad } from "../../../Math";
 import Actor from "../../Actor";
 import { WorldInterface } from "../../../WorldInterface";
 import { TimeType } from "../Action";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
+import DrawableNode from "../../../Drawables/DrawableNode";
 
 class AreaSpell extends RangeSpell {
   center: Vec2 | null = null;
 
   radius: number;
 
-  areaOfEffect: Circle | null = null;
+  areaOfEffect: DrawableNode | null = null;
 
   constructor(
     actor: Actor,
@@ -57,7 +58,7 @@ class AreaSpell extends RangeSpell {
     if (this.areaOfEffect === null) {
       const world = getWorld();
 
-      this.areaOfEffect = new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1))
+      this.areaOfEffect = new DrawableNode(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)))
       this.areaOfEffect.translate = vec3.copy(this.actor.sceneNode.translate)
   
       world.mainRenderPass.addDrawable(this.areaOfEffect, 'circle');

@@ -3,7 +3,7 @@ import Script from "../../../Script/Script";
 import { WorldInterface } from "../../../WorldInterface";
 import Action, { TimeType } from "../Action";
 import Actor from "../../Actor";
-import { getWorld } from "../../../Renderer";
+import { getWorld } from "../../../Main";
 
 class Spell extends Action {
   level: number;

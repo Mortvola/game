@@ -1,6 +1,6 @@
 import { Vec4, vec4 } from "wgpu-matrix";
 import Actor from "./Character/Actor";
-import { isDrawableInterface } from "./Drawables/DrawableInterface";
+import { isDrawableNode } from "./Drawables/DrawableNodeInterface";
 
 export type CollisionResult = {
   actor: Actor,
@@ -22,7 +22,7 @@ class Collidees {
         continue;
       }
 
-      if (isDrawableInterface(actor.sceneNode)) {
+      if (isDrawableNode(actor.sceneNode)) {
         const result = actor.sceneNode.hitTest(p1, ray);
 
         if (result && result.t <= 1) {

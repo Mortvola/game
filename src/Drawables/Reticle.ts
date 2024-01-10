@@ -1,7 +1,6 @@
-import { Vec4, vec4, Mat4, mat4, vec2 } from 'wgpu-matrix';
-import { intersectionPlane } from '../Math';
+import { Vec4, Mat4 } from 'wgpu-matrix';
 import Drawable from './Drawable';
-import { bindGroups, gpu } from '../Renderer';
+import { bindGroups, gpu } from '../Main';
 
 const label = 'reticle';
 
@@ -10,7 +9,7 @@ class Reticle extends Drawable {
 
   bindGroup: GPUBindGroup;
 
-  uniformBuffer: GPUBuffer;
+  modelMatrixBuffer: GPUBuffer;
 
   colorBuffer: GPUBuffer;
 
@@ -29,7 +28,7 @@ class Reticle extends Drawable {
 
     this.radius[0] = radius;
 
-    this.uniformBuffer = gpu.device.createBuffer({
+    this.modelMatrixBuffer = gpu.device.createBuffer({
       label: 'model Matrix',
       size: 16 * Float32Array.BYTES_PER_ELEMENT,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -45,7 +44,7 @@ class Reticle extends Drawable {
       label: 'reticle',
       layout: bindGroups.bindGroupLayout1,
       entries: [
-        { binding: 0, resource: { buffer: this.uniformBuffer }},
+        { binding: 0, resource: { buffer: this.modelMatrixBuffer }},
         { binding: 1, resource: { buffer: this.colorBuffer }},
       ],
     });
@@ -104,7 +103,8 @@ class Reticle extends Drawable {
       throw new Error('gpu device not set.')
     }
 
-    gpu.device.queue.writeBuffer(this.uniformBuffer, 0, this.getTransform() as Float32Array);
+    // gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.getTransform() as Float32Array);
+    gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.modelMatrices);
     gpu.device.queue.writeBuffer(this.uniformBuffer2, 0, this.radius);
 
     passEncoder.setBindGroup(1, this.bindGroup);
@@ -116,22 +116,22 @@ class Reticle extends Drawable {
 
   hitTest(p: Vec4, viewTransform: Mat4): { point: Vec4, t: number, drawable: Drawable} | null {
     // Transform point from model space to world space to camera space.
-    let t = mat4.multiply(mat4.inverse(viewTransform), this.getTransform());
+    // let t = mat4.multiply(mat4.inverse(viewTransform), this.getTransform());
 
-    let point = vec4.create(t[12], t[13], t[14], t[15])
+    // let point = vec4.create(t[12], t[13], t[14], t[15])
 
-    const p2 = intersectionPlane(point, vec4.create(0, 0, 1, 0), vec4.create(0, 0, 0, 1), p);
+    // const p2 = intersectionPlane(point, vec4.create(0, 0, 1, 0), vec4.create(0, 0, 0, 1), p);
   
-    if (p2) {
-      const d = vec2.distance(point, p2)
+    // if (p2) {
+    //   const d = vec2.distance(point, p2)
 
-      if (d < Math.abs(this.radius[0] * t[14])) {
-        // Transform point to world space
-        const wp = vec4.transformMat4(p2, viewTransform);
+    //   if (d < Math.abs(this.radius[0] * t[14])) {
+    //     // Transform point to world space
+    //     const wp = vec4.transformMat4(p2, viewTransform);
 
-        return { point: wp, t: 1.0, drawable: this };
-      }
-    }
+    //     return { point: wp, t: 1.0, drawable: this };
+    //   }
+    // }
 
     return null;
   }

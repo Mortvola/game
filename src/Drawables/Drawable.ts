@@ -1,13 +1,16 @@
 import { Mat4, vec4, Vec4 } from 'wgpu-matrix';
-import DrawableInterface from "./DrawableInterface";
-import SceneNode from './SceneNode';
+import DrawableInterface, { maxInstances } from "./DrawableInterface";
 
-class Drawable extends SceneNode implements DrawableInterface {
+class Drawable implements DrawableInterface {
   drawable = true;
+
+  uuid = '';
+
+  name = '';
 
   tag = '';
 
-  modelMatrices: Float32Array = new Float32Array(16 * 16);
+  modelMatrices: Float32Array = new Float32Array(16 * maxInstances);
 
   numInstances = 0;
 
@@ -23,7 +26,7 @@ class Drawable extends SceneNode implements DrawableInterface {
     throw new Error('not implemented');
   }
 
-  hitTest(origin: Vec4, vector: Vec4): { point: Vec4, t: number, drawable: Drawable} | null {
+  hitTest(origin: Vec4, vector: Vec4): { point: Vec4, t: number, drawable: DrawableInterface} | null {
     return null;
   }
 

@@ -1,5 +1,5 @@
 import Drawable from "./Drawable";
-import { gpu } from '../Renderer';
+import { gpu } from '../Main';
 
 class Line extends Drawable {
   vertices: number[];

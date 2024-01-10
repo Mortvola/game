@@ -1,8 +1,8 @@
-import { Vec4, Mat4, mat4 } from 'wgpu-matrix';
-import DrawableInterface, { isDrawableInterface } from "./DrawableInterface";
+import { Vec4, mat4 } from 'wgpu-matrix';
+import DrawableInterface from "./DrawableInterface";
 import SceneNode from "./SceneNode";
 import { PipelineTypes } from '../Pipelines/PipelineManager';
-// import { makeObservable, observable, runInAction } from 'mobx';
+import { isDrawableNode } from './DrawableNodeInterface';
 
 export type HitTestResult = {
   drawable: DrawableInterface,
@@ -52,7 +52,7 @@ class ContainerNode extends SceneNode {
   updateTransforms(mat = mat4.identity()) {
     const transform = this.computeTransform(mat);
     for (const drawable of this.nodes) {
-      if (isDrawableInterface(drawable.node)) {
+      if (isDrawableNode(drawable.node)) {
         drawable.node.computeTransform(transform);
       }
       else if (isContainerNode(drawable.node)) {
@@ -64,8 +64,8 @@ class ContainerNode extends SceneNode {
 
   resetTransforms() {
     for (const node of this.nodes) {
-      if (isDrawableInterface(node.node)) {
-        node.node.resetTransforms();
+      if (isDrawableNode(node.node)) {
+        node.node.drawable.resetTransforms();
       }
       else if (isContainerNode(node.node)) {
         // const nodeMat = drawable.node.computeTransform(transform);
@@ -79,8 +79,8 @@ class ContainerNode extends SceneNode {
 
     for (const node of this.nodes) {
       let result;
-      if (isDrawableInterface(node.node)) {
-        if (!filter || filter(node.node)) {
+      if (isDrawableNode(node.node)) {
+        if (!filter || filter(node.node.drawable)) {
           result = node.node.hitTest(origin, ray)    
         }
       }

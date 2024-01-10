@@ -1,7 +1,7 @@
-import { gpu, bindGroups } from "../Renderer";
+import { gpu, bindGroups } from "../Main";
 import PipelineInterface from "./PipelineInterface";
 import { litShader } from '../shaders/lit';
-import DrawableInterface from "../Drawables/DrawableInterface";
+import DrawableNode from "../Drawables/DrawableNode";
 
 class LitPipeline implements PipelineInterface {
   pipeline: GPURenderPipeline;
@@ -79,12 +79,12 @@ class LitPipeline implements PipelineInterface {
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
   }
 
-  render(passEncoder: GPURenderPassEncoder, drawables: DrawableInterface[]) {
+  render(passEncoder: GPURenderPassEncoder, drawables: DrawableNode[]) {
     passEncoder.setPipeline(this.pipeline);
 
-    drawables.forEach((drawable) => {
-      drawable.render(passEncoder);
-    })
+    for (const drawableNode of drawables) {
+      drawableNode.drawable.render(passEncoder);
+    }
   }
 }
 

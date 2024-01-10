@@ -8,13 +8,14 @@ import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import { findPath2 } from "../../../Workers/PathPlannerQueue";
 import { PathPoint } from "../../../Workers/PathPlannerTypes";
 import Line from "../../../Drawables/Line";
-import { getWorld } from "../../../Renderer";
+import { getWorld } from "../../../Main";
 import FollowPath from "../../../Script/FollowPath";
+import DrawableNode from "../../../Drawables/DrawableNode";
 
 class MagicMissile extends RangeSpell {
   paths: PathPoint[][] = [];
 
-  missileLines: Line[] = [];
+  missileLines: DrawableNode[] = [];
 
   lines: number[][] = [];
 
@@ -143,7 +144,7 @@ class MagicMissile extends RangeSpell {
     const world = getWorld();
 
     if (!this.cleared && lines.length > 0) {
-      this.missileLines.push(new Line(lines));
+      this.missileLines.push(new DrawableNode(new Line(lines)));
       world.mainRenderPass.addDrawable(this.missileLines[this.missileLines.length - 1], 'line');  
     }
   }

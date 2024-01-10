@@ -1,5 +1,6 @@
-import { Vec4, Vec3, Mat4, Quat } from 'wgpu-matrix';
-import { AllowedTransformations } from './SceneNode';
+import { Vec4, Mat4 } from 'wgpu-matrix';
+
+export const maxInstances = 16;
 
 interface DrawableInterface {
   drawable: boolean;
@@ -10,21 +11,7 @@ interface DrawableInterface {
 
   render(passEncoder: GPURenderPassEncoder): void;
 
-  transform: Mat4;
-
-  postTransforms: Mat4[];
-
-  translate: Vec3;
-
-  qRotate: Quat;
-
-  scale: Vec3;
-
-  allowedTransformations: AllowedTransformations;
-
   tag: string;
-
-  angles: number[];
 
   modelMatrices: Float32Array;
 
@@ -36,19 +23,7 @@ interface DrawableInterface {
 
   hitTest(origin: Vec4, vector: Vec4): { point: Vec4, t: number, drawable: DrawableInterface} | null;
 
-  computeTransform(transform?: Mat4, prepend?: boolean): Mat4;
-
   computeCentroid(): Vec4;
-
-  getTransform(): Mat4;
-
-  getRotation(): Mat4;
-
-  rotate(x: number, y: number, z: number): void;
-
-  setFromAngles(x: number, y: number, z: number): void;
-
-  setQRotate(q: Quat): void;
 
   resetTransforms(): void;
 

@@ -1,5 +1,5 @@
 import { Vec2, Vec4 } from "wgpu-matrix";
-import { bindGroups, gpu } from "../Renderer";
+import { bindGroups, gpu } from "../Main";
 import Drawable from "./Drawable";
 import { makeShaderDataDefinitions, makeStructuredView } from "webgpu-utils";
 import { trajectoryShader } from "../shaders/trajectory";

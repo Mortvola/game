@@ -9,6 +9,7 @@ import AreaSpell from "./AreaSpell";
 import { savingThrow } from "../../../Dice";
 import Logger from "../../../Script/Logger";
 import Circle from "../../../Drawables/Circle";
+import DrawableNode from "../../../Drawables/DrawableNode";
 
 class Grease extends AreaSpell {
   constructor(actor: Actor) {
@@ -17,7 +18,7 @@ class Grease extends AreaSpell {
 
   cast(script: Script, world: WorldInterface): boolean {
     if (this.center) {
-      const obj = new Circle(this.radius, this.radius, vec4.create(0.2, 0.2, 0.2, 1))
+      const obj = new DrawableNode(new Circle(this.radius, this.radius, vec4.create(0.2, 0.2, 0.2, 1)))
       obj.translate = vec3.create(this.center[0], 0, this.center[1])
   
       world.mainRenderPass.addDrawable(obj, 'circle');

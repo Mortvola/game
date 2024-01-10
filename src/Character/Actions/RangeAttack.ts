@@ -7,6 +7,7 @@ import Trajectory from "../../Drawables/Trajectory";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Shot, { ShotData } from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
+import DrawableNode from "../../Drawables/DrawableNode";
 
 class RangeAttack extends Action {
   constructor(actor: Actor) {
@@ -22,13 +23,13 @@ class RangeAttack extends Action {
         this.trajectory = null;
       }
     
-      this.trajectory = new Trajectory({
+      this.trajectory = new DrawableNode(new Trajectory({
         velocityVector: result.velocityVector,
         duration: result.duration,
         startPos: result.startPos,
         orientation: result.orientation,
         distance: result.distance,
-      });
+      }));
   
       world.mainRenderPass.addDrawable(this.trajectory, 'trajectory');
   
@@ -104,8 +105,7 @@ class RangeAttack extends Action {
         position: shotData.startPos,
       };
 
-      const shot = new Shot(world.shot, this.actor, data);
-      script.entries.push(shot);
+      script.entries.push(new Shot(world.shot, this.actor, data));
 
       this.actor.attack(
         this.targets[0],

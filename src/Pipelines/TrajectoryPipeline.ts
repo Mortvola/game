@@ -1,7 +1,7 @@
-import { bindGroups, gpu } from "../Renderer";
+import { bindGroups, gpu } from "../Main";
 import PipelineInterface from "./PipelineInterface";
 import { trajectoryShader } from '../shaders/trajectory';
-import DrawableInterface from "../Drawables/DrawableInterface";
+import { DrawableNodeInterface } from "../Drawables/DrawableNodeInterface";
 
 const label = 'trajectory'
 class TrajectoryPipeline implements PipelineInterface {
@@ -54,12 +54,12 @@ class TrajectoryPipeline implements PipelineInterface {
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
   }
 
-  render(passEncoder: GPURenderPassEncoder, drawables: DrawableInterface[]) {
+  render(passEncoder: GPURenderPassEncoder, drawables: DrawableNodeInterface[]) {
     passEncoder.setPipeline(this.pipeline);
 
-    drawables.forEach((drawable) => {
-      drawable.render(passEncoder);
-    })
+    for (const drawableNode of drawables) {
+      drawableNode.drawable.render(passEncoder);
+    }
   }
 }
 

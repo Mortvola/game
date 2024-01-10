@@ -1,9 +1,9 @@
 import { Mat4, Vec4 } from 'wgpu-matrix';
-import { gpu } from "../Renderer";
-import DrawableInterface from "./DrawableInterface";
-import SceneNode from "./SceneNode";
+import { gpu } from "../Main";
+import DrawableInterface, { maxInstances } from "./DrawableInterface";
+import Drawable from './Drawable';
 
-class CartesianAxes extends SceneNode implements DrawableInterface {
+class CartesianAxes extends Drawable {
   drawable = true;
   
   vertexBuffer: GPUBuffer;
@@ -24,7 +24,7 @@ class CartesianAxes extends SceneNode implements DrawableInterface {
     0, 1, 0, 1,    
   ];
 
-  modelMatrices = new Float32Array(16 * 16)
+  modelMatrices = new Float32Array(16 * maxInstances)
 
   numInstances = 0;
 

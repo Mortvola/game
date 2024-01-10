@@ -1,13 +1,14 @@
-import { Vec2, Vec4, vec2 } from "wgpu-matrix";
+import { Vec4, vec2 } from "wgpu-matrix";
 import Script from "../../Script/Script";
 import { WorldInterface } from "../../WorldInterface";
 import Actor from "../Actor";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
-import { getWorld } from "../../Renderer";
-import Trajectory from "../../Drawables/Trajectory";
+import { getWorld } from "../../Main";
 import { PathPoint } from "../../Workers/PathPlannerTypes";
+import { DrawableNodeInterface } from "../../Drawables/DrawableNodeInterface";
+import DrawableNode from "../../Drawables/DrawableNode";
 
 export type TimeType = 'Action' | 'Bonus' | 'Move';
 
@@ -32,9 +33,9 @@ class Action {
 
   maxTargets: number;
 
-  pathLines: Line | null = null;
+  pathLines: DrawableNodeInterface | null = null;
 
-  trajectory: Trajectory | null = null;
+  trajectory: DrawableNodeInterface | null = null;
 
   cleared = false;
 
@@ -81,7 +82,7 @@ class Action {
     }
 
     if (lines !== null && !this.cleared && lines.length > 0) {
-      this.pathLines = new Line(lines);
+      this.pathLines = new DrawableNode(new Line(lines));
       world.mainRenderPass.addDrawable(this.pathLines, 'line');  
     }
   }

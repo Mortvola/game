@@ -3,15 +3,16 @@ import Actor from "../../Actor";
 import Spell from "./Spell";
 import { WorldInterface } from "../../../WorldInterface";
 import Script from "../../../Script/Script";
-import { getWorld } from "../../../Renderer";
+import { getWorld } from "../../../Main";
 import Circle from "../../../Drawables/Circle";
 import { degToRad } from "../../../Math";
 import { TimeType } from "../Action";
+import DrawableNode from "../../../Drawables/DrawableNode";
 
 class RangeSpell extends Spell {
   range: number;
 
-  rangeCircle: Circle | null = null;
+  rangeCircle: DrawableNode | null = null;
 
   constructor(
     actor: Actor,
@@ -93,7 +94,7 @@ class RangeSpell extends Spell {
     if (this.range > 0) {
       const world = getWorld();
 
-      this.rangeCircle = new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1))
+      this.rangeCircle = new DrawableNode(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)))
       this.rangeCircle.translate = vec3.copy(this.actor.sceneNode.translate)
   
       world.mainRenderPass.addDrawable(this.rangeCircle, 'circle');

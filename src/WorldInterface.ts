@@ -2,8 +2,8 @@ import { ActorInterface } from "./ActorInterface";
 import Actor from "./Character/Actor";
 import Collidees from "./Collidees";
 import ContainerNode from "./Drawables/ContainerNode";
+import { DrawableNodeInterface } from "./Drawables/DrawableNodeInterface";
 import Line from "./Drawables/Line";
-import Mesh from "./Drawables/Mesh";
 import Participants from "./Participants";
 import RenderPass from "./RenderPass";
 import { Occupant } from "./Workers/PathPlannerTypes";
@@ -36,7 +36,7 @@ export interface WorldInterface {
 
   participants: Participants;
 
-  shot: Mesh;
+  shot: DrawableNodeInterface;
 
   delays: Delay[];
 
