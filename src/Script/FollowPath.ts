@@ -13,6 +13,8 @@ class FollowPath implements ActorInterface {
 
   ground: boolean;
 
+  onFinish: (() => void) | null = null;
+
   constructor(sceneNode: SceneNodeInterface, path: PathPoint[], ground = true, metersPerSecond = 6) {
     this.sceneNode = sceneNode;
     this.path = path;
@@ -75,7 +77,15 @@ class FollowPath implements ActorInterface {
       }
     }
 
-    return this.path.length < 2;
+    if (this.path.length < 2) {
+      if (this.onFinish) {
+        this.onFinish();
+      }
+
+      return true;
+    }
+
+    return false;
   }
 }
 

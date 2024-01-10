@@ -53,7 +53,6 @@ class MagicMissile extends RangeSpell {
 
       script.onFinish = () => {
         world.scene.removeNode(shot);
-        world.mainRenderPass.removeDrawables(shot)
       };
 
       parallel.entries.push(script)  
