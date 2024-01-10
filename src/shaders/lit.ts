@@ -19,18 +19,21 @@ ${common}
 
 ${lights}
 
-@group(1) @binding(1) var<uniform> color: vec4f;
+@group(1) @binding(1) var<uniform> color: array<vec4f, 16>;
 
 @vertex
-fn vertex_simple(vert: Vertex) -> VertexOut
+fn vertex_simple(
+  @builtin(instance_index) instanceIndex: u32,
+  vert: Vertex,
+) -> VertexOut
 {
   var output: VertexOut;
 
-  output.position = projectionMatrix * viewMatrix * modelMatrix * vert.position;
+  output.position = projectionMatrix * viewMatrix * modelMatrix[0] * vert.position;
 
-  output.color = color;
-  output.fragPos = viewMatrix * modelMatrix * vert.position;
-  output.normal = viewMatrix * modelMatrix * vert.normal;
+  output.color = color[0];
+  output.fragPos = viewMatrix * modelMatrix[0] * vert.position;
+  output.normal = viewMatrix * modelMatrix[0] * vert.normal;
 
   return output;
 }

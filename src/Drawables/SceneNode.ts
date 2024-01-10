@@ -1,5 +1,6 @@
 import { mat4, vec3, Vec4, Mat4, quat, Quat } from 'wgpu-matrix';
 import { getEulerAngles } from '../Math';
+import { isDrawableInterface } from './DrawableInterface';
 
 export const rotationOrder: quat.RotationOrder = 'xyz';
 
@@ -68,6 +69,10 @@ class SceneNode {
 
     for (const t of this.postTransforms) {
       mat4.multiply(this.transform, t, this.transform)
+    }
+
+    if (isDrawableInterface(this)) {
+      this.addInstanceTransform(this.transform);      
     }
 
     return this.transform;

@@ -26,7 +26,7 @@ fn vs(vert: Vertex) -> VertexOut
     0.0, 0.0, 1.05, 0.0,
     0.0, 0.0, 0.0, 1.0,
   );
-  output.position = projectionMatrix * viewMatrix * modelMatrix * scale * vert.position;
+  output.position = projectionMatrix * viewMatrix * modelMatrix[0] * scale * vert.position;
 
   return output;
 }

@@ -1,4 +1,4 @@
-import { Vec4 } from 'wgpu-matrix';
+import { Mat4, Vec4 } from 'wgpu-matrix';
 import { gpu } from "../Renderer";
 import DrawableInterface from "./DrawableInterface";
 import SceneNode from "./SceneNode";
@@ -23,6 +23,10 @@ class CartesianAxes extends SceneNode implements DrawableInterface {
     0, 0, 2000, 1,
     0, 1, 0, 1,    
   ];
+
+  modelMatrices = new Float32Array(16 * 16)
+
+  numInstances = 0;
 
   constructor() {
     super();
@@ -97,6 +101,18 @@ class CartesianAxes extends SceneNode implements DrawableInterface {
 
   getColor(): Float32Array {
     throw new Error('not implemented');
+  }
+
+  resetTransforms() {
+    this.numInstances = 0;
+  }
+
+  addInstanceTransform(transform: Mat4) {
+    transform.forEach((float, index) => {
+      this.modelMatrices[this.numInstances * 16 + index] = float;
+    })
+
+    this.numInstances += 1;
   }
 }
 

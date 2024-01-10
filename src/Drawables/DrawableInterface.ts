@@ -26,6 +26,10 @@ interface DrawableInterface {
 
   angles: number[];
 
+  modelMatrices: Float32Array;
+
+  numInstances: number;
+
   setColor(color: Vec4): void;
 
   getColor(): Float32Array;
@@ -45,10 +49,15 @@ interface DrawableInterface {
   setFromAngles(x: number, y: number, z: number): void;
 
   setQRotate(q: Quat): void;
+
+  resetTransforms(): void;
+
+  addInstanceTransform(mat4: Mat4): void;
 }
 
 export const isDrawableInterface = (r: unknown): r is DrawableInterface => (
   (r as DrawableInterface).drawable !== undefined
+  && (r as DrawableInterface).modelMatrices !== undefined
 )
 
 export default DrawableInterface;

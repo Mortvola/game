@@ -53,7 +53,7 @@ fn vertex_circle(@builtin(vertex_index) vertexIndex : u32) -> VertexOut
     y = (radius) * sin(radians + radiansPerSegment);
   }
 
-  output.position = projectionMatrix * viewMatrix * modelMatrix * vec4f(x, y, 0, 1);
+  output.position = projectionMatrix * viewMatrix * modelMatrix[0] * vec4f(x, y, 0, 1);
 
   output.color = circle.color;
 

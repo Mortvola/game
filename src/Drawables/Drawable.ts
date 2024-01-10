@@ -1,4 +1,4 @@
-import { vec4, Vec4 } from 'wgpu-matrix';
+import { Mat4, vec4, Vec4 } from 'wgpu-matrix';
 import DrawableInterface from "./DrawableInterface";
 import SceneNode from './SceneNode';
 
@@ -6,6 +6,10 @@ class Drawable extends SceneNode implements DrawableInterface {
   drawable = true;
 
   tag = '';
+
+  modelMatrices: Float32Array = new Float32Array(16 * 16);
+
+  numInstances = 0;
 
   render(passEncoder: GPURenderPassEncoder): void {
     throw new Error('render not implemented')
@@ -25,6 +29,18 @@ class Drawable extends SceneNode implements DrawableInterface {
 
   computeCentroid(): Vec4 {
     return vec4.create();
+  }
+
+  resetTransforms() {
+    this.numInstances = 0;
+  }
+
+  addInstanceTransform(transform: Mat4) {
+    transform.forEach((float, index) => {
+      this.modelMatrices[this.numInstances * 16 + index] = float;
+    })
+
+    this.numInstances += 1;
   }
 }
 

@@ -18,7 +18,7 @@ class Mesh extends Drawable {
 
   colorBuffer: GPUBuffer;
 
-  uniformBuffer: GPUBuffer;
+  modelMatrixBuffer: GPUBuffer;
 
   indexFormat: GPUIndexFormat = "uint16";
 
@@ -87,15 +87,15 @@ class Mesh extends Drawable {
       }  
     }
 
-    this.uniformBuffer = gpu.device.createBuffer({
+    this.modelMatrixBuffer = gpu.device.createBuffer({
       label: 'model Matrix',
-      size: 16 * Float32Array.BYTES_PER_ELEMENT,
+      size: 16 * Float32Array.BYTES_PER_ELEMENT * 16,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
     this.colorBuffer = gpu.device.createBuffer({
       label: 'color',
-      size: 4 * Float32Array.BYTES_PER_ELEMENT,
+      size: 4 * Float32Array.BYTES_PER_ELEMENT * 16,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
@@ -103,7 +103,7 @@ class Mesh extends Drawable {
       label: 'bind group for model matrix',
       layout: bindGroups.bindGroupLayout1,
       entries: [
-        { binding: 0, resource: { buffer: this.uniformBuffer }},
+        { binding: 0, resource: { buffer: this.modelMatrixBuffer }},
         { binding: 1, resource: { buffer: this.colorBuffer }},
       ],
     });
@@ -131,7 +131,12 @@ class Mesh extends Drawable {
       throw new Error('gpu devcie not set.')
     }
 
-    gpu.device.queue.writeBuffer(this.uniformBuffer, 0, this.getTransform() as Float32Array);
+    if (this.numInstances > 0) {
+      gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.modelMatrices);
+    }
+    else {
+      gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.getTransform() as Float32Array);
+    }
     gpu.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
 
     passEncoder.setBindGroup(1, this.bindGroup);
@@ -140,7 +145,7 @@ class Mesh extends Drawable {
     passEncoder.setVertexBuffer(1, this.normalBuffer);
 
     passEncoder.setIndexBuffer(this.indexBuffer, this.indexFormat);
-    passEncoder.drawIndexed(this.mesh.indexes.length);
+    passEncoder.drawIndexed(this.mesh.indexes.length, 1);
   }
 
   hitTest(origin: Vec4, vector: Vec4): { point: Vec4, t: number, drawable: Drawable} | null {

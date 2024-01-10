@@ -404,6 +404,8 @@ class Renderer implements WorldInterface {
   }
 
   updateTransforms() {
+    this.scene.resetTransforms();
+
     this.scene.updateTransforms();
 
     for (const node of this.scene.nodes) {

@@ -44,13 +44,13 @@ class Circle extends Drawable {
     
     this.uniformBuffer = gpu.device.createBuffer({
       label: 'Circle',
-      size: 16 * Float32Array.BYTES_PER_ELEMENT,
+      size: 16 * Float32Array.BYTES_PER_ELEMENT * 16,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
     this.colorBuffer = gpu.device.createBuffer({
       label: 'color',
-      size: 4 * Float32Array.BYTES_PER_ELEMENT,
+      size: 4 * Float32Array.BYTES_PER_ELEMENT * 16,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 

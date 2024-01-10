@@ -9,6 +9,7 @@ import { findPath2 } from "../../../Workers/PathPlannerQueue";
 import { PathPoint } from "../../../Workers/PathPlannerTypes";
 import Line from "../../../Drawables/Line";
 import { getWorld } from "../../../Renderer";
+import FollowPath from "../../../Script/FollowPath";
 
 class MagicMissile extends RangeSpell {
   paths: PathPoint[][] = [];
@@ -34,6 +35,14 @@ class MagicMissile extends RangeSpell {
     for (const target of this.targets) {
       target.takeDamage(diceRoll(1, 4) + 1, false, this.actor, 'Magic Missle', script)
     }
+
+    world.shot.translate[0] = this.paths[0][this.paths[0].length - 1].point[0];
+    world.shot.translate[1] = 1;
+    world.shot.translate[2] = this.paths[0][this.paths[0].length - 1].point[1];
+
+    world.mainRenderPass.addDrawable(world.shot, 'lit');
+
+    script.entries.push(new FollowPath(world.shot, this.paths[0]))
 
     return true;
   }
