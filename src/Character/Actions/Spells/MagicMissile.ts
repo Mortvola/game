@@ -11,6 +11,7 @@ import Line from "../../../Drawables/Line";
 import { getWorld, modelManager } from "../../../Main";
 import FollowPath from "../../../Script/FollowPath";
 import DrawableNode from "../../../Drawables/DrawableNode";
+import Parallel from "../../../Script/Parallel";
 
 class MagicMissile extends RangeSpell {
   paths: PathPoint[][] = [];
@@ -33,21 +34,33 @@ class MagicMissile extends RangeSpell {
   }
 
   async cast(script: Script, world: WorldInterface): Promise<boolean> {
-    for (const target of this.targets) {
-      target.takeDamage(diceRoll(1, 4) + 1, false, this.actor, 'Magic Missle', script)
+    const parallel = new Parallel();
+
+    for (let i = 0; i < this.paths.length; i += 1) {
+      const script = new Script();
+
+      const shot = new DrawableNode(await modelManager.getModel('Shot'));
+
+      shot.translate[0] = this.paths[i][this.paths[i].length - 1].point[0];
+      shot.translate[1] = 1;
+      shot.translate[2] = this.paths[i][this.paths[i].length - 1].point[1];
+  
+      world.scene.addNode(shot, 'lit');
+      world.mainRenderPass.addDrawable(shot, 'lit');
+  
+      script.entries.push(new FollowPath(shot, this.paths[i]))  
+
+      this.targets[i].takeDamage(diceRoll(1, 4) + 1, false, this.actor, 'Magic Missle', script)
+
+      script.onFinish = () => {
+        world.scene.removeNode(shot);
+        world.mainRenderPass.removeDrawable(shot, 'lit')
+      };
+
+      parallel.entries.push(script)  
     }
 
-    const shot = new DrawableNode(await modelManager.getModel('Shot'));
-
-    shot.translate[0] = this.paths[0][this.paths[0].length - 1].point[0];
-    shot.translate[1] = 1;
-    shot.translate[2] = this.paths[0][this.paths[0].length - 1].point[1];
-
-    world.scene.addNode(shot, 'lit');
-
-    world.mainRenderPass.addDrawable(shot, 'lit');
-
-    script.entries.push(new FollowPath(shot, this.paths[0]))
+    script.entries.push(parallel)  
 
     return true;
   }
