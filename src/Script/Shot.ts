@@ -59,9 +59,9 @@ class Shot implements ActorInterface {
       
       this.data.position = newPosition;
 
-      world.shot.translate[0] = this.data.position[0];
-      world.shot.translate[1] = this.data.position[1];
-      world.shot.translate[2] = this.data.position[2];
+      this.mesh.translate[0] = this.data.position[0];
+      this.mesh.translate[1] = this.data.position[1];
+      this.mesh.translate[2] = this.data.position[2];
     }
 
     return false;

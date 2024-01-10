@@ -36,8 +36,6 @@ export interface WorldInterface {
 
   participants: Participants;
 
-  shot: SceneNodeInterface;
-
   delays: Delay[];
 
   scene: ContainerNode;

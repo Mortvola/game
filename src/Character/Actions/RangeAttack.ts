@@ -8,6 +8,7 @@ import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Shot, { ShotData } from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
 import DrawableNode from "../../Drawables/DrawableNode";
+import { modelManager } from "../../Main";
 
 class RangeAttack extends Action {
   constructor(actor: Actor) {
@@ -105,7 +106,7 @@ class RangeAttack extends Action {
         position: shotData.startPos,
       };
 
-      script.entries.push(new Shot(world.shot, this.actor, data));
+      script.entries.push(new Shot(await modelManager.getModel('Shot'), this.actor, data));
 
       this.actor.attack(
         this.targets[0],

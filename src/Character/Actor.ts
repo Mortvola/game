@@ -338,7 +338,7 @@ class Actor implements ActorInterface {
     script.entries.push(mover);
   }
 
-  rangeAttack(target: Actor, script: Script, world: WorldInterface) {
+  async rangeAttack(target: Actor, script: Script, world: WorldInterface) {
     const shotData = this.computeShotData(target);
   
     const data: ShotData = {
@@ -348,7 +348,7 @@ class Actor implements ActorInterface {
       position: shotData.startPos,
     };
 
-    const shot = new Shot(world.shot, this, data);
+    const shot = new Shot(await modelManager.getModel('Shot'), this, data);
     script.entries.push(shot);
 
     this.attack(
@@ -513,7 +513,7 @@ class Actor implements ActorInterface {
                   // Moving to towards the target won't get us close enough 
                   // for a melee attack.
                   if (this.character.equipped.rangeWeapon) {
-                    this.rangeAttack(target, script, world);
+                    await this.rangeAttack(target, script, world);
       
                     if (target.character.hitPoints === 0) {
                       targets = targets.filter((t) => t !== closest);
@@ -530,7 +530,7 @@ class Actor implements ActorInterface {
               }
               else {
                 if (this.character.equipped.rangeWeapon) {
-                  this.rangeAttack(target, script, world);
+                  await this.rangeAttack(target, script, world);
 
                   if (target.character.hitPoints === 0) {
                     targets = targets.filter((t) => t !== closest);
@@ -649,34 +649,6 @@ class Actor implements ActorInterface {
     }
 
     return false;
-  }
-
-  addShot(targetActor: Actor, timestamp: number, world: WorldInterface) {
-    const result = this.computeShotData(targetActor);
-
-    const data: ShotData = {
-      velocityVector: result.velocityVector,
-      orientation: result.orientation,
-      startPos: result.startPos,
-      position: result.startPos,
-    };
-
-    const shot = new Shot(world.shot, this, data);
-    world.actors.push(shot);
-
-    // Transforms the position to world space.
-    const emitterPosition = vec4.transformMat4(
-      vec4.create(0, this.chestHeight, 0, 1),
-      this.sceneNode.transform,
-    );
-
-    playShot(emitterPosition);
-
-    // Remove any previously drawn trajectory.
-    // if (this.trajectory) {
-    //   this.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
-    //   this.trajectory = null;
-    // }
   }
 
   attack(
