@@ -97,7 +97,6 @@ class RangeSpell extends Spell {
       this.rangeCircle = new DrawableNode(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), 'circle')
       this.rangeCircle.translate = vec3.copy(this.actor.sceneNode.translate)
   
-      world.mainRenderPass.addDrawable(this.rangeCircle);
       world.scene.addNode(this.rangeCircle);
   
       const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
@@ -108,7 +107,6 @@ class RangeSpell extends Spell {
   hideRangeCircle() {
     if (this.rangeCircle) {
       const world = getWorld();
-      world.mainRenderPass.removeDrawable(this.rangeCircle);
       world.scene.removeNode(this.rangeCircle)
       this.rangeCircle = null;
     }

@@ -12,8 +12,6 @@ import BindGroups, { lightsStructure } from './BindGroups';
 import RenderPass from './RenderPass';
 import Light, { isLight } from './Drawables/Light';
 import CartesianAxes from './Drawables/CartesianAxes';
-import Mesh from './Drawables/Mesh';
-import { box } from './Drawables/Shapes/box';
 // import Reticle from './Drawables/Reticle';
 import Actor, { States } from './Character/Actor';
 import Line from './Drawables/Line';
@@ -133,10 +131,9 @@ class Renderer implements WorldInterface {
     // this.reticle = reticle;
 
     this.aspectRatio[0] = 1.0;
-    this.mainRenderPass.addDrawable(new DrawableNode(new CartesianAxes(), 'line'));
+    this.scene.addNode(new DrawableNode(new CartesianAxes(), 'line'));
 
     this.shot = shot;
-    this.scene.addNode(shot);
 
     this.updateTransforms();
   }
@@ -309,7 +306,7 @@ class Renderer implements WorldInterface {
       this.actors.push(actor);
     }
 
-    this.scene.updateTransforms();
+    this.scene.updateTransforms(undefined, this);
 
     this.startTurn();
   }
@@ -416,7 +413,7 @@ class Renderer implements WorldInterface {
   updateTransforms() {
     this.scene.resetTransforms();
 
-    this.scene.updateTransforms();
+    this.scene.updateTransforms(undefined, this);
 
     for (const node of this.scene.nodes) {
       if (isLight(node)) {

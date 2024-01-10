@@ -21,7 +21,6 @@ class Grease extends AreaSpell {
       const obj = new DrawableNode(new Circle(this.radius, this.radius, vec4.create(0.2, 0.2, 0.2, 1)), 'circle')
       obj.translate = vec3.create(this.center[0], 0, this.center[1])
   
-      world.mainRenderPass.addDrawable(obj);
       world.scene.addNode(obj);
   
       const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");

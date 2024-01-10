@@ -69,7 +69,7 @@ class Action {
     this.showPathLines(null);
 
     if (this.trajectory) {
-      world.mainRenderPass.removeDrawable(this.trajectory);
+      world.scene.removeNode(this.trajectory);
       this.trajectory = null;
     }
   }
@@ -78,12 +78,14 @@ class Action {
     const world = getWorld();
 
     if (this.pathLines) {
-      world.mainRenderPass.removeDrawable(this.pathLines);
+      world.scene.removeNode(this.pathLines);
     }
 
     if (lines !== null && !this.cleared && lines.length > 0) {
       this.pathLines = new DrawableNode(new Line(lines), 'line');
-      world.mainRenderPass.addDrawable(this.pathLines);  
+      world.scene.addNode(this.pathLines);
+
+      // world.mainRenderPass.addDrawable(this.pathLines);  
     }
   }
 
@@ -147,7 +149,7 @@ class Action {
       }
       else {
         if (this.trajectory) {
-          world.mainRenderPass.removeDrawable(this.trajectory);
+          world.scene.removeNode(this.trajectory);
           this.trajectory = null;
         }
 
@@ -169,7 +171,7 @@ class Action {
       this.focused = null;
 
       if (this.trajectory) {
-        world.mainRenderPass.removeDrawable(this.trajectory);
+        world.scene.removeNode(this.trajectory);
         this.trajectory = null;
       }
 

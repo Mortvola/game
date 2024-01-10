@@ -2,6 +2,8 @@ import { Vec4, mat4 } from 'wgpu-matrix';
 import DrawableInterface from "./DrawableInterface";
 import SceneNode from "./SceneNode";
 import { isDrawableNode } from './DrawableNodeInterface';
+import { SceneNodeInterface } from './SceneNodeInterface';
+import { WorldInterface } from '../WorldInterface';
 
 export type HitTestResult = {
   drawable: DrawableInterface,
@@ -10,13 +12,13 @@ export type HitTestResult = {
 }
 
 class ContainerNode extends SceneNode {
-  nodes: SceneNode[] = [];
+  nodes: SceneNodeInterface[] = [];
 
-  addNode(node: SceneNode) {
+  addNode(node: SceneNodeInterface) {
     this.nodes.push(node);
   }
 
-  removeNode(node: SceneNode) {
+  removeNode(node: SceneNodeInterface) {
     const index = this.nodes.findIndex((n) => n === node);
 
     if (index !== -1) {
@@ -35,15 +37,16 @@ class ContainerNode extends SceneNode {
     }
   }
 
-  updateTransforms(mat = mat4.identity()) {
+  updateTransforms(mat = mat4.identity(), world: WorldInterface) {
     const transform = this.computeTransform(mat);
     for (const drawable of this.nodes) {
       if (isDrawableNode(drawable)) {
         drawable.computeTransform(transform);
+
+        world.mainRenderPass.addDrawable(drawable);
       }
       else if (isContainerNode(drawable)) {
-        // const nodeMat = drawable.node.computeTransform(transform);
-        drawable.updateTransforms(transform);
+        drawable.updateTransforms(transform, world);
       }
     }
   }

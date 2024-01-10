@@ -96,7 +96,7 @@ class MagicMissile extends RangeSpell {
     if (target) {
       const wp = this.actor.getWorldPosition();
 
-          // If there isn't a point but there is a target
+      // If there isn't a point but there is a target
       // then use the target's location.
       let targetWp: Vec2;
 
@@ -162,7 +162,7 @@ class MagicMissile extends RangeSpell {
 
     if (!this.cleared && lines.length > 0) {
       this.missileLines.push(new DrawableNode(new Line(lines), 'line'));
-      world.mainRenderPass.addDrawable(this.missileLines[this.missileLines.length - 1]);  
+      world.scene.addNode(this.missileLines[this.missileLines.length - 1]);
     }
   }
 
@@ -170,7 +170,7 @@ class MagicMissile extends RangeSpell {
     const world = getWorld();
 
     if (this.missileLines.length > 0) {
-      world.mainRenderPass.removeDrawable(this.missileLines[this.missileLines.length - 1]);
+      world.scene.removeNode(this.missileLines[this.missileLines.length - 1]);
       this.missileLines.pop();
     }
   }

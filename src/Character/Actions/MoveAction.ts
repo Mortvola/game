@@ -20,7 +20,7 @@ class MoveAction extends Action {
 
   async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     if (this.trajectory) {
-      world.mainRenderPass.removeDrawable(this.trajectory);
+      world.scene.removeNode(this.trajectory);
       this.trajectory = null;
     }
 

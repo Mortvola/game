@@ -10,4 +10,3 @@ export const modelManager = new ModelManager();
 export const renderer = await Renderer.create(gpu!, bindGroups);
 
 export const getWorld = (): WorldInterface => renderer;
-

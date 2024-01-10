@@ -664,10 +664,6 @@ class Actor implements ActorInterface {
     const shot = new Shot(world.shot, this, data);
     world.actors.push(shot);
 
-    if (this.renderPass) {
-      shot.addToScene(this.renderPass);
-    }
-
     // Transforms the position to world space.
     const emitterPosition = vec4.transformMat4(
       vec4.create(0, this.chestHeight, 0, 1),

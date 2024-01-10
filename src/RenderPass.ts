@@ -109,7 +109,10 @@ class RenderPass {
 
     this.pipelines.forEach((entry) => {
       entry.pipeline.render(passEncoder, entry.drawables);
+      entry.drawables = [];
     })
+
+    this.pipelines = [];
 
     passEncoder.end();
   }

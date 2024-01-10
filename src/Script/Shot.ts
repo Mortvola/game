@@ -1,7 +1,6 @@
 import { Vec2, Vec3, Vec4, vec4 } from "wgpu-matrix";
 import Actor from "../Character/Actor";
 import { gravity } from "../Math";
-import RenderPass from "../RenderPass";
 import { ActorInterface } from "../ActorInterface";
 import { WorldInterface } from "../WorldInterface";
 import { SceneNodeInterface } from "../Drawables/SceneNodeInterface";
@@ -22,8 +21,6 @@ class Shot implements ActorInterface {
 
   actor: Actor;
 
-  renderPass: RenderPass | null = null;
-
   constructor(
     mesh: SceneNodeInterface,
     actor: Actor,
@@ -37,9 +34,9 @@ class Shot implements ActorInterface {
   async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
     if (this.startTime === null) {
       this.startTime = timestamp;
-
-      this.addToScene(world.mainRenderPass);
-    } else {
+      this.addToScene(world);
+    }
+    else {
       const shotElapsedTime = (timestamp - this.startTime) * 0.001;
 
       const xPos = this.data.velocityVector[0] * shotElapsedTime;
@@ -56,7 +53,7 @@ class Shot implements ActorInterface {
       const result = world.collidees.detectCollision(this.data.position, newPosition, (actor: Actor) => actor !== this.actor);
 
       if (result || newPosition[1] < 0) {
-        this.removeFromScene();
+        this.removeFromScene(world);
         return true;
       }
       
@@ -70,15 +67,12 @@ class Shot implements ActorInterface {
     return false;
   }
 
-  addToScene(renderPass: RenderPass) {
-    this.renderPass = renderPass;
-    this.renderPass.addDrawables(this.mesh);
+  addToScene(world: WorldInterface) {
+    world.scene.addNode(this.mesh);
   }
 
-  removeFromScene() {
-    if (this.renderPass) {
-      this.renderPass.removeDrawables(this.mesh);
-    }
+  removeFromScene(world: WorldInterface) {
+    world.scene.removeNode(this.mesh);
   }
 }
 
