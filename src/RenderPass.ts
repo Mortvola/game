@@ -1,6 +1,6 @@
 import PipelineInterface from "./Pipelines/PipelineInterface";
 import ContainerNode, { isContainerNode } from "./Drawables/ContainerNode";
-import PipelineManager, { PipelineTypes } from "./Pipelines/PipelineManager";
+import PipelineManager, { PipelineType } from "./Pipelines/PipelineManager";
 import { bindGroups } from "./Main";
 import { DrawableNodeInterface, isDrawableNode } from "./Drawables/DrawableNodeInterface";
 
@@ -12,7 +12,7 @@ type PipelineEntry = {
 class RenderPass {
   pipelines: PipelineEntry[] = [];
 
-  addDrawable(drawable: DrawableNodeInterface, pipelineType: PipelineTypes) {
+  addDrawable(drawable: DrawableNodeInterface, pipelineType: PipelineType) {
     if (isDrawableNode(drawable)) {
       const pipeline = PipelineManager.getInstance().getPipeline(pipelineType);
 
@@ -35,7 +35,7 @@ class RenderPass {
     }
   }
 
-  removeDrawable(drawable: DrawableNodeInterface, pipelineType: PipelineTypes) {
+  removeDrawable(drawable: DrawableNodeInterface, pipelineType: PipelineType) {
     const pipeline = PipelineManager.getInstance().getPipeline(pipelineType);
 
     let pipelineEntry = this.pipelines.find((p) => p.pipeline === pipeline) ?? null;

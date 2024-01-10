@@ -9,12 +9,12 @@ import PipelineInterface from "./PipelineInterface";
 import ReticlePipeline from "./ReticlePipeline";
 import TrajectoryPipeline from "./TrajectoryPipeline";
 
-export type PipelineTypes =
+export type PipelineType =
   'lit' | 'pipeline' | 'line' | 'billboard' | 'drag-handles' | 'circle' | 'outline' | 'reticle' |
   'trajectory';
 
 type Pipelines = {
-  type: PipelineTypes,
+  type: PipelineType,
   pipeline: PipelineInterface,
 }
 
@@ -45,7 +45,7 @@ class PipelineManager {
     return this.instance!
   }
 
-  getPipeline(type: PipelineTypes): PipelineInterface | null {
+  getPipeline(type: PipelineType): PipelineInterface | null {
     const entry = this.pipelines.find((pipeline) => pipeline.type === type);
 
     if (entry) {

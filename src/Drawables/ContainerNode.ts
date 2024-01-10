@@ -1,7 +1,7 @@
 import { Vec4, mat4 } from 'wgpu-matrix';
 import DrawableInterface from "./DrawableInterface";
 import SceneNode from "./SceneNode";
-import { PipelineTypes } from '../Pipelines/PipelineManager';
+import { PipelineType } from '../Pipelines/PipelineManager';
 import { isDrawableNode } from './DrawableNodeInterface';
 
 export type HitTestResult = {
@@ -13,7 +13,7 @@ export type HitTestResult = {
 class ContainerNode extends SceneNode {
   nodes: {
     node: SceneNode,
-    pipelineType: PipelineTypes,
+    pipelineType: PipelineType,
   }[] = [];
 
   // constructor() {
@@ -24,7 +24,7 @@ class ContainerNode extends SceneNode {
   //   // })
   // }
 
-  addNode(node: SceneNode, pipelineType: PipelineTypes) {
+  addNode(node: SceneNode, pipelineType: PipelineType) {
     // runInAction(() => {
       this.nodes.push({ node, pipelineType });
     // })
