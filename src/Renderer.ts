@@ -132,16 +132,16 @@ class Renderer implements WorldInterface {
     // this.reticle = reticle;
 
     this.aspectRatio[0] = 1.0;
-    this.mainRenderPass.addDrawable(new DrawableNode(new CartesianAxes()), 'line');
+    this.mainRenderPass.addDrawable(new DrawableNode(new CartesianAxes(), 'line'));
 
     this.shot = shot;
-    this.scene.addNode(shot, 'lit');
+    this.scene.addNode(shot);
 
     this.updateTransforms();
   }
 
   static async create(gpu: Gpu, bindGroups: BindGroups) {
-    const shot = new DrawableNode(await modelManager.getModel('Shot'));
+    const shot = new DrawableNode(await modelManager.getModel('Shot'), 'lit');
 
     // const reticle = new DrawableNode(await Reticle.create(0.05));
 
@@ -302,7 +302,7 @@ class Renderer implements WorldInterface {
     this.participants.initiativeRolls();
 
     for (const actor of this.participants.turns) {
-      this.scene.addNode(actor.sceneNode, 'lit');
+      this.scene.addNode(actor.sceneNode);
       actor.addToScene(this.mainRenderPass);
       this.collidees.actors.push(actor);
       this.actors.push(actor);

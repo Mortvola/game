@@ -19,7 +19,7 @@ class RangeAttack extends Action {
       const result = this.actor.computeShotData(target);
       
       if (this.trajectory) {
-        world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+        world.mainRenderPass.removeDrawable(this.trajectory);
         this.trajectory = null;
       }
     
@@ -29,9 +29,9 @@ class RangeAttack extends Action {
         startPos: result.startPos,
         orientation: result.orientation,
         distance: result.distance,
-      }));
+      }), 'trajectory');
   
-      world.mainRenderPass.addDrawable(this.trajectory, 'trajectory');
+      world.mainRenderPass.addDrawable(this.trajectory);
   
       this.showPathLines(null);
   
@@ -50,7 +50,7 @@ class RangeAttack extends Action {
       this.focused = null;
 
       if (this.trajectory) {
-        world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+        world.mainRenderPass.removeDrawable(this.trajectory);
         this.trajectory = null;
       }
 
@@ -115,7 +115,7 @@ class RangeAttack extends Action {
       );
 
       if (this.trajectory) {
-        world.mainRenderPass.removeDrawable(this.trajectory, 'trajectory');
+        world.mainRenderPass.removeDrawable(this.trajectory);
         this.trajectory = null;
       }
 

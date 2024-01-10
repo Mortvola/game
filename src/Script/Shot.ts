@@ -72,12 +72,12 @@ class Shot implements ActorInterface {
 
   addToScene(renderPass: RenderPass) {
     this.renderPass = renderPass;
-    this.renderPass.addDrawable(this.mesh, 'lit');
+    this.renderPass.addDrawable(this.mesh);
   }
 
   removeFromScene() {
     if (this.renderPass) {
-      this.renderPass.removeDrawable(this.mesh, 'lit');
+      this.renderPass.removeDrawable(this.mesh);
     }
   }
 }

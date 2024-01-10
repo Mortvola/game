@@ -12,31 +12,29 @@ type PipelineEntry = {
 class RenderPass {
   pipelines: PipelineEntry[] = [];
 
-  addDrawable(drawable: DrawableNodeInterface, pipelineType: PipelineType) {
-    if (isDrawableNode(drawable)) {
-      const pipeline = PipelineManager.getInstance().getPipeline(pipelineType);
+  addDrawable(drawable: DrawableNodeInterface) {
+    const pipeline = PipelineManager.getInstance().getPipeline(drawable.pipelineType);
 
-      if (pipeline) {
-        let pipelineEntry = this.pipelines.find((p) => p.pipeline === pipeline) ?? null;
+    if (pipeline) {
+      let pipelineEntry = this.pipelines.find((p) => p.pipeline === pipeline) ?? null;
 
-        if (!pipelineEntry) {
-          this.pipelines.push({
-            pipeline: pipeline,
-            drawables: []
-          })
-    
-          pipelineEntry = this.pipelines[this.pipelines.length - 1];
-        }
-    
-        if (pipelineEntry) {
-          pipelineEntry.drawables.push(drawable)
-        }  
+      if (!pipelineEntry) {
+        this.pipelines.push({
+          pipeline: pipeline,
+          drawables: []
+        })
+  
+        pipelineEntry = this.pipelines[this.pipelines.length - 1];
       }
+  
+      if (pipelineEntry) {
+        pipelineEntry.drawables.push(drawable)
+      }  
     }
   }
 
-  removeDrawable(drawable: DrawableNodeInterface, pipelineType: PipelineType) {
-    const pipeline = PipelineManager.getInstance().getPipeline(pipelineType);
+  removeDrawable(drawable: DrawableNodeInterface) {
+    const pipeline = PipelineManager.getInstance().getPipeline(drawable.pipelineType);
 
     let pipelineEntry = this.pipelines.find((p) => p.pipeline === pipeline) ?? null;
 
@@ -54,22 +52,22 @@ class RenderPass {
 
   addDrawables(drawables: ContainerNode) {
     for (const drawable of drawables.nodes) {
-      if (isContainerNode(drawable.node)) {
-        this.addDrawables(drawable.node)
+      if (isContainerNode(drawable)) {
+        this.addDrawables(drawable)
       }
-      else if (isDrawableNode(drawable.node)) {
-        this.addDrawable(drawable.node, drawable.pipelineType);
+      else if (isDrawableNode(drawable)) {
+        this.addDrawable(drawable);
       }
     }
   }
 
   removeDrawables(container: ContainerNode) {
     for (const drawable of container.nodes) {
-      if (isContainerNode(drawable.node)) {
-        this.removeDrawables(drawable.node)
+      if (isContainerNode(drawable)) {
+        this.removeDrawables(drawable)
       }  
-      else if (isDrawableNode(drawable.node)) {
-        this.removeDrawable(drawable.node, drawable.pipelineType);
+      else if (isDrawableNode(drawable)) {
+        this.removeDrawable(drawable);
       }
     }
   }

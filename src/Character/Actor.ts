@@ -106,7 +106,7 @@ class Actor implements ActorInterface {
 
     this.team = team;
     this.automated = automated;
-    this.sceneNode.addNode(mesh, 'lit');
+    this.sceneNode.addNode(mesh);
     this.height = height;
     this.chestHeight = height - 0.5;
     this.teamColor = color;
@@ -116,14 +116,14 @@ class Actor implements ActorInterface {
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
     this.circleDrawable = new Circle(this.occupiedRadius, 0.025, color);
-    this.circle = new DrawableNode(this.circleDrawable);
+    this.circle = new DrawableNode(this.circleDrawable, 'circle');
     this.circle.postTransforms.push(mat4.fromQuat(q));
 
-    this.outerCircle = new DrawableNode(new Circle(this.attackRadius, 0.01, color));
+    this.outerCircle = new DrawableNode(new Circle(this.attackRadius, 0.01, color), 'circle');
     this.outerCircle.postTransforms.push(mat4.fromQuat(q));
 
-    this.sceneNode.addNode(this.circle, 'circle')
-    this.sceneNode.addNode(this.outerCircle, 'circle')
+    this.sceneNode.addNode(this.circle)
+    this.sceneNode.addNode(this.outerCircle)
   }
 
   static async create(
@@ -137,7 +137,7 @@ class Actor implements ActorInterface {
     //   mesh.translate[1] = 0
     // }
     // else {
-      mesh = new DrawableNode(await modelManager.getModel(character.race.name));
+      mesh = new DrawableNode(await modelManager.getModel(character.race.name), 'lit');
       mesh.translate[1] = playerHeight / 2;  
     // }
 

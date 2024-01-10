@@ -39,14 +39,14 @@ class MagicMissile extends RangeSpell {
     for (let i = 0; i < this.paths.length; i += 1) {
       const script = new Script();
 
-      const shot = new DrawableNode(await modelManager.getModel('Shot'));
+      const shot = new DrawableNode(await modelManager.getModel('Shot'), 'lit');
 
       shot.translate[0] = this.paths[i][this.paths[i].length - 1].point[0];
       shot.translate[1] = 1;
       shot.translate[2] = this.paths[i][this.paths[i].length - 1].point[1];
   
-      world.scene.addNode(shot, 'lit');
-      world.mainRenderPass.addDrawable(shot, 'lit');
+      world.scene.addNode(shot);
+      world.mainRenderPass.addDrawable(shot);
   
       script.entries.push(new FollowPath(shot, this.paths[i], false, 24))  
 
@@ -54,7 +54,7 @@ class MagicMissile extends RangeSpell {
 
       script.onFinish = () => {
         world.scene.removeNode(shot);
-        world.mainRenderPass.removeDrawable(shot, 'lit')
+        world.mainRenderPass.removeDrawable(shot)
       };
 
       parallel.entries.push(script)  
@@ -161,8 +161,8 @@ class MagicMissile extends RangeSpell {
     const world = getWorld();
 
     if (!this.cleared && lines.length > 0) {
-      this.missileLines.push(new DrawableNode(new Line(lines)));
-      world.mainRenderPass.addDrawable(this.missileLines[this.missileLines.length - 1], 'line');  
+      this.missileLines.push(new DrawableNode(new Line(lines), 'line'));
+      world.mainRenderPass.addDrawable(this.missileLines[this.missileLines.length - 1]);  
     }
   }
 
@@ -170,7 +170,7 @@ class MagicMissile extends RangeSpell {
     const world = getWorld();
 
     if (this.missileLines.length > 0) {
-      world.mainRenderPass.removeDrawable(this.missileLines[this.missileLines.length - 1], 'line');
+      world.mainRenderPass.removeDrawable(this.missileLines[this.missileLines.length - 1]);
       this.missileLines.pop();
     }
   }

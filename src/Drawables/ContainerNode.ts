@@ -1,7 +1,6 @@
 import { Vec4, mat4 } from 'wgpu-matrix';
 import DrawableInterface from "./DrawableInterface";
 import SceneNode from "./SceneNode";
-import { PipelineType } from '../Pipelines/PipelineManager';
 import { isDrawableNode } from './DrawableNodeInterface';
 
 export type HitTestResult = {
@@ -11,27 +10,14 @@ export type HitTestResult = {
 }
 
 class ContainerNode extends SceneNode {
-  nodes: {
-    node: SceneNode,
-    pipelineType: PipelineType,
-  }[] = [];
+  nodes: SceneNode[] = [];
 
-  // constructor() {
-  //   super();
-
-  //   // makeObservable(this, {
-  //   //   nodes: observable,
-  //   // })
-  // }
-
-  addNode(node: SceneNode, pipelineType: PipelineType) {
-    // runInAction(() => {
-      this.nodes.push({ node, pipelineType });
-    // })
+  addNode(node: SceneNode) {
+    this.nodes.push(node);
   }
 
   removeNode(node: SceneNode) {
-    const index = this.nodes.findIndex((n) => n.node === node);
+    const index = this.nodes.findIndex((n) => n === node);
 
     if (index !== -1) {
       this.nodes = [
@@ -42,7 +28,7 @@ class ContainerNode extends SceneNode {
   }
 
   findNode(node: SceneNode) {
-    const index = this.nodes.findIndex((n) => n.node === node);
+    const index = this.nodes.findIndex((n) => n === node);
 
     if (index === -1) {
       console.log('node not found!!!!')
@@ -52,24 +38,24 @@ class ContainerNode extends SceneNode {
   updateTransforms(mat = mat4.identity()) {
     const transform = this.computeTransform(mat);
     for (const drawable of this.nodes) {
-      if (isDrawableNode(drawable.node)) {
-        drawable.node.computeTransform(transform);
+      if (isDrawableNode(drawable)) {
+        drawable.computeTransform(transform);
       }
-      else if (isContainerNode(drawable.node)) {
+      else if (isContainerNode(drawable)) {
         // const nodeMat = drawable.node.computeTransform(transform);
-        drawable.node.updateTransforms(transform);
+        drawable.updateTransforms(transform);
       }
     }
   }
 
   resetTransforms() {
     for (const node of this.nodes) {
-      if (isDrawableNode(node.node)) {
-        node.node.drawable.resetTransforms();
+      if (isDrawableNode(node)) {
+        node.drawable.resetTransforms();
       }
-      else if (isContainerNode(node.node)) {
+      else if (isContainerNode(node)) {
         // const nodeMat = drawable.node.computeTransform(transform);
-        node.node.resetTransforms();
+        node.resetTransforms();
       }
     }
   }
@@ -79,13 +65,13 @@ class ContainerNode extends SceneNode {
 
     for (const node of this.nodes) {
       let result;
-      if (isDrawableNode(node.node)) {
-        if (!filter || filter(node.node.drawable)) {
-          result = node.node.hitTest(origin, ray)    
+      if (isDrawableNode(node)) {
+        if (!filter || filter(node.drawable)) {
+          result = node.hitTest(origin, ray)    
         }
       }
-      else if (isContainerNode(node.node)) {
-        result = node.node.modelHitTest(origin, ray, filter);
+      else if (isContainerNode(node)) {
+        result = node.modelHitTest(origin, ray, filter);
       }
 
       if (result) {
