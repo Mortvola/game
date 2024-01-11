@@ -7,8 +7,8 @@ import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
 import { getWorld } from "../../Main";
 import { PathPoint } from "../../Workers/PathPlannerTypes";
-import { DrawableNodeInterface } from "../../Drawables/DrawableNodeInterface";
-import DrawableNode from "../../Drawables/DrawableNode";
+import { DrawableNodeInterface } from "../../Drawables/SceneNodes/DrawableNodeInterface";
+import DrawableNode from "../../Drawables/SceneNodes/DrawableNode";
 
 export type TimeType = 'Action' | 'Bonus' | 'Move';
 

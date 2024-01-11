@@ -1,9 +1,9 @@
 import { ActorInterface } from "./ActorInterface";
 import Actor from "./Character/Actor";
 import Collidees from "./Collidees";
-import ContainerNode from "./Drawables/ContainerNode";
+import ContainerNode from "./Drawables/SceneNodes/ContainerNode";
 import Line from "./Drawables/Line";
-import { SceneNodeInterface } from "./Drawables/SceneNodeInterface";
+import { SceneNodeInterface } from "./Drawables/SceneNodes/SceneNodeInterface";
 import Participants from "./Participants";
 import RenderPass from "./RenderPass";
 import { Occupant } from "./Workers/PathPlannerTypes";

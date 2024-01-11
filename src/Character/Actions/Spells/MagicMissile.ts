@@ -10,7 +10,7 @@ import { PathPoint } from "../../../Workers/PathPlannerTypes";
 import Line from "../../../Drawables/Line";
 import { getWorld, modelManager } from "../../../Main";
 import FollowPath from "../../../Script/FollowPath";
-import DrawableNode from "../../../Drawables/DrawableNode";
+import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
 import Parallel from "../../../Script/Parallel";
 
 class MagicMissile extends RangeSpell {

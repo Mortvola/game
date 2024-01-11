@@ -1,7 +1,7 @@
 import { gpu, bindGroups } from "../Main";
 import PipelineInterface from "./PipelineInterface";
 import { circleShader } from '../shaders/circle';
-import { DrawableNodeInterface } from "../Drawables/DrawableNodeInterface";
+import { DrawableNodeInterface } from "../Drawables/SceneNodes/DrawableNodeInterface";
 
 const label = 'CirclePipeline';
 

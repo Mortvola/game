@@ -1,4 +1,4 @@
-import { mat4, vec4, Vec4 } from 'wgpu-matrix';
+import { Vec4 } from 'wgpu-matrix';
 import { bindGroups, gpu } from '../Main';
 import SurfaceMesh from "./SurfaceMesh";
 import Drawable from './Drawable';
@@ -23,7 +23,7 @@ class Mesh extends Drawable {
 
   indexFormat: GPUIndexFormat = "uint16";
 
-  private constructor(mesh: SurfaceMesh, vertices: number[], normals: number[], indices: number[]) {
+  constructor(mesh: SurfaceMesh, vertices: number[], normals: number[], indices: number[]) {
     super()
   
     if (!gpu) {
@@ -110,7 +110,7 @@ class Mesh extends Drawable {
     });
   }
 
-  static async create(mesh: SurfaceMesh) {
+  static async create(mesh: SurfaceMesh): Promise<Mesh> {
     const { vertices, normals, indices } = await mesh.generateBuffers();
 
     return new Mesh(mesh, vertices, normals, indices);

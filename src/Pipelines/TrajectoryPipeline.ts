@@ -1,7 +1,7 @@
 import { bindGroups, gpu } from "../Main";
 import PipelineInterface from "./PipelineInterface";
 import { trajectoryShader } from '../shaders/trajectory';
-import { DrawableNodeInterface } from "../Drawables/DrawableNodeInterface";
+import { DrawableNodeInterface } from "../Drawables/SceneNodes/DrawableNodeInterface";
 
 const label = 'trajectory'
 class TrajectoryPipeline implements PipelineInterface {

@@ -9,7 +9,7 @@ import AreaSpell from "./AreaSpell";
 import { savingThrow } from "../../../Dice";
 import Logger from "../../../Script/Logger";
 import Circle from "../../../Drawables/Circle";
-import DrawableNode from "../../../Drawables/DrawableNode";
+import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
 
 class Grease extends AreaSpell {
   constructor(actor: Actor) {

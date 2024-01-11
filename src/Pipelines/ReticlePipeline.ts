@@ -1,7 +1,7 @@
 import { gpu, bindGroups } from "../Main";
 import PipelineInterface from "./PipelineInterface";
 import { reticleShader } from '../shaders/reticle';
-import { DrawableNodeInterface } from "../Drawables/DrawableNodeInterface";
+import { DrawableNodeInterface } from "../Drawables/SceneNodes/DrawableNodeInterface";
 
 const label = 'reticle';
 

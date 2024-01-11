@@ -3,7 +3,7 @@ import Actor from "../Character/Actor";
 import { gravity } from "../Math";
 import { ActorInterface } from "../ActorInterface";
 import { WorldInterface } from "../WorldInterface";
-import { SceneNodeInterface } from "../Drawables/SceneNodeInterface";
+import { SceneNodeInterface } from "../Drawables/SceneNodes/SceneNodeInterface";
 
 export type ShotData = {
   velocityVector: Vec2,

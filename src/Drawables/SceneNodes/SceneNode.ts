@@ -1,5 +1,5 @@
 import { mat4, vec3, Vec4, Mat4, quat, Quat } from 'wgpu-matrix';
-import { getEulerAngles } from '../Math';
+import { getEulerAngles } from '../../Math';
 import { isDrawableNode } from './DrawableNodeInterface';
 
 export const rotationOrder: quat.RotationOrder = 'xyz';

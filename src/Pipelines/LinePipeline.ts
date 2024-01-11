@@ -1,7 +1,7 @@
 import { bindGroups, gpu } from "../Main";
 import PipelineInterface from "./PipelineInterface";
 import { lineShader } from '../shaders/line';
-import { DrawableNodeInterface } from "../Drawables/DrawableNodeInterface";
+import { DrawableNodeInterface } from "../Drawables/SceneNodes/DrawableNodeInterface";
 
 class LinePipeline implements PipelineInterface {
   pipeline: GPURenderPipeline;

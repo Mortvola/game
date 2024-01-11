@@ -1,5 +1,5 @@
 import { vec4, Vec4 } from 'wgpu-matrix';
-import SceneNode, { AllowedTransformations } from './SceneNode';
+import SceneNode, { AllowedTransformations } from './SceneNodes/SceneNode';
 
 class Light extends SceneNode {
   lightColor = vec4.create(1, 1, 1, 1);

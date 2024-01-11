@@ -1,9 +1,9 @@
 import PipelineInterface from "./Pipelines/PipelineInterface";
-import { isContainerNode } from "./Drawables/ContainerNode";
+import { isContainerNode } from "./Drawables/SceneNodes/ContainerNode";
 import PipelineManager from "./Pipelines/PipelineManager";
 import { bindGroups } from "./Main";
-import { DrawableNodeInterface, isDrawableNode } from "./Drawables/DrawableNodeInterface";
-import { SceneNodeInterface } from "./Drawables/SceneNodeInterface";
+import { DrawableNodeInterface, isDrawableNode } from "./Drawables/SceneNodes/DrawableNodeInterface";
+import { SceneNodeInterface } from "./Drawables/SceneNodes/SceneNodeInterface";
 
 type PipelineEntry = {
   pipeline: PipelineInterface,

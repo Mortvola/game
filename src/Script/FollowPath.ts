@@ -2,7 +2,7 @@ import { vec2, vec3 } from "wgpu-matrix";
 import { ActorInterface } from "../ActorInterface";
 import { WorldInterface } from "../WorldInterface";
 import { PathPoint } from "../Workers/PathPlannerTypes";
-import { SceneNodeInterface } from "../Drawables/SceneNodeInterface";
+import { SceneNodeInterface } from "../Drawables/SceneNodes/SceneNodeInterface";
 
 class FollowPath implements ActorInterface {
   path: PathPoint[];

@@ -7,7 +7,7 @@ import { getWorld } from "../../../Main";
 import Circle from "../../../Drawables/Circle";
 import { degToRad } from "../../../Math";
 import { TimeType } from "../Action";
-import DrawableNode from "../../../Drawables/DrawableNode";
+import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
 
 class RangeSpell extends Spell {
   range: number;

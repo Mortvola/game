@@ -1,7 +1,7 @@
 import { gpu, bindGroups } from "../Main";
 import PipelineInterface from "./PipelineInterface";
 import { outlineShader } from '../shaders/outline';
-import DrawableNode from "../Drawables/DrawableNode";
+import DrawableNode from "../Drawables/SceneNodes/DrawableNode";
 
 const label = 'outline';
 

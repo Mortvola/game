@@ -7,7 +7,7 @@ import { WorldInterface } from "../../../WorldInterface";
 import { TimeType } from "../Action";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
-import DrawableNode from "../../../Drawables/DrawableNode";
+import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
 
 class AreaSpell extends RangeSpell {
   center: Vec2 | null = null;

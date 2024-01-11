@@ -1,7 +1,7 @@
 import { gpu, bindGroups } from "../Main";
 import PipelineInterface from "./PipelineInterface";
 import { litShader } from '../shaders/lit';
-import DrawableNode from "../Drawables/DrawableNode";
+import DrawableNode from "../Drawables/SceneNodes/DrawableNode";
 
 class LitPipeline implements PipelineInterface {
   pipeline: GPURenderPipeline;

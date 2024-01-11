@@ -61,7 +61,7 @@ class SurfaceMesh {
     }
   }
 
-  async generateBuffers() {
+  async generateBuffers(): Promise<{ vertices: number[], normals: number[], indices: number[] }> {
     let verts: number[] = [];
     let indices: number[] = [];
     let normals: number[] = [];

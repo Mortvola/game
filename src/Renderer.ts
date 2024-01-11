@@ -7,7 +7,7 @@ import Gpu from './Gpu';
 import {
   degToRad, intersectionPlane,
 } from './Math';
-import ContainerNode, { isContainerNode } from './Drawables/ContainerNode';
+import ContainerNode, { isContainerNode } from './Drawables/SceneNodes/ContainerNode';
 import BindGroups, { lightsStructure } from './BindGroups';
 import RenderPass from './RenderPass';
 import Light, { isLight } from './Drawables/Light';
@@ -25,7 +25,9 @@ import { Party } from './UserInterface/PartyList';
 import Circle from './Drawables/Circle';
 import MoveAction from './Character/Actions/MoveAction';
 import { Occupant } from './Workers/PathPlannerTypes';
-import DrawableNode from './Drawables/DrawableNode';
+import DrawableNode from './Drawables/SceneNodes/DrawableNode';
+import { modelManager } from './Main';
+import SceneNode from './Drawables/SceneNodes/SceneNode';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -120,7 +122,7 @@ class Renderer implements WorldInterface {
 
   occupants: Occupant[] = [];
 
-  constructor(gpu: Gpu, bindGroups: BindGroups) {
+  constructor(gpu: Gpu, bindGroups: BindGroups, test?: SceneNode) {
     this.gpu = gpu;
     this.bindGroups = bindGroups;
 
@@ -129,13 +131,19 @@ class Renderer implements WorldInterface {
     this.aspectRatio[0] = 1.0;
     this.scene.addNode(new DrawableNode(new CartesianAxes(), 'line'));
 
+    if (test) {
+      this.scene.addNode(test);
+    }
+
     this.updateTransforms();
   }
 
   static async create(gpu: Gpu, bindGroups: BindGroups) {
     // const reticle = new DrawableNode(await Reticle.create(0.05));
 
-    return new Renderer(gpu, bindGroups);
+    const test = await modelManager.getModel('SoulerCoaster');
+
+    return new Renderer(gpu, bindGroups, test);
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {

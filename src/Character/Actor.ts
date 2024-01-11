@@ -10,7 +10,7 @@ import { Advantage, attackRoll, savingThrow } from "../Dice";
 import Mover from "../Script/Mover";
 import Script from "../Script/Script";
 import Weapon, { DamageType, WeaponType } from "./Equipment/Weapon";
-import ContainerNode from "../Drawables/ContainerNode";
+import ContainerNode from "../Drawables/SceneNodes/ContainerNode";
 import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
@@ -24,8 +24,8 @@ import RangeAttack from "./Actions/RangeAttack";
 import Action from "./Actions/Action";
 import { getWorld, modelManager } from "../Main";
 import { PathPoint } from "../Workers/PathPlannerTypes";
-import DrawableNode from "../Drawables/DrawableNode";
-import SceneNode from "../Drawables/SceneNode";
+import DrawableNode from "../Drawables/SceneNodes/DrawableNode";
+import SceneNode from "../Drawables/SceneNodes/SceneNode";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -135,7 +135,6 @@ class Actor implements ActorInterface {
     const playerHeight = character.race.height;
 
     const mesh = await modelManager.getModel(character.race.name)
-    mesh.translate[1] = playerHeight / 2;  
 
     return new Actor(character, mesh, playerHeight, teamColor, team, automated);
   }

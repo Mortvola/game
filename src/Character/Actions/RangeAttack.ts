@@ -7,7 +7,7 @@ import Trajectory from "../../Drawables/Trajectory";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Shot, { ShotData } from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
-import DrawableNode from "../../Drawables/DrawableNode";
+import DrawableNode from "../../Drawables/SceneNodes/DrawableNode";
 import { modelManager } from "../../Main";
 
 class RangeAttack extends Action {
