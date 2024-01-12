@@ -23,6 +23,8 @@ class Drawable implements DrawableInterface {
 
   bindGroup: GPUBindGroup;
 
+  bindGroup2: GPUBindGroup;
+
   constructor() {
     if (!gpu) {
       throw new Error('gpu device not set.')
@@ -50,7 +52,15 @@ class Drawable implements DrawableInterface {
       layout: bindGroups.bindGroupLayout1,
       entries: [
         { binding: 0, resource: { buffer: this.modelMatrixBuffer }},
-        { binding: 1, resource: { buffer: this.colorBuffer }},
+        // { binding: 1, resource: { buffer: this.colorBuffer }},
+      ],
+    });
+
+    this.bindGroup2 = gpu.device.createBindGroup({
+      label: 'Color',
+      layout: bindGroups.bindGroupLayout2A,
+      entries: [
+        { binding: 0, resource: { buffer: this.colorBuffer }},
       ],
     });
   }

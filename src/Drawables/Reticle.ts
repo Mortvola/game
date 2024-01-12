@@ -9,9 +9,9 @@ class Reticle extends Drawable {
 
   bindGroup2: GPUBindGroup;
 
-  uniformBuffer2: GPUBuffer;
-
   bindGroup3: GPUBindGroup;
+
+  uniformBuffer3: GPUBuffer;
 
   private constructor(radius: number, bitmap: ImageBitmap) {
     super()
@@ -22,17 +22,17 @@ class Reticle extends Drawable {
 
     this.radius[0] = radius;
 
-    this.uniformBuffer2 = gpu.device.createBuffer({
+    this.uniformBuffer3 = gpu.device.createBuffer({
       label: 'radius',
       size: Float32Array.BYTES_PER_ELEMENT,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
-    this.bindGroup2 = gpu.device.createBindGroup({
+    this.bindGroup3 = gpu.device.createBindGroup({
       label: 'radius',
-      layout: bindGroups.bindGroupLayout2,
+      layout: bindGroups.bindGroupLayout3,
       entries: [
-        { binding: 0, resource: { buffer: this.uniformBuffer2 }},
+        { binding: 0, resource: { buffer: this.uniformBuffer3 }},
       ],
     });
 
@@ -52,12 +52,13 @@ class Reticle extends Drawable {
 
     const sampler = gpu.device.createSampler();
     
-    this.bindGroup3 = gpu.device.createBindGroup({
+    this.bindGroup2 = gpu.device.createBindGroup({
       label,
-      layout: bindGroups.bindGroupLayout3,
+      layout: bindGroups.bindGroupLayout2,
       entries: [
-        { binding: 0, resource: sampler },
-        { binding: 1, resource: texture.createView() },
+        { binding: 0, resource: { buffer: this.colorBuffer }},
+        { binding: 1, resource: sampler },
+        { binding: 2, resource: texture.createView() },
       ],
     });
   }
@@ -76,7 +77,7 @@ class Reticle extends Drawable {
       throw new Error('gpu device not set.')
     }
 
-    gpu.device.queue.writeBuffer(this.uniformBuffer2, 0, this.radius);
+    gpu.device.queue.writeBuffer(this.uniformBuffer3, 0, this.radius);
 
     passEncoder.setBindGroup(2, this.bindGroup2);
     passEncoder.setBindGroup(3, this.bindGroup3);

@@ -3,7 +3,6 @@ import Drawable from './Drawable';
 import { bindGroups, gpu } from '../Main';
 import { circleShader } from '../shaders/circle';
 import { makeShaderDataDefinitions, makeStructuredView } from 'webgpu-utils';
-import { maxInstances } from './DrawableInterface';
 
 const defs = makeShaderDataDefinitions(circleShader);
 
@@ -16,7 +15,7 @@ class Circle extends Drawable {
 
   circleStructure = makeStructuredView(defs.structs.Circle);
 
-  bindGroup2: GPUBindGroup;
+  bindGroup3: GPUBindGroup;
 
   circleDataBuffer: GPUBuffer;
 
@@ -43,9 +42,9 @@ class Circle extends Drawable {
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
-    this.bindGroup2 = gpu.device.createBindGroup({
+    this.bindGroup3 = gpu.device.createBindGroup({
       label: 'Circle',
-      layout: bindGroups.bindGroupLayout2,
+      layout: bindGroups.bindGroupLayout3,
       entries: [
         { binding: 0, resource: { buffer: this.circleDataBuffer }},
       ],
@@ -69,6 +68,7 @@ class Circle extends Drawable {
     gpu.device.queue.writeBuffer(this.circleDataBuffer, 0, this.circleStructure.arrayBuffer);
 
     passEncoder.setBindGroup(2, this.bindGroup2);
+    passEncoder.setBindGroup(3, this.bindGroup3);
 
     // TODO: determine how many lines should be rendered based on radius?
     passEncoder.draw(numSegments * 2 * 3);  

@@ -18,7 +18,7 @@ struct Trajectory {
   orientation: vec4f,
 }
 
-@group(2) @binding(0) var<uniform> trajectory: Trajectory;
+@group(3) @binding(0) var<uniform> trajectory: Trajectory;
 
 @vertex
 fn vs(@builtin(vertex_index) vertexIndex : u32) -> VertexOut

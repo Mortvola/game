@@ -22,6 +22,7 @@ class OutlinePipeline extends Pipeline {
         bindGroups.bindGroupLayout0,
         bindGroups.bindGroupLayout1,
         bindGroups.bindGroupLayout2,
+        bindGroups.bindGroupLayout3,
       ],
     });
     

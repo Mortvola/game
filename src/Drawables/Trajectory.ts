@@ -44,7 +44,7 @@ class Trajectory extends Drawable {
 
     this.trajectoryBindGroup = gpu.device.createBindGroup({
       label,
-      layout: bindGroups.bindGroupLayout2,
+      layout: bindGroups.bindGroupLayout3,
       entries: [
         { binding: 0, resource: { buffer: this.trajectoryBuffer }},
       ],
@@ -70,7 +70,8 @@ class Trajectory extends Drawable {
 
     gpu.device.queue.writeBuffer(this.trajectoryBuffer, 0, this.trajectoryStructure.arrayBuffer);
 
-    passEncoder.setBindGroup(2, this.trajectoryBindGroup);
+    passEncoder.setBindGroup(2, null);
+    passEncoder.setBindGroup(3, this.trajectoryBindGroup);
 
     // TODO: determine how many lines should be rendered based on length of arc?
     passEncoder.draw(numSegments);  

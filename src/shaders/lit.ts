@@ -19,7 +19,7 @@ ${common}
 
 ${lights}
 
-@group(1) @binding(1) var<uniform> color: array<vec4f, 16>;
+@group(2) @binding(0) var<uniform> color: array<vec4f, 16>;
 
 @vertex
 fn vertex_simple(

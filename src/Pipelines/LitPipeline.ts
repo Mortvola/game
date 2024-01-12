@@ -69,6 +69,7 @@ class LitPipeline extends Pipeline {
         bindGroupLayouts: [
           bindGroups.bindGroupLayout0,
           bindGroups.bindGroupLayout1,
+          bindGroups.bindGroupLayout2A,
         ],
       }),
     };

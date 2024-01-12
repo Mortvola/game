@@ -115,6 +115,8 @@ class Mesh extends Drawable {
       throw new Error('gpu devcie not set.')
     }
 
+    passEncoder.setBindGroup(2, this.bindGroup2);
+
     passEncoder.setVertexBuffer(0, this.vertexBuffer);
     passEncoder.setVertexBuffer(1, this.normalBuffer);
 

@@ -15,7 +15,7 @@ struct Circle {
   color: vec4f,
 }
 
-@group(2) @binding(0) var<uniform> circle: Circle;
+@group(3) @binding(0) var<uniform> circle: Circle;
 
 @vertex
 fn vertex_circle(@builtin(vertex_index) vertexIndex : u32) -> VertexOut

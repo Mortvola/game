@@ -47,7 +47,8 @@ class CirclePipeline extends Pipeline {
         bindGroupLayouts: [
           bindGroups.bindGroupLayout0,
           bindGroups.bindGroupLayout1,
-          bindGroups.bindGroupLayout2,
+          bindGroups.bindGroupLayout2A,
+          bindGroups.bindGroupLayout3,
         ]
       }),
     };

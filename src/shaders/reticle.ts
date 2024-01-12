@@ -9,7 +9,7 @@ struct VertexOut {
 
 ${common}
 
-@group(2) @binding(0) var<uniform> radius: f32;
+@group(3) @binding(0) var<uniform> radius: f32;
 
 @vertex
 fn vs(@builtin(vertex_index) vertexIndex : u32) -> VertexOut

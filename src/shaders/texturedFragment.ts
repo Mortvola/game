@@ -1,6 +1,6 @@
 export const texturedFragment = /*wgsl*/`
-@group(3) @binding(0) var ourSampler: sampler;
-@group(3) @binding(1) var ourTexture: texture_2d<f32>;
+@group(2) @binding(1) var ourSampler: sampler;
+@group(2) @binding(2) var ourTexture: texture_2d<f32>;
 
 @fragment
 fn fs(fragData: VertexOut) -> @location(0) vec4f

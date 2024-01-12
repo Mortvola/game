@@ -12,7 +12,7 @@ struct VertexOut {
 
 ${common}
 
-@group(1) @binding(1) var<uniform> color: vec4f;
+@group(2) @binding(0) var<uniform> color: vec4f;
 
 @vertex
 fn vs(vert: Vertex) -> VertexOut

@@ -22,6 +22,8 @@ class BindGroups {
 
   bindGroupLayout2: GPUBindGroupLayout;
 
+  bindGroupLayout2A: GPUBindGroupLayout;
+
   bindGroupLayout3: GPUBindGroupLayout;
 
   constructor() {
@@ -70,16 +72,43 @@ class BindGroups {
           visibility: GPUShaderStage.VERTEX,
           buffer: {},
         },
+      ]
+    });
+
+    this.bindGroupLayout2 = gpu.device.createBindGroupLayout({
+      label: 'group2',
+      entries: [
         { // Color
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: {},
+        },
+        { // Sampler
           binding: 1,
+          visibility: GPUShaderStage.FRAGMENT,
+          sampler: {},
+        },
+        { // Texture 2D
+          binding: 2,
+          visibility: GPUShaderStage.FRAGMENT,
+          texture: {},
+        },
+      ]
+    });
+
+    this.bindGroupLayout2A = gpu.device.createBindGroupLayout({
+      label: 'group2',
+      entries: [
+        { // Color
+          binding: 0,
           visibility: GPUShaderStage.VERTEX,
           buffer: {},
         },
       ]
     });
       
-    this.bindGroupLayout2 = gpu.device.createBindGroupLayout({
-      label: 'group2',
+    this.bindGroupLayout3 = gpu.device.createBindGroupLayout({
+      label: 'group3',
       entries: [
         { // Circle data, reticle radius
           binding: 0,
@@ -89,22 +118,6 @@ class BindGroups {
       ]
     });
 
-    this.bindGroupLayout3 = gpu.device.createBindGroupLayout({
-      label: 'group3',
-      entries: [
-        { // Sampler
-          binding: 0,
-          visibility: GPUShaderStage.FRAGMENT,
-          sampler: {},
-        },
-        { // Texture 2D
-          binding: 1,
-          visibility: GPUShaderStage.FRAGMENT,
-          texture: {},
-        },
-      ]
-    })
-  
     this.createCameraBindGroups()
   }
 
