@@ -3,16 +3,20 @@ import DrawableInterface from "../DrawableInterface";
 import SceneNode from "./SceneNode";
 import { DrawableNodeInterface } from "./DrawableNodeInterface";
 import { PipelineType } from "../../Pipelines/PipelineManager";
+import { PipelineArgs } from "../../Pipelines/PipelineArgs";
 
 class DrawableNode extends SceneNode implements DrawableNodeInterface {
   drawable: DrawableInterface;
 
   pipelineType: PipelineType;
 
-  constructor(drawable: DrawableInterface, pipelinType: PipelineType) {
+  pipelineArgs?: PipelineArgs;
+
+  constructor(drawable: DrawableInterface, pipelinType: PipelineType, pipelineArgs?: PipelineArgs) {
     super();
     this.drawable = drawable;
     this.pipelineType = pipelinType;
+    this.pipelineArgs = pipelineArgs;
   }
 
   hitTest(origin: Vec4, vector: Vec4): { point: Vec4, t: number, drawable: DrawableInterface} | null {

@@ -1,12 +1,11 @@
 import { bindGroups, gpu } from "../Main";
-import PipelineInterface from "./PipelineInterface";
 import { lineShader } from '../shaders/line';
-import { DrawableNodeInterface } from "../Drawables/SceneNodes/DrawableNodeInterface";
+import Pipeline from "./Pipeline";
 
-class LinePipeline implements PipelineInterface {
-  pipeline: GPURenderPipeline;
-
+class LinePipeline extends Pipeline {
   constructor() {
+    super();
+
     if (!gpu) {
       throw new Error('device is not set')
     }
@@ -71,14 +70,6 @@ class LinePipeline implements PipelineInterface {
     };
     
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
-  }
-
-  render(passEncoder: GPURenderPassEncoder, drawables: DrawableNodeInterface[]) {
-    passEncoder.setPipeline(this.pipeline);
-
-    for (const drawableNode of drawables) {
-      drawableNode.drawable.render(passEncoder);
-    }
   }
 }
 

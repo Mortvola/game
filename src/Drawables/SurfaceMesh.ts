@@ -8,21 +8,30 @@ class SurfaceMesh {
   vertices: number[] = [];
   indexes: number[] = [];
   normals: number[] = [];
+  uv: number[] = [];
   color: Vec4;
 
   constructor(color?: Vec4) {
     this.color = color ?? vec4.create(0.8, 0.8, 0.8, 1.0);
   }
 
-  addVertex(x: number, y: number, z: number): number {
+  addVertex(x: number, y: number, z: number, normal?: number[], uv?: number[]): number {
     this.vertices = this.vertices.concat([
       x, y, z, 1, // position
     ]);
 
+    if (normal) {
+      this.normals = this.normals.concat(normal);
+    }
+
+    if (uv) {
+      this.uv = this.uv.concat(uv);
+    }
+
     return (this.vertices.length / 4) - 1;
   }
 
-  addFace(vertices: number[], normals?: number[]) {
+  addFace(vertices: number[], normals?: number[], uv?: number[]) {
     if (vertices.length === 3) {
       this.indexes = this.indexes.concat(vertices);
 
@@ -33,6 +42,14 @@ class SurfaceMesh {
 
         this.normals = this.normals.concat(normals);
       }
+
+      // if (uv) {
+      //   if (uv.length !== 3 * 2) {
+      //     throw new Error('uv to vertices mismatch');
+      //   }
+
+      //   this.uv = this.uv.concat(uv);
+      // }
     }
     else if (vertices.length === 4) {
       let normals1: number[] | undefined = undefined;
@@ -56,8 +73,29 @@ class SurfaceMesh {
         ];
       }
 
-      this.addFace([vertices[0], vertices[1], vertices[3]], normals1);
-      this.addFace([vertices[1], vertices[2], vertices[3]], normals2);  
+      let uv1: number[] | undefined = undefined;
+      let uv2: number[] | undefined = undefined;
+
+      // if (uv) {
+      //   if (uv.length !== 4 * 2) {
+      //     throw new Error('uv to vertices mismatch');
+      //   }
+
+      //   uv1 = [
+      //     uv[0 + 0], uv[0 + 1],
+      //     uv[2 + 0], uv[2 + 1],
+      //     uv[8 + 0], uv[8 + 1],
+      //   ];
+
+      //   uv2 = [
+      //     uv[2 + 0], uv[2 + 1],
+      //     uv[4 + 0], uv[4 + 1],
+      //     uv[8 + 0], uv[8 + 1],
+      //   ];
+      // }
+      
+      this.addFace([vertices[0], vertices[1], vertices[3]], normals1, uv1);
+      this.addFace([vertices[1], vertices[2], vertices[3]], normals2, uv2);  
     }
   }
 

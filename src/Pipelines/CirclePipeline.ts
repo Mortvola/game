@@ -1,14 +1,13 @@
 import { gpu, bindGroups } from "../Main";
-import PipelineInterface from "./PipelineInterface";
 import { circleShader } from '../shaders/circle';
-import { DrawableNodeInterface } from "../Drawables/SceneNodes/DrawableNodeInterface";
+import Pipeline from "./Pipeline";
 
 const label = 'CirclePipeline';
 
-class CirclePipeline implements PipelineInterface {
-  pipeline: GPURenderPipeline;
-
+class CirclePipeline extends Pipeline {
   constructor() {
+    super();
+
     if (!gpu) {
       throw new Error('device is not set')
     }
@@ -54,14 +53,6 @@ class CirclePipeline implements PipelineInterface {
     };
     
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
-  }
-
-  render(passEncoder: GPURenderPassEncoder, drawables: DrawableNodeInterface[]) {
-    passEncoder.setPipeline(this.pipeline);
-
-    for (const drawableNode of drawables) {
-      drawableNode.drawable.render(passEncoder);
-    }
   }
 }
 

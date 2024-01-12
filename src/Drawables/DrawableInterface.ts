@@ -9,13 +9,21 @@ interface DrawableInterface {
 
   name: string;
 
-  render(passEncoder: GPURenderPassEncoder): void;
-
   tag: string;
 
-  modelMatrices: Float32Array;
+  modelMatrices: Float32Array
+  
+  modelMatrixBuffer: GPUBuffer;
+
+  color: Float32Array;
+
+  colorBuffer: GPUBuffer;
+
+  bindGroup: GPUBindGroup;
 
   numInstances: number;
+
+  render(passEncoder: GPURenderPassEncoder, numInstances: number): void;
 
   setColor(color: Vec4): void;
 
@@ -25,14 +33,11 @@ interface DrawableInterface {
 
   computeCentroid(): Vec4;
 
-  resetTransforms(): void;
-
   addInstanceTransform(mat4: Mat4): void;
 }
 
 export const isDrawableInterface = (r: unknown): r is DrawableInterface => (
   (r as DrawableInterface).drawable !== undefined
-  && (r as DrawableInterface).modelMatrices !== undefined
 )
 
 export default DrawableInterface;

@@ -1,8 +1,10 @@
 import { gpu, bindGroups } from "../Main";
-import { litShader } from '../shaders/lit';
+import { texturedShader } from "../shaders/textured";
 import Pipeline from "./Pipeline";
 
-class LitPipeline extends Pipeline {
+const label = 'reticle';
+
+class ReticlePipeline extends Pipeline {
   constructor() {
     super();
 
@@ -11,8 +13,8 @@ class LitPipeline extends Pipeline {
     }
 
     const shaderModule = gpu.device.createShaderModule({
-      label: 'lit',
-      code: litShader,
+      label,
+      code: texturedShader,
     })
     
     const vertexBufferLayout: GPUVertexBufferLayout[] = [
@@ -37,27 +39,49 @@ class LitPipeline extends Pipeline {
         ],
         arrayStride: 16,
         stepMode: "vertex",
-      }
+      },
+      {
+        attributes: [
+          {
+            shaderLocation: 2, // texcoord
+            offset: 0,
+            format: "float32x2",
+          }
+        ],
+        arrayStride: 8,
+        stepMode: "vertex",
+      },
     ];
     
     const pipelineDescriptor: GPURenderPipelineDescriptor = {
+      label,
       vertex: {
         module: shaderModule,
-        entryPoint: "vertex_simple",
+        entryPoint: "vs",
         buffers: vertexBufferLayout,
       },
       fragment: {
         module: shaderModule,
-        entryPoint: "fragment_simple",
+        entryPoint: "fs",
         targets: [
           {
             format: navigator.gpu.getPreferredCanvasFormat(),
+            blend: {
+              color: {
+                srcFactor: 'src-alpha' as GPUBlendFactor,
+                dstFactor: 'one-minus-src-alpha' as GPUBlendFactor,
+              },
+              alpha: {
+                srcFactor: 'src-alpha' as GPUBlendFactor,
+                dstFactor: 'one-minus-src-alpha' as GPUBlendFactor,
+              },
+            },
           },
         ],
       },
       primitive: {
         topology: "triangle-list",
-        cullMode: "back",
+        cullMode: 'none',
         frontFace: "ccw",
       },
       depthStencil: {
@@ -66,10 +90,13 @@ class LitPipeline extends Pipeline {
         format: "depth24plus"
       },
       layout: gpu.device.createPipelineLayout({
+        label,
         bindGroupLayouts: [
           bindGroups.bindGroupLayout0,
           bindGroups.bindGroupLayout1,
-        ],
+          bindGroups.bindGroupLayout2,
+          bindGroups.bindGroupLayout3,
+        ]
       }),
     };
     
@@ -77,4 +104,4 @@ class LitPipeline extends Pipeline {
   }
 }
 
-export default LitPipeline;
+export default ReticlePipeline;

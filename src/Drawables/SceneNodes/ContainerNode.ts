@@ -51,18 +51,6 @@ class ContainerNode extends SceneNode {
     }
   }
 
-  resetTransforms() {
-    for (const node of this.nodes) {
-      if (isDrawableNode(node)) {
-        node.drawable.resetTransforms();
-      }
-      else if (isContainerNode(node)) {
-        // const nodeMat = drawable.node.computeTransform(transform);
-        node.resetTransforms();
-      }
-    }
-  }
-
   modelHitTest(origin: Vec4, ray: Vec4, filter?: (node: DrawableInterface) => boolean): HitTestResult | null {
     let best: HitTestResult | null = null;
 

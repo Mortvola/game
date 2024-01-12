@@ -102,18 +102,6 @@ class CartesianAxes extends Drawable {
   getColor(): Float32Array {
     throw new Error('not implemented');
   }
-
-  resetTransforms() {
-    this.numInstances = 0;
-  }
-
-  addInstanceTransform(transform: Mat4) {
-    transform.forEach((float, index) => {
-      this.modelMatrices[this.numInstances * 16 + index] = float;
-    })
-
-    this.numInstances += 1;
-  }
 }
 
 export default CartesianAxes;

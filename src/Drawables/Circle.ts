@@ -16,12 +16,6 @@ class Circle extends Drawable {
 
   circleStructure = makeStructuredView(defs.structs.Circle);
 
-  bindGroup: GPUBindGroup;
-
-  modelMatrixBuffer: GPUBuffer;
-
-  colorBuffer: GPUBuffer;
-
   bindGroup2: GPUBindGroup;
 
   circleDataBuffer: GPUBuffer;
@@ -43,27 +37,6 @@ class Circle extends Drawable {
     this.color[2] = color[2];
     this.color[3] = color[3];
     
-    this.modelMatrixBuffer = gpu.device.createBuffer({
-      label: 'Circle',
-      size: 16 * Float32Array.BYTES_PER_ELEMENT * maxInstances,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-
-    this.colorBuffer = gpu.device.createBuffer({
-      label: 'color',
-      size: 4 * Float32Array.BYTES_PER_ELEMENT * maxInstances,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-
-    this.bindGroup = gpu.device.createBindGroup({
-      label: 'Circle',
-      layout: bindGroups.bindGroupLayout1,
-      entries: [
-        { binding: 0, resource: { buffer: this.modelMatrixBuffer }},
-        { binding: 1, resource: { buffer: this.colorBuffer }},
-      ],
-    });
-
     this.circleDataBuffer = gpu.device.createBuffer({
       label: 'Circle',
       size: this.circleStructure.arrayBuffer.byteLength,
@@ -93,11 +66,8 @@ class Circle extends Drawable {
       color: this.color,
     });
 
-    // gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.getTransform() as Float32Array);
-    gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.modelMatrices);
     gpu.device.queue.writeBuffer(this.circleDataBuffer, 0, this.circleStructure.arrayBuffer);
 
-    passEncoder.setBindGroup(1, this.bindGroup);
     passEncoder.setBindGroup(2, this.bindGroup2);
 
     // TODO: determine how many lines should be rendered based on radius?

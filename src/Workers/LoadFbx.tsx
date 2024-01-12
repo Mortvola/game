@@ -19,6 +19,7 @@ const loadGeometry = async (
   const vertices = geometry?.node('Vertices')?.prop(0, 'number[]') ?? [];
   const indexes = geometry?.node('PolygonVertexIndex')?.prop(0, 'number[]') ?? [];
   const normalsNode = geometry?.node('LayerElementNormal');
+  const uvNode = geometry?.node('LayerElementUV');
 
   const normals = normalsNode
     ?.node('Normals')
@@ -32,124 +33,71 @@ const loadGeometry = async (
     ?.node('ReferenceInformationType')
     ?.prop(0, 'string');
 
+  const uv = uvNode
+    ?.node('UV')
+    ?.prop(0, 'number[]') ?? [];
+
+  const uvIndex = uvNode
+    ?.node('UVIndex')
+    ?.prop(0, 'number[]') ?? [];
+
+  const uvMappingInformationType = uvNode
+    ?.node('MappingInformationType')
+    ?.prop(0, 'string');
+
+  const uvReferenceInformationType = uvNode
+    ?.node('ReferenceInformationType')
+    ?.prop(0, 'string');
+
+
   if (vertices.length !== 0 && indexes.length !== 0) {
     const m = new SurfaceMesh();
 
-    let start = 0;
-    // let yieldPolyCount = 0;
-    // const yieldPolyCountMax = 500;
+    let index: number[] = [];
 
     for (let i = 0; i < indexes.length; i += 1) {
-      if (indexes[i] < 0) {
-        const vertexCount = i - start + 1;
+      if (indexes[i] >= 0) {
+        index.push(indexes[i]);
+      }
+      else {
+        index.push(-indexes[i] - 1);
 
-        if (vertexCount === 3) {
-          let index = indexes[start + 0] * 3;
+        const v: number[] = [];
 
-          const v1 = m.addVertex(
-            vertices[index + 0], // / 100,
-            vertices[index + 1], // / 100,
-            vertices[index + 2], // / 100,
-          )
-
-          index = indexes[start + 1] * 3;
-
-          const v2 = m.addVertex(
-            vertices[index + 0], // / 100,
-            vertices[index + 1], // / 100,
-            vertices[index + 2], // / 100,
-          )
-
-          index = (-indexes[start + 2] - 1) * 3;
-
-          const v3 = m.addVertex(
-            vertices[index + 0], // / 100,
-            vertices[index + 1], // / 100,
-            vertices[index + 2], // / 100,
-          )
-
-          let norms: number[] | undefined = undefined;
-
-          if 
-            (mappingInformationType === 'ByPolygonVertex' &&
-            referenceInformationType === 'Direct'
+        for (let n = 0; n < index.length; n += 1) {
+          const texcoord: number[] = [];
+        
+          if(
+            uvMappingInformationType === 'ByPolygonVertex'
+            && uvReferenceInformationType === 'IndexToDirect'
           ) {
-            norms = [
-              ...normals.slice(start * 3, (start + 3) * 3)
-            ]
+            texcoord.push(uv[uvIndex[i + 1 - index.length + n] * 2 + 0])
+            texcoord.push(uv[uvIndex[i + 1 - index.length + n] * 2 + 1])
           }
-
-          m.addFace([v1, v2, v3], norms);
-
-          // yieldPolyCount += 1;
-
-          // if (yieldPolyCount >= yieldPolyCountMax) {
-          //   geoPctComplete(i / indexes.length);
-
-          //   // await yieldToMain();
-          //   yieldPolyCount = 0;  
-          // }
-        }
-        else if (vertexCount === 4) {
-          let index = indexes[start + 0] * 3;
-
-          const v1 = m.addVertex(
-            vertices[index + 0], // / 100,
-            vertices[index + 1], // / 100,
-            vertices[index + 2], // / 100,
+    
+          v[n] = m.addVertex(
+            vertices[index[n] * 3 + 0],
+            vertices[index[n] * 3 + 1],
+            vertices[index[n] * 3 + 2],
+            undefined,
+            texcoord,
           )
-
-          index = indexes[start + 1] * 3;
-
-          const v2 = m.addVertex(
-            vertices[index + 0], // / 100,
-            vertices[index + 1], // / 100,
-            vertices[index + 2], // / 100,
-          )
-
-          index = indexes[start + 2] * 3;
-
-          const v3 = m.addVertex(
-            vertices[index + 0], // / 100,
-            vertices[index + 1], // / 100,
-            vertices[index + 2], // / 100,
-          )
-
-          index = (-indexes[start + 3] - 1) * 3;
-
-          const v4 = m.addVertex(
-            vertices[index + 0], // / 100,
-            vertices[index + 1], // / 100,
-            vertices[index + 2], // / 100,
-          )
-
-          let norms: number[] | undefined = undefined;
-
-          if 
-            (mappingInformationType === 'ByPolygonVertex' &&
-            referenceInformationType === 'Direct'
-          ) {
-            norms = [
-              ...normals.slice(start * 3, (start + 4) * 3)
-            ]
-          }
-
-          m.addFace([v1, v2, v3, v4], norms)
-
-          // yieldPolyCount += 1;
-
-          // if (yieldPolyCount >= yieldPolyCountMax) {
-          //   geoPctComplete(i / indexes.length);
-
-          //   // await yieldToMain();
-          //   yieldPolyCount = 0;
-          // }
-        }
-        else {
-          console.log(`unsupported polygon vertex count: ${vertexCount}`)
         }
 
-        start = i + 1;
+        let norms: number[] | undefined = undefined;
+
+        if (
+          mappingInformationType === 'ByPolygonVertex'
+          && referenceInformationType === 'Direct'
+        ) {
+          norms = [
+            ...normals.slice((i + 1 - index.length) * 3, (i + 1) * 3)
+          ]
+        }
+
+        m.addFace(v, norms)
+
+        index = [];
       }
     }
 
@@ -202,7 +150,7 @@ type Node = {
   nodes: NodeNode[],
 }
 
-let yieldIterations = 0;
+// let yieldIterations = 0;
 
 const objectsVisited: Record<string, number> = {};
 

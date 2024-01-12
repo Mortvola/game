@@ -5,31 +5,23 @@ import { bindGroups } from "./Main";
 import { DrawableNodeInterface, isDrawableNode } from "./Drawables/SceneNodes/DrawableNodeInterface";
 import { SceneNodeInterface } from "./Drawables/SceneNodes/SceneNodeInterface";
 
-type PipelineEntry = {
-  pipeline: PipelineInterface,
-  drawables: DrawableNodeInterface[],
-}
-
 class RenderPass {
-  pipelines: PipelineEntry[] = [];
+  pipelines: PipelineInterface[] = [];
 
   addDrawable(drawable: DrawableNodeInterface) {
     const pipeline = PipelineManager.getInstance().getPipeline(drawable.pipelineType);
 
     if (pipeline) {
-      let pipelineEntry = this.pipelines.find((p) => p.pipeline === pipeline) ?? null;
+      let pipelineEntry = this.pipelines.find((p) => p === pipeline) ?? null;
 
       if (!pipelineEntry) {
-        this.pipelines.push({
-          pipeline: pipeline,
-          drawables: []
-        })
+        this.pipelines.push(pipeline);
   
-        pipelineEntry = this.pipelines[this.pipelines.length - 1];
+        pipelineEntry = pipeline; // this.pipelines[this.pipelines.length - 1];
       }
   
       if (pipelineEntry) {
-        pipelineEntry.drawables.push(drawable)
+        pipelineEntry.addDrawable(drawable)
       }  
     }
   }
@@ -37,17 +29,10 @@ class RenderPass {
   removeDrawable(drawable: DrawableNodeInterface) {
     const pipeline = PipelineManager.getInstance().getPipeline(drawable.pipelineType);
 
-    let pipelineEntry = this.pipelines.find((p) => p.pipeline === pipeline) ?? null;
+    let pipelineEntry = this.pipelines.find((p) => p === pipeline) ?? null;
 
     if (pipelineEntry) {
-      const index = pipelineEntry.drawables.findIndex((d) => d === drawable)
-
-      if (index !== -1) {
-        pipelineEntry.drawables = [
-          ...pipelineEntry.drawables.slice(0, index),
-          ...pipelineEntry.drawables.slice(index + 1),
-        ]
-      }
+      pipelineEntry.removeDrawable(drawable);
     }
   }
 
@@ -107,10 +92,15 @@ class RenderPass {
 
     passEncoder.setBindGroup(0, bindGroups.camera.bindGroup);
 
-    this.pipelines.forEach((entry) => {
-      entry.pipeline.render(passEncoder, entry.drawables);
-      entry.drawables = [];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    let drawableCount = 0;
+
+    this.pipelines.forEach((pipeline) => {
+      drawableCount += pipeline.drawables.length;
+      pipeline.render(passEncoder);
     })
+
+    // console.log(`rendered ${drawableCount} drawables across ${this.pipelines.length} pipelines`);
 
     this.pipelines = [];
 

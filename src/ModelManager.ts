@@ -136,7 +136,15 @@ class ModelManager {
       }
 
       case 'Goblin': {
-        node = await this.loadFbx('./models/goblin.fbx')
+        if (!model) {
+          const mesh = await this.loadFbx('./models/goblin.fbx')
+
+          if (mesh) {
+            model = { name, mesh };
+            this.models.push(model)
+            node = new DrawableNode(model.mesh, 'lit');
+          }
+        }
 
         if (!node) {
           const playerWidth = 1;
@@ -156,7 +164,15 @@ class ModelManager {
       }
 
       case 'Kobold':  {
-        node = await this.loadFbx('./models/kobold.fbx')
+        if (!model) {
+          const mesh = await this.loadFbx('./models/kobold.fbx')
+
+          if (mesh) {
+            model = { name, mesh };
+            this.models.push(model)
+            node = new DrawableNode(model.mesh, 'lit');
+          }
+        }
 
         if (!node) {
           const playerWidth = 1;
@@ -188,7 +204,15 @@ class ModelManager {
       }
 
       case 'SoulerCoaster': {
-        node = await this.loadFbx('./models/SoulerCoaster.fbx')
+        if (!model) {
+          const mesh = await this.loadFbx('./models/SoulerCoaster.fbx')
+
+          if (mesh) {
+            model = { name, mesh };
+            this.models.push(model)
+            node = new DrawableNode(model.mesh, 'lit');
+          }
+        }
 
         if (!node) {
           if (!model) {
@@ -210,7 +234,7 @@ class ModelManager {
     return node;
   }
 
-  async loadFbx(name: string) {
+  async loadFbx(name: string): Promise<Mesh | null> {
     const result = await downloadFbx(name)
 
     if (result) {
@@ -224,13 +248,16 @@ class ModelManager {
             if (isGeometryNode(child)) {
               const mesh = new Mesh(child.mesh, child.vertices, child.normals, child.indices);
 
-              const drawableNode = new DrawableNode(mesh, 'lit');
+              // For now, just return the first mesh found...
+              return mesh;
 
-              node.nodes = [
-                ...node.nodes.slice(0, i),
-                drawableNode,
-                ...node.nodes.slice(i + 1),
-              ]
+              // const drawableNode = new DrawableNode(mesh, 'lit');
+
+              // node.nodes = [
+              //   ...node.nodes.slice(0, i),
+              //   drawableNode,
+              //   ...node.nodes.slice(i + 1),
+              // ]
             }
           }
 
@@ -238,13 +265,17 @@ class ModelManager {
         }
         else if (isGeometryNode(node)) {
           const mesh = new Mesh(node.mesh, node.vertices, node.normals, node.indices);
-          const drawableNode = new DrawableNode(mesh, 'lit');
 
-          container.addNode(drawableNode);
+          // For now, just return the first mesh found...
+          return mesh;
+
+          // const drawableNode = new DrawableNode(mesh, 'lit');
+
+          // container.addNode(drawableNode);
         }
       }
 
-      return container;
+      return null;
     }
 
     return null;

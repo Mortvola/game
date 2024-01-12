@@ -1,14 +1,13 @@
 import { gpu, bindGroups } from "../Main";
-import PipelineInterface from "./PipelineInterface";
 import { reticleShader } from '../shaders/reticle';
-import { DrawableNodeInterface } from "../Drawables/SceneNodes/DrawableNodeInterface";
+import Pipeline from "./Pipeline";
 
 const label = 'reticle';
 
-class ReticlePipeline implements PipelineInterface {
-  pipeline: GPURenderPipeline;
-
+class ReticlePipeline extends Pipeline {
   constructor() {
+    super();
+
     if (!gpu) {
       throw new Error('device is not set')
     }
@@ -65,14 +64,6 @@ class ReticlePipeline implements PipelineInterface {
     };
     
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
-  }
-
-  render(passEncoder: GPURenderPassEncoder, drawables: DrawableNodeInterface[]) {
-    passEncoder.setPipeline(this.pipeline);
-
-    for (const drawableNode of drawables) {
-      drawableNode.drawable.render(passEncoder);
-    }
   }
 }
 

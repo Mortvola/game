@@ -7,12 +7,6 @@ const label = 'reticle';
 class Reticle extends Drawable {
   radius = new Float32Array(1);
 
-  bindGroup: GPUBindGroup;
-
-  modelMatrixBuffer: GPUBuffer;
-
-  colorBuffer: GPUBuffer;
-
   bindGroup2: GPUBindGroup;
 
   uniformBuffer2: GPUBuffer;
@@ -27,27 +21,6 @@ class Reticle extends Drawable {
     }
 
     this.radius[0] = radius;
-
-    this.modelMatrixBuffer = gpu.device.createBuffer({
-      label: 'model Matrix',
-      size: 16 * Float32Array.BYTES_PER_ELEMENT,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-
-    this.colorBuffer = gpu.device.createBuffer({
-      label: 'color',
-      size: Float32Array.BYTES_PER_ELEMENT,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-
-    this.bindGroup = gpu.device.createBindGroup({
-      label: 'reticle',
-      layout: bindGroups.bindGroupLayout1,
-      entries: [
-        { binding: 0, resource: { buffer: this.modelMatrixBuffer }},
-        { binding: 1, resource: { buffer: this.colorBuffer }},
-      ],
-    });
 
     this.uniformBuffer2 = gpu.device.createBuffer({
       label: 'radius',
@@ -103,11 +76,8 @@ class Reticle extends Drawable {
       throw new Error('gpu device not set.')
     }
 
-    // gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.getTransform() as Float32Array);
-    gpu.device.queue.writeBuffer(this.modelMatrixBuffer, 0, this.modelMatrices);
     gpu.device.queue.writeBuffer(this.uniformBuffer2, 0, this.radius);
 
-    passEncoder.setBindGroup(1, this.bindGroup);
     passEncoder.setBindGroup(2, this.bindGroup2);
     passEncoder.setBindGroup(3, this.bindGroup3);
 

@@ -1,14 +1,13 @@
 import { gpu, bindGroups } from "../Main";
-import PipelineInterface from "./PipelineInterface";
 import { outlineShader } from '../shaders/outline';
-import DrawableNode from "../Drawables/SceneNodes/DrawableNode";
+import Pipeline from "./Pipeline";
 
 const label = 'outline';
 
-class OutlinePipeline implements PipelineInterface {
-  pipeline: GPURenderPipeline;
-
+class OutlinePipeline extends Pipeline {
   constructor() {
+    super();
+
     if (!gpu) {
       throw new Error('device is not set')
     }
@@ -81,14 +80,6 @@ class OutlinePipeline implements PipelineInterface {
     };
     
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
-  }
-
-  render(passEncoder: GPURenderPassEncoder, drawables: DrawableNode[]) {
-    passEncoder.setPipeline(this.pipeline);
-
-    for (const drawableNode of drawables) {
-      drawableNode.drawable.render(passEncoder);
-    }
   }
 }
 

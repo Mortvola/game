@@ -1,13 +1,12 @@
 import { bindGroups, gpu } from "../Main";
-import PipelineInterface from "./PipelineInterface";
 import { trajectoryShader } from '../shaders/trajectory';
-import { DrawableNodeInterface } from "../Drawables/SceneNodes/DrawableNodeInterface";
+import Pipeline from "./Pipeline";
 
 const label = 'trajectory'
-class TrajectoryPipeline implements PipelineInterface {
-  pipeline: GPURenderPipeline;
-
+class TrajectoryPipeline extends Pipeline {
   constructor() {
+    super();
+
     if (!gpu) {
       throw new Error('device is not set')
     }
@@ -52,14 +51,6 @@ class TrajectoryPipeline implements PipelineInterface {
     };
     
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
-  }
-
-  render(passEncoder: GPURenderPassEncoder, drawables: DrawableNodeInterface[]) {
-    passEncoder.setPipeline(this.pipeline);
-
-    for (const drawableNode of drawables) {
-      drawableNode.drawable.render(passEncoder);
-    }
   }
 }
 

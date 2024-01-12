@@ -141,8 +141,9 @@ class Renderer implements WorldInterface {
   static async create(gpu: Gpu, bindGroups: BindGroups) {
     // const reticle = new DrawableNode(await Reticle.create(0.05));
 
-    const test = await modelManager.getModel('SoulerCoaster');
-
+    let test: SceneNode | undefined = undefined;
+    // test = await modelManager.getModel('SoulerCoaster');
+    
     return new Renderer(gpu, bindGroups, test);
   }
 
@@ -408,8 +409,6 @@ class Renderer implements WorldInterface {
   }
 
   updateTransforms() {
-    this.scene.resetTransforms();
-
     this.scene.updateTransforms(undefined, this);
 
     for (const node of this.scene.nodes) {
