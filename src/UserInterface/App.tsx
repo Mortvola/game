@@ -8,10 +8,10 @@ import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
 import Messages from './Messages';
 import { Party } from './PartyList';
 import ActionBar from './Actions/ActionBar';
-import { ActionInfo, FocusInfo } from '../WorldInterface';
 import StatusBar from './StatusBar/StatusBar';
 import Focused from './Focused';
 import Actor from '../Character/Actor';
+import { ActionInfo, FocusInfo } from '../types';
 
 type DiretionKeys = {
   left: number,

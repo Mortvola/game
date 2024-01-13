@@ -1,6 +1,6 @@
 import React from 'react';
-import { FocusInfo } from '../WorldInterface';
 import styles from './Focused.module.scss';
+import { FocusInfo } from '../types';
 
 type PropsType = {
   focused: FocusInfo | null,

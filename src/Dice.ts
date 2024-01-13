@@ -4,6 +4,7 @@ import Weapon, { DamageType, WeaponType, weaponDamage } from "./Character/Equipm
 import { AbilityScores } from "./Character/Races/AbilityScores";
 import { Race } from "./Character/Races/Race";
 import { rageDamageBonus } from "./Tables";
+import { CharacterInterface, CreatureInterface } from "./types";
 
 export const diceRoll = (numDice: number, sides: number): number => {
   let sum = 0;
@@ -37,7 +38,7 @@ export const getProficiencyBonus = (level: number) => (
 
 export type Advantage = 'Disadvantage' | 'Neutral' | 'Advantage';
 
-export const savingThrow = (creature: Creature, score: number, advantage: Advantage): number => {
+export const savingThrow = (creature: CharacterInterface, score: number, advantage: Advantage): number => {
   let roll = diceRoll(1, 20);
 
   if (advantage === 'Disadvantage') {
@@ -134,8 +135,8 @@ export const attackRoll = (
 }
 
 export const spellAttackRoll = (
-  attacker: Creature,
-  target: Creature,
+  attacker: CharacterInterface,
+  target: CharacterInterface,
   damageRoll: () => number,
   damageType: DamageType,
   advantage: Advantage,

@@ -1,15 +1,14 @@
 import { Vec4 } from "wgpu-matrix";
-import Actor from "../Actor";
 import Action from "./Action";
-import { WorldInterface } from "../../WorldInterface";
 import Script from "../../Script/Script";
+import { CreatureActorInterface, WorldInterface } from "../../types";
 
 class Rage extends Action {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, 'Rage', 'Bonus', 60, false)
   }
 
-  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     let success = 0;
 
     if (this.actor === target && !target.character.hasInfluencingAction('Rage')) {

@@ -1,5 +1,5 @@
 import Script from "../../../Script/Script";
-import { WorldInterface } from "../../../WorldInterface";
+import { WorldInterface } from '../../../types'
 import Actor from "../../Actor";
 import SelfSpell from "./SelfSpell";
 

@@ -1,21 +1,21 @@
 import { Vec4, vec2 } from "wgpu-matrix";
 import Script from "../../Script/Script";
-import { WorldInterface } from "../../WorldInterface";
 import Action from "./Action";
-import Actor from "../Actor";
 import Trajectory from "../../Drawables/Trajectory";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Shot, { ShotData } from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
 import DrawableNode from "../../Drawables/SceneNodes/DrawableNode";
 import { modelManager } from "../../Main";
+import PipelineManager from "../../Pipelines/PipelineManager";
+import { CreatureActorInterface, WorldInterface } from "../../types";
 
 class RangeAttack extends Action {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, 'Range', 'Action', 0, false)
   }
   
-  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     if (target) {
       const result = this.actor.computeShotData(target);
       
@@ -26,11 +26,11 @@ class RangeAttack extends Action {
     
       this.trajectory = new DrawableNode(new Trajectory({
         velocityVector: result.velocityVector,
-        duration: result.duration,
+        duration: result.duration ?? 0,
         startPos: result.startPos,
         orientation: result.orientation,
         distance: result.distance,
-      }), 'trajectory');
+      }), PipelineManager.getInstance().getPipeline('trajectory')!);
   
       world.scene.addNode(this.trajectory);
   

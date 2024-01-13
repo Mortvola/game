@@ -8,6 +8,7 @@ import Drawable from "./Drawables/Drawable";
 import { downloadFbx } from "./Workers/LoadFbx";
 import ContainerNode, { isContainerNode } from "./Drawables/SceneNodes/ContainerNode";
 import { isGeometryNode } from "./Drawables/SceneNodes/GeometryNode";
+import PipelineManager from "./Pipelines/PipelineManager";
 
 type Model = {
   name: string,
@@ -33,7 +34,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, 'lit');
+        node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -49,7 +50,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, 'lit');
+        node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -65,7 +66,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, 'lit');
+        node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -81,7 +82,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, 'lit');
+        node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -97,7 +98,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, 'lit');
+        node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -113,7 +114,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, 'lit');
+        node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -129,7 +130,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, 'lit');
+        node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -142,7 +143,7 @@ class ModelManager {
           if (mesh) {
             model = { name, mesh };
             this.models.push(model)
-            node = new DrawableNode(model.mesh, 'lit');
+            node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
           }
         }
 
@@ -156,7 +157,7 @@ class ModelManager {
             this.models.push(model)
           }
 
-          node = new DrawableNode(model.mesh, 'lit');
+          node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
           node.translate[1] = playerHeight / 2;
         }
 
@@ -170,7 +171,7 @@ class ModelManager {
           if (mesh) {
             model = { name, mesh };
             this.models.push(model)
-            node = new DrawableNode(model.mesh, 'lit');
+            node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
           }
         }
 
@@ -184,7 +185,7 @@ class ModelManager {
             this.models.push(model)
           }
 
-          node = new DrawableNode(model.mesh, 'lit');
+          node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
           node.translate[1] = playerHeight / 2;  
         }
 
@@ -198,7 +199,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, 'lit');
+        node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
 
         break;
       }
@@ -210,7 +211,7 @@ class ModelManager {
           if (mesh) {
             model = { name, mesh };
             this.models.push(model)
-            node = new DrawableNode(model.mesh, 'lit');
+            node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
           }
         }
 
@@ -221,7 +222,7 @@ class ModelManager {
             this.models.push(model)
           }
 
-          node = new DrawableNode(model.mesh, 'lit');
+          node = new DrawableNode(model.mesh, PipelineManager.getInstance().getPipelineByArgs({}));
         }
 
         break;

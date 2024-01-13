@@ -1,5 +1,5 @@
 import Actor from "../../Actor";
-import { WorldInterface } from "../../../WorldInterface";
+import { WorldInterface } from '../../../types'
 import Script from "../../../Script/Script";
 import Logger from "../../../Script/Logger";
 import { feetToMeters } from "../../../Math";

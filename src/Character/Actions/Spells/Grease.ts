@@ -3,13 +3,14 @@ import { degToRad, feetToMeters, pointWithinCircle } from "../../../Math";
 import Script from "../../../Script/Script";
 import { addOccupant } from "../../../Workers/PathPlannerQueue";
 import { Occupant } from "../../../Workers/PathPlannerTypes";
-import { WorldInterface } from "../../../WorldInterface";
 import Actor, { getActorId } from "../../Actor";
 import AreaSpell from "./AreaSpell";
 import { savingThrow } from "../../../Dice";
 import Logger from "../../../Script/Logger";
 import Circle from "../../../Drawables/Circle";
 import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
+import PipelineManager from "../../../Pipelines/PipelineManager";
+import { WorldInterface } from "../../../types";
 
 class Grease extends AreaSpell {
   constructor(actor: Actor) {
@@ -18,7 +19,7 @@ class Grease extends AreaSpell {
 
   async cast(script: Script, world: WorldInterface): Promise<boolean> {
     if (this.center) {
-      const obj = new DrawableNode(new Circle(this.radius, this.radius, vec4.create(0.2, 0.2, 0.2, 1)), 'circle')
+      const obj = new DrawableNode(new Circle(this.radius, this.radius, vec4.create(0.2, 0.2, 0.2, 1)), PipelineManager.getInstance().getPipeline('circle')!)
       obj.translate = vec3.create(this.center[0], 0, this.center[1])
   
       world.scene.addNode(obj);

@@ -1,6 +1,6 @@
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
-import { WorldInterface } from "../../../WorldInterface";
+import { WorldInterface } from '../../../types'
 import Actor from "../../Actor";
 import RangeSpell from "./RangeSpell";
 import Logger from "../../../Script/Logger";

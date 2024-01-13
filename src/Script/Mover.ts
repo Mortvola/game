@@ -1,6 +1,5 @@
 import { Vec2, vec2, vec3 } from "wgpu-matrix";
-import { ActorInterface, ActorOnFinishCallback } from "../ActorInterface";
-import { WorldInterface } from "../WorldInterface";
+import { ActorInterface, ActorOnFinishCallback, WorldInterface } from "../types";
 import SceneNode from "../Drawables/SceneNodes/SceneNode";
 
 class Mover implements ActorInterface {

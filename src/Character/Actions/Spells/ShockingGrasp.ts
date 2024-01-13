@@ -1,6 +1,6 @@
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
-import { WorldInterface } from "../../../WorldInterface";
+import { WorldInterface } from '../../../types'
 import Actor from "../../Actor";
 import { DamageType } from "../../Equipment/Weapon";
 import TouchSpell from "./TouchSpell";

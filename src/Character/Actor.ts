@@ -2,10 +2,8 @@ import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, pointWithinCircle, timeToTarget } from "../Math";
 import Circle from "../Drawables/Circle";
 import RenderPass from "../RenderPass";
-import { ActorInterface } from "../ActorInterface";
 import Shot, { ShotData } from "../Script/Shot";
 import { playShot } from "../Audio";
-import { WorldInterface } from "../WorldInterface";
 import { Advantage, attackRoll, savingThrow } from "../Dice";
 import Mover from "../Script/Mover";
 import Script from "../Script/Script";
@@ -26,6 +24,8 @@ import { getWorld, modelManager } from "../Main";
 import { PathPoint } from "../Workers/PathPlannerTypes";
 import DrawableNode from "../Drawables/SceneNodes/DrawableNode";
 import SceneNode from "../Drawables/SceneNodes/SceneNode";
+import PipelineManager from "../Pipelines/PipelineManager";
+import { ActorInterface, WorldInterface } from "../types";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -119,10 +119,10 @@ class Actor implements ActorInterface {
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
     this.circleDrawable = new Circle(this.occupiedRadius, 0.025, color);
-    this.circle = new DrawableNode(this.circleDrawable, 'circle');
+    this.circle = new DrawableNode(this.circleDrawable, PipelineManager.getInstance().getPipeline('circle')!);
     this.circle.postTransforms.push(mat4.fromQuat(q));
 
-    this.outerCircle = new DrawableNode(new Circle(this.attackRadius, 0.01, color), 'circle');
+    this.outerCircle = new DrawableNode(new Circle(this.attackRadius, 0.01, color), PipelineManager.getInstance().getPipeline('circle')!);
     this.outerCircle.postTransforms.push(mat4.fromQuat(q));
 
     this.sceneNode.addNode(this.circle)
@@ -601,7 +601,7 @@ class Actor implements ActorInterface {
     weapon: Weapon,
     world: WorldInterface,
     script: Script,
-  ) {
+  ): void {
     let advantage: Advantage = 'Neutral';
     if ([WeaponType.MartialRange, WeaponType.SimpleRange].includes(weapon.type)) {
       const wp = this.getWorldPosition();
@@ -630,7 +630,7 @@ class Actor implements ActorInterface {
     }
   }
 
-  takeDamage(damage: number, critical: boolean, from: Actor, weaponName: string, script: Script) {
+  takeDamage(damage: number, critical: boolean, from: Actor, weaponName: string, script: Script): void {
     if (this.character.hitPoints > 0) {
       if (this.character.temporaryHitPoints > 0) {
         if (damage <= this.character.temporaryHitPoints) {
@@ -686,7 +686,7 @@ class Actor implements ActorInterface {
     }
   }
 
-  takeHealing(hitPoints: number, from: Actor, by: string, script: Script) {
+  takeHealing(hitPoints: number, from: Actor, by: string, script: Script): void {
     if (!this.character.hasInfluencingAction('Chill Touch')) {
       this.character.hitPoints = Math.min(this.character.hitPoints + hitPoints, this.character.maxHitPoints);
 
@@ -697,7 +697,7 @@ class Actor implements ActorInterface {
     }
   }
 
-  computeShotData(targetActor: Actor) {
+  computeShotData(targetActor: Actor): ShotData {
     // Transforms the position to world space.
     const target = vec4.transformMat4(
       vec4.create(0, 0, 0, 1),
@@ -733,11 +733,11 @@ class Actor implements ActorInterface {
 
     return ({
       velocityVector: vec2.create(velocity * Math.cos(lowAngle), velocity * Math.sin(lowAngle)),
-      startTime: null, // start time will be assigned at the next frame.
       duration: timeLow,
       startPos,
       orientation,
       distance,
+      position: vec4.create(),
     });
   }
 

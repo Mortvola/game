@@ -1,9 +1,12 @@
 // import BillboardPipeline from "./BillboardPipeline";
+import { bindGroups, gpu } from "../Main";
+import { litShader } from "../shaders/lit";
 import CirclePipeline from "./CirclePipeline";
 // import DragHandlesPipeline from "./DragHandlesPipeline";
 import LinePipeline from "./LinePipeline";
 import LitPipeline from "./LitPipeline";
 import OutlinePipeline from "./OutlinePipeline";
+import Pipeline from "./Pipeline";
 // import Pipeline from "./Pipeline";
 import PipelineInterface from "./PipelineInterface";
 import ReticlePipeline from "./ReticlePipeline";
@@ -18,10 +21,16 @@ type Pipelines = {
   pipeline: PipelineInterface,
 }
 
+type PipelineAttributes = {
+
+}
+
 class PipelineManager {
   private static instance: PipelineManager | null = null;
 
   pipelines: Pipelines[] = [];
+
+  pipelineMap: Map<string, Pipeline> = new Map();
 
   private constructor() {
     this.pipelines = [];
@@ -55,6 +64,95 @@ class PipelineManager {
     console.log(`pipeline ${type} not found.`)
 
     return null;
+  }
+
+  getPipelineByArgs(args: PipelineAttributes): Pipeline {
+    const key = JSON.stringify(args);
+
+    let pipeline = this.pipelineMap.get(key);
+
+    if (pipeline) {
+      return pipeline;
+    }
+
+    if (!gpu) {
+      throw new Error('device is not set')
+    }
+
+    const shaderModule = gpu.device.createShaderModule({
+      label: 'base pipeline',
+      code: litShader,
+    })
+    
+    const vertexBufferLayout: GPUVertexBufferLayout[] = [
+      {
+        attributes: [
+          {
+            shaderLocation: 0, // position
+            offset: 0,
+            format: "float32x4",
+          },
+        ],
+        arrayStride: 16,
+        stepMode: "vertex",
+      },
+      {
+        attributes: [
+          {
+            shaderLocation: 1, // normal
+            offset: 0,
+            format: "float32x4",
+          }
+        ],
+        arrayStride: 16,
+        stepMode: "vertex",
+      }
+    ];
+    
+    const pipelineDescriptor: GPURenderPipelineDescriptor = {
+      label: 'base pipeline',
+      vertex: {
+        module: shaderModule,
+        entryPoint: "vertex_simple",
+        buffers: vertexBufferLayout,
+      },
+      fragment: {
+        module: shaderModule,
+        entryPoint: "fragment_simple",
+        targets: [
+          {
+            format: navigator.gpu.getPreferredCanvasFormat(),
+          },
+        ],
+      },
+      primitive: {
+        topology: "triangle-list",
+        cullMode: "back",
+        frontFace: "ccw",
+      },
+      depthStencil: {
+        depthWriteEnabled: true,
+        depthCompare: "less",
+        format: "depth24plus"
+      },
+      layout: gpu.device.createPipelineLayout({
+        bindGroupLayouts: [
+          bindGroups.bindGroupLayout0,
+          bindGroups.bindGroupLayout1,
+          bindGroups.bindGroupLayout2A,
+        ],
+      }),
+    };
+    
+    const gpuPipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
+
+    pipeline = new Pipeline();
+    pipeline.pipeline = gpuPipeline;
+
+    this.pipelineMap.set(key, pipeline);
+
+    console.log(`pipelines created: ${this.pipelineMap.size}`)
+    return pipeline;
   }
 }
 

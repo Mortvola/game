@@ -1,9 +1,9 @@
-import Actor from "../Actor";
+import { CreatureActorInterface } from "../../types";
 import Action, { TimeType } from "./Action";
 import Rage from "./Rage";
 
 export type A<T> = {
-  action: new (actor: Actor) => T;
+  action: new (actor: CreatureActorInterface) => T;
   name: string;
   time: TimeType,
 }

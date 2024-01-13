@@ -1,8 +1,8 @@
 import { Vec2, vec2 } from "wgpu-matrix";
-import Actor from "../Character/Actor";
 import {
   AddOccupantdRequest, FindPathRequest, FindPathResponse, MessageType, Occupant, PathPoint, PopulateGridRequest,
 } from "./PathPlannerTypes";
+import { CreatureActorInterface } from "../types";
 
 const worker: Worker = new Worker(new URL("../Workers/PathPlanner.ts", import.meta.url));
 
@@ -118,7 +118,7 @@ worker.addEventListener('message', (evt: MessageEvent<MessageType>) => {
   }
 })
 
-const getOccupant = (actor: Actor): Occupant => {
+const getOccupant = (actor: CreatureActorInterface): Occupant => {
   const point = actor.getWorldPosition();
 
   return ({
@@ -130,7 +130,7 @@ const getOccupant = (actor: Actor): Occupant => {
   })
 }
 
-export const getOccupants = (actor: Actor, participants: Actor[], others: Occupant[]): Occupant[] => {
+export const getOccupants = (actor: CreatureActorInterface, participants: CreatureActorInterface[], others: Occupant[]): Occupant[] => {
   const occupants: Occupant[] = participants
     .filter((p) => p !== actor)
     .map((p) => (
@@ -147,7 +147,7 @@ export const getOccupants = (actor: Actor, participants: Actor[], others: Occupa
 }
 
 export const populateGrid = (
-  actor: Actor,
+  actor: CreatureActorInterface,
   occupants: Occupant[],
 ) => {
   // requestId += 1;
@@ -194,7 +194,7 @@ export const findPath2 = async (
   start: Vec2,
   goal: Vec2,
   goalRadius: number | null,
-  target: Actor | null,
+  target: CreatureActorInterface | null,
   maxDistance: number,
   ignoreTerrain = false,
 ): Promise<FindPathReturn> => {

@@ -1,5 +1,4 @@
-import { ActorInterface } from "../ActorInterface";
-import { WorldInterface } from "../WorldInterface";
+import { ActorInterface, WorldInterface } from "../types";
 
 class Logger implements ActorInterface {
   message: string;

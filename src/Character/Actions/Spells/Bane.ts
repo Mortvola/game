@@ -1,12 +1,11 @@
 import { feetToMeters } from "../../../Math";
-import Actor from "../../Actor";
-import { WorldInterface } from "../../../WorldInterface";
 import { savingThrow } from "../../../Dice";
 import RangeSpell from "./RangeSpell";
 import Script from "../../../Script/Script";
+import { CreatureActorInterface, WorldInterface } from "../../../types";
 
 class Bane extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 3, true, 'Bane', 'Action', 1, feetToMeters(30), 60, false, true)
   }
 

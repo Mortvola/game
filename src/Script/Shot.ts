@@ -1,8 +1,7 @@
 import { Vec2, Vec3, Vec4, vec4 } from "wgpu-matrix";
 import Actor from "../Character/Actor";
 import { gravity } from "../Math";
-import { ActorInterface } from "../ActorInterface";
-import { WorldInterface } from "../WorldInterface";
+import { ActorInterface, WorldInterface } from "../types";
 import { SceneNodeInterface } from "../Drawables/SceneNodes/SceneNodeInterface";
 
 export type ShotData = {
@@ -11,6 +10,7 @@ export type ShotData = {
   position: Vec4,
   orientation: Vec4,
   distance: number,
+  duration?: number,
 };
 
 class Shot implements ActorInterface {
@@ -20,11 +20,11 @@ class Shot implements ActorInterface {
 
   data: ShotData;
 
-  actor: Actor;
+  actor: ActorInterface;
 
   constructor(
     mesh: SceneNodeInterface,
-    actor: Actor,
+    actor: ActorInterface,
     data: ShotData,
   ) {
     this.mesh = mesh;

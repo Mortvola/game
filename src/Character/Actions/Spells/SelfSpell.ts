@@ -1,7 +1,7 @@
 import { Vec4 } from "wgpu-matrix";
 import Actor from "../../Actor";
 import Spell from "./Spell";
-import { WorldInterface } from "../../../WorldInterface";
+import { WorldInterface } from '../../../types'
 import Script from "../../../Script/Script";
 
 class SelfSpell extends Spell {

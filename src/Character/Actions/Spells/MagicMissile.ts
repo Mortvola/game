@@ -1,7 +1,6 @@
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
 import Actor from "../../Actor";
-import { WorldInterface } from "../../../WorldInterface";
 import { diceRoll } from "../../../Dice";
 import RangeSpell from "./RangeSpell";
 import { Vec2, Vec4, vec2 } from "wgpu-matrix";
@@ -12,6 +11,8 @@ import { getWorld, modelManager } from "../../../Main";
 import FollowPath from "../../../Script/FollowPath";
 import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
 import Parallel from "../../../Script/Parallel";
+import PipelineManager from "../../../Pipelines/PipelineManager";
+import { WorldInterface } from "../../../types";
 
 class MagicMissile extends RangeSpell {
   paths: PathPoint[][] = [];
@@ -159,7 +160,7 @@ class MagicMissile extends RangeSpell {
     const world = getWorld();
 
     if (!this.cleared && lines.length > 0) {
-      this.missileLines.push(new DrawableNode(new Line(lines), 'line'));
+      this.missileLines.push(new DrawableNode(new Line(lines), PipelineManager.getInstance().getPipeline('line')!));
       world.scene.addNode(this.missileLines[this.missileLines.length - 1]);
     }
   }

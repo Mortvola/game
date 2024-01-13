@@ -1,8 +1,7 @@
 import { Vec4 } from "wgpu-matrix";
 import Script from "../../../Script/Script";
-import { WorldInterface } from "../../../WorldInterface";
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import Action, { TimeType } from "../Action";
-import Actor from "../../Actor";
 import { getWorld } from "../../../Main";
 
 class Spell extends Action {
@@ -15,7 +14,7 @@ class Spell extends Action {
   uniqueTargets: boolean;
 
   constructor(
-    actor: Actor,
+    actor: CreatureActorInterface,
     maxTargets: number,
     uniqueTargets: boolean,
     name: string,
@@ -66,7 +65,7 @@ class Spell extends Action {
     return true;
   }
 
-  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
   }
 
   async interact(script: Script, world: WorldInterface): Promise<boolean> {

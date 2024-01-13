@@ -2,7 +2,7 @@ import BindGroups from "./BindGroups";
 import Gpu from "./Gpu";
 import ModelManager from "./ModelManager";
 import Renderer from "./Renderer";
-import { WorldInterface } from "./WorldInterface";
+import { WorldInterface } from "./types";
 
 export const gpu = await Gpu.create();
 export const bindGroups = new BindGroups();

@@ -1,13 +1,13 @@
 import { Vec4, mat4, quat, vec3, vec4 } from "wgpu-matrix";
-import Actor from "../../Actor";
 import Spell from "./Spell";
-import { WorldInterface } from "../../../WorldInterface";
 import Script from "../../../Script/Script";
 import { getWorld } from "../../../Main";
 import Circle from "../../../Drawables/Circle";
 import { degToRad } from "../../../Math";
 import { TimeType } from "../Action";
 import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
+import PipelineManager from "../../../Pipelines/PipelineManager";
+import { CreatureActorInterface, WorldInterface } from "../../../types";
 
 class RangeSpell extends Spell {
   range: number;
@@ -15,7 +15,7 @@ class RangeSpell extends Spell {
   rangeCircle: DrawableNode | null = null;
 
   constructor(
-    actor: Actor,
+    actor: CreatureActorInterface,
     maxTargets: number,
     uniqueTargets: boolean,
     name: string,
@@ -39,7 +39,7 @@ class RangeSpell extends Spell {
     this.hideRangeCircle();
   }
 
-  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     let description = `Select ${this.maxTargets  - this.targets.length} more targets.`;
 
     if (this.maxTargets === 1) {
@@ -94,7 +94,7 @@ class RangeSpell extends Spell {
     if (this.range > 0) {
       const world = getWorld();
 
-      this.rangeCircle = new DrawableNode(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), 'circle')
+      this.rangeCircle = new DrawableNode(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), PipelineManager.getInstance().getPipeline('circle')!)
       this.rangeCircle.translate = vec3.copy(this.actor.sceneNode.translate)
   
       world.scene.addNode(this.rangeCircle);
@@ -112,7 +112,7 @@ class RangeSpell extends Spell {
     }
   }
 
-  withinRange(target: Actor) {
+  withinRange(target: CreatureActorInterface) {
     const wp = this.actor.getWorldPosition();
     const targetWp = target.getWorldPosition();
 

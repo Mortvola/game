@@ -1,6 +1,6 @@
 import { feetToMeters } from "../../../Math";
 import Actor from "../../Actor";
-import { WorldInterface } from "../../../WorldInterface";
+import { WorldInterface } from '../../../types'
 import { diceRoll, savingThrow, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";

@@ -1,24 +1,21 @@
 import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import Script from "../../Script/Script";
-import { WorldInterface } from "../../WorldInterface";
 import Action from "./Action";
-import Actor from "../Actor";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import FollowPath from "../../Script/FollowPath";
 import { PathPoint } from "../../Workers/PathPlannerTypes";
-import { savingThrow } from "../../Dice";
-import Logger from "../../Script/Logger";
+import { CreatureActorInterface, WorldInterface } from "../../types";
 
 class MoveAction extends Action {
   path: PathPoint[] = [];
 
   distance = 0;
 
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 0, 'Move', 'Move', 0, false)
   }
 
-  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     if (this.trajectory) {
       world.scene.removeNode(this.trajectory);
       this.trajectory = null;

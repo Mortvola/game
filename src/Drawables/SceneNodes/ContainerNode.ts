@@ -3,7 +3,7 @@ import DrawableInterface from "../DrawableInterface";
 import SceneNode from "./SceneNode";
 import { isDrawableNode } from './DrawableNodeInterface';
 import { SceneNodeInterface } from './SceneNodeInterface';
-import { WorldInterface } from '../../WorldInterface';
+import { WorldInterface } from '../../types';
 
 export type HitTestResult = {
   drawable: DrawableInterface,

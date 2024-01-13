@@ -1,4 +1,5 @@
 import { abilityModifier } from "../Dice";
+import { CharacterInterface } from "../types";
 import CharacterClass from "./Classes/CharacterClass";
 import Creature from "./Creature";
 import { Armor, ArmorType } from "./Equipment/Armor";
@@ -6,7 +7,7 @@ import Weapon, { WeaponType } from "./Equipment/Weapon";
 import { AbilityScores } from "./Races/AbilityScores";
 import { Race } from "./Races/Race";
 
-class Character extends Creature {
+class Character extends Creature implements CharacterInterface {
   constructor(abilityScores: AbilityScores, race: Race, charClass: CharacterClass, weapons: Weapon[], armor: Armor[]) {
     // const abilityScores = generateAbilityScores(rolls, race, charClass);
 

@@ -1,7 +1,5 @@
 import { Vec4, vec2 } from "wgpu-matrix";
 import Script from "../../Script/Script";
-import { WorldInterface } from "../../WorldInterface";
-import Actor from "../Actor";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
@@ -9,11 +7,13 @@ import { getWorld } from "../../Main";
 import { PathPoint } from "../../Workers/PathPlannerTypes";
 import { DrawableNodeInterface } from "../../Drawables/SceneNodes/DrawableNodeInterface";
 import DrawableNode from "../../Drawables/SceneNodes/DrawableNode";
+import PipelineManager from "../../Pipelines/PipelineManager";
+import { ActionInterface, CreatureActorInterface, WorldInterface } from "../../types";
 
 export type TimeType = 'Action' | 'Bonus' | 'Move';
 
-class Action {
-  actor: Actor;
+class Action implements ActionInterface {
+  actor: CreatureActorInterface;
 
   name: string;
 
@@ -27,9 +27,9 @@ class Action {
 
   distance = 0;
 
-  focused: Actor | null = null;
+  focused: CreatureActorInterface | null = null;
 
-  targets: Actor[] = [];
+  targets: CreatureActorInterface[] = [];
 
   maxTargets: number;
 
@@ -39,7 +39,7 @@ class Action {
 
   cleared = false;
 
-  constructor(actor: Actor, maxTargets: number, name: string, time: TimeType, duration: number, endOfTurn: boolean) {
+  constructor(actor: CreatureActorInterface, maxTargets: number, name: string, time: TimeType, duration: number, endOfTurn: boolean) {
     this.actor = actor;
     this.maxTargets = maxTargets;
 
@@ -50,7 +50,7 @@ class Action {
     this.endOfTurn = endOfTurn;
   }
   
-  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
 
   }
 
@@ -82,14 +82,14 @@ class Action {
     }
 
     if (lines !== null && !this.cleared && lines.length > 0) {
-      this.pathLines = new DrawableNode(new Line(lines), 'line');
+      this.pathLines = new DrawableNode(new Line(lines), PipelineManager.getInstance().getPipeline('line')!);
       world.scene.addNode(this.pathLines);
 
       // world.mainRenderPass.addDrawable(this.pathLines);  
     }
   }
 
-  async prepareZeroDistAction(actionPercent: number, target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareZeroDistAction(actionPercent: number, target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     if (target) {
       const wp = this.actor.getWorldPosition();
       const targetWp = target.getWorldPosition();

@@ -1,15 +1,14 @@
 import { Vec4 } from "wgpu-matrix";
 import Script from "../../Script/Script";
-import { WorldInterface } from "../../WorldInterface";
 import Action from "./Action";
-import Actor from "../Actor";
+import { CreatureActorInterface, WorldInterface } from "../../types";
 
 class MeleeAttack extends Action {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, 'Melee', 'Action', 0, false)
   }
   
-  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     let actionPercent = 0;
 
     if (target) {

@@ -1,5 +1,4 @@
 import { Vec4 } from "wgpu-matrix";
-import { CreatureActorInterface } from "../ActorInterface";
 import { abilityModifier, getProficiencyBonus } from "../Dice";
 import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from "../Tables";
 import Action from "./Actions/Action";
@@ -11,17 +10,11 @@ import { Armor } from "./Equipment/Armor";
 import Weapon, { WeaponProperties, WeaponType } from "./Equipment/Weapon";
 import { AbilityScores } from "./Races/AbilityScores";
 import { Race } from "./Races/Race";
-
-export type Equipped = {
-  meleeWeapon: Weapon | null,
-  rangeWeapon: Weapon | null,
-  armor: Armor | null,
-  shield: Armor | null,
-}
+import { CreatureActorInterface, CreatureInterface, Equipped } from "../types";
 
 type PrimaryWeapon = 'Melee' | 'Range';
   
-class Creature {
+class Creature implements CreatureInterface {
   name = '';
 
   race: Race;
@@ -96,7 +89,7 @@ class Creature {
     throw new Error('not implemented')
   }
 
-  get armorClass() {
+  get armorClass(): number {
     let ac = 0;
 
     if (this.hasInfluencingAction('Shield of Faith')) {
@@ -258,7 +251,7 @@ class Creature {
     }
   }
 
-  get spellcastingAbilityScore() {
+  get spellcastingAbilityScore(): number {
     switch (this.charClass.name) {
       case "Bard":
       case "Paladin":
@@ -278,7 +271,7 @@ class Creature {
     return 0;
   }
 
-  get spellCastingDc() {
+  get spellCastingDc(): number {
     return 8 + getProficiencyBonus(this.charClass.level) + abilityModifier(this.spellcastingAbilityScore);
   }
 
