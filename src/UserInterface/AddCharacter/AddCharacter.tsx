@@ -4,7 +4,6 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import styles from './AddCharacter.module.scss';
 import Fighter from '../../Character/Classes/Fighter';
 import CharacterClass, { StartingEquipment as StartingEquipmentTable } from '../../Character/Classes/CharacterClass';
-import Weapon from '../../Character/Equipment/Weapon';
 import { Armor } from '../../Character/Equipment/Armor';
 import Barbarian from '../../Character/Classes/Barbarian';
 import Bard from '../../Character/Classes/Bard';
@@ -38,6 +37,7 @@ import Creature from '../../Character/Creature';
 import Cantrips from './Spells/Cantrips';
 import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from '../../Tables';
 import { AbilityScores } from '../../types';
+import { Weapon } from '../../Character/Equipment/Types';
 
 type PropsType = {
   show: boolean,

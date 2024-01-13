@@ -1,13 +1,13 @@
 import { isContainerNode } from "./Drawables/SceneNodes/ContainerNode";
 import { isDrawableNode } from "./Drawables/SceneNodes/utils";
 import { bindGroups } from "./Main";
-import { DrawableNodeInterface, PipelineInterface, SceneNodeInterface } from "./types";
+import { DrawableNodeInterface, PipelineInterface, RenderPassInterface, SceneNodeInterface } from "./types";
 
-class RenderPass {
+class RenderPass implements RenderPassInterface {
   pipelines: PipelineInterface[] = [];
 
   addDrawable(drawable: DrawableNodeInterface) {
-    const pipeline = drawable.pipeline;
+    const pipeline = drawable.material.pipeline;
 
     if (pipeline) {
       let pipelineEntry = this.pipelines.find((p) => p === pipeline) ?? null;
@@ -25,7 +25,7 @@ class RenderPass {
   }
 
   removeDrawable(drawable: DrawableNodeInterface) {
-    const pipeline = drawable.pipeline;
+    const pipeline = drawable.material.pipeline;
 
     let pipelineEntry = this.pipelines.find((p) => p === pipeline) ?? null;
 
@@ -81,14 +81,10 @@ class RenderPass {
     return descriptor;
   }
 
-  render(view: GPUTextureView, depthView: GPUTextureView | null, commandEncoder: GPUCommandEncoder) {
-    if (!bindGroups.camera) {
-      throw new Error('uniformBuffer is not set');
-    }
-
+  render(view: GPUTextureView, depthView: GPUTextureView | null, commandEncoder: GPUCommandEncoder, frameBindGroup: GPUBindGroup) {
     const passEncoder = commandEncoder.beginRenderPass(this.getDescriptor(view, depthView));
 
-    passEncoder.setBindGroup(0, bindGroups.camera.bindGroup);
+    passEncoder.setBindGroup(0, frameBindGroup);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let drawableCount = 0;

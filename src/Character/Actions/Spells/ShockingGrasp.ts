@@ -1,7 +1,7 @@
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import { CreatureActorInterface, WorldInterface } from '../../../types'
-import { DamageType } from "../../Equipment/Weapon";
+import { DamageType } from "../../Equipment/Types";
 import TouchSpell from "./TouchSpell";
 
 class ShockingGrasp extends TouchSpell {

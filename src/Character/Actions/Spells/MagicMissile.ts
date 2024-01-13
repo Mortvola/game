@@ -6,11 +6,12 @@ import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import { findPath2 } from "../../../Workers/PathPlannerQueue";
 import { PathPoint } from "../../../Workers/PathPlannerTypes";
 import Line from "../../../Drawables/Line";
-import { getWorld, modelManager, pipelineManager } from "../../../Main";
+import { getWorld, modelManager } from "../../../Main";
 import FollowPath from "../../../Script/FollowPath";
 import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
 import Parallel from "../../../Script/Parallel";
 import { CreatureActorInterface, WorldInterface } from "../../../types";
+import { lineMaterial } from "../../../Materials/Line";
 
 class MagicMissile extends RangeSpell {
   paths: PathPoint[][] = [];
@@ -158,7 +159,7 @@ class MagicMissile extends RangeSpell {
     const world = getWorld();
 
     if (!this.cleared && lines.length > 0) {
-      this.missileLines.push(new DrawableNode(new Line(lines), pipelineManager.getPipeline('line')!));
+      this.missileLines.push(new DrawableNode(new Line(lines), lineMaterial));
       world.scene.addNode(this.missileLines[this.missileLines.length - 1]);
     }
   }

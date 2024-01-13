@@ -2,7 +2,7 @@ import { CreatureActorInterface, WorldInterface } from '../../../types'
 import Script from "../../../Script/Script";
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import TouchSpell from "./TouchSpell";
-import { DamageType } from "../../Equipment/Weapon";
+import { DamageType } from "../../Equipment/Types";
 
 class InflictWounds extends TouchSpell {
   constructor(actor: CreatureActorInterface) {

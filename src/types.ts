@@ -1,4 +1,10 @@
-import { Vec2, Vec3, Vec4, Mat4 } from 'wgpu-matrix';
+import { Vec2, Vec3, Vec4, Mat4, Quat } from 'wgpu-matrix';
+import { Occupant, PathPoint } from './Workers/PathPlannerTypes';
+import { ConditionType } from './Character/Actions/Conditions/Condition';
+import { Armor } from './Character/Equipment/Armor';
+import { Abilities } from './Character/Classes/Abilities';
+import DrawableInterface from './Drawables/DrawableInterface';
+import { Weapon } from './Character/Equipment/Types';
 
 export type ShotData = {
   velocityVector: Vec2,
@@ -38,8 +44,23 @@ export interface ParticipantsInterface {
   get activeActor(): CreatureActorInterface;
 }
 
+export type CollisionResult = {
+  actor: CreatureActorInterface,
+  point: Vec4,
+}
+
 export interface CollideesInterface {
   detectCollision(p1 : Vec4, p2: Vec4, filter?: (actor: ActorInterface) => boolean): CollisionResult | null;
+}
+
+export interface ContainerNodeInterface {
+  addNode(node: SceneNodeInterface): void;
+
+  removeNode(node: SceneNodeInterface): void;
+}
+
+export interface RenderPassInterface {
+  addDrawable(drawable: DrawableNodeInterface): void;
 }
 
 export interface WorldInterface {
@@ -49,7 +70,7 @@ export interface WorldInterface {
 
   participants: ParticipantsInterface;
 
-  scene: ContainerNode;
+  scene: ContainerNodeInterface;
 
   animate: boolean;
   
@@ -57,19 +78,19 @@ export interface WorldInterface {
 
   removeActors: ActorInterface[];
 
-  mainRenderPass: RenderPass;
+  mainRenderPass: RenderPassInterface;
 
   loggerCallback: ((message: string) => void) | null;
 
-  path2: Line | null;
+  path2: DrawableInterface | null;
 
-  path3: Line | null;
+  path3: DrawableInterface | null;
 
-  path4: Line | null;
+  path4: DrawableInterface | null;
 
   occupants: Occupant[];
 
-  focused: Actor | null;
+  focused: CreatureActorInterface | null;
 
   focusCallback: ((focusInfo: FocusInfo | null) => void) | null;
 
@@ -130,7 +151,7 @@ export interface CharacterInterface extends CreatureInterface {
 
   concentration: SpellInterface | null;
 
-  get spellCastingDc();
+  get spellCastingDc(): number;
 
   get spellcastingAbilityScore(): number;
 
@@ -142,7 +163,7 @@ export interface CharacterInterface extends CreatureInterface {
 
   percentSuccess(target: CreatureInterface, weapon: Weapon): number;
 
-  addInfluencingAction(spell: Action): void;
+  addInfluencingAction(spell: ActionInterface): void;
 
   stopConcentrating(): void;
 }
@@ -154,6 +175,10 @@ export type AbilityScores = {
   intelligence: number,
   strength: number,
   wisdom: number,
+}
+
+export interface ScriptInterface {
+
 }
 
 export interface CreatureActorInterface extends ActorInterface {
@@ -173,20 +198,20 @@ export interface CreatureActorInterface extends ActorInterface {
 
   getWorldPosition(): Vec4;
 
-  processPath(path: PathPoint[], script: Script): PathPoint[];
+  processPath(path: PathPoint[], script: ScriptInterface): PathPoint[];
 
   attack(
-    targetActor: Actor,
+    targetActor: CreatureActorInterface,
     weapon: Weapon,
     world: WorldInterface,
-    script: Script,
+    script: ScriptInterface,
   ): void;
 
-  computeShotData(targetActor: Actor): ShotData;
+  computeShotData(targetActor: CreatureActorInterface): ShotData;
 
-  takeDamage(damage: number, critical: boolean, from: Actor, weaponName: string, script: Script);
+  takeDamage(damage: number, critical: boolean, from: CreatureActorInterface, weaponName: string, script: ScriptInterface): void;
 
-  takeHealing(hitPoints: number, from: Actor, by: string, script: Script);
+  takeHealing(hitPoints: number, from: CreatureActorInterface, by: string, script: ScriptInterface): void;
 }
 
 export interface SceneNodeInterface {
@@ -202,17 +227,19 @@ export interface SceneNodeInterface {
 
   scale: Vec3;
 
-  allowedTransformations: AllowedTransformations;
-
-  transform: Met4;
+  transform: Mat4;
 
   computeTransform(transform: Mat4, prepend?: boolean): Mat4;
+}
+
+export interface MaterialInterface {
+  pipeline: PipelineInterface | null;
 }
 
 export interface DrawableNodeInterface extends SceneNodeInterface {
   drawable: DrawableInterface;
 
-  pipeline: PipelineInterface;
+  material: MaterialInterface;
   
   hitTest(origin: Vec4, vector: Vec4): { point: Vec4, t: number, drawable: DrawableInterface} | null;
 }
@@ -232,6 +259,6 @@ export type PipelineAttributes = {
 }
 
 export interface PipelineManagerInterface {
-  getPipelineByArgs(args: PipelineAttributes): Pipeline;
+  getPipelineByArgs(args: PipelineAttributes): PipelineInterface;
 }
 

@@ -1,7 +1,7 @@
 import { Vec4, mat4 } from 'wgpu-matrix';
 import DrawableInterface from "../DrawableInterface";
 import SceneNode from "./SceneNode";
-import { SceneNodeInterface, WorldInterface } from '../../types.d';
+import { ContainerNodeInterface, SceneNodeInterface, WorldInterface } from '../../types';
 import { isDrawableNode } from './utils';
 
 export type HitTestResult = {
@@ -10,7 +10,7 @@ export type HitTestResult = {
   point: Vec4,
 }
 
-class ContainerNode extends SceneNode {
+class ContainerNode extends SceneNode implements ContainerNodeInterface {
   nodes: SceneNodeInterface[] = [];
 
   addNode(node: SceneNodeInterface) {

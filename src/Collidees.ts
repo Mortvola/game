@@ -1,11 +1,6 @@
 import { Vec4, vec4 } from "wgpu-matrix";
 import { isDrawableNode } from "./Drawables/SceneNodes/utils";
-import { CollideesInterface, CreatureActorInterface } from "./types";
-
-export type CollisionResult = {
-  actor: CreatureActorInterface,
-  point: Vec4,
-}
+import { CollideesInterface, CollisionResult, CreatureActorInterface } from "./types";
 
 class Collidees implements CollideesInterface {
   actors: CreatureActorInterface[] = [];

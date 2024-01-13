@@ -7,6 +7,7 @@ import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
 import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface, WorldInterface } from "../../../types";
+import { circleMaterial } from "../../../Materials/Circle";
 
 class AreaSpell extends RangeSpell {
   center: Vec2 | null = null;
@@ -57,7 +58,7 @@ class AreaSpell extends RangeSpell {
     if (this.areaOfEffect === null) {
       const world = getWorld();
 
-      this.areaOfEffect = new DrawableNode(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), pipelineManager.getPipeline('circle')!)
+      this.areaOfEffect = new DrawableNode(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), circleMaterial)
       this.areaOfEffect.translate = vec3.copy(this.actor.sceneNode.translate)
   
       world.scene.addNode(this.areaOfEffect);

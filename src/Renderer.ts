@@ -22,9 +22,9 @@ import { Party } from './UserInterface/PartyList';
 import MoveAction from './Character/Actions/MoveAction';
 import { Occupant } from './Workers/PathPlannerTypes';
 import DrawableNode from './Drawables/SceneNodes/DrawableNode';
-import { pipelineManager } from './Main';
 import SceneNode from './Drawables/SceneNodes/SceneNode';
 import { ActionInfo, ActorInterface, FocusInfo, WorldInterface } from './types';
+import { lineMaterial } from './Materials/Line';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -34,12 +34,19 @@ const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   });
 };
 
+type BindGroup = {
+  bindGroup: GPUBindGroup,
+  buffer: GPUBuffer[],
+}
+
 class Renderer implements WorldInterface {
   initialized = false;
 
   gpu: Gpu;
 
   bindGroups: BindGroups;
+
+  frameBindGroup: BindGroup | null = null;
 
   render = true;
 
@@ -119,10 +126,12 @@ class Renderer implements WorldInterface {
     this.gpu = gpu;
     this.bindGroups = bindGroups;
 
+    this.createCameraBindGroups();
+
     // this.reticle = reticle;
 
     this.aspectRatio[0] = 1.0;
-    this.scene.addNode(new DrawableNode(new CartesianAxes(), pipelineManager.getPipeline('line')!));
+    this.scene.addNode(new DrawableNode(new CartesianAxes(), lineMaterial));
 
     if (test) {
       this.scene.addNode(test);
@@ -168,6 +177,64 @@ class Renderer implements WorldInterface {
     this.initialized = true;
   }
 
+  createCameraBindGroups() {
+    if (this.gpu) {
+      const matrixBufferSize = 16 * Float32Array.BYTES_PER_ELEMENT;
+
+      const projectionTransformBuffer = this.gpu.device.createBuffer({
+        label: 'projection Matrix',
+        size: matrixBufferSize,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
+
+      const viewTransformBuffer = this.gpu.device.createBuffer({
+        label: 'view Matrix',
+        size: matrixBufferSize,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
+
+      const cameraPosBuffer = this.gpu.device.createBuffer({
+        label: 'camera position',
+        size: 4 * Float32Array.BYTES_PER_ELEMENT,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
+
+      const aspectRatioBuffer = this.gpu.device.createBuffer({
+        label: 'aspect ratio',
+        size: 1 * Float32Array.BYTES_PER_ELEMENT,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
+
+      const lightsBuffer = this.gpu.device.createBuffer({
+        label: 'lights',
+        size: lightsStructure.arrayBuffer.byteLength,
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      });
+
+      const frameBindGroup = this.gpu.device.createBindGroup({
+        label: 'camera',
+        layout: this.bindGroups.bindGroupLayout0,
+        entries: [
+          { binding: 0, resource: { buffer: projectionTransformBuffer }},
+          { binding: 1, resource: { buffer: viewTransformBuffer }},
+          { binding: 2, resource: { buffer: cameraPosBuffer }},
+          { binding: 3, resource: { buffer: aspectRatioBuffer }},
+          { binding: 4, resource: { buffer: lightsBuffer }},
+        ],
+      });
+
+      this.frameBindGroup = {
+        bindGroup: frameBindGroup,
+        buffer: [
+            projectionTransformBuffer,
+            viewTransformBuffer,
+            cameraPosBuffer,
+            aspectRatioBuffer,
+            lightsBuffer,
+        ],
+      }
+    }
+  }
   startTurn() {
     if (this.participants.activeActor) {
       if (this.participants.activeActor.automated) {
@@ -420,7 +487,7 @@ class Renderer implements WorldInterface {
       throw new Error('context is null');
     }
 
-    if (!this.bindGroups.camera) {
+    if (!this.frameBindGroup) {
       throw new Error('uniformBuffer is not set');
     }
 
@@ -465,19 +532,19 @@ class Renderer implements WorldInterface {
     const view = this.context.getCurrentTexture().createView();
 
     if (this.camera.projection === 'Perspective') {
-      this.gpu.device.queue.writeBuffer(this.bindGroups.camera.buffer[0], 0, this.camera.perspectiveTransform as Float32Array);
+      this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[0], 0, this.camera.perspectiveTransform as Float32Array);
     } else {
-      this.gpu.device.queue.writeBuffer(this.bindGroups.camera.buffer[0], 0, this.camera.orthographicTransform as Float32Array);
+      this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[0], 0, this.camera.orthographicTransform as Float32Array);
     }
 
     const inverseViewtransform = mat4.inverse(this.camera.viewTransform);
-    this.gpu.device.queue.writeBuffer(this.bindGroups.camera.buffer[1], 0, inverseViewtransform as Float32Array);
+    this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[1], 0, inverseViewtransform as Float32Array);
 
     // Write the camera position
 
     const cameraPosition = vec4.transformMat4(vec4.create(0, 0, 0, 1), this.camera.viewTransform);
-    this.gpu.device.queue.writeBuffer(this.bindGroups.camera.buffer[2], 0, cameraPosition as Float32Array);
-    this.gpu.device.queue.writeBuffer(this.bindGroups.camera.buffer[3], 0, this.aspectRatio as Float32Array);
+    this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[2], 0, cameraPosition as Float32Array);
+    this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[3], 0, this.aspectRatio as Float32Array);
 
     // Update the light information
     lightsStructure.set({
@@ -496,11 +563,11 @@ class Renderer implements WorldInterface {
       })),
     });
 
-    this.gpu.device.queue.writeBuffer(this.bindGroups.camera.buffer[4], 0, lightsStructure.arrayBuffer);
+    this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[4], 0, lightsStructure.arrayBuffer);
 
     const commandEncoder = this.gpu.device.createCommandEncoder();
 
-    this.mainRenderPass.render(view, this.depthTextureView!, commandEncoder);
+    this.mainRenderPass.render(view, this.depthTextureView!, commandEncoder, this.frameBindGroup.bindGroup);
 
     // if (this.selected.selection.length > 0) {
     //   // Transform camera position to world space.
@@ -523,18 +590,6 @@ class Renderer implements WorldInterface {
     //   this.transformer.updateTransforms(mat)
 
     //   this.dragHandlesPass.pipelines = [];
-
-    //   if (this.selected.selection[0].node.allowedTransformations & AllowedTransformations.Translation) {
-    //     this.dragHandlesPass.addDrawables(this.transformer.translator);
-    //   }
-
-    //   if (this.selected.selection[0].node.allowedTransformations & AllowedTransformations.Scale) {
-    //     this.dragHandlesPass.addDrawables(this.transformer.scaler);
-    //   }
-
-    //   if (this.selected.selection[0].node.allowedTransformations & AllowedTransformations.Rotation) {
-    //     this.dragHandlesPass.addDrawables(this.transformer.rotator);
-    //   }
 
     //   this.dragHandlesPass.render(view, this.depthTextureView!, commandEncoder);
     // }

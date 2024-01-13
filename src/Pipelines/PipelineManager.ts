@@ -14,8 +14,8 @@ import ReticlePipeline from "./ReticlePipeline";
 import TrajectoryPipeline from "./TrajectoryPipeline";
 
 export type PipelineType =
-  'lit' | 'pipeline' | 'line' | 'billboard' | 'drag-handles' | 'circle' | 'outline' | 'reticle' |
-  'trajectory';
+  'Lit' | 'pipeline' | 'Line' | 'billboard' | 'drag-handles' | 'Circle' | 'outline' | 'reticle' |
+  'Trajectory';
 
 type Pipelines = {
   type: PipelineType,
@@ -43,15 +43,15 @@ class PipelineManager implements PipelineManagerInterface {
 
     this.pipelines = [];
 
-    this.pipelines.push({ type: 'lit', pipeline: new LitPipeline() });
+    this.pipelines.push({ type: 'Lit', pipeline: new LitPipeline() });
     // this.pipelines.push({ type: 'pipeline', pipeline: new Pipeline() })
-    this.pipelines.push({ type: 'line', pipeline: new LinePipeline() });
+    this.pipelines.push({ type: 'Line', pipeline: new LinePipeline() });
     // this.pipelines.push({ type: 'billboard', pipeline: new BillboardPipeline() });
     // this.pipelines.push({ type: 'drag-handles', pipeline: new DragHandlesPipeline() });
-    this.pipelines.push({ type: 'circle', pipeline: new CirclePipeline() });
+    this.pipelines.push({ type: 'Circle', pipeline: new CirclePipeline() });
     this.pipelines.push({ type: 'outline', pipeline: new OutlinePipeline() });
     this.pipelines.push({ type: 'reticle', pipeline: new ReticlePipeline() });
-    this.pipelines.push({ type: 'trajectory', pipeline: new TrajectoryPipeline() });
+    this.pipelines.push({ type: 'Trajectory', pipeline: new TrajectoryPipeline() });
   }
 
   // public static getInstance(): PipelineManager {

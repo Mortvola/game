@@ -1,10 +1,8 @@
 import { vec4, Vec4 } from 'wgpu-matrix';
-import SceneNode, { AllowedTransformations } from './SceneNodes/SceneNode';
+import SceneNode from './SceneNodes/SceneNode';
 
 class Light extends SceneNode {
   lightColor = vec4.create(1, 1, 1, 1);
-
-  allowedTransformations = AllowedTransformations.Translation;
 
   computeCentroid(): Vec4 {
     return vec4.create(0, 0, 0, 1);

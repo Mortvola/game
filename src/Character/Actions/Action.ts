@@ -3,10 +3,11 @@ import Script from "../../Script/Script";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
-import { getWorld, pipelineManager } from "../../Main";
+import { getWorld } from "../../Main";
 import { PathPoint } from "../../Workers/PathPlannerTypes";
 import DrawableNode from "../../Drawables/SceneNodes/DrawableNode";
 import { ActionInterface, CreatureActorInterface, DrawableNodeInterface, WorldInterface } from "../../types";
+import { lineMaterial } from "../../Materials/Line";
 
 export type TimeType = 'Action' | 'Bonus' | 'Move';
 
@@ -80,7 +81,7 @@ class Action implements ActionInterface {
     }
 
     if (lines !== null && !this.cleared && lines.length > 0) {
-      this.pathLines = new DrawableNode(new Line(lines), pipelineManager.getPipeline('line')!);
+      this.pathLines = new DrawableNode(new Line(lines), lineMaterial);
       world.scene.addNode(this.pathLines);
 
       // world.mainRenderPass.addDrawable(this.pathLines);  

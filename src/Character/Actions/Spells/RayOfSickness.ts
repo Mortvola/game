@@ -3,7 +3,7 @@ import { CreatureActorInterface, WorldInterface } from '../../../types'
 import { diceRoll, savingThrow, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
-import { DamageType } from "../../Equipment/Weapon";
+import { DamageType } from "../../Equipment/Types";
 
 class RayOfSickness extends RangeSpell {
   constructor(actor: CreatureActorInterface) {

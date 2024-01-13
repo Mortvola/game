@@ -4,13 +4,6 @@ import { isDrawableNode } from './utils';
 
 export const rotationOrder: quat.RotationOrder = 'xyz';
 
-export enum AllowedTransformations {
-  Translation = 1,
-  Scale = 2,
-  Rotation = 4,
-  All = 7,
-}
-
 class SceneNode {
   uuid = crypto.randomUUID() as string;
 
@@ -27,8 +20,6 @@ class SceneNode {
   angles: number[];
 
   scale = vec3.create(1, 1, 1);
-
-  allowedTransformations = AllowedTransformations.All;
 
   constructor() {
     this.angles = getEulerAngles(this.qRotate);

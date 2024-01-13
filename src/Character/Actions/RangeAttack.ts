@@ -6,8 +6,9 @@ import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Shot from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
 import DrawableNode from "../../Drawables/SceneNodes/DrawableNode";
-import { modelManager, pipelineManager } from "../../Main";
+import { modelManager } from "../../Main";
 import { CreatureActorInterface, ShotData, WorldInterface } from "../../types";
+import { trajectoryMaterial } from "../../Materials/Trajectory";
 
 class RangeAttack extends Action {
   constructor(actor: CreatureActorInterface) {
@@ -29,7 +30,7 @@ class RangeAttack extends Action {
         startPos: result.startPos,
         orientation: result.orientation,
         distance: result.distance,
-      }), pipelineManager.getPipeline('trajectory')!);
+      }), trajectoryMaterial);
   
       world.scene.addNode(this.trajectory);
   

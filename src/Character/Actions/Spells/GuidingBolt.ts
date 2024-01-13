@@ -3,7 +3,7 @@ import { CreatureActorInterface, WorldInterface } from '../../../types'
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
-import { DamageType } from "../../Equipment/Weapon";
+import { DamageType } from "../../Equipment/Types";
 import { modelManager } from "../../../Main";
 import { PathPoint } from "../../../Workers/PathPlannerTypes";
 import { vec2 } from "wgpu-matrix";

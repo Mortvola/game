@@ -1,12 +1,13 @@
 import { Vec4, mat4, quat, vec3, vec4 } from "wgpu-matrix";
 import Spell from "./Spell";
 import Script from "../../../Script/Script";
-import { getWorld, pipelineManager } from "../../../Main";
+import { getWorld } from "../../../Main";
 import Circle from "../../../Drawables/Circle";
 import { degToRad } from "../../../Math";
 import { TimeType } from "../Action";
 import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface, WorldInterface } from "../../../types";
+import { circleMaterial } from "../../../Materials/Circle";
 
 class RangeSpell extends Spell {
   range: number;
@@ -93,7 +94,7 @@ class RangeSpell extends Spell {
     if (this.range > 0) {
       const world = getWorld();
 
-      this.rangeCircle = new DrawableNode(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), pipelineManager.getPipeline('circle')!)
+      this.rangeCircle = new DrawableNode(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), circleMaterial)
       this.rangeCircle.translate = vec3.copy(this.actor.sceneNode.translate)
   
       world.scene.addNode(this.rangeCircle);

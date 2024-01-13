@@ -7,9 +7,9 @@ import Spell from "./Actions/Spells/Spell";
 import { R, clericSpells, druidSpells } from "./Actions/Spells/Spells";
 import CharacterClass from "./Classes/CharacterClass";
 import { Armor } from "./Equipment/Armor";
-import Weapon, { WeaponProperties, WeaponType } from "./Equipment/Weapon";
 import { Race } from "./Races/Race";
 import { AbilityScores, CreatureActorInterface, CreatureInterface, Equipped } from "../types";
+import { Weapon, WeaponProperties, WeaponType } from "./Equipment/Types";
 
 type PrimaryWeapon = 'Melee' | 'Range';
   

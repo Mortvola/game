@@ -1,8 +1,9 @@
 import { Abilities } from "./Abilities";
 import { abilityModifier } from "../../Dice";
 import { AbilityScores } from "../../types";
-import { WeaponType, getWeapon } from "../Equipment/Weapon";
+import { getWeapon } from "../Equipment/Weapon";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
+import { WeaponType } from "../Equipment/Types";
 
 class Monk extends CharacterClass {
   constructor(level = 1) {

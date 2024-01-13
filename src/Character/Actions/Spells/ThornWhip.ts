@@ -2,7 +2,7 @@ import { diceRoll, spellAttackRoll } from "../../../Dice";
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
 import { CreatureActorInterface, WorldInterface } from '../../../types'
-import { DamageType } from "../../Equipment/Weapon";
+import { DamageType } from "../../Equipment/Types";
 import RangeSpell from "./RangeSpell";
 
 class ThornWhip extends RangeSpell {

@@ -1,85 +1,6 @@
 import { abilityModifier, diceRoll } from "../../Dice";
 import { AbilityScores } from "../../types";
-
-export enum WeaponProperties {
-  Light,
-  Finesse,
-  TwoHanded,
-  Versatile,
-  Loading,
-  Ammunition,
-  Heavy,
-  Reach,
-  Special,
-}
-
-export enum DamageType {
-  Acid,
-  Bludgeoning,
-  Cold,
-  Fire,
-  Force,
-  Lightning,
-  Necrotic,
-  Piercing,
-  Poison,
-  Psycnic,
-  Radiant,
-  Slashing,
-  Thunder,
-  None,
-}
-
-export enum WeaponType {
-  Simple,
-  SimpleRange,
-  Martial,
-  MartialRange,
-}
-
-type DamageDice = {
-  die: number,
-  numDice: number,
-}
-
-export type WeaponProficiencies = 
-  'Simple Weapons'
-  | 'Martial Weapons'
-  | 'Hand Crossbows'
-  | 'Light Crossbows'
-  | 'Longswords'
-  | 'Rapiers'
-  | 'Shortswords'
-  | 'Clubs'
-  | 'Daggers'
-  | 'Darts'
-  | 'Javelins'
-  | 'Maces'
-  | 'Quarterstaffs'
-  | 'Scimitars'
-  | 'Sickles'
-  | 'Slings'
-  | 'Spears'
-  ;
-
-export type WeaponName = 'Club' | 'Dagger' | 'Greatclub' | 'Handaxe' | 'Javelin' | 'Light Hammer' | 'Mace'
-  | 'Quarterstaff' | 'Sickle' | 'Spear' | 'Crossbow, light' | 'Dart' | 'Shortbow' | 'Sling'
-  | 'Battleaxe' | 'Flail' | 'Glaive' | 'Greataxe' | 'Greatsword' | 'Halberd' | 'Lance'
-  | 'Longsword' | 'Maul' | 'Morningstar' | 'Pike' | 'Rapier' | 'Scimitar' | 'Shortsword' | 'Trident'
-  | 'War pick' | 'Warhammer' | 'Whip' | 'Blowgun' | 'Crossbow, hand' | 'Crossbow, heavy'
-  | 'Longbow' | 'Net';
-
-type Weapon = {
-  type: WeaponType,
-  name: WeaponName,
-  cost: string,
-  die: DamageDice[],
-  damage: DamageType,
-  weight: number,
-  range: null | [number, number]
-  properties: WeaponProperties[],
-  proficiencies: WeaponProficiencies[],
-}
+import { DamageType, Weapon, WeaponName, WeaponProperties, WeaponType } from "./Types";
 
 export const weapons: Weapon[] = [
   { type: WeaponType.Simple, name: 'Club', cost: '1 sp', die: [{ die: 4, numDice: 1 }], damage: DamageType.Bludgeoning, weight: 2, range: null, properties: [WeaponProperties.Light], proficiencies: ['Simple Weapons', 'Clubs'] },
@@ -156,5 +77,3 @@ export const weaponDamage = (weapon: Weapon, abilityScores: AbilityScores, twoHa
 export const meanDamage = (weapon: Weapon) => (
   ((weapon.die[0].die + 1) / 2) * weapon.die[0].numDice
 )
-
-export default Weapon;

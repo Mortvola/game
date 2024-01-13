@@ -1,7 +1,8 @@
 import { Abilities } from "./Abilities";
 import { getArmor } from "../Equipment/Armor";
-import { WeaponType, getWeapon } from "../Equipment/Weapon";
+import { getWeapon } from "../Equipment/Weapon";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
+import { WeaponType } from "../Equipment/Types";
 
 class Paladin extends CharacterClass {
   constructor(level = 1) {

@@ -4,7 +4,7 @@ import { AbilityScores, CharacterClassInterface } from "../../types";
 import Action from "../Actions/Action";
 import { A } from "../Actions/Actions";
 import { Armor } from "../Equipment/Armor";
-import Weapon, { WeaponProficiencies, WeaponType } from "../Equipment/Weapon";
+import { Weapon, WeaponProficiencies, WeaponType } from "../Equipment/Types";
 
 class CharacterClass implements CharacterClassInterface {
   name: string;

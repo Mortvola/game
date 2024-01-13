@@ -7,7 +7,6 @@ import { playShot } from "../Audio";
 import { Advantage, attackRoll, savingThrow } from "../Dice";
 import Mover from "../Script/Mover";
 import Script from "../Script/Script";
-import Weapon, { DamageType, WeaponType } from "./Equipment/Weapon";
 import ContainerNode from "../Drawables/SceneNodes/ContainerNode";
 import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
@@ -20,11 +19,13 @@ import Creature from "./Creature";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
 import Action from "./Actions/Action";
-import { getWorld, modelManager, pipelineManager } from "../Main";
+import { getWorld, modelManager } from "../Main";
 import { PathPoint } from "../Workers/PathPlannerTypes";
 import DrawableNode from "../Drawables/SceneNodes/DrawableNode";
 import SceneNode from "../Drawables/SceneNodes/SceneNode";
 import { CreatureActorInterface, ShotData, WorldInterface } from "../types";
+import { circleMaterial } from "../Materials/Circle";
+import { DamageType, Weapon, WeaponType } from "./Equipment/Types";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -118,10 +119,10 @@ class Actor implements CreatureActorInterface {
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
     this.circleDrawable = new Circle(this.occupiedRadius, 0.025, color);
-    this.circle = new DrawableNode(this.circleDrawable, pipelineManager.getPipeline('circle')!);
+    this.circle = new DrawableNode(this.circleDrawable, circleMaterial);
     this.circle.postTransforms.push(mat4.fromQuat(q));
 
-    this.outerCircle = new DrawableNode(new Circle(this.attackRadius, 0.01, color), pipelineManager.getPipeline('circle')!);
+    this.outerCircle = new DrawableNode(new Circle(this.attackRadius, 0.01, color), circleMaterial);
     this.outerCircle.postTransforms.push(mat4.fromQuat(q));
 
     this.sceneNode.addNode(this.circle)
@@ -399,11 +400,6 @@ class Actor implements CreatureActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              // if (world.path2) {
-              //   world.mainRenderPass.removeDrawable(world.path2, 'line')
-              //   world.path2 = null;
-              // }
-
               const occupants = getOccupants(this, participants, world.occupants);
 
               populateGrid(this, occupants);
@@ -419,9 +415,6 @@ class Actor implements CreatureActorInterface {
               if (this !== world.participants.activeActor) {
                 return;
               }
-
-              // world.path2 = new Line(dbl);
-              // world.mainRenderPass.addDrawable(world.path2, 'line')
 
               if (path.length > 0) {
                 let distanceToTarget = vec2.distance(path[0].point, goal);
@@ -496,11 +489,6 @@ class Actor implements CreatureActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              // if (world.path2) {
-              //   world.mainRenderPass.removeDrawable(world.path2, 'line')
-              //   world.path2 = null;
-              // }
-
               const occupants = getOccupants(this, participants, world.occupants);
 
               populateGrid(this, occupants);
@@ -516,9 +504,6 @@ class Actor implements CreatureActorInterface {
               if (this !== world.participants.activeActor) {
                 return;
               }
-
-              // world.path2 = new Line(dbl);
-              // world.mainRenderPass.addDrawable(world.path2, 'line')
 
               if (path.length > 0) {
                 path = this.processPath(path, script);

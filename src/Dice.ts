@@ -1,4 +1,5 @@
-import Weapon, { DamageType, WeaponType, weaponDamage } from "./Character/Equipment/Weapon";
+import { DamageType, Weapon, WeaponType } from "./Character/Equipment/Types";
+import { weaponDamage } from "./Character/Equipment/Weapon";
 import { Race } from "./Character/Races/Race";
 import { rageDamageBonus } from "./Tables";
 import { AbilityScores, CharacterClassInterface, CharacterInterface, CreatureInterface } from "./types";

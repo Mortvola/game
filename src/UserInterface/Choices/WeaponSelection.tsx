@@ -1,6 +1,7 @@
 import React from 'react';
-import Weapon, { WeaponName, WeaponType, getWeapon, weapons as weaponList } from '../../Character/Equipment/Weapon';
+import { getWeapon, weapons as weaponList } from '../../Character/Equipment/Weapon';
 import styles from './StartingEquipment.module.scss';
+import { Weapon, WeaponName, WeaponType } from '../../Character/Equipment/Types';
 
 type PropsType = {
   weaponTypes: WeaponType[],
