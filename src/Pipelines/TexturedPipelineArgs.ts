@@ -1,5 +1,6 @@
-import { bindGroups, gpu } from "../Main";
 import { PipelineArgs } from "./PipelineArgs";
+import { bindGroups } from '../BindGroups';
+import { gpu } from "../Gpu";
 
 class TexturedPipelineArgs implements PipelineArgs {
   bitmap: ImageBitmap;
@@ -9,13 +10,9 @@ class TexturedPipelineArgs implements PipelineArgs {
   static label = 'TexturedPipelineArgs';
 
   constructor(bitmap: ImageBitmap) {
-    if (!gpu) {
-      throw new Error('device is not set')
-    }
-
     this.bitmap = bitmap;
 
-    const texture = gpu.device!.createTexture({
+    const texture = gpu.device.createTexture({
       label: TexturedPipelineArgs.label,
       format: 'rgba8unorm',
       size: [bitmap.width, bitmap.height],
@@ -36,7 +33,7 @@ class TexturedPipelineArgs implements PipelineArgs {
     
     this.bindGroup3 = gpu.device.createBindGroup({
       label: TexturedPipelineArgs.label,
-      layout: bindGroups.bindGroupLayout3,
+      layout: bindGroups.getBindGroupLayout3(gpu!.device),
       entries: [
         { binding: 0, resource: sampler },
         { binding: 1, resource: texture.createView() },

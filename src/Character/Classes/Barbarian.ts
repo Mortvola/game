@@ -1,15 +1,14 @@
 import { Abilities } from "./Abilities";
 import { abilityModifier } from "../../Dice";
-import type { AbilityScores } from "../../types";
-import Action from "../Actions/Action";
-import { A, getAction } from "../Actions/Actions";
+import type { A, AbilityScores, ActionInterface } from "../../types";
+import { getAction } from "../Actions/Actions";
 import { getWeapon } from "../Equipment/Weapon";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 import { WeaponType } from "../Equipment/Types";
 
 class Barbarian extends CharacterClass {
   constructor(level = 1) {
-    const actions: A<Action>[] = [];
+    const actions: A<ActionInterface>[] = [];
 
     const action = getAction('Rage');
     if (action) {

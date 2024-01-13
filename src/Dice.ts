@@ -1,8 +1,6 @@
-import { DamageType, Weapon, WeaponType } from "./Character/Equipment/Types";
-import { weaponDamage } from "./Character/Equipment/Weapon";
-import { Race } from "./Character/Races/Race";
+import { DamageType, Weapon, WeaponProperties, WeaponType } from "./Character/Equipment/Types";
 import { rageDamageBonus } from "./Tables";
-import { AbilityScores, CharacterClassInterface, CharacterInterface, CreatureInterface } from "./types";
+import { AbilityScores, CharacterClassInterface, CharacterInterface, CreatureInterface, RaceInterface } from "./types";
 
 export const diceRoll = (numDice: number, sides: number): number => {
   let sum = 0;
@@ -64,6 +62,25 @@ export const savingThrow = (creature: CharacterInterface, score: number, advanta
   }
 
   return roll;
+}
+
+export const weaponDamage = (weapon: Weapon, abilityScores: AbilityScores, twoHanded: boolean): number => {
+  let dieIndex = 0;
+  if (twoHanded && weapon.die.length === 2) {
+    dieIndex = 1;
+  }
+
+  const roll = diceRoll(weapon.die[dieIndex].numDice, weapon.die[dieIndex].die)
+
+  if (
+    [WeaponType.MartialRange, WeaponType.SimpleRange].includes(weapon.type)
+    || (weapon.properties.includes(WeaponProperties.Finesse)
+    && abilityScores.dexterity > abilityScores.strength)
+  ) {
+    return roll + abilityModifier(abilityScores.dexterity);
+  }
+
+  return roll + abilityModifier(abilityScores.strength);
 }
 
 export const attackRoll = (
@@ -246,7 +263,7 @@ export const assignAbilityScores = (rolls: number[], charClass: CharacterClassIn
   return abilities;
 }
 
-export const addAbilityIncreases = (abilityScores: AbilityScores, race: Race): AbilityScores => {
+export const addAbilityIncreases = (abilityScores: AbilityScores, race: RaceInterface): AbilityScores => {
   const updatedScores: AbilityScores = {
     strength: 0,
     constitution: 0,
@@ -264,7 +281,7 @@ export const addAbilityIncreases = (abilityScores: AbilityScores, race: Race): A
   return updatedScores;
 }
 
-export const generateAbilityScores = (rolls: number[], race: Race, charClass: CharacterClassInterface): AbilityScores => {
+export const generateAbilityScores = (rolls: number[], race: RaceInterface, charClass: CharacterClassInterface): AbilityScores => {
   const abilities: AbilityScores = {
     strength: 0,
     dexterity: 0,

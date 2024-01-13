@@ -1,5 +1,3 @@
-import { abilityModifier, diceRoll } from "../../Dice";
-import { AbilityScores } from "../../types";
 import { DamageType, Weapon, WeaponName, WeaponProperties, WeaponType } from "./Types";
 
 export const weapons: Weapon[] = [
@@ -53,25 +51,6 @@ export const getWeapon = (name: WeaponName): Weapon => {
   }
 
   return w;
-}
-
-export const weaponDamage = (weapon: Weapon, abilityScores: AbilityScores, twoHanded: boolean): number => {
-  let dieIndex = 0;
-  if (twoHanded && weapon.die.length === 2) {
-    dieIndex = 1;
-  }
-
-  const roll = diceRoll(weapon.die[dieIndex].numDice, weapon.die[dieIndex].die)
-
-  if (
-    [WeaponType.MartialRange, WeaponType.SimpleRange].includes(weapon.type)
-    || (weapon.properties.includes(WeaponProperties.Finesse)
-    && abilityScores.dexterity > abilityScores.strength)
-  ) {
-    return roll + abilityModifier(abilityScores.dexterity);
-  }
-
-  return roll + abilityModifier(abilityScores.strength);
 }
 
 export const meanDamage = (weapon: Weapon) => (

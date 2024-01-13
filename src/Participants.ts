@@ -1,14 +1,12 @@
 import { Vec4, vec4 } from "wgpu-matrix";
 import Actor from "./Character/Actor";
 import { abilityModifier, diceRoll } from "./Dice";
-import { Party } from "./UserInterface/PartyList";
 import Goblin from "./Character/Monsters/Goblin";
 import { XPThreshold, xpThresholds } from "./Tables";
 import Kobold from "./Character/Monsters/Kobold";
-import Creature from "./Character/Creature";
-import { ParticipantsInterface } from "./types";
+import { CharacterInterface, CreatureActorInterface, ParticipantsInterface, Party } from "./types";
 
-function createParty<Type extends Creature>(thresholds: XPThreshold, c: new (name: string) => Type, name: string): Party {
+function createParty<Type extends CharacterInterface>(thresholds: XPThreshold, c: new (name: string) => Type, name: string): Party {
   const party: Party = {
     members: [],
     automate: true,
@@ -65,19 +63,19 @@ export enum ParticipantsState {
 class Participants implements ParticipantsInterface {
   parties: Party[] = [];
 
-  participants: Actor[][] = [[], []];
+  participants: CreatureActorInterface[][] = [[], []];
 
   state: ParticipantsState = ParticipantsState.waiting;
 
-  turns: Actor[] = [];
+  turns: CreatureActorInterface[] = [];
 
   turn: number = 0;
 
-  get activeActor(): Actor {
+  get activeActor(): CreatureActorInterface {
     return this.turns[this.turn]
   }
 
-  remove(actor: Actor) {
+  remove(actor: CreatureActorInterface) {
     const team = this.participants[actor.team];
     let index = team.findIndex((a) => a === actor);
 
@@ -113,8 +111,8 @@ class Participants implements ParticipantsInterface {
     this.turns.sort((a, b) => a.initiativeRoll - b.initiativeRoll);
   }
 
-  async createTeam(team: number, z: number, color: Vec4, teamColor: Vec4): Promise<Actor[]> {
-    const actors: Actor[] = [];
+  async createTeam(team: number, z: number, color: Vec4, teamColor: Vec4): Promise<CreatureActorInterface[]> {
+    const actors: CreatureActorInterface[] = [];
     const numPlayers = this.parties[team].members.filter((t) => t.included).length;
     const spaceBetween = 4;
     const playerWidth = 4;
@@ -153,7 +151,7 @@ class Participants implements ParticipantsInterface {
   }
 
   async createTeams() {
-    const players: Actor[] = await this.createTeam(0, 10, vec4.create(0, 0, 0.5, 1), vec4.create(0, 0.6, 0, 1));
+    const players: CreatureActorInterface[] = await this.createTeam(0, 10, vec4.create(0, 0, 0.5, 1), vec4.create(0, 0.6, 0, 1));
 
     const thresholds: XPThreshold = {
       easy: 0,
@@ -190,7 +188,7 @@ class Participants implements ParticipantsInterface {
 
     this.parties[1] = party;
 
-    const opponents: Actor[] = await this.createTeam(1, -10, vec4.create(0.5, 0, 0, 1), vec4.create(1, 0, 0, 1));
+    const opponents: CreatureActorInterface[] = await this.createTeam(1, -10, vec4.create(0.5, 0, 0, 1), vec4.create(1, 0, 0, 1));
 
     this.participants[0] = players;
     this.participants[1] = opponents;

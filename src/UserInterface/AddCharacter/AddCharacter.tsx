@@ -19,7 +19,6 @@ import Wizard from '../../Character/Classes/Wizard';
 import StartingEquipment from '../Choices/StartingEquipment';
 import Tab from './Tab';
 import RaceTab from './Race';
-import { Race } from '../../Character/Races/Race';
 import Human from '../../Character/Races/Human';
 import HighElf from '../../Character/Races/HighElf';
 import WoodElf from '../../Character/Races/WoodElf';
@@ -31,12 +30,12 @@ import Character from '../../Character/Character';
 import { abilityModifier, abilityRolls, addAbilityIncreases, assignAbilityScores } from '../../Dice';
 import Spells from './Spells/Spells';
 import { KnownSpell } from './Spells/KnownSpell';
-import { R, clericSpells, druidSpells, wizardSpells } from '../../Character/Actions/Spells/Spells';
+import { clericSpells, druidSpells, wizardSpells } from '../../Character/Actions/Spells/Spells';
 import Spell from '../../Character/Actions/Spells/Spell';
 import Creature from '../../Character/Creature';
 import Cantrips from './Spells/Cantrips';
 import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from '../../Tables';
-import { AbilityScores } from '../../types';
+import { AbilityScores, R, RaceInterface } from '../../types';
 import { Weapon } from '../../Character/Equipment/Types';
 
 type PropsType = {
@@ -52,7 +51,7 @@ const AddCharacter: React.FC<PropsType> = ({
 }) => {
   const [charClass, setCharClass] = React.useState<CharacterClass>(new Barbarian())
   const [equipment, setEquipment] = React.useState<StartingEquipmentTable>(Barbarian.startingEquipment());
-  const [race, setRace] = React.useState<Race>(new Human());
+  const [race, setRace] = React.useState<RaceInterface>(new Human());
   // const [character, setCharacter] = React.useState<Character | null>(null);
   const [rolls] = React.useState<number[]>(abilityRolls());
   const [baseAbilityScores, setBaseAbilityScores] = React.useState<AbilityScores>(assignAbilityScores(rolls, charClass))

@@ -1,5 +1,5 @@
-import { gpu } from "../Main";
 import DrawableInterface from "../Drawables/DrawableInterface";
+import { gpu } from "../Gpu";
 import { DrawableNodeInterface, PipelineInterface } from "../types";
 
 class Pipeline implements PipelineInterface {
@@ -21,10 +21,6 @@ class Pipeline implements PipelineInterface {
 
   render(passEncoder: GPURenderPassEncoder) {
     if (this.pipeline) {
-      if (!gpu) {
-        throw new Error('gpu device not set.')
-      }
-  
       passEncoder.setPipeline(this.pipeline);
 
       for (const drawable of this.drawables) {

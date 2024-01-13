@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './DefineParties.module.scss'
-import Character from '../Character/Character';
 import CharacterDetails from './Details/CharacterDetails';
-import PartyList, { Party } from './PartyList';
+import PartyList from './PartyList';
+import { CharacterInterface, Party } from '../types';
 
 type PropsType = {
   parties: Party[],
@@ -16,7 +16,7 @@ const DefineParty: React.FC<PropsType> = ({
   onSave,
 }) => {
   const [newParties, setNewParties] = React.useState<Party[]>(parties);
-  const [selected, setSelected] = React.useState<Character | null>(null);
+  const [selected, setSelected] = React.useState<CharacterInterface | null>(null);
 
   const handleSaveClick = () => {
     onSave(newParties)
@@ -26,7 +26,7 @@ const DefineParty: React.FC<PropsType> = ({
     onHide()
   }
 
-  const handleSelect = (character: Character) => {
+  const handleSelect = (character: CharacterInterface) => {
     setSelected(character);
   }
 

@@ -1,9 +1,8 @@
 import React from 'react';
-import { R } from '../../Character/Actions/Spells/Spells';
-import Spell from '../../Character/Actions/Spells/Spell';
+import { R, SpellInterface } from '../../types';
 
 type PropsType = {
-  spell: R<Spell>
+  spell: R<SpellInterface>
 }
 
 const Cantrip: React.FC<PropsType> = ({

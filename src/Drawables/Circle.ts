@@ -1,8 +1,9 @@
 import { Vec4, Mat4 } from 'wgpu-matrix';
 import Drawable from './Drawable';
-import { bindGroups, gpu } from '../Main';
 import { circleShader } from '../shaders/circle';
 import { makeShaderDataDefinitions, makeStructuredView } from 'webgpu-utils';
+import { bindGroups } from '../BindGroups';
+import { gpu } from '../Gpu';
 
 const defs = makeShaderDataDefinitions(circleShader);
 
@@ -24,10 +25,6 @@ class Circle extends Drawable {
   constructor(radius: number, thickness: number, color: Vec4) {
     super()
 
-    if (!gpu) {
-      throw new Error('device is not set')
-    }
-
     this.radius= radius;
     this.thickness = thickness;
 
@@ -44,7 +41,7 @@ class Circle extends Drawable {
 
     this.bindGroup3 = gpu.device.createBindGroup({
       label: 'Circle',
-      layout: bindGroups.bindGroupLayout3,
+      layout: bindGroups.getBindGroupLayout3(gpu.device),
       entries: [
         { binding: 0, resource: { buffer: this.circleDataBuffer }},
       ],
@@ -52,10 +49,6 @@ class Circle extends Drawable {
   }
 
   render(passEncoder: GPURenderPassEncoder) {
-    if (!gpu) {
-      throw new Error('gpu device not set.')
-    }
-
     const numSegments = 64;
 
     this.circleStructure.set({

@@ -1,3 +1,4 @@
+import { RaceInterface } from "../types";
 import Barbarian from "./Classes/Barbarian";
 import Bard from "./Classes/Bard";
 import CharacterClass from "./Classes/CharacterClass";
@@ -19,12 +20,11 @@ import HillDwarf from "./Races/HillDwarf";
 import Human from "./Races/Human";
 import LightfootHalfling from "./Races/LightfootHalfling";
 import MountainDwarf from "./Races/MountainDwarf";
-import { Race } from "./Races/Race";
 import StoutHalfling from "./Races/StoutHalfling";
 import WoodElf from "./Races/WoodElf";
 
 export const getRace = (race: string) => {
-  let r: Race | null = null;
+  let r: RaceInterface | null = null;
 
   switch (race) {
     case "Dwarf":

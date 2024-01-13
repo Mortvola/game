@@ -8,8 +8,8 @@ import Drawable from "./Drawables/Drawable";
 import { downloadFbx } from "./Workers/LoadFbx";
 import ContainerNode, { isContainerNode } from "./Drawables/SceneNodes/ContainerNode";
 import { isGeometryNode } from "./Drawables/SceneNodes/GeometryNode";
-import { PipelineManagerInterface } from "./types";
 import { litMaterial } from "./Materials/Lit";
+import { gpu } from "./Gpu";
 
 type Model = {
   name: string,
@@ -19,10 +19,8 @@ type Model = {
 class ModelManager {
   models: Model[] = []
 
-  pipelineManager: PipelineManagerInterface;
-
-  constructor(pipelineManager: PipelineManagerInterface) {
-    this.pipelineManager = pipelineManager;
+  async ready() {
+    return gpu.ready();
   }
 
   async getModel(name: string): Promise<SceneNode> {
@@ -289,5 +287,7 @@ class ModelManager {
     return null;
   }
 }
+
+export const modelManager = new ModelManager();
 
 export default ModelManager;

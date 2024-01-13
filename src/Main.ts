@@ -1,14 +1,12 @@
-import BindGroups from "./BindGroups";
-import Gpu from "./Gpu";
-import ModelManager from "./ModelManager";
-import PipelineManager from "./Pipelines/PipelineManager";
+import { gpu } from "./Gpu";
+import { modelManager } from "./ModelManager";
+import { pipelineManager } from "./Pipelines/PipelineManager";
 import Renderer from "./Renderer";
 import { WorldInterface } from "./types";
 
-export const gpu = await Gpu.create();
-export const bindGroups = new BindGroups(gpu);
-export const pipelineManager = new PipelineManager(gpu, bindGroups);
-export const modelManager = new ModelManager(pipelineManager);
-export const renderer = await Renderer.create(gpu!, bindGroups);
+await gpu.ready();
+await pipelineManager.ready();
+await modelManager.ready();
+export const renderer = await Renderer.create();
 
 export const getWorld = (): WorldInterface => renderer;

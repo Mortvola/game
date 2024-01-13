@@ -1,5 +1,5 @@
+import { gpu } from "../Gpu";
 import Drawable from "./Drawable";
-import { gpu } from '../Main';
 
 class Line extends Drawable {
   vertices: number[];
@@ -11,7 +11,7 @@ class Line extends Drawable {
   
     this.vertices = p1.flatMap((p) => p)
 
-    this.vertexBuffer = gpu!.device.createBuffer({
+    this.vertexBuffer = gpu.device.createBuffer({
       size: this.vertices.length * Float32Array.BYTES_PER_ELEMENT,
       usage: GPUBufferUsage.VERTEX,
       mappedAtCreation: true,

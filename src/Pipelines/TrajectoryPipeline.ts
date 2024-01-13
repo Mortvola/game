@@ -1,4 +1,5 @@
-import { bindGroups, gpu } from "../Main";
+import { bindGroups } from '../BindGroups';
+import { gpu } from '../Gpu';
 import { trajectoryShader } from '../shaders/trajectory';
 import Pipeline from "./Pipeline";
 
@@ -6,10 +7,6 @@ const label = 'trajectory'
 class TrajectoryPipeline extends Pipeline {
   constructor() {
     super();
-
-    if (!gpu) {
-      throw new Error('device is not set')
-    }
 
     const shaderModule = gpu.device.createShaderModule({
       label,
@@ -43,10 +40,10 @@ class TrajectoryPipeline extends Pipeline {
       layout: gpu.device.createPipelineLayout({
         label,
         bindGroupLayouts: [
-          bindGroups.bindGroupLayout0,
-          bindGroups.bindGroupLayout1,
-          bindGroups.bindGroupLayout2,
-          bindGroups.bindGroupLayout3,
+          bindGroups.getBindGroupLayout0(gpu.device),
+          bindGroups.getBindGroupLayout1(gpu.device),
+          bindGroups.getBindGroupLayout2(gpu.device),
+          bindGroups.getBindGroupLayout3(gpu.device),
         ],
       }),
     };

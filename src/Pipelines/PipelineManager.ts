@@ -1,15 +1,12 @@
-// import BillboardPipeline from "./BillboardPipeline";
-import BindGroups from "../BindGroups";
-import Gpu from "../Gpu";
+import { bindGroups } from "../BindGroups";
+import { gpu } from "../Gpu";
 import { litShader } from "../shaders/lit";
 import { PipelineAttributes, PipelineInterface, PipelineManagerInterface } from "../types";
 import CirclePipeline from "./CirclePipeline";
-// import DragHandlesPipeline from "./DragHandlesPipeline";
 import LinePipeline from "./LinePipeline";
 import LitPipeline from "./LitPipeline";
 import OutlinePipeline from "./OutlinePipeline";
 import Pipeline from "./Pipeline";
-// import Pipeline from "./Pipeline";
 import ReticlePipeline from "./ReticlePipeline";
 import TrajectoryPipeline from "./TrajectoryPipeline";
 
@@ -25,33 +22,30 @@ type Pipelines = {
 class PipelineManager implements PipelineManagerInterface {
   // private static instance: PipelineManager | null = null;
 
-  gpu: Gpu;
-
-  bindGroups: BindGroups;
-
   pipelines: Pipelines[] = [];
 
   pipelineMap: Map<string, Pipeline> = new Map();
 
-  constructor(gpu: Gpu | null, bindGroups: BindGroups) {
-    if (!gpu) {
-      throw new Error('gpu not set')
+  constructor() {
+    this.pipelines = [];
+  }
+
+  async ready() {
+    const result = await gpu.ready();
+
+    if (result) {
+      this.pipelines.push({ type: 'Lit', pipeline: new LitPipeline() });
+      // this.pipelines.push({ type: 'pipeline', pipeline: new Pipeline() })
+      this.pipelines.push({ type: 'Line', pipeline: new LinePipeline() });
+      // this.pipelines.push({ type: 'billboard', pipeline: new BillboardPipeline() });
+      // this.pipelines.push({ type: 'drag-handles', pipeline: new DragHandlesPipeline() });
+      this.pipelines.push({ type: 'Circle', pipeline: new CirclePipeline() });
+      this.pipelines.push({ type: 'outline', pipeline: new OutlinePipeline() });
+      this.pipelines.push({ type: 'reticle', pipeline: new ReticlePipeline() });
+      this.pipelines.push({ type: 'Trajectory', pipeline: new TrajectoryPipeline() });
     }
 
-    this.gpu = gpu;
-    this.bindGroups = bindGroups;
-
-    this.pipelines = [];
-
-    this.pipelines.push({ type: 'Lit', pipeline: new LitPipeline() });
-    // this.pipelines.push({ type: 'pipeline', pipeline: new Pipeline() })
-    this.pipelines.push({ type: 'Line', pipeline: new LinePipeline() });
-    // this.pipelines.push({ type: 'billboard', pipeline: new BillboardPipeline() });
-    // this.pipelines.push({ type: 'drag-handles', pipeline: new DragHandlesPipeline() });
-    this.pipelines.push({ type: 'Circle', pipeline: new CirclePipeline() });
-    this.pipelines.push({ type: 'outline', pipeline: new OutlinePipeline() });
-    this.pipelines.push({ type: 'reticle', pipeline: new ReticlePipeline() });
-    this.pipelines.push({ type: 'Trajectory', pipeline: new TrajectoryPipeline() });
+    return result;
   }
 
   // public static getInstance(): PipelineManager {
@@ -83,11 +77,7 @@ class PipelineManager implements PipelineManagerInterface {
       return pipeline;
     }
 
-    if (!this.gpu) {
-      throw new Error('device is not set')
-    }
-
-    const shaderModule = this.gpu.device.createShaderModule({
+    const shaderModule = gpu.device.createShaderModule({
       label: 'base pipeline',
       code: litShader,
     })
@@ -143,16 +133,16 @@ class PipelineManager implements PipelineManagerInterface {
         depthCompare: "less",
         format: "depth24plus"
       },
-      layout: this.gpu.device.createPipelineLayout({
+      layout: gpu.device.createPipelineLayout({
         bindGroupLayouts: [
-          this.bindGroups.bindGroupLayout0,
-          this.bindGroups.bindGroupLayout1,
-          this.bindGroups.bindGroupLayout2A,
+          bindGroups.getBindGroupLayout0(gpu.device),
+          bindGroups.getBindGroupLayout1(gpu.device),
+          bindGroups.getBindGroupLayout2A(gpu.device),
         ],
       }),
     };
     
-    const gpuPipeline = this.gpu.device.createRenderPipeline(pipelineDescriptor);
+    const gpuPipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
 
     pipeline = new Pipeline();
     pipeline.pipeline = gpuPipeline;
@@ -163,5 +153,7 @@ class PipelineManager implements PipelineManagerInterface {
     return pipeline;
   }
 }
+
+export const pipelineManager = new PipelineManager();
 
 export default PipelineManager;

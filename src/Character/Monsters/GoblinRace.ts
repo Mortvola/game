@@ -1,7 +1,7 @@
 import { feetToMeters } from "../../Math";
-import { Race, Size } from "../Races/Race";
+import { RaceInterface, Size } from "../../types";
 
-class GoblinRace implements Race {
+class GoblinRace implements RaceInterface {
   name = "Goblin";
 
   speed = feetToMeters(30);

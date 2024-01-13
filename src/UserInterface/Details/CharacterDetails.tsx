@@ -1,12 +1,12 @@
 import React from 'react';
-import Character from '../../Character/Character';
 import styles from './CharacterDetails.module.scss';
 import Abilities from './Abilities';
 import Inventory from './Inventory';
 import Equipped from './Equipped';
+import { CharacterInterface } from '../../types';
 
 type PropsType = {
-  character: Character | null,
+  character: CharacterInterface | null,
 }
 
 const CharacterDetails: React.FC<PropsType> = ({

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Race } from '../../Character/Races/Race';
+import { RaceInterface } from '../../types';
 
 type PropsType = {
-  race: Race,
+  race: RaceInterface,
   onChange: (race: string) => void,
 }
 

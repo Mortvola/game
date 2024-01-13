@@ -1,4 +1,4 @@
-import Character from "../Character/Character";
+import { CharacterInterface } from "../types";
 
 export interface EnvironmentInterface {
   teams: ActorInterface[][];
@@ -6,7 +6,7 @@ export interface EnvironmentInterface {
 }
 
 export interface ActorInterface {
-  character: Character;
+  character: CharacterInterface;
 
   team: number;
 }

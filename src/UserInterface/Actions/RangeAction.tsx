@@ -1,11 +1,10 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import Creature from '../../Character/Creature';
 import RangeAttack from '../../Character/Actions/RangeAttack';
-import Actor from '../../Character/Actor';
+import { CreatureActorInterface } from '../../types';
 
 type PropsType = {
-  actor: Actor,
+  actor: CreatureActorInterface,
 }
 
 const RangeAction: React.FC<PropsType> = ({

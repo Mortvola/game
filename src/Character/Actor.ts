@@ -15,33 +15,23 @@ import FollowPath from "../Script/FollowPath";
 import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
 import { findPath2, getOccupants, populateGrid } from "../Workers/PathPlannerQueue";
-import Creature from "./Creature";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
-import Action from "./Actions/Action";
-import { getWorld, modelManager } from "../Main";
+import { getWorld } from "../Main";
+import { modelManager } from "../ModelManager";
 import { PathPoint } from "../Workers/PathPlannerTypes";
 import DrawableNode from "../Drawables/SceneNodes/DrawableNode";
 import SceneNode from "../Drawables/SceneNodes/SceneNode";
-import { CreatureActorInterface, ShotData, WorldInterface } from "../types";
+import { ActionInterface, CharacterInterface, CreatureActorInterface, ShotData, States, WorldInterface } from "../types";
 import { circleMaterial } from "../Materials/Circle";
 import { DamageType, Weapon, WeaponType } from "./Equipment/Types";
+import MoveAction from "./Actions/MoveAction";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
 // } | null = null
 
 export const pathFinder: UniformGridSearch = new JumpPointSearch(512, 512, 16);
-
-export type EpisodeInfo = {
-  winningTeam: number,
-}
-
-export enum States {
-  idle,
-  planning,
-  scripting,
-}
 
 let actorId = 0;
 export const getActorId = () => {
@@ -54,7 +44,7 @@ export const getActorId = () => {
 class Actor implements CreatureActorInterface {
   id: number;
 
-  character: Creature;
+  character: CharacterInterface;
 
   team: number;
 
@@ -90,12 +80,12 @@ class Actor implements CreatureActorInterface {
 
   state = States.idle;
 
-  private action: Action | null = null;
+  private action: ActionInterface | null = null;
 
   private useQLearning = false;
 
   private constructor(
-    character: Creature,
+    character: CharacterInterface,
     mesh: SceneNode,
     height: number,
     color: Vec4,
@@ -130,7 +120,7 @@ class Actor implements CreatureActorInterface {
   }
 
   static async create(
-    character: Creature, color: Vec4, teamColor: Vec4, team: number, automated: boolean,
+    character: CharacterInterface, color: Vec4, teamColor: Vec4, team: number, automated: boolean,
   ) {
     const playerHeight = character.race.height;
 
@@ -185,6 +175,10 @@ class Actor implements CreatureActorInterface {
     else {
       this.setAction(new RangeAttack(this));
     }
+  }
+
+  setMoveAction(): void {
+    this.setAction(new MoveAction(this));
   }
 
   endTurn() {
@@ -726,7 +720,7 @@ class Actor implements CreatureActorInterface {
   }
 
 
-  setAction(action: Action | null) {
+  setAction(action: ActionInterface | null): void {
     if (this.action) {
       this.action.clear();
     }
@@ -738,7 +732,7 @@ class Actor implements CreatureActorInterface {
     }
   }
 
-  getAction(): Action | null {
+  getAction(): ActionInterface | null {
     return this.action;
   }
 

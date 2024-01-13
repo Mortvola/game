@@ -1,12 +1,10 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import ActionClass from '../../Character/Actions/Action';
-import { A } from '../../Character/Actions/Actions';
-import Actor from '../../Character/Actor';
+import { A, ActionInterface, CreatureActorInterface } from '../../types';
 
 type PropsType = {
-  actor: Actor,
-  action: A<ActionClass>,
+  actor: CreatureActorInterface,
+  action: A<ActionInterface>,
 }
 
 const Action: React.FC<PropsType> = ({

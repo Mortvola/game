@@ -1,11 +1,10 @@
 import React from 'react';
 import styles from './AddCharacter.module.scss'
-import { Race } from '../../Character/Races/Race';
-import { AbilityScores } from '../../types';
+import { AbilityScores, RaceInterface } from '../../types';
 
 type PropsType = {
   scores: AbilityScores | null,
-  race: Race | null,
+  race: RaceInterface | null,
 }
 
 const Abilities: React.FC<PropsType> = ({

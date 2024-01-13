@@ -4,7 +4,7 @@ import { diceRoll, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
 import { DamageType } from "../../Equipment/Types";
-import { modelManager } from "../../../Main";
+import { modelManager } from "../../../ModelManager";
 import { PathPoint } from "../../../Workers/PathPlannerTypes";
 import { vec2 } from "wgpu-matrix";
 import FollowPath from "../../../Script/FollowPath";

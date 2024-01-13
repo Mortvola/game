@@ -4,9 +4,8 @@ import Script from "../../../Script/Script";
 import { getWorld } from "../../../Main";
 import Circle from "../../../Drawables/Circle";
 import { degToRad } from "../../../Math";
-import { TimeType } from "../Action";
 import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
-import { CreatureActorInterface, WorldInterface } from "../../../types";
+import { CreatureActorInterface, TimeType, WorldInterface } from "../../../types";
 import { circleMaterial } from "../../../Materials/Circle";
 
 class RangeSpell extends Spell {

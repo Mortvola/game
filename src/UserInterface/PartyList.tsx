@@ -1,21 +1,15 @@
 import React from 'react';
 import CharacterEntry from './CharacterEntry';
 import styles from './PartyList.module.scss';
-import Character from '../Character/Character';
 import AddCharacter from './AddCharacter/AddCharacter';
 import Creature from '../Character/Creature';
-
-export type Party = {
-  members: { included: boolean, character: Creature }[],
-  automate: boolean,
-  experiencePoints?: number,
-}
+import { CharacterInterface, Party } from '../types';
 
 type PropsType = {
   party: Party,
   label: string,
-  onSelect: (character: Character) => void,
-  selected: Character | null,
+  onSelect: (character: CharacterInterface) => void,
+  selected: CharacterInterface | null,
   onPartyChange: (party: Party) => void,
 }
 
@@ -29,7 +23,7 @@ const PartyList: React.FC<PropsType> = ({
   const [showAddDialog, setShowAddDialog] = React.useState<boolean>(false);
   const [automate, setAutomate] = React.useState<boolean>(false);
 
-  const handleEntryClick = (character: Character) => {
+  const handleEntryClick = (character: CharacterInterface) => {
     onSelect(character)
   }
 
@@ -55,7 +49,7 @@ const PartyList: React.FC<PropsType> = ({
     onSelect(character);
   }
 
-  const handleDelete = (character: Character) => {
+  const handleDelete = (character: CharacterInterface) => {
     const index = party.members.findIndex((m) => m.character === character);
 
     if (index !== -1) {

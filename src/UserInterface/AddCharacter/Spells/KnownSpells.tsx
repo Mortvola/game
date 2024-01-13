@@ -4,7 +4,7 @@ import { ItemTypes } from './Spell';
 import styles from '../AddCharacter.module.scss';
 import Spell from '../../../Character/Actions/Spells/Spell';
 import KnownSpellComponent, { KnownSpell } from './KnownSpell';
-import { R } from '../../../Character/Actions/Spells/Spells';
+import { R } from '../../../types';
 
 type PropsType = {
   knownSpells: KnownSpell[],

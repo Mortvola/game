@@ -1,5 +1,4 @@
-import { CreatureActorInterface } from "../../../types";
-import { TimeType } from "../Action";
+import { R } from "../../../types";
 import AcidSplash from "./AcidSplash";
 import Bane from "./Bane";
 import BladeWard from "./BladeWard";
@@ -44,13 +43,6 @@ import ThornWhip from "./ThornWhip";
 import Thunderwave from "./Thunderwave";
 import TrueStrike from "./TrueStrike";
 import WitchBolt from "./WitchBolt";
-
-export type R<T> = {
-  spell: new (actor: CreatureActorInterface) => T;
-  name: string;
-  time: TimeType,
-  level: number,
-}
 
 export const wizardSpells: R<Spell>[][] = [
   [

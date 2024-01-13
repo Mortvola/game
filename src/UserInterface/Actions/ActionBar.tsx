@@ -4,10 +4,10 @@ import MeleeAction from './MeleeAction';
 import RangeAction from './RangeAction';
 import SpellAction from './SpellAction';
 import Action from './Action';
-import Actor from '../../Character/Actor';
+import { CreatureActorInterface } from '../../types';
 
 type PropsType = {
-  actor: Actor,
+  actor: CreatureActorInterface,
 }
 
 const ActionBar: React.FC<PropsType> = ({

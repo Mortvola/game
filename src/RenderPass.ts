@@ -1,6 +1,5 @@
 import { isContainerNode } from "./Drawables/SceneNodes/ContainerNode";
 import { isDrawableNode } from "./Drawables/SceneNodes/utils";
-import { bindGroups } from "./Main";
 import { DrawableNodeInterface, PipelineInterface, RenderPassInterface, SceneNodeInterface } from "./types";
 
 class RenderPass implements RenderPassInterface {

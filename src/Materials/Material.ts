@@ -1,5 +1,4 @@
-import { pipelineManager } from "../Main";
-import { PipelineType } from "../Pipelines/PipelineManager";
+import { PipelineType, pipelineManager } from "../Pipelines/PipelineManager";
 import { MaterialInterface, PipelineInterface } from "../types";
 import { MaterialDescriptor } from "./MaterialDescriptor";
 

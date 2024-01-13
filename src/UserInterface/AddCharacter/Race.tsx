@@ -1,13 +1,12 @@
 import React from 'react';
 import SelectRace from './SelectRace';
-import { Race } from '../../Character/Races/Race';
 import SelectClass from './SelectClass';
 import CharacterClass from '../../Character/Classes/CharacterClass';
 import Abilities from './Abilities';
-import { AbilityScores } from '../../types';
+import { AbilityScores, RaceInterface } from '../../types';
 
 type PropsType = {
-  race: Race,
+  race: RaceInterface,
   charClass: CharacterClass,
   scores: AbilityScores | null,
   onRaceChange: (race: string) => void,

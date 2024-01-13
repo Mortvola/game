@@ -1,13 +1,12 @@
 import { abilityModifier } from "../Dice";
-import { AbilityScores, CharacterInterface } from "../types";
+import { AbilityScores, CharacterInterface, RaceInterface } from "../types";
 import CharacterClass from "./Classes/CharacterClass";
 import Creature from "./Creature";
 import { Armor, ArmorType } from "./Equipment/Armor";
 import { Weapon, WeaponType } from "./Equipment/Types";
-import { Race } from "./Races/Race";
 
 class Character extends Creature implements CharacterInterface {
-  constructor(abilityScores: AbilityScores, race: Race, charClass: CharacterClass, weapons: Weapon[], armor: Armor[]) {
+  constructor(abilityScores: AbilityScores, race: RaceInterface, charClass: CharacterClass, weapons: Weapon[], armor: Armor[]) {
     // const abilityScores = generateAbilityScores(rolls, race, charClass);
 
     const maxHitPoints = charClass.hitDice

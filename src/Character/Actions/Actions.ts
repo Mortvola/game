@@ -1,18 +1,11 @@
-import { CreatureActorInterface } from "../../types";
-import Action, { TimeType } from "./Action";
+import { A, ActionInterface } from "../../types";
 import Rage from "./Rage";
 
-export type A<T> = {
-  action: new (actor: CreatureActorInterface) => T;
-  name: string;
-  time: TimeType,
-}
-
-export const actions: A<Action>[] = [
+export const actions: A<ActionInterface>[] = [
   { action: Rage, name: 'Rage', time: 'Bonus' }
 ]
 
-export const getAction = (name: string): A<Action> | null => {
+export const getAction = (name: string): A<ActionInterface> | null => {
   const action = actions.find((a) => a.name === name);
 
   if (action) {

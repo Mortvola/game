@@ -1,14 +1,11 @@
-import { bindGroups, gpu } from "../Main";
+import { bindGroups } from '../BindGroups';
+import { gpu } from '../Gpu';
 import { lineShader } from '../shaders/line';
 import Pipeline from "./Pipeline";
 
 class LinePipeline extends Pipeline {
   constructor() {
     super();
-
-    if (!gpu) {
-      throw new Error('device is not set')
-    }
 
     const shaderModule = gpu.device.createShaderModule({
       label: 'line',
@@ -18,7 +15,7 @@ class LinePipeline extends Pipeline {
     const pipelineLayout = gpu.device.createPipelineLayout({
       label: 'line',
       bindGroupLayouts: [
-        bindGroups.bindGroupLayout0,
+        bindGroups.getBindGroupLayout0(gpu.device),
       ],
     });
 

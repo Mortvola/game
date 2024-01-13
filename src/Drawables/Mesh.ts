@@ -1,8 +1,8 @@
 import { Vec4 } from 'wgpu-matrix';
-import { gpu } from '../Main';
 import SurfaceMesh from "./SurfaceMesh";
 import Drawable from './Drawable';
 import DrawableInterface from './DrawableInterface';
+import { gpu } from '../Gpu';
 
 class Mesh extends Drawable {
   mesh: SurfaceMesh;
@@ -20,10 +20,6 @@ class Mesh extends Drawable {
   constructor(mesh: SurfaceMesh, vertices: number[], normals: number[], indices: number[]) {
     super()
   
-    if (!gpu) {
-      throw new Error('device is not set')
-    }
-
     this.mesh = mesh;
     this.setColor(mesh.color);
 
@@ -111,10 +107,6 @@ class Mesh extends Drawable {
   }
 
   render(passEncoder: GPURenderPassEncoder, numInstances: number) {
-    if (!gpu) {
-      throw new Error('gpu devcie not set.')
-    }
-
     passEncoder.setBindGroup(2, this.bindGroup2);
 
     passEncoder.setVertexBuffer(0, this.vertexBuffer);

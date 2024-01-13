@@ -1,10 +1,10 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
 import MeleeAttack from '../../Character/Actions/MeleeAttack';
-import Actor from '../../Character/Actor';
+import { CreatureActorInterface } from '../../types';
 
 type PropsType = {
-  actor: Actor,
+  actor: CreatureActorInterface,
 }
 
 const MeleeAction: React.FC<PropsType> = ({

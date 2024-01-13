@@ -1,12 +1,10 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import Spell from '../../Character/Actions/Spells/Spell';
-import { R } from '../../Character/Actions/Spells/Spells';
-import Actor from '../../Character/Actor';
+import { CreatureActorInterface, R, SpellInterface } from '../../types';
 
 type PropsType = {
-  actor: Actor,
-  spell: R<Spell>,
+  actor: CreatureActorInterface,
+  spell: R<SpellInterface>,
 }
 
 const SpellAction: React.FC<PropsType> = ({

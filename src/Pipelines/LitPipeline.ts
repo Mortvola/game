@@ -1,14 +1,11 @@
-import { gpu, bindGroups } from "../Main";
+import { bindGroups } from '../BindGroups';
+import { gpu } from '../Gpu';
 import { litShader } from '../shaders/lit';
 import Pipeline from "./Pipeline";
 
 class LitPipeline extends Pipeline {
   constructor() {
     super();
-
-    if (!gpu) {
-      throw new Error('device is not set')
-    }
 
     const shaderModule = gpu.device.createShaderModule({
       label: 'lit',
@@ -67,9 +64,9 @@ class LitPipeline extends Pipeline {
       },
       layout: gpu.device.createPipelineLayout({
         bindGroupLayouts: [
-          bindGroups.bindGroupLayout0,
-          bindGroups.bindGroupLayout1,
-          bindGroups.bindGroupLayout2A,
+          bindGroups.getBindGroupLayout0(gpu.device),
+          bindGroups.getBindGroupLayout1(gpu.device),
+          bindGroups.getBindGroupLayout2A(gpu.device),
         ],
       }),
     };

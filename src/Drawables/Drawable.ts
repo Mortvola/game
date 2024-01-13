@@ -1,6 +1,7 @@
 import { Mat4, vec4, Vec4 } from 'wgpu-matrix';
 import DrawableInterface, { maxInstances } from "./DrawableInterface";
-import { bindGroups, gpu } from '../Main';
+import { bindGroups } from '../BindGroups';
+import { gpu } from '../Gpu';
 
 class Drawable implements DrawableInterface {
   drawable = true;
@@ -26,10 +27,6 @@ class Drawable implements DrawableInterface {
   bindGroup2: GPUBindGroup;
 
   constructor() {
-    if (!gpu) {
-      throw new Error('gpu device not set.')
-    }
-
     this.color[0] = 0.8;
     this.color[1] = 0.8;
     this.color[2] = 0.8;
@@ -49,16 +46,15 @@ class Drawable implements DrawableInterface {
 
     this.bindGroup = gpu.device.createBindGroup({
       label: 'bind group for model matrix',
-      layout: bindGroups.bindGroupLayout1,
+      layout: bindGroups.getBindGroupLayout1(gpu.device),
       entries: [
         { binding: 0, resource: { buffer: this.modelMatrixBuffer }},
-        // { binding: 1, resource: { buffer: this.colorBuffer }},
       ],
     });
 
     this.bindGroup2 = gpu.device.createBindGroup({
       label: 'Color',
-      layout: bindGroups.bindGroupLayout2A,
+      layout: bindGroups.getBindGroupLayout2A(gpu.device),
       entries: [
         { binding: 0, resource: { buffer: this.colorBuffer }},
       ],

@@ -1,25 +1,33 @@
 class Gpu {
-  device: GPUDevice;
+  d: GPUDevice | null = null;
 
-  private constructor(device: GPUDevice) {
-    this.device = device;
+  get device(): GPUDevice {
+    if (!this.d) {
+      throw new Error('device not set')
+    }
+
+    return this.d;
   }
 
-  static async create(): Promise<Gpu | null> {
+  async ready(): Promise<boolean> {
+    if (this.d) {
+      return true;
+    }
+    
     if (navigator.gpu) {
       const adapter = await navigator.gpu.requestAdapter();
   
       if (adapter) {  
-        const device = await adapter.requestDevice();
+         this.d = await adapter.requestDevice();
       
-        if (device) {
-          return new Gpu(device);
-        }
+        return this.d !== undefined;
       }
     }
 
-    return null;
+    return false;
   }
 }
+
+export const gpu = new Gpu();
 
 export default Gpu;

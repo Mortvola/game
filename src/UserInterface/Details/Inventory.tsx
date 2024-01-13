@@ -1,11 +1,11 @@
 import React from 'react';
-import Character from '../../Character/Character';
 import styles from './Inventory.module.scss';
 import KnownSpellComponent, { KnownSpell } from './KnownSpell';
 import Cantrip from './Cantrip';
+import { CharacterInterface } from '../../types';
 
 type PropsType = {
-  character: Character,
+  character: CharacterInterface,
 }
 
 const Inventory: React.FC<PropsType> = ({

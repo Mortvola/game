@@ -1,17 +1,16 @@
 import React from 'react';
 import './App.scss';
-import { gpu, renderer } from '../Main';
+import { renderer } from '../Main';
 import { vec4 } from 'wgpu-matrix';
 import DefineParties from './DefineParty';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
 import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
 import Messages from './Messages';
-import { Party } from './PartyList';
 import ActionBar from './Actions/ActionBar';
 import StatusBar from './StatusBar/StatusBar';
 import Focused from './Focused';
-import Actor from '../Character/Actor';
-import { ActionInfo, FocusInfo } from '../types';
+import { ActionInfo, CreatureActorInterface, FocusInfo, Party } from '../types';
+import { gpu } from '../Gpu';
 
 type DiretionKeys = {
   left: number,
@@ -72,9 +71,9 @@ function App() {
     setActionInfo(actionInfo);
   }, [])
 
-  const [actor, setActor] = React.useState<Actor | null>(null);
+  const [actor, setActor] = React.useState<CreatureActorInterface | null>(null);
 
-  const characterChangeCallback = React.useCallback((actor: Actor | null) => {
+  const characterChangeCallback = React.useCallback((actor: CreatureActorInterface | null) => {
     setActor(actor)
   }, [])
 
@@ -216,8 +215,8 @@ function App() {
           const height = entry.devicePixelContentBoxSize?.[0].blockSize ??
             entry.contentBoxSize[0].blockSize * dpr;
 
-           const canvas = entry.target as HTMLCanvasElement;
-          canvas.width = Math.max(1, Math.min(width, gpu?.device.limits.maxTextureDimension2D ?? 1));
+          const canvas = entry.target as HTMLCanvasElement;
+          canvas.width = Math.max(1, Math.min(width, gpu.device.limits.maxTextureDimension2D ?? 1));
           canvas.height = Math.max(1, Math.min(height, gpu?.device.limits.maxTextureDimension2D ?? 1));
         }
       })

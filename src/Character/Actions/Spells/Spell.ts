@@ -1,7 +1,7 @@
 import { Vec4 } from "wgpu-matrix";
 import Script from "../../../Script/Script";
-import { CreatureActorInterface, SpellInterface, WorldInterface } from '../../../types'
-import Action, { TimeType } from "../Action";
+import { CreatureActorInterface, SpellInterface, TimeType, WorldInterface } from '../../../types'
+import Action from "../Action";
 import { getWorld } from "../../../Main";
 
 class Spell extends Action implements SpellInterface {

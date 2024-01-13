@@ -1,9 +1,9 @@
 import React from 'react';
-import Character from '../../Character/Character';
 import styles from './Equipped.module.scss';
+import { CharacterInterface } from '../../types';
 
 type PropsType = {
-  character: Character,
+  character: CharacterInterface,
 }
 
 const Equipped: React.FC<PropsType> = ({

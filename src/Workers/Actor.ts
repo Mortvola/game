@@ -1,11 +1,11 @@
 import { ActorInterface, EnvironmentInterface } from "./Interfaces";
 import QLearn from "./QLearn";
 import QStore, { Action, Key } from "./QStore";
-import Character from "../Character/Character";
 import { attackRoll } from "../Dice";
+import { CharacterInterface } from "../types";
 
 class Actor implements ActorInterface {
-  character: Character;
+  character: CharacterInterface;
 
   team: number;
 
@@ -13,7 +13,7 @@ class Actor implements ActorInterface {
 
   initiativeRoll = 0;
 
-  constructor(character: Character,team: number) {
+  constructor(character: CharacterInterface, team: number) {
     this.character = character;
     this.team = team;
   }

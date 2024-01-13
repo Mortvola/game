@@ -1,22 +1,18 @@
 import { Vec4 } from "wgpu-matrix";
 import { abilityModifier, getProficiencyBonus } from "../Dice";
 import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from "../Tables";
-import Action from "./Actions/Action";
 import { ConditionType } from "./Actions/Conditions/Condition";
 import Spell from "./Actions/Spells/Spell";
-import { R, clericSpells, druidSpells } from "./Actions/Spells/Spells";
+import { clericSpells, druidSpells } from "./Actions/Spells/Spells";
 import CharacterClass from "./Classes/CharacterClass";
 import { Armor } from "./Equipment/Armor";
-import { Race } from "./Races/Race";
-import { AbilityScores, CreatureActorInterface, CreatureInterface, Equipped } from "../types";
+import { AbilityScores, ActionInterface, CreatureActorInterface, CreatureInterface, Equipped, PrimaryWeapon, R, RaceInterface } from "../types";
 import { Weapon, WeaponProperties, WeaponType } from "./Equipment/Types";
 
-type PrimaryWeapon = 'Melee' | 'Range';
-  
 class Creature implements CreatureInterface {
   name = '';
 
-  race: Race;
+  race: RaceInterface;
 
   charClass: CharacterClass;
 
@@ -57,18 +53,18 @@ class Creature implements CreatureInterface {
 
   primaryWeapon: PrimaryWeapon = 'Melee';
 
-  influencingActions: Action[] = [];
+  influencingActions: ActionInterface[] = [];
 
   conditions: ConditionType[] = [];
 
   concentration: Spell | null = null;
 
-  enduringActions: Action[] = [];
+  enduringActions: ActionInterface[] = [];
 
   constructor(
     abilityScores: AbilityScores,
     maxHitPoints: number,
-    race: Race,
+    race: RaceInterface,
     charClass: CharacterClass,
     weapons: Weapon[],
     armor: Armor[],
@@ -172,7 +168,7 @@ class Creature implements CreatureInterface {
       * 5, 5), 95)
   }
 
-  getMaxSpellSlots(spellLevel: number) {
+  getMaxSpellSlots(spellLevel: number): number | undefined {
     switch (this.charClass.name) {
       case 'Cleric':
         return clericSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
@@ -274,7 +270,7 @@ class Creature implements CreatureInterface {
     return 8 + getProficiencyBonus(this.charClass.level) + abilityModifier(this.spellcastingAbilityScore);
   }
 
-  addInfluencingAction(spell: Action) {
+  addInfluencingAction(spell: ActionInterface) {
     this.influencingActions.push(spell);
   }
 
@@ -293,7 +289,7 @@ class Creature implements CreatureInterface {
     return this.influencingActions.some((s) => s.name === name);
   }
 
-  getInfluencingAction(name: string): Action | null {
+  getInfluencingAction(name: string): ActionInterface | null {
     const spell = this.influencingActions.find((s) => s.name === name);
 
     return spell ?? null;

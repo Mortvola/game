@@ -1,34 +1,20 @@
-import {
-  makeShaderDataDefinitions,
-  makeStructuredView,
-} from 'webgpu-utils';
-import { lights } from "./shaders/lights";
-import Gpu from "./Gpu";
-
-const defs = makeShaderDataDefinitions(lights);
-export const lightsStructure = makeStructuredView(defs.structs.Lights);
-
 class BindGroups {
-  gpu: Gpu;
+  private bindGroupLayout0: GPUBindGroupLayout | null = null;
 
-  bindGroupLayout0: GPUBindGroupLayout;
+  private bindGroupLayout1: GPUBindGroupLayout | null = null;
 
-  bindGroupLayout1: GPUBindGroupLayout;
+  private bindGroupLayout2: GPUBindGroupLayout | null = null;
 
-  bindGroupLayout2: GPUBindGroupLayout;
+  private bindGroupLayout2A: GPUBindGroupLayout | null = null;
 
-  bindGroupLayout2A: GPUBindGroupLayout;
+  private bindGroupLayout3: GPUBindGroupLayout | null = null;
 
-  bindGroupLayout3: GPUBindGroupLayout;
-
-  constructor(gpu: Gpu | null) {
-    if (!gpu) {
-      throw new Error('gpu not set')
+  getBindGroupLayout0(device: GPUDevice) {
+    if (this.bindGroupLayout0) {
+      return this.bindGroupLayout0;
     }
 
-    this.gpu = gpu;
-
-    this.bindGroupLayout0 = gpu.device.createBindGroupLayout({
+    this.bindGroupLayout0 = device.createBindGroupLayout({
       label: 'group0',
       entries: [
         { // Projection matrix
@@ -60,8 +46,16 @@ class BindGroups {
         },
       ]
     })
-  
-    this.bindGroupLayout1 = gpu.device.createBindGroupLayout({
+
+    return this.bindGroupLayout0;
+  }
+
+  getBindGroupLayout1(device: GPUDevice) {
+    if (this.bindGroupLayout1) {
+      return this.bindGroupLayout1;
+    }
+
+    this.bindGroupLayout1 = device.createBindGroupLayout({
       label: 'group1',
       entries: [
         { // Model matrix
@@ -72,7 +66,15 @@ class BindGroups {
       ]
     });
 
-    this.bindGroupLayout2 = gpu.device.createBindGroupLayout({
+    return this.bindGroupLayout1;
+  }
+
+  getBindGroupLayout2(device: GPUDevice) {
+    if (this.bindGroupLayout2) {
+      return this.bindGroupLayout2;
+    }
+
+    this.bindGroupLayout2 = device.createBindGroupLayout({
       label: 'group2',
       entries: [
         { // Color
@@ -93,8 +95,16 @@ class BindGroups {
       ]
     });
 
-    this.bindGroupLayout2A = gpu.device.createBindGroupLayout({
-      label: 'group2',
+    return this.bindGroupLayout2;
+  }
+
+  getBindGroupLayout2A(device: GPUDevice) {
+    if (this.bindGroupLayout2A) {
+      return this.bindGroupLayout2A;
+    }
+
+    this.bindGroupLayout2A = device.createBindGroupLayout({
+      label: 'group2A',
       entries: [
         { // Color
           binding: 0,
@@ -103,8 +113,16 @@ class BindGroups {
         },
       ]
     });
-      
-    this.bindGroupLayout3 = gpu.device.createBindGroupLayout({
+
+    return this.bindGroupLayout2A;
+  }
+
+  getBindGroupLayout3(device: GPUDevice) {
+    if (this.bindGroupLayout3) {
+      return this.bindGroupLayout3;
+    }
+
+    this.bindGroupLayout3 = device.createBindGroupLayout({
       label: 'group3',
       entries: [
         { // Circle data, reticle radius
@@ -114,7 +132,12 @@ class BindGroups {
         },
       ]
     });
+
+    return this.bindGroupLayout3;
   }
+
 }
+
+export const bindGroups = new BindGroups();
 
 export default BindGroups;

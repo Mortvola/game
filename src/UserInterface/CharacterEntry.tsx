@@ -1,11 +1,11 @@
 import React from 'react';
-import Character from '../Character/Character';
+import { CharacterInterface } from '../types';
 
 type PropsType = {
   className?: string,
-  member: { included: boolean, character: Character },
-  onClick: (character: Character) => void,
-  onDelete: (character: Character) => void,
+  member: { included: boolean, character: CharacterInterface },
+  onClick: (character: CharacterInterface) => void,
+  onDelete: (character: CharacterInterface) => void,
 }
 
 const CharacterEntry: React.FC<PropsType> = ({

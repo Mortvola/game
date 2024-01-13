@@ -1,9 +1,10 @@
 import { Vec2, Vec4 } from "wgpu-matrix";
-import { bindGroups, gpu } from "../Main";
+import { bindGroups } from '../BindGroups';
 import Drawable from "./Drawable";
 import { makeShaderDataDefinitions, makeStructuredView } from "webgpu-utils";
 import { trajectoryShader } from "../shaders/trajectory";
 import { gravity } from "../Math";
+import { gpu } from "../Gpu";
 
 const defs = makeShaderDataDefinitions(trajectoryShader);
 
@@ -30,10 +31,6 @@ class Trajectory extends Drawable {
   constructor(trajectoryData: TrajectoryData) {
     super();
   
-    if (!gpu) {
-      throw new Error('gpu not set')
-    }
-  
     this.trajectoryData = trajectoryData;
 
     this.trajectoryBuffer = gpu.device.createBuffer({
@@ -44,7 +41,7 @@ class Trajectory extends Drawable {
 
     this.trajectoryBindGroup = gpu.device.createBindGroup({
       label,
-      layout: bindGroups.bindGroupLayout3,
+      layout: bindGroups.getBindGroupLayout3(gpu.device),
       entries: [
         { binding: 0, resource: { buffer: this.trajectoryBuffer }},
       ],
@@ -52,10 +49,6 @@ class Trajectory extends Drawable {
   }
 
   render(passEncoder: GPURenderPassEncoder) {
-    if (!gpu) {
-      throw new Error('gpu device not set.')
-    }
-
     const numSegments = this.trajectoryData.distance * 4;
     
     // Update the trajectory information

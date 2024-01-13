@@ -4,8 +4,7 @@ import KnownSpells from './KnownSpells';
 import AvailableSpells from './AvailableSpells';
 import Spell from '../../../Character/Actions/Spells/Spell';
 import { KnownSpell } from './KnownSpell';
-import { R } from '../../../Character/Actions/Spells/Spells';
-import { AbilityScores } from '../../../types';
+import { AbilityScores, R } from '../../../types';
 
 type PropsType = {
   level: number,

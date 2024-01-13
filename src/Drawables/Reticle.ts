@@ -1,6 +1,7 @@
 import { Vec4, Mat4 } from 'wgpu-matrix';
 import Drawable from './Drawable';
-import { bindGroups, gpu } from '../Main';
+import { bindGroups } from '../BindGroups';
+import { gpu } from '../Gpu';
 
 const label = 'reticle';
 
@@ -16,10 +17,6 @@ class Reticle extends Drawable {
   private constructor(radius: number, bitmap: ImageBitmap) {
     super()
 
-    if (!gpu) {
-      throw new Error('device is not set')
-    }
-
     this.radius[0] = radius;
 
     this.uniformBuffer3 = gpu.device.createBuffer({
@@ -30,13 +27,13 @@ class Reticle extends Drawable {
 
     this.bindGroup3 = gpu.device.createBindGroup({
       label: 'radius',
-      layout: bindGroups.bindGroupLayout3,
+      layout: bindGroups.getBindGroupLayout3(gpu.device),
       entries: [
         { binding: 0, resource: { buffer: this.uniformBuffer3 }},
       ],
     });
 
-    const texture = gpu.device!.createTexture({
+    const texture = gpu.device.createTexture({
       format: 'rgba8unorm',
       size: [bitmap.width, bitmap.height],
       usage: GPUTextureUsage.TEXTURE_BINDING |
@@ -54,7 +51,7 @@ class Reticle extends Drawable {
     
     this.bindGroup2 = gpu.device.createBindGroup({
       label,
-      layout: bindGroups.bindGroupLayout2,
+      layout: bindGroups.getBindGroupLayout2(gpu.device),
       entries: [
         { binding: 0, resource: { buffer: this.colorBuffer }},
         { binding: 1, resource: sampler },
@@ -73,10 +70,6 @@ class Reticle extends Drawable {
   }
 
   render(passEncoder: GPURenderPassEncoder) {
-    if (!gpu) {
-      throw new Error('gpu device not set.')
-    }
-
     gpu.device.queue.writeBuffer(this.uniformBuffer3, 0, this.radius);
 
     passEncoder.setBindGroup(2, this.bindGroup2);

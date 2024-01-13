@@ -1,4 +1,5 @@
-import { gpu, bindGroups } from "../Main";
+import { bindGroups } from '../BindGroups';
+import { gpu } from '../Gpu';
 import { outlineShader } from '../shaders/outline';
 import Pipeline from "./Pipeline";
 
@@ -8,10 +9,6 @@ class OutlinePipeline extends Pipeline {
   constructor() {
     super();
 
-    if (!gpu) {
-      throw new Error('device is not set')
-    }
-
     const shaderModule = gpu.device.createShaderModule({
       label,
       code: outlineShader,
@@ -19,10 +16,10 @@ class OutlinePipeline extends Pipeline {
 
     const pipelineLayout = gpu.device.createPipelineLayout({
       bindGroupLayouts: [
-        bindGroups.bindGroupLayout0,
-        bindGroups.bindGroupLayout1,
-        bindGroups.bindGroupLayout2,
-        bindGroups.bindGroupLayout3,
+        bindGroups.getBindGroupLayout0(gpu.device),
+        bindGroups.getBindGroupLayout1(gpu.device),
+        bindGroups.getBindGroupLayout2(gpu.device),
+        bindGroups.getBindGroupLayout3(gpu.device),
       ],
     });
     

@@ -5,6 +5,11 @@ import { Armor } from './Character/Equipment/Armor';
 import { Abilities } from './Character/Classes/Abilities';
 import DrawableInterface from './Drawables/DrawableInterface';
 import { Weapon } from './Character/Equipment/Types';
+import { feetToMeters } from './Math';
+
+export type EpisodeInfo = {
+  winningTeam: number,
+}
 
 export type ShotData = {
   velocityVector: Vec2,
@@ -104,19 +109,41 @@ export interface ActorInterface {
 }
 
 export interface CreatureInterface {
+  name: string;
+
   abilityScores: AbilityScores;
 
   charClass: CharacterClassInterface;
 
+  race: RaceInterface;
+
   get armorClass(): number;
 
+  experiencePoints: number;
+
+  weapons: Weapon[];
+
+  armor: Armor[];
+
+  knownSpells: R<SpellInterface>[] | null;
+
   hasInfluencingAction(name: string): boolean;
+
+  getInfluencingAction(name: string): ActionInterface | null
 
   getAbilityModifier(weapon: Weapon): number;
 
   getWeaponProficiency(weapon: Weapon): number;
 
   addCondition(name: ConditionType): void;
+
+  hasCondition(name: ConditionType): boolean;
+
+  removeCondition(name: ConditionType): void;
+
+  getKnownSpells(): { spell: R<SpellInterface>, prepared: boolean }[];
+
+  getMaxPreparedSpells(): number;
 }
 
 export type Equipped = {
@@ -126,23 +153,87 @@ export type Equipped = {
   shield: Armor | null,
 }
 
-export interface ActionInterface {
+export type TimeType = 'Action' | 'Bonus' | 'Move';
 
+export interface ActionInterface {
+  actor: CreatureActorInterface;
+
+  name: string;
+
+  duration: number;
+
+  time: TimeType;
+
+  endOfTurn: boolean;
+
+  targets: CreatureActorInterface[];
+
+  initialize(): void;
+
+  clear(): void;
+
+  prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void>;
+
+  interact(script: ScriptInterface, world: WorldInterface): Promise<boolean>;
+}
+
+export type A<T> = {
+  action: new (actor: CreatureActorInterface) => T;
+  name: string;
+  time: TimeType,
+}
+
+export enum Size {
+  Tiny = feetToMeters(2.5),
+  Small = feetToMeters(5),
+  Medium = feetToMeters(5),
+  Large = feetToMeters(10),
+  Huge = feetToMeters(15),
+  Gargantuan = feetToMeters(20),
+}
+
+export interface RaceInterface {
+  name: string;
+  
+  speed: number;
+
+  abilityIncrease: AbilityScores;
+
+  hitPointBonus: number;
+  
+  size: Size;
+
+  height: number;
+
+  generateName(): string;
+
+  clone(): RaceInterface;
 }
 
 export interface CharacterClassInterface {
+  name: string;
+
   level: number;
 
   primaryAbilities: Abilities[];
+
+  actions: A<ActionInterface>[];
 }
 
-export interface SpellInterface {
+export interface SpellInterface extends ActionInterface {
 
 }
 
-export interface CharacterInterface extends CreatureInterface {
+export type R<T> = {
+  spell: new (actor: CreatureActorInterface) => T;
   name: string;
+  time: TimeType,
+  level: number,
+}
 
+export type PrimaryWeapon = 'Melee' | 'Range';
+  
+export interface CharacterInterface extends CreatureInterface {
   equipped: Equipped;
 
   enduringActions: ActionInterface[];
@@ -155,10 +246,30 @@ export interface CharacterInterface extends CreatureInterface {
 
   get spellcastingAbilityScore(): number;
 
+  spells: R<SpellInterface>[];
+
+  cantrips: R<SpellInterface>[]
+
   hitPoints: number;
+
+  maxHitPoints: number;
 
   temporaryHitPoints: number;
   
+  influencingActions: ActionInterface[];
+
+  conditions: ConditionType[];
+
+  actionsLeft: number;
+
+  bonusActionsLeft: number;
+
+  primaryWeapon: PrimaryWeapon;
+
+  actor: CreatureActorInterface | null;
+
+  getMaxSpellSlots(spellLevel: number): number | undefined;
+
   removeInfluencingAction(name: string): void;
 
   percentSuccess(target: CreatureInterface, weapon: Weapon): number;
@@ -181,6 +292,12 @@ export interface ScriptInterface {
 
 }
 
+export enum States {
+  idle,
+  planning,
+  scripting,
+}
+
 export interface CreatureActorInterface extends ActorInterface {
   id: number;
 
@@ -195,6 +312,26 @@ export interface CreatureActorInterface extends ActorInterface {
   sceneNode: SceneNodeInterface;
   
   chestHeight: number;
+
+  team: number;
+
+  initiativeRoll: number;
+
+  automated: boolean;
+
+  state: States;
+
+  startTurn(world: WorldInterface): void;
+
+  endTurn(): void;
+
+  setAction(action: ActionInterface | null): void;
+
+  setDefaultAction(): void;
+
+  setMoveAction(): void;
+
+  getAction(): ActionInterface | null;
 
   getWorldPosition(): Vec4;
 
@@ -262,3 +399,8 @@ export interface PipelineManagerInterface {
   getPipelineByArgs(args: PipelineAttributes): PipelineInterface;
 }
 
+export type Party = {
+  members: { included: boolean, character: CharacterInterface }[],
+  automate: boolean,
+  experiencePoints?: number,
+}

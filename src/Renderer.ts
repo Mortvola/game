@@ -3,12 +3,10 @@ import {
   Vec4, mat4, vec2, vec4,
 } from 'wgpu-matrix';
 import Camera from './Camera';
-import Gpu from './Gpu';
 import {
   degToRad, intersectionPlane,
 } from './Math';
 import ContainerNode, { isContainerNode } from './Drawables/SceneNodes/ContainerNode';
-import BindGroups, { lightsStructure } from './BindGroups';
 import RenderPass from './RenderPass';
 import Light, { isLight } from './Drawables/Light';
 import CartesianAxes from './Drawables/CartesianAxes';
@@ -16,15 +14,19 @@ import CartesianAxes from './Drawables/CartesianAxes';
 import Line from './Drawables/Line';
 import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
-import Actor, { EpisodeInfo, States } from './Character/Actor';
 import Script from './Script/Script';
-import { Party } from './UserInterface/PartyList';
-import MoveAction from './Character/Actions/MoveAction';
 import { Occupant } from './Workers/PathPlannerTypes';
 import DrawableNode from './Drawables/SceneNodes/DrawableNode';
 import SceneNode from './Drawables/SceneNodes/SceneNode';
-import { ActionInfo, ActorInterface, FocusInfo, WorldInterface } from './types';
+import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, EpisodeInfo, Party } from './types';
 import { lineMaterial } from './Materials/Line';
+import {
+  makeShaderDataDefinitions,
+  makeStructuredView,
+} from 'webgpu-utils';
+import { lights } from "./shaders/lights";
+import { bindGroups } from './BindGroups';
+import { gpu } from './Gpu';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -34,6 +36,9 @@ const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   });
 };
 
+const defs = makeShaderDataDefinitions(lights);
+export const lightsStructure = makeStructuredView(defs.structs.Lights);
+
 type BindGroup = {
   bindGroup: GPUBindGroup,
   buffer: GPUBuffer[],
@@ -41,10 +46,6 @@ type BindGroup = {
 
 class Renderer implements WorldInterface {
   initialized = false;
-
-  gpu: Gpu;
-
-  bindGroups: BindGroups;
 
   frameBindGroup: BindGroup | null = null;
 
@@ -88,7 +89,7 @@ class Renderer implements WorldInterface {
 
   participants = new Participants();
 
-  focused: Actor | null = null;
+  focused: CreatureActorInterface | null = null;
 
   path2: Line | null = null;
 
@@ -112,7 +113,7 @@ class Renderer implements WorldInterface {
 
   actionInfoCallback: ((actionInfo: ActionInfo | null) => void) | null = null;
 
-  characterChangeCallback: ((character: Actor | null) => void) | null = null;
+  characterChangeCallback: ((character: CreatureActorInterface | null) => void) | null = null;
 
   animate = true;
 
@@ -122,11 +123,8 @@ class Renderer implements WorldInterface {
 
   occupants: Occupant[] = [];
 
-  constructor(gpu: Gpu, bindGroups: BindGroups, test?: SceneNode) {
-    this.gpu = gpu;
-    this.bindGroups = bindGroups;
-
-    this.createCameraBindGroups();
+  constructor(frameBindGroupLayout: GPUBindGroupLayout, test?: SceneNode) {
+    this.createCameraBindGroups(frameBindGroupLayout);
 
     // this.reticle = reticle;
 
@@ -140,20 +138,16 @@ class Renderer implements WorldInterface {
     this.updateTransforms();
   }
 
-  static async create(gpu: Gpu, bindGroups: BindGroups) {
+  static async create() {
     // const reticle = new DrawableNode(await Reticle.create(0.05));
 
     let test: SceneNode | undefined = undefined;
     // test = await modelManager.getModel('SoulerCoaster');
     
-    return new Renderer(gpu, bindGroups, test);
+    return new Renderer(bindGroups.getBindGroupLayout0(gpu.device), test);
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
-    if (!this.gpu) {
-      throw new Error('Could not acquire device');
-    }
-
     if (this.context) {
       this.context.unconfigure();
     }
@@ -165,7 +159,7 @@ class Renderer implements WorldInterface {
     }
 
     this.context.configure({
-      device: this.gpu.device,
+      device: gpu.device,
       format: navigator.gpu.getPreferredCanvasFormat(),
       alphaMode: 'opaque',
     });
@@ -177,64 +171,63 @@ class Renderer implements WorldInterface {
     this.initialized = true;
   }
 
-  createCameraBindGroups() {
-    if (this.gpu) {
-      const matrixBufferSize = 16 * Float32Array.BYTES_PER_ELEMENT;
+  createCameraBindGroups(frameBindGroupLayout: GPUBindGroupLayout) {
+    const matrixBufferSize = 16 * Float32Array.BYTES_PER_ELEMENT;
 
-      const projectionTransformBuffer = this.gpu.device.createBuffer({
-        label: 'projection Matrix',
-        size: matrixBufferSize,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      });
+    const projectionTransformBuffer = gpu.device.createBuffer({
+      label: 'projection Matrix',
+      size: matrixBufferSize,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
 
-      const viewTransformBuffer = this.gpu.device.createBuffer({
-        label: 'view Matrix',
-        size: matrixBufferSize,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      });
+    const viewTransformBuffer = gpu.device.createBuffer({
+      label: 'view Matrix',
+      size: matrixBufferSize,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
 
-      const cameraPosBuffer = this.gpu.device.createBuffer({
-        label: 'camera position',
-        size: 4 * Float32Array.BYTES_PER_ELEMENT,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      });
+    const cameraPosBuffer = gpu.device.createBuffer({
+      label: 'camera position',
+      size: 4 * Float32Array.BYTES_PER_ELEMENT,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
 
-      const aspectRatioBuffer = this.gpu.device.createBuffer({
-        label: 'aspect ratio',
-        size: 1 * Float32Array.BYTES_PER_ELEMENT,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      });
+    const aspectRatioBuffer = gpu.device.createBuffer({
+      label: 'aspect ratio',
+      size: 1 * Float32Array.BYTES_PER_ELEMENT,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
 
-      const lightsBuffer = this.gpu.device.createBuffer({
-        label: 'lights',
-        size: lightsStructure.arrayBuffer.byteLength,
-        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-      });
+    const lightsBuffer = gpu.device.createBuffer({
+      label: 'lights',
+      size: lightsStructure.arrayBuffer.byteLength,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+    });
 
-      const frameBindGroup = this.gpu.device.createBindGroup({
-        label: 'camera',
-        layout: this.bindGroups.bindGroupLayout0,
-        entries: [
-          { binding: 0, resource: { buffer: projectionTransformBuffer }},
-          { binding: 1, resource: { buffer: viewTransformBuffer }},
-          { binding: 2, resource: { buffer: cameraPosBuffer }},
-          { binding: 3, resource: { buffer: aspectRatioBuffer }},
-          { binding: 4, resource: { buffer: lightsBuffer }},
-        ],
-      });
+    const frameBindGroup = gpu.device.createBindGroup({
+      label: 'frame',
+      layout: frameBindGroupLayout,
+      entries: [
+        { binding: 0, resource: { buffer: projectionTransformBuffer }},
+        { binding: 1, resource: { buffer: viewTransformBuffer }},
+        { binding: 2, resource: { buffer: cameraPosBuffer }},
+        { binding: 3, resource: { buffer: aspectRatioBuffer }},
+        { binding: 4, resource: { buffer: lightsBuffer }},
+      ],
+    });
 
-      this.frameBindGroup = {
-        bindGroup: frameBindGroup,
-        buffer: [
-            projectionTransformBuffer,
-            viewTransformBuffer,
-            cameraPosBuffer,
-            aspectRatioBuffer,
-            lightsBuffer,
-        ],
-      }
+    this.frameBindGroup = {
+      bindGroup: frameBindGroup,
+      buffer: [
+          projectionTransformBuffer,
+          viewTransformBuffer,
+          cameraPosBuffer,
+          aspectRatioBuffer,
+          lightsBuffer,
+      ],
     }
   }
+
   startTurn() {
     if (this.participants.activeActor) {
       if (this.participants.activeActor.automated) {
@@ -264,7 +257,7 @@ class Renderer implements WorldInterface {
     }
   }
 
-  endTurn2(actor: Actor) {
+  endTurn2(actor: CreatureActorInterface) {
     if (this.participants.activeActor && this.participants.activeActor === actor) {
       this.participants.activeActor.endTurn();
 
@@ -327,10 +320,10 @@ class Renderer implements WorldInterface {
         ];
       }
 
-      this.participants.remove(removedActor as Actor);
+      this.participants.remove(removedActor as CreatureActorInterface);
 
-      this.collidees.remove(removedActor as Actor);
-      this.scene.removeNode((removedActor as Actor).sceneNode);
+      this.collidees.remove(removedActor as CreatureActorInterface);
+      this.scene.removeNode((removedActor as CreatureActorInterface).sceneNode);
     }
 
     this.removeActors = [];
@@ -479,10 +472,6 @@ class Renderer implements WorldInterface {
   }
 
   drawScene() {
-    if (!this.gpu) {
-      throw new Error('device is not set');
-    }
-
     if (!this.context) {
       throw new Error('context is null');
     }
@@ -499,7 +488,7 @@ class Renderer implements WorldInterface {
     if (this.context.canvas.width !== this.renderedDimensions[0]
       || this.context.canvas.height !== this.renderedDimensions[1]
     ) {
-      const depthTexture = this.gpu.device!.createTexture({
+      const depthTexture = gpu.device.createTexture({
         size: { width: this.context.canvas.width, height: this.context.canvas.height },
         format: 'depth24plus',
         usage: GPUTextureUsage.RENDER_ATTACHMENT,
@@ -532,19 +521,19 @@ class Renderer implements WorldInterface {
     const view = this.context.getCurrentTexture().createView();
 
     if (this.camera.projection === 'Perspective') {
-      this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[0], 0, this.camera.perspectiveTransform as Float32Array);
+      gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[0], 0, this.camera.perspectiveTransform as Float32Array);
     } else {
-      this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[0], 0, this.camera.orthographicTransform as Float32Array);
+      gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[0], 0, this.camera.orthographicTransform as Float32Array);
     }
 
     const inverseViewtransform = mat4.inverse(this.camera.viewTransform);
-    this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[1], 0, inverseViewtransform as Float32Array);
+    gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[1], 0, inverseViewtransform as Float32Array);
 
     // Write the camera position
 
     const cameraPosition = vec4.transformMat4(vec4.create(0, 0, 0, 1), this.camera.viewTransform);
-    this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[2], 0, cameraPosition as Float32Array);
-    this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[3], 0, this.aspectRatio as Float32Array);
+    gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[2], 0, cameraPosition as Float32Array);
+    gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[3], 0, this.aspectRatio as Float32Array);
 
     // Update the light information
     lightsStructure.set({
@@ -563,9 +552,9 @@ class Renderer implements WorldInterface {
       })),
     });
 
-    this.gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[4], 0, lightsStructure.arrayBuffer);
+    gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[4], 0, lightsStructure.arrayBuffer);
 
-    const commandEncoder = this.gpu.device.createCommandEncoder();
+    const commandEncoder = gpu.device.createCommandEncoder();
 
     this.mainRenderPass.render(view, this.depthTextureView!, commandEncoder, this.frameBindGroup.bindGroup);
 
@@ -594,7 +583,7 @@ class Renderer implements WorldInterface {
     //   this.dragHandlesPass.render(view, this.depthTextureView!, commandEncoder);
     // }
 
-    this.gpu.device.queue.submit([commandEncoder.finish()]);
+    gpu.device.queue.submit([commandEncoder.finish()]);
   }
 
   pointerDown(x: number, y: number) {
@@ -643,13 +632,13 @@ class Renderer implements WorldInterface {
   pointerUp(x: number, y: number) {
   }
 
-  cameraHitTest(): { actor?: Actor, point?: Vec4 } {
+  cameraHitTest(): { actor?: CreatureActorInterface, point?: Vec4 } {
     const { origin, ray } = this.camera.computeHitTestRay(this.reticlePosition[0], this.reticlePosition[1]);
 
     // Determine if an actor should be highlighted but
     // don't check the active actor.
     let best: {
-      actor: Actor
+      actor: CreatureActorInterface
       t: number,
     } | null = null;
 
@@ -682,7 +671,7 @@ class Renderer implements WorldInterface {
   }
 
   updateFocus = true;
-  prevActor: Actor | null = null;
+  prevActor: CreatureActorInterface | null = null;
   prevPoint: Vec4 | null = null;
   
   async checkActorFocus() {
@@ -787,7 +776,7 @@ class Renderer implements WorldInterface {
             activeActor.setDefaultAction();
           }
           else if (activeActor.distanceLeft > 0) {
-            activeActor.setAction(new MoveAction(activeActor));
+            activeActor.setMoveAction();
           }
           else if (this.actionInfoCallback) {
             this.actionInfoCallback(null)
@@ -866,7 +855,7 @@ class Renderer implements WorldInterface {
     this.actionInfoCallback = callback;
   }
 
-  setCharacterChangeCallback(callback: (actor: Actor | null) => void) {
+  setCharacterChangeCallback(callback: (actor: CreatureActorInterface | null) => void) {
     this.characterChangeCallback = callback;
   }
 

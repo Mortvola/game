@@ -1,7 +1,7 @@
 import { Vec4 } from 'wgpu-matrix';
-import { gpu } from "../Main";
 import DrawableInterface, { maxInstances } from "./DrawableInterface";
 import Drawable from './Drawable';
+import { gpu } from '../Gpu';
 
 class CartesianAxes extends Drawable {
   drawable = true;
@@ -31,10 +31,6 @@ class CartesianAxes extends Drawable {
   constructor() {
     super();
     
-    if (!gpu) {
-      throw new Error('gepu device not set')
-    }
-
     const gridLineColor = [0.3, 0.3, 0.3, 1];
 
     // x grid lines

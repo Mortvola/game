@@ -1,6 +1,6 @@
 import { CharacterStorageParty, characterStorageParties } from "./Character/CharacterStorage";
-import { Party } from "./UserInterface/PartyList";
 import QStore, { Key, QTable } from "./Workers/QStore";
+import { Party } from "./types";
 
 export const qStore = new QStore();
 
