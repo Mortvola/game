@@ -1,3 +1,5 @@
+import { gpu } from "./Gpu";
+
 class BindGroups {
   private bindGroupLayout0: GPUBindGroupLayout | null = null;
 
@@ -9,12 +11,12 @@ class BindGroups {
 
   private bindGroupLayout3: GPUBindGroupLayout | null = null;
 
-  getBindGroupLayout0(device: GPUDevice) {
+  getBindGroupLayout0() {
     if (this.bindGroupLayout0) {
       return this.bindGroupLayout0;
     }
 
-    this.bindGroupLayout0 = device.createBindGroupLayout({
+    this.bindGroupLayout0 = gpu.device.createBindGroupLayout({
       label: 'group0',
       entries: [
         { // Projection matrix
@@ -50,12 +52,12 @@ class BindGroups {
     return this.bindGroupLayout0;
   }
 
-  getBindGroupLayout1(device: GPUDevice) {
+  getBindGroupLayout1() {
     if (this.bindGroupLayout1) {
       return this.bindGroupLayout1;
     }
 
-    this.bindGroupLayout1 = device.createBindGroupLayout({
+    this.bindGroupLayout1 = gpu.device.createBindGroupLayout({
       label: 'group1',
       entries: [
         { // Model matrix
@@ -69,12 +71,12 @@ class BindGroups {
     return this.bindGroupLayout1;
   }
 
-  getBindGroupLayout2(device: GPUDevice) {
+  getBindGroupLayout2() {
     if (this.bindGroupLayout2) {
       return this.bindGroupLayout2;
     }
 
-    this.bindGroupLayout2 = device.createBindGroupLayout({
+    this.bindGroupLayout2 = gpu.device.createBindGroupLayout({
       label: 'group2',
       entries: [
         { // Color
@@ -98,12 +100,12 @@ class BindGroups {
     return this.bindGroupLayout2;
   }
 
-  getBindGroupLayout2A(device: GPUDevice) {
+  getBindGroupLayout2A() {
     if (this.bindGroupLayout2A) {
       return this.bindGroupLayout2A;
     }
 
-    this.bindGroupLayout2A = device.createBindGroupLayout({
+    this.bindGroupLayout2A = gpu.device.createBindGroupLayout({
       label: 'group2A',
       entries: [
         { // Color
@@ -117,12 +119,12 @@ class BindGroups {
     return this.bindGroupLayout2A;
   }
 
-  getBindGroupLayout3(device: GPUDevice) {
+  getBindGroupLayout3() {
     if (this.bindGroupLayout3) {
       return this.bindGroupLayout3;
     }
 
-    this.bindGroupLayout3 = device.createBindGroupLayout({
+    this.bindGroupLayout3 = gpu.device.createBindGroupLayout({
       label: 'group3',
       entries: [
         { // Circle data, reticle radius

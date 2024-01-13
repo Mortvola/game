@@ -33,7 +33,7 @@ class TexturedPipelineArgs implements PipelineArgs {
     
     this.bindGroup3 = gpu.device.createBindGroup({
       label: TexturedPipelineArgs.label,
-      layout: bindGroups.getBindGroupLayout3(gpu!.device),
+      layout: bindGroups.getBindGroupLayout3(),
       entries: [
         { binding: 0, resource: sampler },
         { binding: 1, resource: texture.createView() },

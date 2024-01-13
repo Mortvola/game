@@ -27,7 +27,7 @@ class Reticle extends Drawable {
 
     this.bindGroup3 = gpu.device.createBindGroup({
       label: 'radius',
-      layout: bindGroups.getBindGroupLayout3(gpu.device),
+      layout: bindGroups.getBindGroupLayout3(),
       entries: [
         { binding: 0, resource: { buffer: this.uniformBuffer3 }},
       ],
@@ -51,7 +51,7 @@ class Reticle extends Drawable {
     
     this.bindGroup2 = gpu.device.createBindGroup({
       label,
-      layout: bindGroups.getBindGroupLayout2(gpu.device),
+      layout: bindGroups.getBindGroupLayout2(),
       entries: [
         { binding: 0, resource: { buffer: this.colorBuffer }},
         { binding: 1, resource: sampler },

@@ -13,15 +13,6 @@ class OutlinePipeline extends Pipeline {
       label,
       code: outlineShader,
     })
-
-    const pipelineLayout = gpu.device.createPipelineLayout({
-      bindGroupLayouts: [
-        bindGroups.getBindGroupLayout0(gpu.device),
-        bindGroups.getBindGroupLayout1(gpu.device),
-        bindGroups.getBindGroupLayout2(gpu.device),
-        bindGroups.getBindGroupLayout3(gpu.device),
-      ],
-    });
     
     const vertexBufferLayout: GPUVertexBufferLayout[] = [
       {
@@ -74,7 +65,14 @@ class OutlinePipeline extends Pipeline {
         depthCompare: "less",
         format: "depth24plus"
       },
-      layout: pipelineLayout,
+      layout: gpu.device.createPipelineLayout({
+        bindGroupLayouts: [
+          bindGroups.getBindGroupLayout0(),
+          bindGroups.getBindGroupLayout1(),
+          bindGroups.getBindGroupLayout2(),
+          bindGroups.getBindGroupLayout3(),
+        ],
+      }),
     };
     
     this.pipeline = gpu.device.createRenderPipeline(pipelineDescriptor);

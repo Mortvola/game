@@ -41,7 +41,7 @@ class Trajectory extends Drawable {
 
     this.trajectoryBindGroup = gpu.device.createBindGroup({
       label,
-      layout: bindGroups.getBindGroupLayout3(gpu.device),
+      layout: bindGroups.getBindGroupLayout3(),
       entries: [
         { binding: 0, resource: { buffer: this.trajectoryBuffer }},
       ],

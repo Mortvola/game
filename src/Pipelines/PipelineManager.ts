@@ -135,9 +135,9 @@ class PipelineManager implements PipelineManagerInterface {
       },
       layout: gpu.device.createPipelineLayout({
         bindGroupLayouts: [
-          bindGroups.getBindGroupLayout0(gpu.device),
-          bindGroups.getBindGroupLayout1(gpu.device),
-          bindGroups.getBindGroupLayout2A(gpu.device),
+          bindGroups.getBindGroupLayout0(),
+          bindGroups.getBindGroupLayout1(),
+          bindGroups.getBindGroupLayout2A(),
         ],
       }),
     };

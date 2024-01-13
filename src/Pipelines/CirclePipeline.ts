@@ -42,10 +42,10 @@ class CirclePipeline extends Pipeline {
       layout: gpu.device.createPipelineLayout({
         label,
         bindGroupLayouts: [
-          bindGroups.getBindGroupLayout0(gpu.device),
-          bindGroups.getBindGroupLayout1(gpu.device),
-          bindGroups.getBindGroupLayout2A(gpu.device),
-          bindGroups.getBindGroupLayout3(gpu.device),
+          bindGroups.getBindGroupLayout0(),
+          bindGroups.getBindGroupLayout1(),
+          bindGroups.getBindGroupLayout2A(),
+          bindGroups.getBindGroupLayout3(),
         ]
       }),
     };

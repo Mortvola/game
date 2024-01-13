@@ -46,7 +46,7 @@ class Drawable implements DrawableInterface {
 
     this.bindGroup = gpu.device.createBindGroup({
       label: 'bind group for model matrix',
-      layout: bindGroups.getBindGroupLayout1(gpu.device),
+      layout: bindGroups.getBindGroupLayout1(),
       entries: [
         { binding: 0, resource: { buffer: this.modelMatrixBuffer }},
       ],
@@ -54,7 +54,7 @@ class Drawable implements DrawableInterface {
 
     this.bindGroup2 = gpu.device.createBindGroup({
       label: 'Color',
-      layout: bindGroups.getBindGroupLayout2A(gpu.device),
+      layout: bindGroups.getBindGroupLayout2A(),
       entries: [
         { binding: 0, resource: { buffer: this.colorBuffer }},
       ],

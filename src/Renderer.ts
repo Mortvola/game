@@ -144,7 +144,7 @@ class Renderer implements WorldInterface {
     let test: SceneNode | undefined = undefined;
     // test = await modelManager.getModel('SoulerCoaster');
     
-    return new Renderer(bindGroups.getBindGroupLayout0(gpu.device), test);
+    return new Renderer(bindGroups.getBindGroupLayout0(), test);
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {

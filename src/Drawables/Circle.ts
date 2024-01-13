@@ -41,7 +41,7 @@ class Circle extends Drawable {
 
     this.bindGroup3 = gpu.device.createBindGroup({
       label: 'Circle',
-      layout: bindGroups.getBindGroupLayout3(gpu.device),
+      layout: bindGroups.getBindGroupLayout3(),
       entries: [
         { binding: 0, resource: { buffer: this.circleDataBuffer }},
       ],
