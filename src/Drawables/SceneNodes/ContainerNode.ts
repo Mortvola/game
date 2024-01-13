@@ -1,9 +1,8 @@
 import { Vec4, mat4 } from 'wgpu-matrix';
 import DrawableInterface from "../DrawableInterface";
 import SceneNode from "./SceneNode";
-import { isDrawableNode } from './DrawableNodeInterface';
-import { SceneNodeInterface } from './SceneNodeInterface';
-import { WorldInterface } from '../../types';
+import { SceneNodeInterface, WorldInterface } from '../../types.d';
+import { isDrawableNode } from './utils';
 
 export type HitTestResult = {
   drawable: DrawableInterface,

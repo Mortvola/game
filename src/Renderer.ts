@@ -13,22 +13,18 @@ import RenderPass from './RenderPass';
 import Light, { isLight } from './Drawables/Light';
 import CartesianAxes from './Drawables/CartesianAxes';
 // import Reticle from './Drawables/Reticle';
-import Actor, { States } from './Character/Actor';
 import Line from './Drawables/Line';
 import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
-import { EpisodeInfo } from './Character/Actor';
+import Actor, { EpisodeInfo, States } from './Character/Actor';
 import Script from './Script/Script';
 import { Party } from './UserInterface/PartyList';
-import Circle from './Drawables/Circle';
 import MoveAction from './Character/Actions/MoveAction';
 import { Occupant } from './Workers/PathPlannerTypes';
 import DrawableNode from './Drawables/SceneNodes/DrawableNode';
-import { modelManager } from './Main';
+import { pipelineManager } from './Main';
 import SceneNode from './Drawables/SceneNodes/SceneNode';
-import PipelineManager from './Pipelines/PipelineManager';
 import { ActionInfo, ActorInterface, FocusInfo, WorldInterface } from './types';
-import Delay from './Script/Delay';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -117,8 +113,6 @@ class Renderer implements WorldInterface {
 
   endOfRound = true;
 
-  circleAoE: Circle | null = null;
-
   occupants: Occupant[] = [];
 
   constructor(gpu: Gpu, bindGroups: BindGroups, test?: SceneNode) {
@@ -128,7 +122,7 @@ class Renderer implements WorldInterface {
     // this.reticle = reticle;
 
     this.aspectRatio[0] = 1.0;
-    this.scene.addNode(new DrawableNode(new CartesianAxes(), PipelineManager.getInstance().getPipeline('line')!));
+    this.scene.addNode(new DrawableNode(new CartesianAxes(), pipelineManager.getPipeline('line')!));
 
     if (test) {
       this.scene.addNode(test);

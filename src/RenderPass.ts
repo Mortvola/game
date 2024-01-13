@@ -1,8 +1,7 @@
-import PipelineInterface from "./Pipelines/PipelineInterface";
 import { isContainerNode } from "./Drawables/SceneNodes/ContainerNode";
+import { isDrawableNode } from "./Drawables/SceneNodes/utils";
 import { bindGroups } from "./Main";
-import { DrawableNodeInterface, isDrawableNode } from "./Drawables/SceneNodes/DrawableNodeInterface";
-import { SceneNodeInterface } from "./Drawables/SceneNodes/SceneNodeInterface";
+import { DrawableNodeInterface, PipelineInterface, SceneNodeInterface } from "./types";
 
 class RenderPass {
   pipelines: PipelineInterface[] = [];

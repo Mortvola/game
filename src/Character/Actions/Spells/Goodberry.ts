@@ -1,10 +1,9 @@
 import Script from "../../../Script/Script";
-import { WorldInterface } from '../../../types'
-import Actor from "../../Actor";
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import TouchSpell from "./TouchSpell";
 
 class Goodberry extends TouchSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Goodberry', 'Action', 1, 0, false, false);
   }
 

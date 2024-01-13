@@ -1,11 +1,10 @@
 import { Vec4 } from "wgpu-matrix";
-import Actor from "../../Actor";
 import Spell from "./Spell";
-import { WorldInterface } from '../../../types'
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import Script from "../../../Script/Script";
 
 class SelfSpell extends Spell {
-  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     let success = 0;
 
     if (this.actor === target) {

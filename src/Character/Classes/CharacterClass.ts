@@ -1,12 +1,12 @@
-import { Abilities, abilityModifier } from "../../Dice";
-import { CHaracterClassInterface } from "../../types";
+import { Abilities } from "./Abilities";
+import { abilityModifier } from "../../Dice";
+import { AbilityScores, CharacterClassInterface } from "../../types";
 import Action from "../Actions/Action";
 import { A } from "../Actions/Actions";
 import { Armor } from "../Equipment/Armor";
 import Weapon, { WeaponProficiencies, WeaponType } from "../Equipment/Weapon";
-import { AbilityScores } from "../Races/AbilityScores";
 
-class CharacterClass implements CHaracterClassInterface {
+class CharacterClass implements CharacterClassInterface {
   name: string;
 
   hitDice: number;

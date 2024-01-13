@@ -1,7 +1,6 @@
-import { DrawableNodeInterface } from "../Drawables/SceneNodes/DrawableNodeInterface";
-import PipelineInterface from "./PipelineInterface";
 import { gpu } from "../Main";
 import DrawableInterface from "../Drawables/DrawableInterface";
+import { DrawableNodeInterface, PipelineInterface } from "../types";
 
 class Pipeline implements PipelineInterface {
   pipeline: GPURenderPipeline | null = null;

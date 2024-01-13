@@ -1,5 +1,5 @@
 import { abilityModifier, diceRoll } from "../../Dice";
-import { AbilityScores } from "../Races/AbilityScores";
+import { AbilityScores } from "../../types";
 
 export enum WeaponProperties {
   Light,

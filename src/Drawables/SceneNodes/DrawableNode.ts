@@ -1,9 +1,8 @@
 import { Vec4, mat4, vec4 } from "wgpu-matrix";
 import DrawableInterface from "../DrawableInterface";
 import SceneNode from "./SceneNode";
-import { DrawableNodeInterface } from "./DrawableNodeInterface";
 import { PipelineArgs } from "../../Pipelines/PipelineArgs";
-import PipelineInterface from "../../Pipelines/PipelineInterface";
+import { DrawableNodeInterface, PipelineInterface } from "../../types";
 
 class DrawableNode extends SceneNode implements DrawableNodeInterface {
   drawable: DrawableInterface;

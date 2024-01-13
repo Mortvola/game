@@ -1,18 +1,16 @@
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
-import Actor from "../../Actor";
 import { diceRoll } from "../../../Dice";
 import RangeSpell from "./RangeSpell";
 import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import { findPath2 } from "../../../Workers/PathPlannerQueue";
 import { PathPoint } from "../../../Workers/PathPlannerTypes";
 import Line from "../../../Drawables/Line";
-import { getWorld, modelManager } from "../../../Main";
+import { getWorld, modelManager, pipelineManager } from "../../../Main";
 import FollowPath from "../../../Script/FollowPath";
 import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
 import Parallel from "../../../Script/Parallel";
-import PipelineManager from "../../../Pipelines/PipelineManager";
-import { WorldInterface } from "../../../types";
+import { CreatureActorInterface, WorldInterface } from "../../../types";
 
 class MagicMissile extends RangeSpell {
   paths: PathPoint[][] = [];
@@ -21,7 +19,7 @@ class MagicMissile extends RangeSpell {
 
   lines: number[][] = [];
 
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 3, false, 'Magic Missile', 'Action', 1, feetToMeters(120), 0, false, false)
   }
 
@@ -64,7 +62,7 @@ class MagicMissile extends RangeSpell {
     return true;
   }
 
-  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     let description = `Select ${this.maxTargets  - this.targets.length} more targets.`;
 
     if (this.maxTargets === 1) {
@@ -160,7 +158,7 @@ class MagicMissile extends RangeSpell {
     const world = getWorld();
 
     if (!this.cleared && lines.length > 0) {
-      this.missileLines.push(new DrawableNode(new Line(lines), PipelineManager.getInstance().getPipeline('line')!));
+      this.missileLines.push(new DrawableNode(new Line(lines), pipelineManager.getPipeline('line')!));
       world.scene.addNode(this.missileLines[this.missileLines.length - 1]);
     }
   }

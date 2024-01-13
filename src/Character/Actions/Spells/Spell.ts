@@ -1,10 +1,10 @@
 import { Vec4 } from "wgpu-matrix";
 import Script from "../../../Script/Script";
-import { CreatureActorInterface, WorldInterface } from '../../../types'
+import { CreatureActorInterface, SpellInterface, WorldInterface } from '../../../types'
 import Action, { TimeType } from "../Action";
 import { getWorld } from "../../../Main";
 
-class Spell extends Action {
+class Spell extends Action implements SpellInterface {
   level: number;
 
   castingTime = 1;

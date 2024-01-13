@@ -1,12 +1,11 @@
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
-import { WorldInterface } from '../../../types'
-import Actor from "../../Actor";
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import RangeSpell from "./RangeSpell";
 import Logger from "../../../Script/Logger";
 
 class ShieldOfFaith extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Shield of Faith', 'Bonus', 1, feetToMeters(60), 10 * 60, false, true);
   }
 

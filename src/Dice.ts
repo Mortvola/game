@@ -1,10 +1,7 @@
-import CharacterClass from "./Character/Classes/CharacterClass";
-import Creature from "./Character/Creature";
 import Weapon, { DamageType, WeaponType, weaponDamage } from "./Character/Equipment/Weapon";
-import { AbilityScores } from "./Character/Races/AbilityScores";
 import { Race } from "./Character/Races/Race";
 import { rageDamageBonus } from "./Tables";
-import { CharacterInterface, CreatureInterface } from "./types";
+import { AbilityScores, CharacterClassInterface, CharacterInterface, CreatureInterface } from "./types";
 
 export const diceRoll = (numDice: number, sides: number): number => {
   let sum = 0;
@@ -69,8 +66,8 @@ export const savingThrow = (creature: CharacterInterface, score: number, advanta
 }
 
 export const attackRoll = (
-  attacker: Creature,
-  target: Creature,
+  attacker: CreatureInterface,
+  target: CreatureInterface,
   weapon: Weapon,
   twhoHanded: boolean,
   advantage: Advantage,
@@ -190,15 +187,6 @@ export const spellAttackRoll = (
   return [0, false];
 }
 
-export enum Abilities {
-  strength = 'strength',
-  charisma = 'charisma',
-  dexterity = 'dexterity',
-  intelligence = 'intelligence',
-  constitution = 'constitution',
-  wisdom = 'wisdom',
-}
-
 export const abilityRolls = () => (
   [
     abilityRoll(),
@@ -210,7 +198,7 @@ export const abilityRolls = () => (
   ]
 )
 
-export const assignAbilityScores = (rolls: number[], charClass: CharacterClass): AbilityScores => {
+export const assignAbilityScores = (rolls: number[], charClass: CharacterClassInterface): AbilityScores => {
   const abilities: AbilityScores = {
     strength: 0,
     dexterity: 0,
@@ -275,7 +263,7 @@ export const addAbilityIncreases = (abilityScores: AbilityScores, race: Race): A
   return updatedScores;
 }
 
-export const generateAbilityScores = (rolls: number[], race: Race, charClass: CharacterClass): AbilityScores => {
+export const generateAbilityScores = (rolls: number[], race: Race, charClass: CharacterClassInterface): AbilityScores => {
   const abilities: AbilityScores = {
     strength: 0,
     dexterity: 0,

@@ -8,9 +8,8 @@ import { R, clericSpells, druidSpells } from "./Actions/Spells/Spells";
 import CharacterClass from "./Classes/CharacterClass";
 import { Armor } from "./Equipment/Armor";
 import Weapon, { WeaponProperties, WeaponType } from "./Equipment/Weapon";
-import { AbilityScores } from "./Races/AbilityScores";
 import { Race } from "./Races/Race";
-import { CreatureActorInterface, CreatureInterface, Equipped } from "../types";
+import { AbilityScores, CreatureActorInterface, CreatureInterface, Equipped } from "../types";
 
 type PrimaryWeapon = 'Melee' | 'Range';
   
@@ -144,7 +143,7 @@ class Creature implements CreatureInterface {
     }
   }
 
-  getWeaponProficiency(weapon: Weapon) {
+  getWeaponProficiency(weapon: Weapon): number {
     if (this.charClass.weaponProficiencies.filter((wp) => weapon.proficiencies.includes(wp)).length > 0) {
       return getProficiencyBonus(this.charClass.level)
     }

@@ -1,9 +1,9 @@
 import { feetToMeters } from "../../../Math";
-import Actor from "../../Actor";
+import { CreatureActorInterface } from "../../../types";
 import AreaSpell from "./AreaSpell";
 
 class FogCloud extends AreaSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 'Fog Cloud', 'Action', 1, feetToMeters(20), feetToMeters(120), 60 * 60, false, true);
   }
 }

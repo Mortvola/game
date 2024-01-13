@@ -1,11 +1,10 @@
 import { Vec4 } from "wgpu-matrix";
-import Actor from "../../Actor";
 import Spell from "./Spell";
-import { WorldInterface } from '../../../types'
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import Script from "../../../Script/Script";
 
 class TouchSpell extends Spell {
-  async prepareInteraction(target: Actor | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     await this.prepareZeroDistAction(100, target, point, world);
   }
 

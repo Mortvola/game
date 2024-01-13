@@ -1,12 +1,11 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import Circle from "../../../Drawables/Circle";
-import { getWorld } from "../../../Main";
+import { getWorld, pipelineManager } from "../../../Main";
 import { degToRad } from "../../../Math";
 import { TimeType } from "../Action";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
 import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
-import PipelineManager from "../../../Pipelines/PipelineManager";
 import { CreatureActorInterface, WorldInterface } from "../../../types";
 
 class AreaSpell extends RangeSpell {
@@ -58,7 +57,7 @@ class AreaSpell extends RangeSpell {
     if (this.areaOfEffect === null) {
       const world = getWorld();
 
-      this.areaOfEffect = new DrawableNode(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), PipelineManager.getInstance().getPipeline('circle')!)
+      this.areaOfEffect = new DrawableNode(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), pipelineManager.getPipeline('circle')!)
       this.areaOfEffect.translate = vec3.copy(this.actor.sceneNode.translate)
   
       world.scene.addNode(this.areaOfEffect);

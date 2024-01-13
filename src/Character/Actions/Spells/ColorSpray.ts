@@ -1,11 +1,10 @@
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
-import { WorldInterface } from '../../../types'
-import Actor from "../../Actor";
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import RangeSpell from "./RangeSpell";
 
 class ColorSpray extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Color Spray', 'Action', 1, feetToMeters(15), 6, true, false)
   }
 

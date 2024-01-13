@@ -1,4 +1,4 @@
-import { Abilities } from "../../Dice";
+import { Abilities } from "./Abilities";
 import { getArmor } from "../Equipment/Armor";
 import { WeaponType, getWeapon } from "../Equipment/Weapon";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";

@@ -4,7 +4,7 @@ import { Race } from '../../Character/Races/Race';
 import SelectClass from './SelectClass';
 import CharacterClass from '../../Character/Classes/CharacterClass';
 import Abilities from './Abilities';
-import { AbilityScores } from '../../Character/Races/AbilityScores';
+import { AbilityScores } from '../../types';
 
 type PropsType = {
   race: Race,

@@ -1,11 +1,10 @@
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
-import { WorldInterface } from '../../../types'
-import Actor from "../../Actor";
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import AreaSpell from "./AreaSpell";
 
 class Sleep extends AreaSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 'Sleep', 'Action', 1, feetToMeters(20), feetToMeters(90), 60, false, false)
   }
 

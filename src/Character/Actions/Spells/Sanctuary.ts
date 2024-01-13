@@ -1,12 +1,11 @@
-import Actor from "../../Actor";
-import { WorldInterface } from '../../../types'
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import Script from "../../../Script/Script";
 import Logger from "../../../Script/Logger";
 import { feetToMeters } from "../../../Math";
 import RangeSpell from "./RangeSpell";
 
 class Sanctuary extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Sanctuary', 'Bonus', 1, feetToMeters(30), 60, false, false);
   }
 

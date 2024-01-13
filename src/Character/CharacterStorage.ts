@@ -2,9 +2,9 @@ import { Party } from "../UserInterface/PartyList"
 import Character from "./Character"
 import { ArmorName, getArmor } from "./Equipment/Armor"
 import { WeaponName, getWeapon } from "./Equipment/Weapon"
-import { AbilityScores } from "./Races/AbilityScores"
 import { clericSpells, druidSpells, getSpell, wizardSpells } from "./Actions/Spells/Spells"
 import { getClass, getRace } from "./Utilities"
+import { AbilityScores } from "../types"
 
 export type CharacterStorage = {
   name: string,

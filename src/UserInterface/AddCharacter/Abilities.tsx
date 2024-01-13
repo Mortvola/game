@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './AddCharacter.module.scss'
 import { Race } from '../../Character/Races/Race';
-import { AbilityScores } from '../../Character/Races/AbilityScores';
+import { AbilityScores } from '../../types';
 
 type PropsType = {
   scores: AbilityScores | null,

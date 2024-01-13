@@ -1,8 +1,9 @@
-import { Abilities, abilityModifier } from "../../Dice";
+import { Abilities } from "./Abilities";
+import { abilityModifier } from "../../Dice";
+import type { AbilityScores } from "../../types";
 import Action from "../Actions/Action";
 import { A, getAction } from "../Actions/Actions";
 import { WeaponType, getWeapon } from "../Equipment/Weapon";
-import { AbilityScores } from "../Races/AbilityScores";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Barbarian extends CharacterClass {

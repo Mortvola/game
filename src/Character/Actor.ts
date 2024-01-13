@@ -2,7 +2,7 @@ import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, pointWithinCircle, timeToTarget } from "../Math";
 import Circle from "../Drawables/Circle";
 import RenderPass from "../RenderPass";
-import Shot, { ShotData } from "../Script/Shot";
+import Shot from "../Script/Shot";
 import { playShot } from "../Audio";
 import { Advantage, attackRoll, savingThrow } from "../Dice";
 import Mover from "../Script/Mover";
@@ -20,12 +20,11 @@ import Creature from "./Creature";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
 import Action from "./Actions/Action";
-import { getWorld, modelManager } from "../Main";
+import { getWorld, modelManager, pipelineManager } from "../Main";
 import { PathPoint } from "../Workers/PathPlannerTypes";
 import DrawableNode from "../Drawables/SceneNodes/DrawableNode";
 import SceneNode from "../Drawables/SceneNodes/SceneNode";
-import PipelineManager from "../Pipelines/PipelineManager";
-import { ActorInterface, WorldInterface } from "../types";
+import { CreatureActorInterface, ShotData, WorldInterface } from "../types";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -51,7 +50,7 @@ export const getActorId = () => {
   return r;
 }
 
-class Actor implements ActorInterface {
+class Actor implements CreatureActorInterface {
   id: number;
 
   character: Creature;
@@ -119,10 +118,10 @@ class Actor implements ActorInterface {
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
     this.circleDrawable = new Circle(this.occupiedRadius, 0.025, color);
-    this.circle = new DrawableNode(this.circleDrawable, PipelineManager.getInstance().getPipeline('circle')!);
+    this.circle = new DrawableNode(this.circleDrawable, pipelineManager.getPipeline('circle')!);
     this.circle.postTransforms.push(mat4.fromQuat(q));
 
-    this.outerCircle = new DrawableNode(new Circle(this.attackRadius, 0.01, color), PipelineManager.getInstance().getPipeline('circle')!);
+    this.outerCircle = new DrawableNode(new Circle(this.attackRadius, 0.01, color), pipelineManager.getPipeline('circle')!);
     this.outerCircle.postTransforms.push(mat4.fromQuat(q));
 
     this.sceneNode.addNode(this.circle)
@@ -257,7 +256,7 @@ class Actor implements ActorInterface {
 
   }
 
-  getTargets(otherTeam: Actor[]) {
+  getTargets(otherTeam: CreatureActorInterface[]) {
     const myPosition = this.getWorldPosition();
 
     const rankedTargets = otherTeam
@@ -282,7 +281,7 @@ class Actor implements ActorInterface {
     script.entries.push(mover);
   }
 
-  async rangeAttack(target: Actor, script: Script, world: WorldInterface) {
+  async rangeAttack(target: CreatureActorInterface, script: Script, world: WorldInterface) {
     const shotData = this.computeShotData(target);
   
     const data: ShotData = {
@@ -597,7 +596,7 @@ class Actor implements ActorInterface {
   }
 
   attack(
-    targetActor: Actor,
+    targetActor: CreatureActorInterface,
     weapon: Weapon,
     world: WorldInterface,
     script: Script,
@@ -697,7 +696,7 @@ class Actor implements ActorInterface {
     }
   }
 
-  computeShotData(targetActor: Actor): ShotData {
+  computeShotData(targetActor: CreatureActorInterface): ShotData {
     // Transforms the position to world space.
     const target = vec4.transformMat4(
       vec4.create(0, 0, 0, 1),

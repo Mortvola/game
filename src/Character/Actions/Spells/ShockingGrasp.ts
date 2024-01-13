@@ -1,12 +1,11 @@
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
-import { WorldInterface } from '../../../types'
-import Actor from "../../Actor";
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import { DamageType } from "../../Equipment/Weapon";
 import TouchSpell from "./TouchSpell";
 
 class ShockingGrasp extends TouchSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Shocking Grasp', 'Action', 0, 0, false, false);
   }
 

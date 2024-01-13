@@ -3,12 +3,11 @@ import Script from "../../Script/Script";
 import Action from "./Action";
 import Trajectory from "../../Drawables/Trajectory";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
-import Shot, { ShotData } from "../../Script/Shot";
+import Shot from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
 import DrawableNode from "../../Drawables/SceneNodes/DrawableNode";
-import { modelManager } from "../../Main";
-import PipelineManager from "../../Pipelines/PipelineManager";
-import { CreatureActorInterface, WorldInterface } from "../../types";
+import { modelManager, pipelineManager } from "../../Main";
+import { CreatureActorInterface, ShotData, WorldInterface } from "../../types";
 
 class RangeAttack extends Action {
   constructor(actor: CreatureActorInterface) {
@@ -30,7 +29,7 @@ class RangeAttack extends Action {
         startPos: result.startPos,
         orientation: result.orientation,
         distance: result.distance,
-      }), PipelineManager.getInstance().getPipeline('trajectory')!);
+      }), pipelineManager.getPipeline('trajectory')!);
   
       world.scene.addNode(this.trajectory);
   

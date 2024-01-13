@@ -1,5 +1,5 @@
 import { feetToMeters } from "../../Math";
-import { AbilityScores } from "./AbilityScores";
+import { AbilityScores } from "../../types";
 import { Race, Size } from "./Race";
 
 class Human implements Race {

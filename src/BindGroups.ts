@@ -1,9 +1,9 @@
-import { gpu } from "./Main";
 import {
   makeShaderDataDefinitions,
   makeStructuredView,
 } from 'webgpu-utils';
 import { lights } from "./shaders/lights";
+import Gpu from "./Gpu";
 
 type BindGroup = {
   bindGroup: GPUBindGroup,
@@ -14,6 +14,8 @@ const defs = makeShaderDataDefinitions(lights);
 export const lightsStructure = makeStructuredView(defs.structs.Lights);
 
 class BindGroups {
+  gpu: Gpu;
+
   camera: BindGroup | null = null;
 
   bindGroupLayout0: GPUBindGroupLayout;
@@ -26,10 +28,12 @@ class BindGroups {
 
   bindGroupLayout3: GPUBindGroupLayout;
 
-  constructor() {
+  constructor(gpu: Gpu | null) {
     if (!gpu) {
       throw new Error('gpu not set')
     }
+
+    this.gpu = gpu;
 
     this.bindGroupLayout0 = gpu.device.createBindGroupLayout({
       label: 'group0',
@@ -122,40 +126,40 @@ class BindGroups {
   }
 
   createCameraBindGroups() {
-    if (gpu) {
+    if (this.gpu) {
       const matrixBufferSize = 16 * Float32Array.BYTES_PER_ELEMENT;
 
-      const projectionTransformBuffer = gpu.device.createBuffer({
+      const projectionTransformBuffer = this.gpu.device.createBuffer({
         label: 'projection Matrix',
         size: matrixBufferSize,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
 
-      const viewTransformBuffer = gpu.device.createBuffer({
+      const viewTransformBuffer = this.gpu.device.createBuffer({
         label: 'view Matrix',
         size: matrixBufferSize,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
 
-      const cameraPosBuffer = gpu.device.createBuffer({
+      const cameraPosBuffer = this.gpu.device.createBuffer({
         label: 'camera position',
         size: 4 * Float32Array.BYTES_PER_ELEMENT,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
 
-      const aspectRatioBuffer = gpu.device.createBuffer({
+      const aspectRatioBuffer = this.gpu.device.createBuffer({
         label: 'aspect ratio',
         size: 1 * Float32Array.BYTES_PER_ELEMENT,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
 
-      const lightsBuffer = gpu.device.createBuffer({
+      const lightsBuffer = this.gpu.device.createBuffer({
         label: 'lights',
         size: lightsStructure.arrayBuffer.byteLength,
         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
       });
 
-      const cameraBindGroup = gpu.device.createBindGroup({
+      const cameraBindGroup = this.gpu.device.createBindGroup({
         label: 'camera',
         layout: this.bindGroupLayout0,
         entries: [

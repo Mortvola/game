@@ -1,5 +1,5 @@
 import { feetToMeters } from "../../Math";
-import { AbilityScores } from "./AbilityScores";
+import { AbilityScores } from "../../types";
 
 export enum Size {
   Tiny = feetToMeters(2.5),

@@ -1,12 +1,11 @@
-import Actor from "../../Actor";
-import { WorldInterface } from '../../../types'
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import Script from "../../../Script/Script";
 import { abilityModifier, diceRoll } from "../../../Dice";
 import { feetToMeters } from "../../../Math";
 import RangeSpell from "./RangeSpell";
 
 class HealingWord extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Healing Word', 'Bonus', 1, feetToMeters(60), 0, false, false);
   }
 

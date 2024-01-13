@@ -1,13 +1,12 @@
 import { feetToMeters } from "../../../Math";
-import Actor from "../../Actor";
-import { WorldInterface } from '../../../types'
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import { diceRoll, savingThrow, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
 import { DamageType } from "../../Equipment/Weapon";
 
 class RayOfSickness extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Ray of Sickness', 'Action', 1, feetToMeters(60), 0, false, false)
   }
 

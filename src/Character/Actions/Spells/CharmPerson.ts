@@ -1,12 +1,11 @@
 import { savingThrow } from "../../../Dice";
 import Script from "../../../Script/Script";
-import { WorldInterface } from '../../../types'
-import Actor from "../../Actor";
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import { feetToMeters } from "../../../Math";
 import RangeSpell from "./RangeSpell";
 
 class CharmPerson extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Charm Person', 'Action', 1, feetToMeters(30), 60 * 60, false, false);
   }
 

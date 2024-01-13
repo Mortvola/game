@@ -1,12 +1,11 @@
 import React from 'react';
-import { AbilityScores } from '../../../Character/Races/AbilityScores';
-import { abilityModifier } from '../../../Dice';
 import styles from '../AddCharacter.module.scss';
 import KnownSpells from './KnownSpells';
 import AvailableSpells from './AvailableSpells';
 import Spell from '../../../Character/Actions/Spells/Spell';
 import { KnownSpell } from './KnownSpell';
 import { R } from '../../../Character/Actions/Spells/Spells';
+import { AbilityScores } from '../../../types';
 
 type PropsType = {
   level: number,

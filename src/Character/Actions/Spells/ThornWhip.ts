@@ -1,13 +1,12 @@
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
-import { WorldInterface } from '../../../types'
-import Actor from "../../Actor";
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import { DamageType } from "../../Equipment/Weapon";
 import RangeSpell from "./RangeSpell";
 
 class ThornWhip extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Thorn Whip', 'Action', 0, feetToMeters(30), 0, false, false);
   }
 

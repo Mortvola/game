@@ -3,12 +3,10 @@ import Script from "../../Script/Script";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Line from "../../Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
-import { getWorld } from "../../Main";
+import { getWorld, pipelineManager } from "../../Main";
 import { PathPoint } from "../../Workers/PathPlannerTypes";
-import { DrawableNodeInterface } from "../../Drawables/SceneNodes/DrawableNodeInterface";
 import DrawableNode from "../../Drawables/SceneNodes/DrawableNode";
-import PipelineManager from "../../Pipelines/PipelineManager";
-import { ActionInterface, CreatureActorInterface, WorldInterface } from "../../types";
+import { ActionInterface, CreatureActorInterface, DrawableNodeInterface, WorldInterface } from "../../types";
 
 export type TimeType = 'Action' | 'Bonus' | 'Move';
 
@@ -82,7 +80,7 @@ class Action implements ActionInterface {
     }
 
     if (lines !== null && !this.cleared && lines.length > 0) {
-      this.pathLines = new DrawableNode(new Line(lines), PipelineManager.getInstance().getPipeline('line')!);
+      this.pathLines = new DrawableNode(new Line(lines), pipelineManager.getPipeline('line')!);
       world.scene.addNode(this.pathLines);
 
       // world.mainRenderPass.addDrawable(this.pathLines);  

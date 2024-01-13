@@ -1,6 +1,5 @@
 import { feetToMeters } from "../../../Math";
-import Actor from "../../Actor";
-import { WorldInterface } from '../../../types'
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
@@ -11,7 +10,7 @@ import { vec2 } from "wgpu-matrix";
 import FollowPath from "../../../Script/FollowPath";
 
 class GuidingBolt extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Guiding Bolt', 'Action', 1, feetToMeters(120), 6, true, false)
   }
 

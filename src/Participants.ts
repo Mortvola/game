@@ -6,6 +6,7 @@ import Goblin from "./Character/Monsters/Goblin";
 import { XPThreshold, xpThresholds } from "./Tables";
 import Kobold from "./Character/Monsters/Kobold";
 import Creature from "./Character/Creature";
+import { ParticipantsInterface } from "./types";
 
 function createParty<Type extends Creature>(thresholds: XPThreshold, c: new (name: string) => Type, name: string): Party {
   const party: Party = {
@@ -61,7 +62,7 @@ export enum ParticipantsState {
   ready,
 }
 
-class Participants {
+class Participants implements ParticipantsInterface {
   parties: Party[] = [];
 
   participants: Actor[][] = [[], []];
@@ -72,7 +73,7 @@ class Participants {
 
   turn: number = 0;
 
-  get activeActor() {
+  get activeActor(): Actor {
     return this.turns[this.turn]
   }
 

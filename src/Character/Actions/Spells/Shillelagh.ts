@@ -1,10 +1,9 @@
 import Script from "../../../Script/Script";
-import { WorldInterface } from '../../../types'
-import Actor from "../../Actor";
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import SelfSpell from "./SelfSpell";
 
 class Shillelagh extends SelfSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Shillelagh', 'Bonus', 0, 60, false, false);
   }
 

@@ -1,13 +1,12 @@
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
-import { WorldInterface } from '../../../types'
-import Actor from "../../Actor";
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import { DamageType } from "../../Equipment/Weapon";
 import RangeSpell from "./RangeSpell";
 
 class RayOfFrost extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Ray of Frost', 'Action', 0, feetToMeters(60), 0, false, false);
   }
 

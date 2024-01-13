@@ -1,11 +1,10 @@
-import Actor from "../../Actor";
-import { WorldInterface } from '../../../types'
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import Script from "../../../Script/Script";
 import { abilityModifier, diceRoll } from "../../../Dice";
 import TouchSpell from "./TouchSpell";
 
 class CureWounds extends TouchSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Cure Wounds', 'Action', 1, 0, false, false);
   }
 

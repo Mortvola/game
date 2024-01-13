@@ -1,7 +1,7 @@
-import { Abilities, abilityModifier } from "../../Dice";
-import { getArmor } from "../Equipment/Armor";
+import { Abilities } from "./Abilities";
+import { abilityModifier } from "../../Dice";
+import { AbilityScores } from "../../types";
 import { WeaponType, getWeapon } from "../Equipment/Weapon";
-import { AbilityScores } from "../Races/AbilityScores";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 
 class Monk extends CharacterClass {

@@ -1,17 +1,6 @@
-import { Vec2, Vec3, Vec4, vec4 } from "wgpu-matrix";
-import Actor from "../Character/Actor";
+import { vec4 } from "wgpu-matrix";
 import { gravity } from "../Math";
-import { ActorInterface, WorldInterface } from "../types";
-import { SceneNodeInterface } from "../Drawables/SceneNodes/SceneNodeInterface";
-
-export type ShotData = {
-  velocityVector: Vec2,
-  startPos: Vec3,
-  position: Vec4,
-  orientation: Vec4,
-  distance: number,
-  duration?: number,
-};
+import { ActorInterface, CreatureActorInterface, SceneNodeInterface, ShotData, WorldInterface } from "../types";
 
 class Shot implements ActorInterface {
   startTime: number | null = null;
@@ -51,7 +40,7 @@ class Shot implements ActorInterface {
         1,
       );
 
-      const result = world.collidees.detectCollision(this.data.position, newPosition, (actor: Actor) => actor !== this.actor);
+      const result = world.collidees.detectCollision(this.data.position, newPosition, (actor: ActorInterface) => actor !== this.actor);
 
       if (result || newPosition[1] < 0 || xPos >= this.data.distance) {
         this.removeFromScene(world);

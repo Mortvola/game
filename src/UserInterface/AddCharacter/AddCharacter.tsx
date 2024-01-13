@@ -19,9 +19,7 @@ import Warlock from '../../Character/Classes/Warlock';
 import Wizard from '../../Character/Classes/Wizard';
 import StartingEquipment from '../Choices/StartingEquipment';
 import Tab from './Tab';
-import Abilities from './Abilities';
 import RaceTab from './Race';
-import CharClass from './CharClass';
 import { Race } from '../../Character/Races/Race';
 import Human from '../../Character/Races/Human';
 import HighElf from '../../Character/Races/HighElf';
@@ -32,7 +30,6 @@ import StoutHalfling from '../../Character/Races/StoutHalfling';
 import LightfootHalfling from '../../Character/Races/LightfootHalfling';
 import Character from '../../Character/Character';
 import { abilityModifier, abilityRolls, addAbilityIncreases, assignAbilityScores } from '../../Dice';
-import { AbilityScores } from '../../Character/Races/AbilityScores';
 import Spells from './Spells/Spells';
 import { KnownSpell } from './Spells/KnownSpell';
 import { R, clericSpells, druidSpells, wizardSpells } from '../../Character/Actions/Spells/Spells';
@@ -40,6 +37,7 @@ import Spell from '../../Character/Actions/Spells/Spell';
 import Creature from '../../Character/Creature';
 import Cantrips from './Spells/Cantrips';
 import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from '../../Tables';
+import { AbilityScores } from '../../types';
 
 type PropsType = {
   show: boolean,

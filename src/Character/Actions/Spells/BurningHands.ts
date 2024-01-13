@@ -1,9 +1,9 @@
 import { feetToMeters } from "../../../Math";
-import Actor from "../../Actor";
+import { CreatureActorInterface } from "../../../types";
 import AreaSpell from "./AreaSpell";
 
 class BurningHands extends AreaSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 'Burning Hands', 'Action', 1, feetToMeters(15), 0, 0, false, false)
   }
 }

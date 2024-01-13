@@ -1,6 +1,8 @@
 // import BillboardPipeline from "./BillboardPipeline";
-import { bindGroups, gpu } from "../Main";
+import BindGroups from "../BindGroups";
+import Gpu from "../Gpu";
 import { litShader } from "../shaders/lit";
+import { PipelineAttributes, PipelineInterface, PipelineManagerInterface } from "../types";
 import CirclePipeline from "./CirclePipeline";
 // import DragHandlesPipeline from "./DragHandlesPipeline";
 import LinePipeline from "./LinePipeline";
@@ -8,7 +10,6 @@ import LitPipeline from "./LitPipeline";
 import OutlinePipeline from "./OutlinePipeline";
 import Pipeline from "./Pipeline";
 // import Pipeline from "./Pipeline";
-import PipelineInterface from "./PipelineInterface";
 import ReticlePipeline from "./ReticlePipeline";
 import TrajectoryPipeline from "./TrajectoryPipeline";
 
@@ -21,18 +22,25 @@ type Pipelines = {
   pipeline: PipelineInterface,
 }
 
-type PipelineAttributes = {
+class PipelineManager implements PipelineManagerInterface {
+  // private static instance: PipelineManager | null = null;
 
-}
+  gpu: Gpu;
 
-class PipelineManager {
-  private static instance: PipelineManager | null = null;
+  bindGroups: BindGroups;
 
   pipelines: Pipelines[] = [];
 
   pipelineMap: Map<string, Pipeline> = new Map();
 
-  private constructor() {
+  constructor(gpu: Gpu | null, bindGroups: BindGroups) {
+    if (!gpu) {
+      throw new Error('gpu not set')
+    }
+
+    this.gpu = gpu;
+    this.bindGroups = bindGroups;
+
     this.pipelines = [];
 
     this.pipelines.push({ type: 'lit', pipeline: new LitPipeline() });
@@ -46,13 +54,13 @@ class PipelineManager {
     this.pipelines.push({ type: 'trajectory', pipeline: new TrajectoryPipeline() });
   }
 
-  public static getInstance(): PipelineManager {
-    if (PipelineManager.instance === null) {
-      PipelineManager.instance = new PipelineManager();
-    }
+  // public static getInstance(): PipelineManager {
+  //   if (PipelineManager.instance === null) {
+  //     PipelineManager.instance = new PipelineManager();
+  //   }
 
-    return this.instance!
-  }
+  //   return this.instance!
+  // }
 
   getPipeline(type: PipelineType): PipelineInterface | null {
     const entry = this.pipelines.find((pipeline) => pipeline.type === type);
@@ -75,11 +83,11 @@ class PipelineManager {
       return pipeline;
     }
 
-    if (!gpu) {
+    if (!this.gpu) {
       throw new Error('device is not set')
     }
 
-    const shaderModule = gpu.device.createShaderModule({
+    const shaderModule = this.gpu.device.createShaderModule({
       label: 'base pipeline',
       code: litShader,
     })
@@ -135,16 +143,16 @@ class PipelineManager {
         depthCompare: "less",
         format: "depth24plus"
       },
-      layout: gpu.device.createPipelineLayout({
+      layout: this.gpu.device.createPipelineLayout({
         bindGroupLayouts: [
-          bindGroups.bindGroupLayout0,
-          bindGroups.bindGroupLayout1,
-          bindGroups.bindGroupLayout2A,
+          this.bindGroups.bindGroupLayout0,
+          this.bindGroups.bindGroupLayout1,
+          this.bindGroups.bindGroupLayout2A,
         ],
       }),
     };
     
-    const gpuPipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
+    const gpuPipeline = this.gpu.device.createRenderPipeline(pipelineDescriptor);
 
     pipeline = new Pipeline();
     pipeline.pipeline = gpuPipeline;

@@ -1,12 +1,11 @@
 import { diceRoll, savingThrow } from "../../../Dice";
 import { feetToMeters } from "../../../Math";
 import Script from "../../../Script/Script";
-import { WorldInterface } from '../../../types'
-import Actor from "../../Actor";
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import RangeSpell from "./RangeSpell";
 
 class SacredFlame extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Sacred Flame', 'Action', 0, feetToMeters(60), 0, false, false);
   }
 

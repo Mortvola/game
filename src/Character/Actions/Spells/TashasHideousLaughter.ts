@@ -1,12 +1,11 @@
 import { feetToMeters } from "../../../Math";
-import Actor from "../../Actor";
-import { WorldInterface } from '../../../types'
+import { CreatureActorInterface, WorldInterface } from '../../../types'
 import RangeSpell from "./RangeSpell";
 import Script from "../../../Script/Script";
 import { savingThrow } from "../../../Dice";
 
 class TashasHideosLaughter extends RangeSpell {
-  constructor(actor: Actor) {
+  constructor(actor: CreatureActorInterface) {
     super(actor, 1, true, 'Tasha\'s Hideous Laughter', 'Action', 1, feetToMeters(30), 60, false, true)
   }
 

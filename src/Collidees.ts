@@ -1,19 +1,19 @@
 import { Vec4, vec4 } from "wgpu-matrix";
-import Actor from "./Character/Actor";
-import { isDrawableNode } from "./Drawables/SceneNodes/DrawableNodeInterface";
+import { isDrawableNode } from "./Drawables/SceneNodes/utils";
+import { CollideesInterface, CreatureActorInterface } from "./types";
 
 export type CollisionResult = {
-  actor: Actor,
+  actor: CreatureActorInterface,
   point: Vec4,
 }
 
-class Collidees {
-  actors: Actor[] = [];
+class Collidees implements CollideesInterface {
+  actors: CreatureActorInterface[] = [];
 
-  detectCollision(p1 : Vec4, p2: Vec4, filter?: (actor: Actor) => boolean): CollisionResult | null {
+  detectCollision(p1 : Vec4, p2: Vec4, filter?: (actor: CreatureActorInterface) => boolean): CollisionResult | null {
     const ray = vec4.subtract(p2, p1);
     let best: {
-      actor: Actor,
+      actor: CreatureActorInterface,
       t: number,
     } | null = null;
 
@@ -46,7 +46,7 @@ class Collidees {
     return null;
   }
 
-  remove(actor: Actor) {
+  remove(actor: CreatureActorInterface) {
     const index = this.actors.findIndex((a) => a === actor);
 
     if (index !== -1) {
