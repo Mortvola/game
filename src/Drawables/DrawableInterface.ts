@@ -1,7 +1,5 @@
 import { Vec4, Mat4 } from 'wgpu-matrix';
 
-export const maxInstances = 16;
-
 interface DrawableInterface {
   drawable: boolean;
 
@@ -15,9 +13,9 @@ interface DrawableInterface {
   
   modelMatrixBuffer: GPUBuffer;
 
-  color: Float32Array;
+  // color: Float32Array;
 
-  colorBuffer: GPUBuffer;
+  // colorBuffer: GPUBuffer;
 
   bindGroup: GPUBindGroup;
 

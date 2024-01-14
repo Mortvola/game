@@ -10,6 +10,9 @@ import ContainerNode, { isContainerNode } from "./Drawables/SceneNodes/Container
 import { isGeometryNode } from "./Drawables/SceneNodes/GeometryNode";
 import { litMaterial } from "./Materials/Lit";
 import { gpu } from "./Gpu";
+import { soulerCoasterMaterial } from "./Materials/SoulerCoaster";
+import { goblinMaterial } from "./Materials/Goblin";
+import { koboldMaterial } from "./Materials/Kobold";
 
 type Model = {
   name: string,
@@ -39,7 +42,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, litMaterial);
+        node = await DrawableNode.create(model.mesh, litMaterial);
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -55,7 +58,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, litMaterial);
+        node = await DrawableNode.create(model.mesh, litMaterial);
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -71,7 +74,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, litMaterial);
+        node = await DrawableNode.create(model.mesh, litMaterial);
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -87,7 +90,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, litMaterial);
+        node = await DrawableNode.create(model.mesh, litMaterial);
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -103,7 +106,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, litMaterial);
+        node = await DrawableNode.create(model.mesh, litMaterial);
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -119,7 +122,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, litMaterial);
+        node = await DrawableNode.create(model.mesh, litMaterial);
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -135,7 +138,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, litMaterial);
+        node = await DrawableNode.create(model.mesh, litMaterial);
         node.translate[1] = playerHeight / 2;  
 
         break;
@@ -148,7 +151,7 @@ class ModelManager {
           if (mesh) {
             model = { name, mesh };
             this.models.push(model)
-            node = new DrawableNode(model.mesh, litMaterial);
+            node = await DrawableNode.create(model.mesh, goblinMaterial);
           }
         }
 
@@ -162,7 +165,7 @@ class ModelManager {
             this.models.push(model)
           }
 
-          node = new DrawableNode(model.mesh, litMaterial);
+          node = await DrawableNode.create(model.mesh, goblinMaterial);
           node.translate[1] = playerHeight / 2;
         }
 
@@ -176,7 +179,7 @@ class ModelManager {
           if (mesh) {
             model = { name, mesh };
             this.models.push(model)
-            node = new DrawableNode(model.mesh, litMaterial);
+            node = await DrawableNode.create(model.mesh, koboldMaterial);
           }
         }
 
@@ -190,7 +193,7 @@ class ModelManager {
             this.models.push(model)
           }
 
-          node = new DrawableNode(model.mesh, litMaterial);
+          node = await DrawableNode.create(model.mesh, koboldMaterial);
           node.translate[1] = playerHeight / 2;  
         }
 
@@ -204,7 +207,7 @@ class ModelManager {
           this.models.push(model)
         }
 
-        node = new DrawableNode(model.mesh, litMaterial);
+        node = await DrawableNode.create(model.mesh, litMaterial);
 
         break;
       }
@@ -216,7 +219,7 @@ class ModelManager {
           if (mesh) {
             model = { name, mesh };
             this.models.push(model)
-            node = new DrawableNode(model.mesh, litMaterial);
+            node = await DrawableNode.create(model.mesh, soulerCoasterMaterial);
           }
         }
 
@@ -227,7 +230,7 @@ class ModelManager {
             this.models.push(model)
           }
 
-          node = new DrawableNode(model.mesh, litMaterial);
+          node = await DrawableNode.create(model.mesh, litMaterial);
         }
 
         break;
@@ -252,12 +255,12 @@ class ModelManager {
             const child = node.nodes[i];
 
             if (isGeometryNode(child)) {
-              const mesh = new Mesh(child.mesh, child.vertices, child.normals, child.indices);
+              const mesh = new Mesh(child.mesh, child.vertices, child.normals, child.texcoords, child.indices);
 
               // For now, just return the first mesh found...
               return mesh;
 
-              // const drawableNode = new DrawableNode(mesh, 'lit');
+              // const drawableNode = await DrawableNode.create(mesh, 'lit');
 
               // node.nodes = [
               //   ...node.nodes.slice(0, i),
@@ -270,12 +273,12 @@ class ModelManager {
           container.addNode(node);
         }
         else if (isGeometryNode(node)) {
-          const mesh = new Mesh(node.mesh, node.vertices, node.normals, node.indices);
+          const mesh = new Mesh(node.mesh, node.vertices, node.normals, node.texcoords, node.indices);
 
           // For now, just return the first mesh found...
           return mesh;
 
-          // const drawableNode = new DrawableNode(mesh, 'lit');
+          // const drawableNode = await DrawableNode.create(mesh, 'lit');
 
           // container.addNode(drawableNode);
         }

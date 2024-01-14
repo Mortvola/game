@@ -40,12 +40,12 @@ class LitPipeline extends Pipeline {
     const pipelineDescriptor: GPURenderPipelineDescriptor = {
       vertex: {
         module: shaderModule,
-        entryPoint: "vertex_simple",
+        entryPoint: "vs",
         buffers: vertexBufferLayout,
       },
       fragment: {
         module: shaderModule,
-        entryPoint: "fragment_simple",
+        entryPoint: "fs",
         targets: [
           {
             format: navigator.gpu.getPreferredCanvasFormat(),

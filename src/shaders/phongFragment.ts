@@ -1,6 +1,6 @@
 export const phongFragment = /*wgsl*/`
 @fragment
-fn fragment_simple(fragData: VertexOut) -> @location(0) vec4f
+fn fs(fragData: VertexOut) -> @location(0) vec4f
 {
   var ambientStrength = f32(0.1);
   var specularStrength = 0.5;

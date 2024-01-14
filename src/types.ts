@@ -7,6 +7,8 @@ import DrawableInterface from './Drawables/DrawableInterface';
 import { Weapon } from './Character/Equipment/Types';
 import { feetToMeters } from './Math';
 
+export const maxInstances = 16;
+
 export type EpisodeInfo = {
   winningTeam: number,
 }
@@ -371,6 +373,16 @@ export interface SceneNodeInterface {
 
 export interface MaterialInterface {
   pipeline: PipelineInterface | null;
+
+  color: Float32Array;
+
+  drawables: DrawableInterface[];
+
+  colorBuffer: GPUBuffer;
+
+  bindGroup: GPUBindGroup;
+
+  addDrawable(drawableNode: DrawableNodeInterface): void;
 }
 
 export interface DrawableNodeInterface extends SceneNodeInterface {
@@ -382,11 +394,14 @@ export interface DrawableNodeInterface extends SceneNodeInterface {
 }
 
 export interface PipelineInterface {
-  drawables: DrawableInterface[];
+  pipeline: GPURenderPipeline | null;
+
+  // drawables: DrawableInterface[];
+  materials: MaterialInterface[];
 
   addDrawable(drawable: DrawableNodeInterface): void;
 
-  removeDrawable(drawable: DrawableNodeInterface): void;
+  // removeDrawable(drawable: DrawableNodeInterface): void;
 
   render(passEncoder: GPURenderPassEncoder): void;
 }

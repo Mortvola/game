@@ -91,6 +91,9 @@ class Actor implements CreatureActorInterface {
     color: Vec4,
     team: number,
     automated: boolean,
+    circleDrawable: Circle,
+    circle: DrawableNode,
+    outerCircle: DrawableNode,
   ) {
     this.id = getActorId();
 
@@ -108,11 +111,11 @@ class Actor implements CreatureActorInterface {
 
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
-    this.circleDrawable = new Circle(this.occupiedRadius, 0.025, color);
-    this.circle = new DrawableNode(this.circleDrawable, circleMaterial);
+    this.circleDrawable = circleDrawable;
+    this.circle = circle;
     this.circle.postTransforms.push(mat4.fromQuat(q));
 
-    this.outerCircle = new DrawableNode(new Circle(this.attackRadius, 0.01, color), circleMaterial);
+    this.outerCircle = outerCircle;
     this.outerCircle.postTransforms.push(mat4.fromQuat(q));
 
     this.sceneNode.addNode(this.circle)
@@ -126,7 +129,12 @@ class Actor implements CreatureActorInterface {
 
     const mesh = await modelManager.getModel(character.race.name)
 
-    return new Actor(character, mesh, playerHeight, teamColor, team, automated);
+    const circleDrawable = new Circle(0.75, 0.025, color);
+    const circle = await DrawableNode.create(circleDrawable, circleMaterial);
+
+    const outerCircle = await DrawableNode.create(new Circle(0.75 + feetToMeters(5), 0.01, color), circleMaterial);
+
+    return new Actor(character, mesh, playerHeight, teamColor, team, automated, circleDrawable, circle, outerCircle);
   }
 
   getWorldPosition(): Vec4 {

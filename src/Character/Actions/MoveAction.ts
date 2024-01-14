@@ -45,7 +45,7 @@ class MoveAction extends Action {
     )
 
     if (!cancelled) { // && !this.target) {
-      this.showPathLines(lines);
+      await this.showPathLines(lines);
 
       this.path = path;
       this.distance = distance;
@@ -63,7 +63,7 @@ class MoveAction extends Action {
     const path = this.actor.processPath(this.path, script);
     script.entries.push(new FollowPath(this.actor.sceneNode, path));    
 
-    this.showPathLines(null);
+    await this.showPathLines(null);
 
     if (world.actionInfoCallback) {
       world.actionInfoCallback(null)

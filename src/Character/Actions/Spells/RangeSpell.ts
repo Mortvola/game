@@ -89,11 +89,11 @@ class RangeSpell extends Spell {
     return false;
   }
 
-  showRangeCircle() {
+  async showRangeCircle() {
     if (this.range > 0) {
       const world = getWorld();
 
-      this.rangeCircle = new DrawableNode(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), circleMaterial)
+      this.rangeCircle = await DrawableNode.create(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), circleMaterial)
       this.rangeCircle.translate = vec3.copy(this.actor.sceneNode.translate)
   
       world.scene.addNode(this.rangeCircle);

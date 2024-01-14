@@ -23,15 +23,15 @@ class RenderPass implements RenderPassInterface {
     }
   }
 
-  removeDrawable(drawable: DrawableNodeInterface) {
-    const pipeline = drawable.material.pipeline;
+  // removeDrawable(drawable: DrawableNodeInterface) {
+  //   const pipeline = drawable.material.pipeline;
 
-    let pipelineEntry = this.pipelines.find((p) => p === pipeline) ?? null;
+  //   let pipelineEntry = this.pipelines.find((p) => p === pipeline) ?? null;
 
-    if (pipelineEntry) {
-      pipelineEntry.removeDrawable(drawable);
-    }
-  }
+  //   if (pipelineEntry) {
+  //     pipelineEntry.removeDrawable(drawable);
+  //   }
+  // }
 
   addDrawables(node: SceneNodeInterface) {
     if (isContainerNode(node)) {
@@ -44,16 +44,16 @@ class RenderPass implements RenderPassInterface {
     }
   }
 
-  removeDrawables(node: SceneNodeInterface) {
-    if (isContainerNode(node)) {
-      for (const drawable of node.nodes) {
-        this.removeDrawables(drawable)
-      }
-    }
-    else if (isDrawableNode(node)) {
-      this.removeDrawable(node);
-    }
-  }
+  // removeDrawables(node: SceneNodeInterface) {
+  //   if (isContainerNode(node)) {
+  //     for (const drawable of node.nodes) {
+  //       this.removeDrawables(drawable)
+  //     }
+  //   }
+  //   else if (isDrawableNode(node)) {
+  //     this.removeDrawable(node);
+  //   }
+  // }
 
   getDescriptor(view: GPUTextureView, depthView: GPUTextureView | null): GPURenderPassDescriptor {
     const descriptor: GPURenderPassDescriptor = {
@@ -86,10 +86,10 @@ class RenderPass implements RenderPassInterface {
     passEncoder.setBindGroup(0, frameBindGroup);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    let drawableCount = 0;
+    // let drawableCount = 0;
 
     this.pipelines.forEach((pipeline) => {
-      drawableCount += pipeline.drawables.length;
+      // drawableCount += pipeline.drawables.length;
       pipeline.render(passEncoder);
     })
 

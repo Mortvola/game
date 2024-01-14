@@ -71,7 +71,7 @@ class Action implements ActionInterface {
     }
   }
 
-  showPathLines(lines: number[][] | null) {
+  async showPathLines(lines: number[][] | null) {
     const world = getWorld();
 
     if (this.pathLines) {
@@ -79,7 +79,7 @@ class Action implements ActionInterface {
     }
 
     if (lines !== null && !this.cleared && lines.length > 0) {
-      this.pathLines = new DrawableNode(new Line(lines), lineMaterial);
+      this.pathLines = await DrawableNode.create(new Line(lines), lineMaterial);
       world.scene.addNode(this.pathLines);
 
       // world.mainRenderPass.addDrawable(this.pathLines);  
@@ -111,7 +111,7 @@ class Action implements ActionInterface {
 
         if (!cancelled) {
           if (path.length > 0) {
-            this.showPathLines(lines);
+            await this.showPathLines(lines);
 
             let distanceToTarget = vec2.distance(path[0].point, vec2.create(targetWp[0], targetWp[2]));
             distanceToTarget -= target.occupiedRadius  
@@ -150,7 +150,7 @@ class Action implements ActionInterface {
           this.trajectory = null;
         }
 
-        this.showPathLines(null);
+        await this.showPathLines(null);
 
         this.focused = target;
         this.distance = 0;
@@ -187,7 +187,7 @@ class Action implements ActionInterface {
         )
 
         if (!cancelled && !this.focused) {
-          this.showPathLines(lines);
+          await this.showPathLines(lines);
 
           this.path = path;
           this.distance = distance;
@@ -209,7 +209,7 @@ class Action implements ActionInterface {
       script.entries.push(new FollowPath(this.actor.sceneNode, path));    
     }
 
-    this.showPathLines(null);
+    await this.showPathLines(null);
 
     if (this.targets.length > 0) {
       return action();

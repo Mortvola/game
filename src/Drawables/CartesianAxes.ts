@@ -1,7 +1,8 @@
 import { Vec4 } from 'wgpu-matrix';
-import DrawableInterface, { maxInstances } from "./DrawableInterface";
+import DrawableInterface from "./DrawableInterface";
 import Drawable from './Drawable';
 import { gpu } from '../Gpu';
+import { maxInstances } from '../types';
 
 class CartesianAxes extends Drawable {
   drawable = true;

@@ -92,7 +92,7 @@ class ReticlePipeline extends Pipeline {
           bindGroups.getBindGroupLayout0(),
           bindGroups.getBindGroupLayout1(),
           bindGroups.getBindGroupLayout2(),
-          bindGroups.getBindGroupLayout3(),
+          // bindGroups.getBindGroupLayout3(),
         ]
       }),
     };

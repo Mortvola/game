@@ -1,18 +1,20 @@
-import DrawableInterface from "../Drawables/DrawableInterface";
 import { gpu } from "../Gpu";
-import { DrawableNodeInterface, PipelineInterface } from "../types";
+import { DrawableNodeInterface, MaterialInterface, PipelineInterface } from "../types";
 
 class Pipeline implements PipelineInterface {
   pipeline: GPURenderPipeline | null = null;
 
-  drawables: DrawableInterface[] = [];
+  // drawables: DrawableInterface[] = [];
+  materials: MaterialInterface[] = [];
 
-  addDrawable(drawableNode: DrawableNodeInterface): void {
-    let entry = this.drawables.find((d) => d === drawableNode.drawable);
+  addDrawable(drawable: DrawableNodeInterface): void {
+    let entry = this.materials.find((d) => d === drawable.material);
 
     if (!entry) {
-      this.drawables.push(drawableNode.drawable);
+      this.materials.push(drawable.material);
     }
+
+    drawable.material.addDrawable(drawable);
   }
 
   removeDrawable(drawable: DrawableNodeInterface): void {
@@ -23,19 +25,24 @@ class Pipeline implements PipelineInterface {
     if (this.pipeline) {
       passEncoder.setPipeline(this.pipeline);
 
-      for (const drawable of this.drawables) {
-        gpu.device.queue.writeBuffer(drawable.modelMatrixBuffer, 0, drawable.modelMatrices);
-        gpu.device.queue.writeBuffer(drawable.colorBuffer, 0, drawable.color);
+      for (const material of this.materials) {
+        for (const drawable of material.drawables) {
+          gpu.device.queue.writeBuffer(material.colorBuffer, 0, material.color);
+          passEncoder.setBindGroup(2, material.bindGroup);
 
-        passEncoder.setBindGroup(1, drawable.bindGroup);
+          gpu.device.queue.writeBuffer(drawable.modelMatrixBuffer, 0, drawable.modelMatrices);  
+          passEncoder.setBindGroup(1, drawable.bindGroup);
 
-        drawable.render(passEncoder, drawable.numInstances);
+          drawable.render(passEncoder, drawable.numInstances);
+  
+          drawable.numInstances = 0;
+        }
 
-        drawable.numInstances = 0;
-      }  
+        material.drawables = [];
+      }
     }
 
-    this.drawables = [];
+    this.materials = [];
   }
 }
 

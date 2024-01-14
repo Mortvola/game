@@ -116,7 +116,7 @@ class MagicMissile extends RangeSpell {
           l[1] = 1;
         }
 
-        this.showPathLines(lines);
+        await this.showPathLines(lines);
 
         this.path = path;
         this.distance = distance;
@@ -125,7 +125,7 @@ class MagicMissile extends RangeSpell {
       }
     }
     else {
-      this.showPathLines(null);
+      await this.showPathLines(null);
     }
   }
 
@@ -136,7 +136,7 @@ class MagicMissile extends RangeSpell {
       this.focused = null;
       this.path = [];
 
-      this.addMissileLines(this.lines);
+      await this.addMissileLines(this.lines);
       this.lines = [];
 
       if (this.targets.length < this.maxTargets) {
@@ -156,11 +156,11 @@ class MagicMissile extends RangeSpell {
     return false;
   }
 
-  addMissileLines(lines: number[][]) {
+  async addMissileLines(lines: number[][]) {
     const world = getWorld();
 
     if (!this.cleared && lines.length > 0) {
-      this.missileLines.push(new DrawableNode(new Line(lines), lineMaterial));
+      this.missileLines.push(await DrawableNode.create(new Line(lines), lineMaterial));
       world.scene.addNode(this.missileLines[this.missileLines.length - 1]);
     }
   }

@@ -36,7 +36,7 @@ class AreaSpell extends RangeSpell {
   }
 
   async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
-    this.showAreaOfEffect();
+    await this.showAreaOfEffect();
 
     if (point && this.areaOfEffect) {
       this.areaOfEffect.translate = vec3.create(point[0], 0, point[2])
@@ -53,11 +53,11 @@ class AreaSpell extends RangeSpell {
     return false;
   }
 
-  showAreaOfEffect() {
+  async showAreaOfEffect() {
     if (this.areaOfEffect === null) {
       const world = getWorld();
 
-      this.areaOfEffect = new DrawableNode(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), circleMaterial)
+      this.areaOfEffect = await DrawableNode.create(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), circleMaterial)
       this.areaOfEffect.translate = vec3.copy(this.actor.sceneNode.translate)
   
       world.scene.addNode(this.areaOfEffect);

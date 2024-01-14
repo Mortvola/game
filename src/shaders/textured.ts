@@ -5,7 +5,7 @@ export const texturedShader = /*wgsl*/`
 struct Vertex {
   @location(0) position: vec4f,
   @location(1) normal: vec4f,
-  @location(2) texcoord: vec4f,
+  @location(2) texcoord: vec2f,
 }
 
 struct VertexOut {

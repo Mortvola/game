@@ -13,11 +13,13 @@ class Mesh extends Drawable {
 
   normalBuffer: GPUBuffer;
 
+  texcoordBuffer: GPUBuffer;
+
   indexBuffer: GPUBuffer;
 
   indexFormat: GPUIndexFormat = "uint16";
 
-  constructor(mesh: SurfaceMesh, vertices: number[], normals: number[], indices: number[]) {
+  constructor(mesh: SurfaceMesh, vertices: number[], normals: number[], texcoord: number[], indices: number[]) {
     super()
   
     this.mesh = mesh;
@@ -45,6 +47,18 @@ class Mesh extends Drawable {
       const mapping = new Float32Array(this.normalBuffer.getMappedRange());
       mapping.set(normals, 0);
       this.normalBuffer.unmap();  
+    }
+
+    this.texcoordBuffer = gpu.device.createBuffer({
+      size: texcoord.length * Float32Array.BYTES_PER_ELEMENT,
+      usage: GPUBufferUsage.VERTEX,
+      mappedAtCreation: true,
+    });  
+
+    {
+      const mapping = new Float32Array(this.texcoordBuffer.getMappedRange());
+      mapping.set(texcoord, 0);
+      this.texcoordBuffer.unmap();  
     }
 
     if (indices.length > 0xFFFF) {
@@ -80,9 +94,9 @@ class Mesh extends Drawable {
   }
 
   static async create(mesh: SurfaceMesh): Promise<Mesh> {
-    const { vertices, normals, indices } = await mesh.generateBuffers();
+    const { vertices, normals, texcoords, indices } = await mesh.generateBuffers();
 
-    return new Mesh(mesh, vertices, normals, indices);
+    return new Mesh(mesh, vertices, normals, texcoords, indices);
   }
 
   setColor(color: Vec4) {
@@ -107,10 +121,9 @@ class Mesh extends Drawable {
   }
 
   render(passEncoder: GPURenderPassEncoder, numInstances: number) {
-    passEncoder.setBindGroup(2, this.bindGroup2);
-
     passEncoder.setVertexBuffer(0, this.vertexBuffer);
     passEncoder.setVertexBuffer(1, this.normalBuffer);
+    passEncoder.setVertexBuffer(2, this.texcoordBuffer);
 
     passEncoder.setIndexBuffer(this.indexBuffer, this.indexFormat);
     passEncoder.drawIndexed(this.mesh.indexes.length, numInstances);

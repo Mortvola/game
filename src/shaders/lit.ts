@@ -22,7 +22,7 @@ ${lights}
 @group(2) @binding(0) var<uniform> color: array<vec4f, 16>;
 
 @vertex
-fn vertex_simple(
+fn vs(
   @builtin(instance_index) instanceIndex: u32,
   vert: Vertex,
 ) -> VertexOut

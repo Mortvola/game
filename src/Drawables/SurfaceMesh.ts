@@ -8,7 +8,7 @@ class SurfaceMesh {
   vertices: number[] = [];
   indexes: number[] = [];
   normals: number[] = [];
-  uv: number[] = [];
+  texcoords: number[] = [];
   color: Vec4;
 
   constructor(color?: Vec4) {
@@ -21,11 +21,11 @@ class SurfaceMesh {
     ]);
 
     if (normal) {
-      this.normals = this.normals.concat(normal);
+      this.normals = this.normals.concat([...normal, 0]);
     }
 
     if (uv) {
-      this.uv = this.uv.concat(uv);
+      this.texcoords = this.texcoords.concat(uv);
     }
 
     return (this.vertices.length / 4) - 1;
@@ -99,10 +99,18 @@ class SurfaceMesh {
     }
   }
 
-  async generateBuffers(): Promise<{ vertices: number[], normals: number[], indices: number[] }> {
+  async generateBuffers(): Promise<{ vertices: number[], normals: number[], texcoords: number[], indices: number[] }> {
     let verts: number[] = [];
     let indices: number[] = [];
     let normals: number[] = [];
+    let texcoords: number[] = [];
+
+    return {
+      vertices: this.vertices,
+      normals: this.normals,
+      texcoords: this.texcoords,
+      indices: this.indexes,
+    }
 
     let yieldPolyCount = 0;
     const yieldPolyCountMax = 500;
@@ -138,6 +146,19 @@ class SurfaceMesh {
         ...vertexB,
         ...vertexC,
       ]);
+
+      if (this.texcoords.length !== 0) {
+        texcoords = texcoords.concat([
+          this.texcoords[index0 + 0],
+          this.texcoords[index0 + 1],
+
+          this.texcoords[index1 + 0],
+          this.texcoords[index1 + 1],
+
+          this.texcoords[index2 + 0],
+          this.texcoords[index2 + 1],
+        ])
+      }
 
       if (this.normals.length === 0) {
         const v1 = vec4.subtract(vertexA, vertexB);
@@ -175,6 +196,7 @@ class SurfaceMesh {
     return {
       vertices: verts,
       normals,
+      texcoords,
       indices,
     }
   }

@@ -2,7 +2,7 @@ import { Vec4, mat4, vec4 } from "wgpu-matrix";
 import DrawableInterface from "../DrawableInterface";
 import SceneNode from "./SceneNode";
 import { PipelineArgs } from "../../Pipelines/PipelineArgs";
-import { DrawableNodeInterface } from "../../types";
+import { DrawableNodeInterface, MaterialInterface } from "../../types";
 import { MaterialDescriptor } from "../../Materials/MaterialDescriptor";
 import Material from "../../Materials/Material";
 
@@ -13,11 +13,17 @@ class DrawableNode extends SceneNode implements DrawableNodeInterface {
 
   pipelineArgs?: PipelineArgs;
 
-  constructor(drawable: DrawableInterface, materialDescriptor: MaterialDescriptor, pipelineArgs?: PipelineArgs) {
+  private constructor(drawable: DrawableInterface, material: MaterialInterface, pipelineArgs?: PipelineArgs) {
     super();
     this.drawable = drawable;
-    this.material = new Material(materialDescriptor);
+    this.material = material;
     this.pipelineArgs = pipelineArgs;
+  }
+
+  static async create(drawable: DrawableInterface, materialDescriptor: MaterialDescriptor): Promise<DrawableNode> {
+    const material = await Material.create(materialDescriptor);
+
+    return new DrawableNode(drawable, material);
   }
 
   hitTest(origin: Vec4, vector: Vec4): { point: Vec4, t: number, drawable: DrawableInterface} | null {

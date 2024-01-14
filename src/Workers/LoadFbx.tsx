@@ -66,36 +66,48 @@ const loadGeometry = async (
 
         for (let n = 0; n < index.length; n += 1) {
           const texcoord: number[] = [];
-        
+          const norms: number[] = [];
+
+          const offset = i + 1 - index.length + n;
+
           if(
             uvMappingInformationType === 'ByPolygonVertex'
             && uvReferenceInformationType === 'IndexToDirect'
           ) {
-            texcoord.push(uv[uvIndex[i + 1 - index.length + n] * 2 + 0])
-            texcoord.push(uv[uvIndex[i + 1 - index.length + n] * 2 + 1])
+            texcoord.push(uv[uvIndex[offset] * 2 + 0])
+            texcoord.push(uv[uvIndex[offset] * 2 + 1])
           }
     
+          if (
+            mappingInformationType === 'ByPolygonVertex'
+            && referenceInformationType === 'Direct'
+          ) {
+            norms.push(normals[(offset) * 3 + 0])
+            norms.push(normals[(offset) * 3 + 1])
+            norms.push(normals[(offset) * 3 + 2])
+          }
+  
           v[n] = m.addVertex(
             vertices[index[n] * 3 + 0],
             vertices[index[n] * 3 + 1],
             vertices[index[n] * 3 + 2],
-            undefined,
+            norms,
             texcoord,
           )
         }
 
-        let norms: number[] | undefined = undefined;
+        // let norms: number[] | undefined = undefined;
 
-        if (
-          mappingInformationType === 'ByPolygonVertex'
-          && referenceInformationType === 'Direct'
-        ) {
-          norms = [
-            ...normals.slice((i + 1 - index.length) * 3, (i + 1) * 3)
-          ]
-        }
+        // if (
+        //   mappingInformationType === 'ByPolygonVertex'
+        //   && referenceInformationType === 'Direct'
+        // ) {
+        //   norms = [
+        //     ...normals.slice((i + 1 - index.length) * 3, (i + 1) * 3)
+        //   ]
+        // }
 
-        m.addFace(v, norms)
+        m.addFace(v)
 
         index = [];
       }
@@ -216,7 +228,7 @@ const traverseTree = async (
             if (geometry) {
               const results = await geometry.generateBuffers();
 
-              const geometryNode = new GeometryNode(geometry, results.vertices, results.normals, results.indices);
+              const geometryNode = new GeometryNode(geometry, results.vertices, results.normals, results.texcoords, results.indices);
               
               geometryNode.name =  node.prop(1, 'string')?.split('::')[1] ?? '';
               if (geometryNode.name === '') {

@@ -7,15 +7,18 @@ class GeometryNode extends SceneNode {
   vertices: number[];
   
   normals: number[];
+
+  texcoords: number[];
   
   indices: number[];
 
-  constructor(mesh: SurfaceMesh, vertices: number[], normals: number[], indices: number[]) {
+  constructor(mesh: SurfaceMesh, vertices: number[], normals: number[], texcoords: number[], indices: number[]) {
     super();
   
     this.mesh = mesh;
     this.vertices = vertices;
     this.normals = normals;
+    this.texcoords = texcoords;
     this.indices = indices;
   }
 }

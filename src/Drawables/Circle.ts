@@ -60,7 +60,7 @@ class Circle extends Drawable {
 
     gpu.device.queue.writeBuffer(this.circleDataBuffer, 0, this.circleStructure.arrayBuffer);
 
-    passEncoder.setBindGroup(2, this.bindGroup2);
+    // passEncoder.setBindGroup(2, this.bindGroup2);
     passEncoder.setBindGroup(3, this.bindGroup3);
 
     // TODO: determine how many lines should be rendered based on radius?

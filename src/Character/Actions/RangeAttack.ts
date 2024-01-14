@@ -24,7 +24,7 @@ class RangeAttack extends Action {
         this.trajectory = null;
       }
     
-      this.trajectory = new DrawableNode(new Trajectory({
+      this.trajectory = await DrawableNode.create(new Trajectory({
         velocityVector: result.velocityVector,
         duration: result.duration ?? 0,
         startPos: result.startPos,
@@ -34,7 +34,7 @@ class RangeAttack extends Action {
   
       world.scene.addNode(this.trajectory);
   
-      this.showPathLines(null);
+      await this.showPathLines(null);
   
       if (world.actionInfoCallback) {
         world.actionInfoCallback({
@@ -70,7 +70,7 @@ class RangeAttack extends Action {
         )
 
         if (!cancelled && !this.focused) {
-          this.showPathLines(lines);
+          await this.showPathLines(lines);
 
           this.path = path;
           this.distance = distance;
@@ -91,7 +91,7 @@ class RangeAttack extends Action {
       const path = this.actor.processPath(this.path, script);
       script.entries.push(new FollowPath(this.actor.sceneNode, path));    
 
-      this.showPathLines(null);
+      await this.showPathLines(null);
     }
     else if (this.focused) {
       this.targets.push(this.focused);

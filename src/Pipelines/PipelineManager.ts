@@ -1,7 +1,9 @@
 import { bindGroups } from "../BindGroups";
 import { gpu } from "../Gpu";
+import { MaterialDescriptor } from "../Materials/MaterialDescriptor";
 import { litShader } from "../shaders/lit";
-import { PipelineAttributes, PipelineInterface, PipelineManagerInterface } from "../types";
+import { texturedShader } from "../shaders/textured";
+import { PipelineInterface, PipelineManagerInterface } from "../types";
 import CirclePipeline from "./CirclePipeline";
 import LinePipeline from "./LinePipeline";
 import LitPipeline from "./LitPipeline";
@@ -24,7 +26,7 @@ class PipelineManager implements PipelineManagerInterface {
 
   pipelines: Pipelines[] = [];
 
-  pipelineMap: Map<string, Pipeline> = new Map();
+  pipelineMap: Map<string, PipelineInterface> = new Map();
 
   constructor() {
     this.pipelines = [];
@@ -68,86 +70,176 @@ class PipelineManager implements PipelineManagerInterface {
     return null;
   }
 
-  getPipelineByArgs(args: PipelineAttributes): Pipeline {
-    const key = JSON.stringify(args);
+  getPipelineByArgs(materialDescriptor: MaterialDescriptor): PipelineInterface {
+    const key = JSON.stringify(materialDescriptor);
 
-    let pipeline = this.pipelineMap.get(key);
+    let pipeline: PipelineInterface | undefined = this.pipelineMap.get(key);
 
     if (pipeline) {
       return pipeline;
     }
 
-    const shaderModule = gpu.device.createShaderModule({
-      label: 'base pipeline',
-      code: litShader,
-    })
-    
-    const vertexBufferLayout: GPUVertexBufferLayout[] = [
-      {
-        attributes: [
+    if (materialDescriptor.type !== 'Lit') {
+      pipeline = this.getPipeline(materialDescriptor.type)!
+
+      this.pipelineMap.set(key, pipeline);
+    }
+    else {
+      // const vertexBufferLayout: GPUVertexBufferLayout[] = [
+      //   {
+      //     attributes: [
+      //       {
+      //         shaderLocation: 0, // position
+      //         offset: 0,
+      //         format: "float32x4",
+      //       },
+      //     ],
+      //     arrayStride: 16,
+      //     stepMode: "vertex",
+      //   },
+      //   {
+      //     attributes: [
+      //       {
+      //         shaderLocation: 1, // normal
+      //         offset: 0,
+      //         format: "float32x4",
+      //       }
+      //     ],
+      //     arrayStride: 16,
+      //     stepMode: "vertex",
+      //   }
+      // ];
+      
+      let bindgroupLayout: GPUPipelineLayout;
+      let shaderModule: GPUShaderModule;
+      let vertexBufferLayout: GPUVertexBufferLayout[] = [];
+
+      if (materialDescriptor.texture) {
+        bindgroupLayout = gpu.device.createPipelineLayout({
+          bindGroupLayouts: [
+            bindGroups.getBindGroupLayout0(),
+            bindGroups.getBindGroupLayout1(),
+            bindGroups.getBindGroupLayout2(),
+          ],
+        });
+
+        shaderModule = gpu.device.createShaderModule({
+          label: 'base pipeline',
+          code: texturedShader,
+        })
+
+        vertexBufferLayout = [
           {
-            shaderLocation: 0, // position
-            offset: 0,
-            format: "float32x4",
+            attributes: [
+              {
+                shaderLocation: 0, // position
+                offset: 0,
+                format: "float32x4",
+              },
+            ],
+            arrayStride: 16,
+            stepMode: "vertex",
           },
-        ],
-        arrayStride: 16,
-        stepMode: "vertex",
-      },
-      {
-        attributes: [
           {
-            shaderLocation: 1, // normal
-            offset: 0,
-            format: "float32x4",
+            attributes: [
+              {
+                shaderLocation: 1, // normal
+                offset: 0,
+                format: "float32x4",
+              }
+            ],
+            arrayStride: 16,
+            stepMode: "vertex",
+          },
+          {
+            attributes: [
+              {
+                shaderLocation: 2, // texcoord
+                offset: 0,
+                format: "float32x2",
+              }
+            ],
+            arrayStride: 8,
+            stepMode: "vertex",
           }
-        ],
-        arrayStride: 16,
-        stepMode: "vertex",
+        ];
       }
-    ];
-    
-    const pipelineDescriptor: GPURenderPipelineDescriptor = {
-      label: 'base pipeline',
-      vertex: {
-        module: shaderModule,
-        entryPoint: "vertex_simple",
-        buffers: vertexBufferLayout,
-      },
-      fragment: {
-        module: shaderModule,
-        entryPoint: "fragment_simple",
-        targets: [
+      else {
+        bindgroupLayout = gpu.device.createPipelineLayout({
+          bindGroupLayouts: [
+            bindGroups.getBindGroupLayout0(),
+            bindGroups.getBindGroupLayout1(),
+            bindGroups.getBindGroupLayout2A(),
+          ],
+        });
+
+        shaderModule = gpu.device.createShaderModule({
+          label: 'base pipeline',
+          code: litShader,
+        })
+
+        vertexBufferLayout = [
           {
-            format: navigator.gpu.getPreferredCanvasFormat(),
+            attributes: [
+              {
+                shaderLocation: 0, // position
+                offset: 0,
+                format: "float32x4",
+              },
+            ],
+            arrayStride: 16,
+            stepMode: "vertex",
           },
-        ],
-      },
-      primitive: {
-        topology: "triangle-list",
-        cullMode: "back",
-        frontFace: "ccw",
-      },
-      depthStencil: {
-        depthWriteEnabled: true,
-        depthCompare: "less",
-        format: "depth24plus"
-      },
-      layout: gpu.device.createPipelineLayout({
-        bindGroupLayouts: [
-          bindGroups.getBindGroupLayout0(),
-          bindGroups.getBindGroupLayout1(),
-          bindGroups.getBindGroupLayout2A(),
-        ],
-      }),
-    };
-    
-    const gpuPipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
+          {
+            attributes: [
+              {
+                shaderLocation: 1, // normal
+                offset: 0,
+                format: "float32x4",
+              }
+            ],
+            arrayStride: 16,
+            stepMode: "vertex",
+          }
+        ];
+      }
 
-    pipeline = new Pipeline();
-    pipeline.pipeline = gpuPipeline;
+      const pipelineDescriptor: GPURenderPipelineDescriptor = {
+        label: 'base pipeline',
+        vertex: {
+          module: shaderModule,
+          entryPoint: "vs",
+          buffers: vertexBufferLayout,
+        },
+        fragment: {
+          module: shaderModule,
+          entryPoint: "fs",
+          targets: [
+            {
+              format: navigator.gpu.getPreferredCanvasFormat(),
+            },
+          ],
+        },
+        primitive: {
+          topology: "triangle-list",
+          cullMode: materialDescriptor.cullMode ?? "back",
+          frontFace: "ccw",
+        },
+        depthStencil: {
+          depthWriteEnabled: true,
+          depthCompare: "less",
+          format: "depth24plus"
+        },
+        layout: bindgroupLayout,
+      };
+      
+      const gpuPipeline = gpu.device.createRenderPipeline(pipelineDescriptor);
 
-    this.pipelineMap.set(key, pipeline);
+      pipeline = new Pipeline();
+      pipeline.pipeline = gpuPipeline;
+
+      this.pipelineMap.set(key, pipeline);
+    }
 
     console.log(`pipelines created: ${this.pipelineMap.size}`)
     return pipeline;

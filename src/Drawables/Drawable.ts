@@ -1,7 +1,8 @@
 import { Mat4, vec4, Vec4 } from 'wgpu-matrix';
-import DrawableInterface, { maxInstances } from "./DrawableInterface";
+import DrawableInterface from "./DrawableInterface";
 import { bindGroups } from '../BindGroups';
 import { gpu } from '../Gpu';
+import { maxInstances } from '../types';
 
 class Drawable implements DrawableInterface {
   drawable = true;
@@ -14,7 +15,7 @@ class Drawable implements DrawableInterface {
 
   color = new Float32Array(4);
 
-  colorBuffer: GPUBuffer;
+  // colorBuffer: GPUBuffer;
 
   modelMatrices: Float32Array = new Float32Array(16 * maxInstances);
 
@@ -24,7 +25,7 @@ class Drawable implements DrawableInterface {
 
   bindGroup: GPUBindGroup;
 
-  bindGroup2: GPUBindGroup;
+  // bindGroup2: GPUBindGroup;
 
   constructor() {
     this.color[0] = 0.8;
@@ -32,11 +33,11 @@ class Drawable implements DrawableInterface {
     this.color[2] = 0.8;
     this.color[3] = 1.0;
 
-    this.colorBuffer = gpu.device.createBuffer({
-      label: 'color',
-      size: 4 * Float32Array.BYTES_PER_ELEMENT * maxInstances,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    // this.colorBuffer = gpu.device.createBuffer({
+    //   label: 'color',
+    //   size: 4 * Float32Array.BYTES_PER_ELEMENT * maxInstances,
+    //   usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    // });
 
     this.modelMatrixBuffer = gpu.device.createBuffer({
       label: 'model Matrix',
@@ -52,13 +53,13 @@ class Drawable implements DrawableInterface {
       ],
     });
 
-    this.bindGroup2 = gpu.device.createBindGroup({
-      label: 'Color',
-      layout: bindGroups.getBindGroupLayout2A(),
-      entries: [
-        { binding: 0, resource: { buffer: this.colorBuffer }},
-      ],
-    });
+    // this.bindGroup2 = gpu.device.createBindGroup({
+    //   label: 'Color',
+    //   layout: bindGroups.getBindGroupLayout2A(),
+    //   entries: [
+    //     { binding: 0, resource: { buffer: this.colorBuffer }},
+    //   ],
+    // });
   }
 
   render(passEncoder: GPURenderPassEncoder, numInstances: number): void {

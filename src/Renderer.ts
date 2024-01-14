@@ -27,6 +27,7 @@ import {
 import { lights } from "./shaders/lights";
 import { bindGroups } from './BindGroups';
 import { gpu } from './Gpu';
+import { modelManager } from './ModelManager';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -123,13 +124,13 @@ class Renderer implements WorldInterface {
 
   occupants: Occupant[] = [];
 
-  constructor(frameBindGroupLayout: GPUBindGroupLayout, test?: SceneNode) {
+  constructor(frameBindGroupLayout: GPUBindGroupLayout, cartesianAxes: DrawableNode, test?: SceneNode) {
     this.createCameraBindGroups(frameBindGroupLayout);
 
     // this.reticle = reticle;
 
     this.aspectRatio[0] = 1.0;
-    this.scene.addNode(new DrawableNode(new CartesianAxes(), lineMaterial));
+    this.scene.addNode(cartesianAxes);
 
     if (test) {
       this.scene.addNode(test);
@@ -141,10 +142,12 @@ class Renderer implements WorldInterface {
   static async create() {
     // const reticle = new DrawableNode(await Reticle.create(0.05));
 
+    const cartesianAxes = await DrawableNode.create(new CartesianAxes(), lineMaterial)
+
     let test: SceneNode | undefined = undefined;
-    // test = await modelManager.getModel('SoulerCoaster');
+    test = await modelManager.getModel('SoulerCoaster');
     
-    return new Renderer(bindGroups.getBindGroupLayout0(), test);
+    return new Renderer(bindGroups.getBindGroupLayout0(), cartesianAxes, test);
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
