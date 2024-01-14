@@ -5,5 +5,9 @@ export const soulerCoasterMaterial: MaterialDescriptor = {
 
   cullMode: "none",
 
-  texture: './textures/stars.png',
+  texture: {
+    url: './textures/stars.png',
+
+    scale: [1, 5],
+  }
 }

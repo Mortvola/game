@@ -1,9 +1,11 @@
+import { makeShaderDataDefinitions, makeStructuredView } from "webgpu-utils";
 import { bindGroups } from "../BindGroups";
 import DrawableInterface from "../Drawables/DrawableInterface";
 import { gpu } from "../Gpu";
 import { pipelineManager } from "../Pipelines/PipelineManager";
+import { textureAttributes } from "../shaders/textureAttributes";
 import { DrawableNodeInterface, MaterialInterface, PipelineInterface, maxInstances } from "../types";
-import { MaterialDescriptor } from "./MaterialDescriptor";
+import { MaterialDescriptor, TextureDescriptor } from "./MaterialDescriptor";
 
 class Material implements MaterialInterface {
   pipeline: PipelineInterface | null = null;
@@ -11,6 +13,8 @@ class Material implements MaterialInterface {
   color = new Float32Array(4);
 
   colorBuffer: GPUBuffer;
+
+  textureAttributesBuffer: GPUBuffer | null = null;
 
   bindGroup: GPUBindGroup;
 
@@ -47,11 +51,35 @@ class Material implements MaterialInterface {
         { width: bitmap.width, height: bitmap.height },
       );
   
-      const sampler = gpu.device.createSampler();      this.colorBuffer = gpu.device.createBuffer({
+      const sampler = gpu.device.createSampler();
+      
+      this.colorBuffer = gpu.device.createBuffer({
         label: 'color',
         size: 4 * Float32Array.BYTES_PER_ELEMENT * maxInstances,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
+
+      const defs = makeShaderDataDefinitions(textureAttributes);
+      const textureAttributesStruct = makeStructuredView(defs.structs.TextureAttributes);
+
+      this.textureAttributesBuffer = gpu.device.createBuffer({
+        label: 'texture attributes',
+        size: textureAttributesStruct.arrayBuffer.byteLength,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      })
+
+      let scale = [1, 1];
+      if (typeof materialDescriptor.texture !== 'string'
+        && materialDescriptor.texture.scale
+      ) {
+        scale = materialDescriptor.texture.scale;
+      }
+
+      textureAttributesStruct.set({
+        scale,
+      })
+
+      gpu.device.queue.writeBuffer(this.textureAttributesBuffer, 0, textureAttributesStruct.arrayBuffer)
 
       this.bindGroup = gpu.device.createBindGroup({
         label: 'material',
@@ -60,6 +88,7 @@ class Material implements MaterialInterface {
           { binding: 0, resource: { buffer: this.colorBuffer }},
           { binding: 1, resource: sampler },
           { binding: 2, resource: texture.createView() },
+          { binding: 3, resource: { buffer: this.textureAttributesBuffer }}
         ],
       });  
     }
@@ -84,7 +113,14 @@ class Material implements MaterialInterface {
     let bitmap: ImageBitmap | undefined = undefined;
 
     if (materialDescriptor.texture) {
-      const url = materialDescriptor.texture;
+      let url: string;
+      if (typeof materialDescriptor.texture === 'string') {
+        url = materialDescriptor.texture;
+      }
+      else {
+        url = (materialDescriptor.texture as TextureDescriptor).url;
+      }
+
       const res = await fetch(url);
       const blob = await res.blob();
       try {

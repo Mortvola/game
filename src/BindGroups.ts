@@ -94,6 +94,11 @@ class BindGroups {
           visibility: GPUShaderStage.FRAGMENT,
           texture: {},
         },
+        { // Attributes
+          binding: 3,
+          visibility: GPUShaderStage.FRAGMENT,
+          buffer: {},
+        },
       ]
     });
 

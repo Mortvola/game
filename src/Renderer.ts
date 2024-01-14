@@ -38,7 +38,7 @@ const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
 };
 
 const defs = makeShaderDataDefinitions(lights);
-export const lightsStructure = makeStructuredView(defs.structs.Lights);
+const lightsStructure = makeStructuredView(defs.structs.Lights);
 
 type BindGroup = {
   bindGroup: GPUBindGroup,
@@ -514,7 +514,6 @@ class Renderer implements WorldInterface {
         this.context.canvas.height / 80,
         // this.near, this.far,
         -200,
-
         200,
       );
 

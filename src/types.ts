@@ -380,6 +380,8 @@ export interface MaterialInterface {
 
   colorBuffer: GPUBuffer;
 
+  textureAttributesBuffer: GPUBuffer | null;
+  
   bindGroup: GPUBindGroup;
 
   addDrawable(drawableNode: DrawableNodeInterface): void;

@@ -9,7 +9,7 @@ import LinePipeline from "./LinePipeline";
 import LitPipeline from "./LitPipeline";
 import OutlinePipeline from "./OutlinePipeline";
 import Pipeline from "./Pipeline";
-import ReticlePipeline from "./ReticlePipeline";
+// import ReticlePipeline from "./ReticlePipeline";
 import TrajectoryPipeline from "./TrajectoryPipeline";
 
 export type PipelineType =
@@ -43,7 +43,7 @@ class PipelineManager implements PipelineManagerInterface {
       // this.pipelines.push({ type: 'drag-handles', pipeline: new DragHandlesPipeline() });
       this.pipelines.push({ type: 'Circle', pipeline: new CirclePipeline() });
       this.pipelines.push({ type: 'outline', pipeline: new OutlinePipeline() });
-      this.pipelines.push({ type: 'reticle', pipeline: new ReticlePipeline() });
+      // this.pipelines.push({ type: 'reticle', pipeline: new ReticlePipeline() });
       this.pipelines.push({ type: 'Trajectory', pipeline: new TrajectoryPipeline() });
     }
 
@@ -84,32 +84,7 @@ class PipelineManager implements PipelineManagerInterface {
 
       this.pipelineMap.set(key, pipeline);
     }
-    else {
-      // const vertexBufferLayout: GPUVertexBufferLayout[] = [
-      //   {
-      //     attributes: [
-      //       {
-      //         shaderLocation: 0, // position
-      //         offset: 0,
-      //         format: "float32x4",
-      //       },
-      //     ],
-      //     arrayStride: 16,
-      //     stepMode: "vertex",
-      //   },
-      //   {
-      //     attributes: [
-      //       {
-      //         shaderLocation: 1, // normal
-      //         offset: 0,
-      //         format: "float32x4",
-      //       }
-      //     ],
-      //     arrayStride: 16,
-      //     stepMode: "vertex",
-      //   }
-      // ];
-      
+    else {      
       let bindgroupLayout: GPUPipelineLayout;
       let shaderModule: GPUShaderModule;
       let vertexBufferLayout: GPUVertexBufferLayout[] = [];
