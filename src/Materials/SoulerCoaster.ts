@@ -9,5 +9,7 @@ export const soulerCoasterMaterial: MaterialDescriptor = {
     url: './textures/stars.png',
 
     scale: [1, 5],
+
+    offset: [0, 0.1],
   }
 }

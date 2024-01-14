@@ -2,6 +2,8 @@ export type TextureDescriptor = {
   url: string,
 
   scale?: [number, number],
+
+  offset?: [number, number],
 }
 
 export type MaterialDescriptor = {

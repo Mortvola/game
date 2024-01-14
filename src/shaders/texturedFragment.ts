@@ -10,6 +10,6 @@ ${textureAttributes}
 @fragment
 fn fs(fragData: VertexOut) -> @location(0) vec4f
 {
-  return textureSample(ourTexture, ourSampler, fract(fragData.texcoord * texAttr.scale));
+  return textureSample(ourTexture, ourSampler, fract(fragData.texcoord * texAttr.scale + texAttr.offset));
 }
 `

@@ -75,8 +75,16 @@ class Material implements MaterialInterface {
         scale = materialDescriptor.texture.scale;
       }
 
+      let offset = [0, 0];
+      if (typeof materialDescriptor.texture !== 'string'
+        && materialDescriptor.texture.offset
+      ) {
+        offset = materialDescriptor.texture.offset;
+      }
+
       textureAttributesStruct.set({
         scale,
+        offset,
       })
 
       gpu.device.queue.writeBuffer(this.textureAttributesBuffer, 0, textureAttributesStruct.arrayBuffer)
