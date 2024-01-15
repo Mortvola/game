@@ -46,6 +46,11 @@ class BindGroups {
             type: "read-only-storage",
           },
         },
+        { // Light data
+          binding: 5,
+          visibility: GPUShaderStage.FRAGMENT,
+          buffer: {},
+        },
       ]
     })
 

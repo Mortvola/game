@@ -10,6 +10,4 @@ struct Lights {
   count: u32,
   lights: array<PointLight, 4>,
 }
-
-@group(0) @binding(4) var<storage> pointLights: Lights;
 `

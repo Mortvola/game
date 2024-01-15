@@ -9,6 +9,7 @@ import LinePipeline from "./LinePipeline";
 import LitPipeline from "./LitPipeline";
 import OutlinePipeline from "./OutlinePipeline";
 import Pipeline from "./Pipeline";
+import { buildFromGraph } from "../shaders/ShaderBuilder/ShaderBuilder";
 // import ReticlePipeline from "./ReticlePipeline";
 import TrajectoryPipeline from "./TrajectoryPipeline";
 
@@ -98,10 +99,11 @@ class PipelineManager implements PipelineManagerInterface {
           ],
         });
 
-        shaderModule = gpu.device.createShaderModule({
-          label: 'base pipeline',
-          code: texturedShader,
-        })
+        shaderModule = buildFromGraph(materialDescriptor);
+        // shaderModule = gpu.device.createShaderModule({
+        //   label: 'base pipeline',
+        //   code: texturedShader,
+        // })
 
         vertexBufferLayout = [
           {

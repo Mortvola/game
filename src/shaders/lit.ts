@@ -17,8 +17,6 @@ struct VertexOut {
 
 ${common}
 
-${lights}
-
 @group(2) @binding(0) var<uniform> color: array<vec4f, 16>;
 
 @vertex

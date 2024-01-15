@@ -1,3 +1,5 @@
+import { GraphDescriptor } from "../shaders/ShaderBuilder/GraphDescriptor";
+
 export type TextureDescriptor = {
   url: string,
 
@@ -14,4 +16,6 @@ export type MaterialDescriptor = {
   texture?: string | TextureDescriptor,
 
   color?: number[],
+
+  graph?: GraphDescriptor,
 }

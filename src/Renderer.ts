@@ -207,6 +207,12 @@ class Renderer implements WorldInterface {
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     });
 
+    const timeBuffer = gpu.device.createBuffer({
+      label: 'time',
+      size: 1 * Float32Array.BYTES_PER_ELEMENT,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
     const frameBindGroup = gpu.device.createBindGroup({
       label: 'frame',
       layout: frameBindGroupLayout,
@@ -216,6 +222,7 @@ class Renderer implements WorldInterface {
         { binding: 2, resource: { buffer: cameraPosBuffer }},
         { binding: 3, resource: { buffer: aspectRatioBuffer }},
         { binding: 4, resource: { buffer: lightsBuffer }},
+        { binding: 5, resource: { buffer: timeBuffer }},
       ],
     });
 
@@ -227,6 +234,7 @@ class Renderer implements WorldInterface {
           cameraPosBuffer,
           aspectRatioBuffer,
           lightsBuffer,
+          timeBuffer,
       ],
     }
   }
@@ -440,10 +448,9 @@ class Renderer implements WorldInterface {
           this.checkActorFocus();
         }
 
+        this.drawScene(timestamp);
+
         this.previousTimestamp = timestamp;
-
-        this.drawScene();
-
         this.framesRendered += 1;
       }
 
@@ -474,7 +481,7 @@ class Renderer implements WorldInterface {
     };
   }
 
-  drawScene() {
+  drawScene(timestamp: number) {
     if (!this.context) {
       throw new Error('context is null');
     }
@@ -555,6 +562,11 @@ class Renderer implements WorldInterface {
     });
 
     gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[4], 0, lightsStructure.arrayBuffer);
+
+    const timeBuffer = new Float32Array(1);
+    timeBuffer[0] = timestamp / 1000.0;
+    
+    gpu.device.queue.writeBuffer(this.frameBindGroup.buffer[5], 0, timeBuffer);
 
     const commandEncoder = gpu.device.createCommandEncoder();
 

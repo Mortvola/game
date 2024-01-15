@@ -8,8 +8,10 @@ ${textureAttributes}
 @group(2) @binding(3) var<uniform> texAttr: TextureAttributes;
 
 @fragment
-fn fs(fragData: VertexOut) -> @location(0) vec4f
+fn fs(vertexOut: VertexOut) -> @location(0) vec4f
 {
-  return textureSample(ourTexture, ourSampler, fract(fragData.texcoord * texAttr.scale + texAttr.offset));
+  var offset = vec2f(0, time);
+
+  return textureSample(ourTexture, ourSampler, fract(vertexOut.texcoord * texAttr.scale + offset));
 }
 `
