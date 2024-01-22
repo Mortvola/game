@@ -1,7 +1,7 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, pointWithinCircle, timeToTarget } from "../Math";
 import Circle from "../Renderer/Drawables/Circle";
-import RenderPass from "../RenderPass";
+import RenderPass from "../Renderer/RenderPass";
 import Shot from "../Script/Shot";
 import { playShot } from "../Audio";
 import { Advantage, attackRoll, savingThrow } from "../Dice";

@@ -7,7 +7,7 @@ import {
   degToRad, intersectionPlane,
 } from './Math';
 import ContainerNode, { isContainerNode } from './Renderer/Drawables/SceneNodes/ContainerNode';
-import RenderPass from './RenderPass';
+import RenderPass from './Renderer/RenderPass';
 import Light, { isLight } from './Renderer/Drawables/Light';
 import CartesianAxes from './Renderer/Drawables/CartesianAxes';
 // import Reticle from './Drawables/Reticle';
