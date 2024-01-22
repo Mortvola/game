@@ -2,9 +2,9 @@ import * as FBXParser from 'fbx-parser'
 import { vec3 } from 'wgpu-matrix';
 import SurfaceMesh from '../Renderer/Drawables/SurfaceMesh';
 import { degToRad } from '../Renderer/Math';
-import ContainerNode from '../Renderer/Drawables/SceneNodes/ContainerNode';
-import SceneNode from '../Renderer/Drawables/SceneNodes/SceneNode';
-import GeometryNode from '../Renderer/Drawables/SceneNodes/GeometryNode';
+import FbxNode from './FbxNode';
+import FbxGeometryNode from './FbxGeometryNode';
+import FbxContainerNode from './FbxContainerNode';
 
 // export const yieldToMain = () => {
 //   return new Promise(resolve => {
@@ -117,22 +117,24 @@ const loadGeometry = async (
   }
 }
 
-const addTransformProperties = (sceneNode: SceneNode, node: FBXParser.FBXReaderNode) => {
+const addTransformProperties = (sceneNode: FbxNode, node: FBXParser.FBXReaderNode) => {
   const [scaling] = node.node('Properties70')?.nodes({ 0: "Lcl Scaling" }) ?? [];
   const [trans] = node.node('Properties70')?.nodes({ 0: "Lcl Translation"}) ?? [];
   const [rot] = node.node('Properties70')?.nodes({ 0: "Lcl Rotation"}) ?? [];
 
-  const xScale = (scaling?.prop(4, 'number') ?? 1) / 100;
-  const yScale = (scaling?.prop(5, 'number') ?? 1) / 100;
-  const zScale = (scaling?.prop(6, 'number') ?? 1) / 100;
+  const scaleFactor = 1 / 10;
+
+  const xScale = (scaling?.prop(4, 'number') ?? 1) * scaleFactor;
+  const yScale = (scaling?.prop(5, 'number') ?? 1) * scaleFactor;
+  const zScale = (scaling?.prop(6, 'number') ?? 1) * scaleFactor;
 
   const xRotation = rot?.prop(4, 'number') ?? 0;
   const yRotation = rot?.prop(5, 'number') ?? 0;
   const zRotation = rot?.prop(6, 'number') ?? 0;
 
-  const xTranslation = (trans?.prop(4, 'number') ?? 0) / 100;
-  const yTranslation = (trans?.prop(5, 'number') ?? 0) / 100;
-  const zTranslation = (trans?.prop(5, 'number') ?? 0) / 100;
+  const xTranslation = (trans?.prop(4, 'number') ?? 0) * scaleFactor;
+  const yTranslation = (trans?.prop(5, 'number') ?? 0) * scaleFactor;
+  const zTranslation = (trans?.prop(5, 'number') ?? 0) * scaleFactor;
 
   sceneNode.scale = vec3.create(xScale, yScale, zScale); 
   sceneNode.setFromAngles(degToRad(xRotation), degToRad(yRotation), degToRad(zRotation));
@@ -140,7 +142,7 @@ const addTransformProperties = (sceneNode: SceneNode, node: FBXParser.FBXReaderN
 }
 
 type Result = {
-  sceneNodes: SceneNode[],
+  sceneNodes: FbxNode[],
 }
 
 type Context = {
@@ -228,7 +230,7 @@ const traverseTree = async (
             if (geometry) {
               const results = await geometry.generateBuffers();
 
-              const geometryNode = new GeometryNode(geometry, results.vertices, results.normals, results.texcoords, results.indices);
+              const geometryNode = new FbxGeometryNode(geometry, results.vertices, results.normals, results.texcoords, results.indices);
               
               geometryNode.name =  node.prop(1, 'string')?.split('::')[1] ?? '';
               if (geometryNode.name === '') {
@@ -246,7 +248,7 @@ const traverseTree = async (
           }
         
           case 'Model': {
-            const model = new ContainerNode();
+            const model = new FbxContainerNode();
 
             addTransformProperties(model, node);
 
@@ -271,7 +273,7 @@ const traverseTree = async (
           }
 
           default: {
-            const model = new ContainerNode();
+            const model = new FbxContainerNode();
 
             // model.name =  node.prop(1, 'string')?.split('::')[1] ?? 'Unknown';
             model.name =  node.prop(1, 'string') ?? 'Unknown';
@@ -458,7 +460,17 @@ export const downloadFbx = async (url: string) => {
         // setPercentComplete(null);
         // setGeoPercent(null);
 
-        return result.sceneNodes;
+        if (result.sceneNodes.length === 1) {
+          return result.sceneNodes[0];
+        }
+
+        const containerNode = new FbxContainerNode();
+        
+        for (const node of result.sceneNodes) {
+          containerNode.addNode(node);
+        }
+
+        return containerNode;
       }
     }
   }

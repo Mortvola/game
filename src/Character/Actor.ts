@@ -26,6 +26,7 @@ import { ActionInterface, CharacterInterface, CreatureActorInterface, ShotData, 
 import { circleMaterial } from "../Renderer/Materials/Circle";
 import { DamageType, Weapon, WeaponType } from "./Equipment/Types";
 import MoveAction from "./Actions/MoveAction";
+import { SceneNodeInterface } from "../Renderer/types";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -86,7 +87,7 @@ class Actor implements CreatureActorInterface {
 
   private constructor(
     character: CharacterInterface,
-    mesh: SceneNode,
+    mesh: SceneNodeInterface,
     height: number,
     color: Vec4,
     team: number,
