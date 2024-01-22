@@ -1,8 +1,7 @@
 import { bindGroups } from "../BindGroups";
-import { gpu } from "../Gpu";
+import { gpu } from "../Renderer/Gpu";
 import { MaterialDescriptor } from "../Materials/MaterialDescriptor";
 import { litShader } from "../shaders/lit";
-import { texturedShader } from "../shaders/textured";
 import { PipelineInterface, PipelineManagerInterface } from "../types";
 import CirclePipeline from "./CirclePipeline";
 import LinePipeline from "./LinePipeline";

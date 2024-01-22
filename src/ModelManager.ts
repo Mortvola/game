@@ -9,7 +9,7 @@ import { downloadFbx } from "./Workers/LoadFbx";
 import ContainerNode, { isContainerNode } from "./Drawables/SceneNodes/ContainerNode";
 import { isGeometryNode } from "./Drawables/SceneNodes/GeometryNode";
 import { litMaterial } from "./Materials/Lit";
-import { gpu } from "./Gpu";
+import { gpu } from "./Renderer/Gpu";
 import { soulerCoasterMaterial } from "./Materials/SoulerCoaster";
 import { goblinMaterial } from "./Materials/Goblin";
 import { koboldMaterial } from "./Materials/Kobold";

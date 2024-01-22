@@ -1,4 +1,4 @@
-import { gpu } from "../Gpu";
+import { gpu } from "../Renderer/Gpu";
 import { DrawableNodeInterface, MaterialInterface, PipelineInterface } from "../types";
 
 class Pipeline implements PipelineInterface {

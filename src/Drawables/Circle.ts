@@ -3,7 +3,7 @@ import Drawable from './Drawable';
 import { circleShader } from '../shaders/circle';
 import { makeShaderDataDefinitions, makeStructuredView } from 'webgpu-utils';
 import { bindGroups } from '../BindGroups';
-import { gpu } from '../Gpu';
+import { gpu } from "../Renderer/Gpu";
 
 const defs = makeShaderDataDefinitions(circleShader);
 

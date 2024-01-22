@@ -1,5 +1,5 @@
 import { bindGroups } from '../BindGroups';
-import { gpu } from '../Gpu';
+import { gpu } from "../Renderer/Gpu";
 import { litShader } from '../shaders/lit';
 import Pipeline from "./Pipeline";
 

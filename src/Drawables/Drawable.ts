@@ -1,7 +1,7 @@
 import { Mat4, vec4, Vec4 } from 'wgpu-matrix';
 import DrawableInterface from "./DrawableInterface";
 import { bindGroups } from '../BindGroups';
-import { gpu } from '../Gpu';
+import { gpu } from "../Renderer/Gpu";
 import { maxInstances } from '../types';
 
 class Drawable implements DrawableInterface {

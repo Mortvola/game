@@ -10,7 +10,7 @@ import ActionBar from './Actions/ActionBar';
 import StatusBar from './StatusBar/StatusBar';
 import Focused from './Focused';
 import { ActionInfo, CreatureActorInterface, FocusInfo, Party } from '../types';
-import { gpu } from '../Gpu';
+import { gpu } from "../Renderer/Gpu";
 
 type DiretionKeys = {
   left: number,

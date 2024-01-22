@@ -1,4 +1,4 @@
-import { gpu } from "./Gpu";
+import { gpu } from "./Renderer/Gpu";
 import { modelManager } from "./ModelManager";
 import { pipelineManager } from "./Pipelines/PipelineManager";
 import Renderer from "./Renderer";

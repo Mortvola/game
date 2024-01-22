@@ -4,7 +4,7 @@ import Drawable from "./Drawable";
 import { makeShaderDataDefinitions, makeStructuredView } from "webgpu-utils";
 import { trajectoryShader } from "../shaders/trajectory";
 import { gravity } from "../Math";
-import { gpu } from "../Gpu";
+import { gpu } from "../Renderer/Gpu";
 
 const defs = makeShaderDataDefinitions(trajectoryShader);
 

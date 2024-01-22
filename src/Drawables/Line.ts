@@ -1,4 +1,4 @@
-import { gpu } from "../Gpu";
+import { gpu } from "../Renderer/Gpu";
 import Drawable from "./Drawable";
 
 class Line extends Drawable {

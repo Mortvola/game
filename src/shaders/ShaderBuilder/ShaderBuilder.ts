@@ -1,4 +1,4 @@
-import { gpu } from "../../Gpu";
+import { gpu } from "../../Renderer/Gpu";
 import { MaterialDescriptor } from "../../Materials/MaterialDescriptor";
 import { common } from "../common";
 import { textureAttributes } from "../textureAttributes";
