@@ -1,7 +1,7 @@
 import { gpu } from "./Renderer/Gpu";
 import { modelManager } from "./ModelManager";
 import { pipelineManager } from "./Renderer/Pipelines/PipelineManager";
-import Game from "./Renderer";
+import Game from "./Game";
 import { WorldInterface } from "./types";
 
 await gpu.ready();
