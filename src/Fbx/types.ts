@@ -2,6 +2,8 @@ import { Quat, Vec3 } from "wgpu-matrix";
 import SurfaceMesh from "../Renderer/Drawables/SurfaceMesh";
 
 export interface FbxNodeInterface {
+  name: string;
+  
   scale: Vec3;
 
   translate: Vec3;
