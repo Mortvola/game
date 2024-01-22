@@ -2,7 +2,7 @@
 import {
   Vec4, mat4, vec2, vec4,
 } from 'wgpu-matrix';
-import Camera from './Camera';
+import Camera from './Renderer/Camera';
 import {
   degToRad, intersectionPlane,
 } from './Renderer/Math';
@@ -60,7 +60,7 @@ class Renderer implements WorldInterface {
 
   onFpsChange?: (fps: number) => void;
 
-  camera = new Camera();
+  camera = new Camera(18, vec4.create(0, 0, 20, 1));
 
   aspectRatio = new Float32Array(1);
 
