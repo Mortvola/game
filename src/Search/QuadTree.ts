@@ -1,6 +1,6 @@
 import { Vec2, Vec4, vec2, vec4 } from "wgpu-matrix";
 import Actor from "../Character/Actor";
-import { circleRectangleIntersectionTest, lineCircleIntersection, lineRectangleClip } from "../Math";
+import { circleRectangleIntersectionTest, lineCircleIntersection, lineRectangleClip } from "../Renderer/Math";
 
 enum Direction {
   North = 0,

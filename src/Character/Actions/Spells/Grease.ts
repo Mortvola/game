@@ -1,5 +1,5 @@
 import { mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
-import { degToRad, feetToMeters, pointWithinCircle } from "../../../Math";
+import { degToRad, feetToMeters, pointWithinCircle } from "../../../Renderer/Math";
 import Script from "../../../Script/Script";
 import { addOccupant } from "../../../Workers/PathPlannerQueue";
 import { Occupant } from "../../../Workers/PathPlannerTypes";

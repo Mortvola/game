@@ -1,4 +1,4 @@
-import { feetToMeters } from "../../Math";
+import { feetToMeters } from "../../Renderer/Math";
 import { AbilityScores, RaceInterface, Size } from "../../types";
 
 class Human implements RaceInterface {

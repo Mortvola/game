@@ -1,7 +1,7 @@
 import { vec4 } from "wgpu-matrix";
 import Mesh from "./Renderer/Drawables/Mesh";
 import { box } from "./Renderer/Drawables/Shapes/box";
-import { feetToMeters } from "./Math";
+import { feetToMeters } from "./Renderer/Math";
 import SceneNode from "./Renderer/Drawables/SceneNodes/SceneNode";
 import DrawableNode from "./Renderer/Drawables/SceneNodes/DrawableNode";
 import Drawable from "./Renderer/Drawables/Drawable";

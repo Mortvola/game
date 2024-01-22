@@ -1,7 +1,7 @@
 import { savingThrow } from "../../../Dice";
 import Script from "../../../Script/Script";
 import { CreatureActorInterface, WorldInterface } from '../../../types'
-import { feetToMeters } from "../../../Math";
+import { feetToMeters } from "../../../Renderer/Math";
 import RangeSpell from "./RangeSpell";
 
 class CharmPerson extends RangeSpell {

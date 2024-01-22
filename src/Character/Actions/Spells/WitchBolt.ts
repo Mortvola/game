@@ -1,5 +1,5 @@
 import { diceRoll, spellAttackRoll } from "../../../Dice";
-import { feetToMeters } from "../../../Math";
+import { feetToMeters } from "../../../Renderer/Math";
 import Script from "../../../Script/Script";
 import { CreatureActorInterface, WorldInterface } from '../../../types'
 import { DamageType } from "../../Equipment/Types";

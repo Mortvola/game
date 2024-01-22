@@ -1,4 +1,4 @@
-import { feetToMeters } from "../../Math";
+import { feetToMeters } from "../../Renderer/Math";
 import Elf from "./Elf";
 
 class WoodElf extends Elf {

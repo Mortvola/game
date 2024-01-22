@@ -1,4 +1,4 @@
-import { feetToMeters } from "../../../Math";
+import { feetToMeters } from "../../../Renderer/Math";
 import { savingThrow } from "../../../Dice";
 import RangeSpell from "./RangeSpell";
 import Script from "../../../Script/Script";

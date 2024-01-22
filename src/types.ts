@@ -5,7 +5,7 @@ import { Armor } from './Character/Equipment/Armor';
 import { Abilities } from './Character/Classes/Abilities';
 import DrawableInterface from './Renderer/Drawables/DrawableInterface';
 import { Weapon } from './Character/Equipment/Types';
-import { feetToMeters } from './Math';
+import { feetToMeters } from './Renderer/Math';
 
 export const maxInstances = 16;
 

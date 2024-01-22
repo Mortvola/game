@@ -1,4 +1,4 @@
-import { feetToMeters } from "../../Math";
+import { feetToMeters } from "../../Renderer/Math";
 import { RaceInterface, Size } from "../../types";
 
 class KoboldRace implements RaceInterface {

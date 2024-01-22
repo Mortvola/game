@@ -6,7 +6,7 @@ import {
   AddOccupantResponse, AddOccupantdRequest, FindPathRequest, FindPathResponse,
   MessageType, Occupant, PathPoint, PopulateGridRequest, PopulateGridResponse,
 } from "./PathPlannerTypes";
-import { lineSegmentCircleIntersection } from "../Math";
+import { lineSegmentCircleIntersection } from "../Renderer/Math";
 
 const pathFinder = new JumpPointSearch(512, 512, 4)
 

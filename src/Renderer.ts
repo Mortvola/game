@@ -5,7 +5,7 @@ import {
 import Camera from './Camera';
 import {
   degToRad, intersectionPlane,
-} from './Math';
+} from './Renderer/Math';
 import ContainerNode, { isContainerNode } from './Renderer/Drawables/SceneNodes/ContainerNode';
 import RenderPass from './Renderer/RenderPass';
 import Light, { isLight } from './Renderer/Drawables/Light';

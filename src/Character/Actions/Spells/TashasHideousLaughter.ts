@@ -1,4 +1,4 @@
-import { feetToMeters } from "../../../Math";
+import { feetToMeters } from "../../../Renderer/Math";
 import { CreatureActorInterface, WorldInterface } from '../../../types'
 import RangeSpell from "./RangeSpell";
 import Script from "../../../Script/Script";

@@ -1,5 +1,5 @@
 import { vec4, mat4, quat, Vec4, Mat4 } from 'wgpu-matrix';
-import { normalizeDegrees, degToRad } from './Math';
+import { normalizeDegrees, degToRad } from './Renderer/Math';
 import { audioContext } from './Audio';
 
 export type ProjectionType = 'Perspective' | 'Orthographic';

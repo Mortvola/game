@@ -1,6 +1,6 @@
 import { Vec2, vec2 } from "wgpu-matrix";
 import UniformGridSearch from "./UniformGridSearch";
-import { lineCircleIntersection } from "../Math";
+import { lineCircleIntersection } from "../Renderer/Math";
 import { GridNode } from "./GridNode";
 import GridNodeSet from "./GridNodeSet";
 import { Occupant } from "../Workers/PathPlannerTypes";

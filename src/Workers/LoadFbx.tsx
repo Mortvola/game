@@ -1,7 +1,7 @@
 import * as FBXParser from 'fbx-parser'
 import { vec3 } from 'wgpu-matrix';
 import SurfaceMesh from '../Renderer/Drawables/SurfaceMesh';
-import { degToRad } from '../Math';
+import { degToRad } from '../Renderer/Math';
 import ContainerNode from '../Renderer/Drawables/SceneNodes/ContainerNode';
 import SceneNode from '../Renderer/Drawables/SceneNodes/SceneNode';
 import GeometryNode from '../Renderer/Drawables/SceneNodes/GeometryNode';

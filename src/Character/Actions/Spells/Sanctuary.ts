@@ -1,7 +1,7 @@
 import { CreatureActorInterface, WorldInterface } from '../../../types'
 import Script from "../../../Script/Script";
 import Logger from "../../../Script/Logger";
-import { feetToMeters } from "../../../Math";
+import { feetToMeters } from "../../../Renderer/Math";
 import RangeSpell from "./RangeSpell";
 
 class Sanctuary extends RangeSpell {

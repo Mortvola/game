@@ -1,7 +1,7 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import Circle from "../../../Renderer/Drawables/Circle";
 import { getWorld } from "../../../Main";
-import { degToRad } from "../../../Math";
+import { degToRad } from "../../../Renderer/Math";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
 import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";

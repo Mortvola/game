@@ -1,4 +1,4 @@
-import { feetToMeters } from "../../../Math";
+import { feetToMeters } from "../../../Renderer/Math";
 import { CreatureActorInterface } from "../../../types";
 import AreaSpell from "./AreaSpell";
 

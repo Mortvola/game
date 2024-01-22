@@ -3,7 +3,7 @@ import Spell from "./Spell";
 import Script from "../../../Script/Script";
 import { getWorld } from "../../../Main";
 import Circle from "../../../Renderer/Drawables/Circle";
-import { degToRad } from "../../../Math";
+import { degToRad } from "../../../Renderer/Math";
 import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface, TimeType, WorldInterface } from "../../../types";
 import { circleMaterial } from "../../../Renderer/Materials/Circle";
