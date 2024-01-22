@@ -6,8 +6,9 @@ import FollowPath from "../../Script/FollowPath";
 import { getWorld } from "../../Main";
 import { PathPoint } from "../../Workers/PathPlannerTypes";
 import DrawableNode from "../../Renderer/Drawables/SceneNodes/DrawableNode";
-import { ActionInterface, CreatureActorInterface, DrawableNodeInterface, TimeType, WorldInterface } from "../../types";
+import { ActionInterface, CreatureActorInterface, TimeType, WorldInterface } from "../../types";
 import { lineMaterial } from "../../Renderer/Materials/Line";
+import { DrawableNodeInterface } from "../../Renderer/types";
 
 class Action implements ActionInterface {
   actor: CreatureActorInterface;

@@ -1,6 +1,7 @@
 import { vec4 } from "wgpu-matrix";
 import { gravity } from "../Renderer/Math";
-import { ActorInterface, SceneNodeInterface, ShotData, WorldInterface } from "../types";
+import { ActorInterface, ShotData, WorldInterface } from "../types";
+import { SceneNodeInterface } from "../Renderer/types";
 
 class Shot implements ActorInterface {
   startTime: number | null = null;
