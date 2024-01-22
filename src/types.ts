@@ -6,7 +6,8 @@ import { Abilities } from './Character/Classes/Abilities';
 import DrawableInterface from './Renderer/Drawables/DrawableInterface';
 import { Weapon } from './Character/Equipment/Types';
 import { feetToMeters } from './Renderer/Math';
-import { ContainerNodeInterface, RenderPassInterface, SceneNodeInterface } from './Renderer/types';
+import { SceneNodeInterface } from './Renderer/types';
+import Renderer from './Renderer/Renderer';
 
 export const maxInstances = 16;
 
@@ -62,13 +63,15 @@ export interface CollideesInterface {
 }
 
 export interface WorldInterface {
+  renderer: Renderer;
+
   collidees: CollideesInterface;
 
   actors: ActorInterface[];
 
   participants: ParticipantsInterface;
 
-  scene: ContainerNodeInterface;
+  // scene: ContainerNodeInterface;
 
   animate: boolean;
   
@@ -76,7 +79,7 @@ export interface WorldInterface {
 
   removeActors: ActorInterface[];
 
-  mainRenderPass: RenderPassInterface;
+  // mainRenderPass: RenderPassInterface;
 
   loggerCallback: ((message: string) => void) | null;
 

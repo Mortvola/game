@@ -60,7 +60,7 @@ class AreaSpell extends RangeSpell {
       this.areaOfEffect = await DrawableNode.create(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), circleMaterial)
       this.areaOfEffect.translate = vec3.copy(this.actor.sceneNode.translate)
   
-      world.scene.addNode(this.areaOfEffect);
+      world.renderer.scene.addNode(this.areaOfEffect);
   
       const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
       this.areaOfEffect.postTransforms.push(mat4.fromQuat(q));  
@@ -70,7 +70,7 @@ class AreaSpell extends RangeSpell {
   hideAreaOfEffect() {
     if (this.areaOfEffect) {
       const world = getWorld();
-      world.scene.removeNode(this.areaOfEffect)
+      world.renderer.scene.removeNode(this.areaOfEffect)
       this.areaOfEffect = null;
     }
   }

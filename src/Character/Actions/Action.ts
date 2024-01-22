@@ -67,7 +67,7 @@ class Action implements ActionInterface {
     this.showPathLines(null);
 
     if (this.trajectory) {
-      world.scene.removeNode(this.trajectory);
+      world.renderer.scene.removeNode(this.trajectory);
       this.trajectory = null;
     }
   }
@@ -76,12 +76,12 @@ class Action implements ActionInterface {
     const world = getWorld();
 
     if (this.pathLines) {
-      world.scene.removeNode(this.pathLines);
+      world.renderer.scene.removeNode(this.pathLines);
     }
 
     if (lines !== null && !this.cleared && lines.length > 0) {
       this.pathLines = await DrawableNode.create(new Line(lines), lineMaterial);
-      world.scene.addNode(this.pathLines);
+      world.renderer.scene.addNode(this.pathLines);
 
       // world.mainRenderPass.addDrawable(this.pathLines);  
     }
@@ -147,7 +147,7 @@ class Action implements ActionInterface {
       }
       else {
         if (this.trajectory) {
-          world.scene.removeNode(this.trajectory);
+          world.renderer.scene.removeNode(this.trajectory);
           this.trajectory = null;
         }
 
@@ -169,7 +169,7 @@ class Action implements ActionInterface {
       this.focused = null;
 
       if (this.trajectory) {
-        world.scene.removeNode(this.trajectory);
+        world.renderer.scene.removeNode(this.trajectory);
         this.trajectory = null;
       }
 

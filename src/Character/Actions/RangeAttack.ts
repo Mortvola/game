@@ -20,7 +20,7 @@ class RangeAttack extends Action {
       const result = this.actor.computeShotData(target);
       
       if (this.trajectory) {
-        world.scene.removeNode(this.trajectory);
+        world.renderer.scene.removeNode(this.trajectory);
         this.trajectory = null;
       }
     
@@ -32,7 +32,7 @@ class RangeAttack extends Action {
         distance: result.distance,
       }), trajectoryMaterial);
   
-      world.scene.addNode(this.trajectory);
+      world.renderer.scene.addNode(this.trajectory);
   
       await this.showPathLines(null);
   
@@ -51,7 +51,7 @@ class RangeAttack extends Action {
       this.focused = null;
 
       if (this.trajectory) {
-        world.scene.removeNode(this.trajectory);
+        world.renderer.scene.removeNode(this.trajectory);
         this.trajectory = null;
       }
 
@@ -117,7 +117,7 @@ class RangeAttack extends Action {
       );
 
       if (this.trajectory) {
-        world.scene.removeNode(this.trajectory);
+        world.renderer.scene.removeNode(this.trajectory);
         this.trajectory = null;
       }
 

@@ -29,12 +29,12 @@ class GuidingBolt extends RangeSpell {
     shot.translate[1] = 1;
     shot.translate[2] = path[path.length - 1].point[1];
 
-    world.scene.addNode(shot);
+    world.renderer.scene.addNode(shot);
 
     const followPath = new FollowPath(shot, path, false, 24);
     
     followPath.onFinish = () => {
-      world.scene.removeNode(shot);
+      world.renderer.scene.removeNode(shot);
     }
 
     script.entries.push(followPath)  

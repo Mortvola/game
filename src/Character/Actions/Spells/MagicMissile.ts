@@ -46,14 +46,14 @@ class MagicMissile extends RangeSpell {
       shot.translate[1] = 1;
       shot.translate[2] = this.paths[i][this.paths[i].length - 1].point[1];
   
-      world.scene.addNode(shot);
+      world.renderer.scene.addNode(shot);
   
       script.entries.push(new FollowPath(shot, this.paths[i], false, 24))  
 
       this.targets[i].takeDamage(diceRoll(1, 4) + 1, false, this.actor, 'Magic Missle', script)
 
       script.onFinish = () => {
-        world.scene.removeNode(shot);
+        world.renderer.scene.removeNode(shot);
       };
 
       parallel.entries.push(script)  
@@ -161,7 +161,7 @@ class MagicMissile extends RangeSpell {
 
     if (!this.cleared && lines.length > 0) {
       this.missileLines.push(await DrawableNode.create(new Line(lines), lineMaterial));
-      world.scene.addNode(this.missileLines[this.missileLines.length - 1]);
+      world.renderer.scene.addNode(this.missileLines[this.missileLines.length - 1]);
     }
   }
 
@@ -169,7 +169,7 @@ class MagicMissile extends RangeSpell {
     const world = getWorld();
 
     if (this.missileLines.length > 0) {
-      world.scene.removeNode(this.missileLines[this.missileLines.length - 1]);
+      world.renderer.scene.removeNode(this.missileLines[this.missileLines.length - 1]);
       this.missileLines.pop();
     }
   }

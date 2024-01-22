@@ -59,11 +59,11 @@ class Shot implements ActorInterface {
   }
 
   addToScene(world: WorldInterface) {
-    world.scene.addNode(this.mesh);
+    world.renderer.scene.addNode(this.mesh);
   }
 
   removeFromScene(world: WorldInterface) {
-    world.scene.removeNode(this.mesh);
+    world.renderer.scene.removeNode(this.mesh);
   }
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.scss';
-import { renderer } from '../Main';
+import { game } from '../Main';
 import { vec4 } from 'wgpu-matrix';
 import DefineParties from './DefineParty';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
@@ -36,7 +36,7 @@ function App() {
       element.focus();
 
       (async () => {
-        await renderer.setCanvas(element);
+        await game.setCanvas(element);
       })()  
     }
   }, [])
@@ -138,10 +138,10 @@ function App() {
     if (element) {
       element.focus();
       (async () => {
-        renderer.setLoggerCallback(loggerCallback);
-        renderer.setFocusCallback(focusCallback);
-        renderer.setActionInfoCallback(actionInfoCallback)
-        renderer.setCharacterChangeCallback(characterChangeCallback)
+        game.setLoggerCallback(loggerCallback);
+        game.setFocusCallback(focusCallback);
+        game.setActionInfoCallback(actionInfoCallback)
+        game.setCharacterChangeCallback(characterChangeCallback)
       })()  
     }
   }, [loggerCallback, focusCallback, characterChangeCallback, actionInfoCallback])
@@ -155,13 +155,13 @@ function App() {
 
       const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
       const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-      // renderer?.pointerDown(clipX, clipY);
+      // game?.pointerDown(clipX, clipY);
 
       if (event.metaKey) {
-        renderer?.centerOn(clipX, clipY)
+        game?.centerOn(clipX, clipY)
       }
       else if (!event.ctrlKey) {
-        renderer?.interact()
+        game?.interact()
       }
     }
   }
@@ -175,12 +175,12 @@ function App() {
       setActionInfoStyle({ left: event.clientX + 10, top: event.clientY + 10 })
       const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
       const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-      renderer?.pointerMove(clipX, clipY);
+      game?.pointerMove(clipX, clipY);
     }
   }
 
   const handlePointerLeave: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
-    renderer?.pointerLeft();
+    game?.pointerLeft();
   }
 
   const handlePointerUp: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
@@ -192,12 +192,12 @@ function App() {
 
       // const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
       // const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-      // renderer?.pointerUp(clipX, clipY);
+      // game?.pointerUp(clipX, clipY);
     }
   }
 
   const handleWheel: React.WheelEventHandler<HTMLCanvasElement> = (event) => {
-    renderer?.mouseWheel(event.deltaX, event.deltaY, event.clientX, event.clientY)
+    game?.mouseWheel(event.deltaX, event.deltaY, event.clientX, event.clientY)
 
     event.stopPropagation();
   }
@@ -240,7 +240,7 @@ function App() {
       0,
     ))
 
-    renderer?.updateDirection(direction);
+    game?.updateDirection(direction);
   }, [])
 
   const handleKeyDown = React.useCallback((key: string) => {
@@ -263,13 +263,13 @@ function App() {
         updateDirection()
         break;
       case ' ':
-        renderer.endTurn();
+        game.endTurn();
         break;
       case 'ARROWDOWN':
-        renderer.zoomOut();
+        game.zoomOut();
         break;
       case 'ARROWUP':
-        renderer.zoomIn();
+        game.zoomIn();
         break;
     }
   }, [updateDirection])
@@ -309,7 +309,7 @@ function App() {
   const [inputMode, setInputMode] = React.useState('Mouse');
 
   const handleInputModeClick = () => {
-    renderer.toggleInputMode();
+    game.toggleInputMode();
     setInputMode((prev) => prev === 'Controller' ? 'Mouse' : 'Controller')
   }
 
@@ -330,7 +330,7 @@ function App() {
   const handlePartySave = (parties: Party[]) => {
     setShowPartyDefs(false);
     setParties(parties);
-    renderer.setParties(parties);
+    game.setParties(parties);
 
     storeParties(parties);
   }
@@ -338,7 +338,7 @@ function App() {
   React.useEffect(() => {
     const parties = restoreParties();
     setParties(parties);
-    renderer.setParties(parties);
+    game.setParties(parties);
   }, [])
 
   return (

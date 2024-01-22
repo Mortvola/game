@@ -17,7 +17,7 @@ class MoveAction extends Action {
 
   async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
     if (this.trajectory) {
-      world.scene.removeNode(this.trajectory);
+      world.renderer.scene.removeNode(this.trajectory);
       this.trajectory = null;
     }
 
