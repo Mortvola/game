@@ -7,10 +7,10 @@ import { getActorId } from "../../Actor";
 import AreaSpell from "./AreaSpell";
 import { savingThrow } from "../../../Dice";
 import Logger from "../../../Script/Logger";
-import Circle from "../../../Drawables/Circle";
-import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
+import Circle from "../../../Renderer/Drawables/Circle";
+import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface, WorldInterface } from "../../../types";
-import { circleMaterial } from "../../../Materials/Circle";
+import { circleMaterial } from "../../../Renderer/Materials/Circle";
 
 class Grease extends AreaSpell {
   constructor(actor: CreatureActorInterface) {

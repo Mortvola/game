@@ -1,18 +1,18 @@
 import { vec4 } from "wgpu-matrix";
-import Mesh from "./Drawables/Mesh";
-import { box } from "./Drawables/Shapes/box";
+import Mesh from "./Renderer/Drawables/Mesh";
+import { box } from "./Renderer/Drawables/Shapes/box";
 import { feetToMeters } from "./Math";
-import SceneNode from "./Drawables/SceneNodes/SceneNode";
-import DrawableNode from "./Drawables/SceneNodes/DrawableNode";
-import Drawable from "./Drawables/Drawable";
+import SceneNode from "./Renderer/Drawables/SceneNodes/SceneNode";
+import DrawableNode from "./Renderer/Drawables/SceneNodes/DrawableNode";
+import Drawable from "./Renderer/Drawables/Drawable";
 import { downloadFbx } from "./Workers/LoadFbx";
-import ContainerNode, { isContainerNode } from "./Drawables/SceneNodes/ContainerNode";
-import { isGeometryNode } from "./Drawables/SceneNodes/GeometryNode";
-import { litMaterial } from "./Materials/Lit";
+import ContainerNode, { isContainerNode } from "./Renderer/Drawables/SceneNodes/ContainerNode";
+import { isGeometryNode } from "./Renderer/Drawables/SceneNodes/GeometryNode";
+import { litMaterial } from "./Renderer/Materials/Lit";
 import { gpu } from "./Renderer/Gpu";
-import { soulerCoasterMaterial } from "./Materials/SoulerCoaster";
-import { goblinMaterial } from "./Materials/Goblin";
-import { koboldMaterial } from "./Materials/Kobold";
+import { soulerCoasterMaterial } from "./Renderer/Materials/SoulerCoaster";
+import { goblinMaterial } from "./Renderer/Materials/Goblin";
+import { koboldMaterial } from "./Renderer/Materials/Kobold";
 
 type Model = {
   name: string,

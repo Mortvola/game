@@ -3,7 +3,7 @@ import { Occupant, PathPoint } from './Workers/PathPlannerTypes';
 import { ConditionType } from './Character/Actions/Conditions/Condition';
 import { Armor } from './Character/Equipment/Armor';
 import { Abilities } from './Character/Classes/Abilities';
-import DrawableInterface from './Drawables/DrawableInterface';
+import DrawableInterface from './Renderer/Drawables/DrawableInterface';
 import { Weapon } from './Character/Equipment/Types';
 import { feetToMeters } from './Math';
 
@@ -369,6 +369,8 @@ export interface SceneNodeInterface {
   transform: Mat4;
 
   computeTransform(transform: Mat4, prepend?: boolean): Mat4;
+
+  setFromAngles(x: number, y: number, z: number): void;
 }
 
 export interface MaterialInterface {

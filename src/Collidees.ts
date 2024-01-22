@@ -1,5 +1,5 @@
 import { Vec4, vec4 } from "wgpu-matrix";
-import { isDrawableNode } from "./Drawables/SceneNodes/utils";
+import { isDrawableNode } from "./Renderer/Drawables/SceneNodes/utils";
 import { CollideesInterface, CollisionResult, CreatureActorInterface } from "./types";
 
 class Collidees implements CollideesInterface {

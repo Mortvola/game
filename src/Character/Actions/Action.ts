@@ -1,13 +1,13 @@
 import { Vec4, vec2 } from "wgpu-matrix";
 import Script from "../../Script/Script";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
-import Line from "../../Drawables/Line";
+import Line from "../../Renderer/Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
 import { getWorld } from "../../Main";
 import { PathPoint } from "../../Workers/PathPlannerTypes";
-import DrawableNode from "../../Drawables/SceneNodes/DrawableNode";
+import DrawableNode from "../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { ActionInterface, CreatureActorInterface, DrawableNodeInterface, TimeType, WorldInterface } from "../../types";
-import { lineMaterial } from "../../Materials/Line";
+import { lineMaterial } from "../../Renderer/Materials/Line";
 
 class Action implements ActionInterface {
   actor: CreatureActorInterface;

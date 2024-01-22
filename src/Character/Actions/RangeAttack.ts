@@ -1,13 +1,13 @@
 import { Vec4, vec2 } from "wgpu-matrix";
 import Script from "../../Script/Script";
 import Action from "./Action";
-import Trajectory from "../../Drawables/Trajectory";
+import Trajectory from "../../Renderer/Drawables/Trajectory";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Shot from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
-import DrawableNode from "../../Drawables/SceneNodes/DrawableNode";
+import DrawableNode from "../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface, ShotData, WorldInterface } from "../../types";
-import { trajectoryMaterial } from "../../Materials/Trajectory";
+import { trajectoryMaterial } from "../../Renderer/Materials/Trajectory";
 import { modelManager } from "../../ModelManager";
 
 class RangeAttack extends Action {

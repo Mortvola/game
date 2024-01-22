@@ -1,6 +1,6 @@
 import { makeShaderDataDefinitions, makeStructuredView } from "webgpu-utils";
 import { bindGroups } from "../BindGroups";
-import DrawableInterface from "../Drawables/DrawableInterface";
+import DrawableInterface from "../Renderer/Drawables/DrawableInterface";
 import { gpu } from "../Renderer/Gpu";
 import { pipelineManager } from "../Pipelines/PipelineManager";
 import { textureAttributes } from "../shaders/textureAttributes";

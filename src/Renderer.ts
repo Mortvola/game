@@ -6,20 +6,20 @@ import Camera from './Camera';
 import {
   degToRad, intersectionPlane,
 } from './Math';
-import ContainerNode, { isContainerNode } from './Drawables/SceneNodes/ContainerNode';
+import ContainerNode, { isContainerNode } from './Renderer/Drawables/SceneNodes/ContainerNode';
 import RenderPass from './RenderPass';
-import Light, { isLight } from './Drawables/Light';
-import CartesianAxes from './Drawables/CartesianAxes';
+import Light, { isLight } from './Renderer/Drawables/Light';
+import CartesianAxes from './Renderer/Drawables/CartesianAxes';
 // import Reticle from './Drawables/Reticle';
-import Line from './Drawables/Line';
+import Line from './Renderer/Drawables/Line';
 import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
 import Script from './Script/Script';
 import { Occupant } from './Workers/PathPlannerTypes';
-import DrawableNode from './Drawables/SceneNodes/DrawableNode';
-import SceneNode from './Drawables/SceneNodes/SceneNode';
+import DrawableNode from './Renderer/Drawables/SceneNodes/DrawableNode';
+import SceneNode from './Renderer/Drawables/SceneNodes/SceneNode';
 import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, EpisodeInfo, Party } from './types';
-import { lineMaterial } from './Materials/Line';
+import { lineMaterial } from './Renderer/Materials/Line';
 import {
   makeShaderDataDefinitions,
   makeStructuredView,
@@ -145,7 +145,7 @@ class Renderer implements WorldInterface {
     const cartesianAxes = await DrawableNode.create(new CartesianAxes(), lineMaterial)
 
     let test: SceneNode | undefined = undefined;
-    test = await modelManager.getModel('SoulerCoaster');
+    // test = await modelManager.getModel('SoulerCoaster');
     
     return new Renderer(bindGroups.getBindGroupLayout0(), cartesianAxes, test);
   }

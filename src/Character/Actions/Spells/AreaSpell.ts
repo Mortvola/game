@@ -1,12 +1,12 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
-import Circle from "../../../Drawables/Circle";
+import Circle from "../../../Renderer/Drawables/Circle";
 import { getWorld } from "../../../Main";
 import { degToRad } from "../../../Math";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
-import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
+import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface, TimeType, WorldInterface } from "../../../types";
-import { circleMaterial } from "../../../Materials/Circle";
+import { circleMaterial } from "../../../Renderer/Materials/Circle";
 
 class AreaSpell extends RangeSpell {
   center: Vec2 | null = null;

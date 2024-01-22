@@ -5,14 +5,14 @@ import RangeSpell from "./RangeSpell";
 import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import { findPath2 } from "../../../Workers/PathPlannerQueue";
 import { PathPoint } from "../../../Workers/PathPlannerTypes";
-import Line from "../../../Drawables/Line";
+import Line from "../../../Renderer/Drawables/Line";
 import { getWorld } from "../../../Main";
 import { modelManager } from "../../../ModelManager";
 import FollowPath from "../../../Script/FollowPath";
-import DrawableNode from "../../../Drawables/SceneNodes/DrawableNode";
+import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
 import Parallel from "../../../Script/Parallel";
 import { CreatureActorInterface, WorldInterface } from "../../../types";
-import { lineMaterial } from "../../../Materials/Line";
+import { lineMaterial } from "../../../Renderer/Materials/Line";
 
 class MagicMissile extends RangeSpell {
   paths: PathPoint[][] = [];
