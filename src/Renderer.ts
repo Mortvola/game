@@ -24,7 +24,7 @@ import {
   makeShaderDataDefinitions,
   makeStructuredView,
 } from 'webgpu-utils';
-import { lights } from "./shaders/lights";
+import { lights } from "./Renderer/shaders/lights";
 import { bindGroups } from './BindGroups';
 import { gpu } from "./Renderer/Gpu";
 import { modelManager } from './ModelManager';
