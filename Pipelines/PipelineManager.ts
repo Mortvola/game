@@ -30,6 +30,7 @@ type PipelineMapEntry = {
   properties: Property[],
   uniforms: StructuredView | null,
   uniformValues: Record<string, unknown> | null,
+  fromGraph: boolean,
 }
 
 class PipelineManager implements PipelineManagerInterface {
@@ -83,11 +84,12 @@ class PipelineManager implements PipelineManagerInterface {
 
   getPipelineByArgs(
     materialDescriptor: MaterialDescriptor,
-  ): [PipelineInterface, GPUBindGroupLayout | null, PropertyInterface[], StructuredView | null, Record<string, unknown> | null] {
+  ): [PipelineInterface, GPUBindGroupLayout | null, PropertyInterface[], StructuredView | null, Record<string, unknown> | null, boolean] {
     let properties: Property[] = [];
     let bindgroupLayout: GPUBindGroupLayout | null = null;
     let uniforms: StructuredView | null = null;
     let uniformValues: Record<string, unknown> | null = null;
+    let fromGraph = false;
 
     const key = JSON.stringify(materialDescriptor);
 
@@ -100,6 +102,7 @@ class PipelineManager implements PipelineManagerInterface {
         pipelineEntry.properties,
         pipelineEntry.uniforms,
         pipelineEntry.uniformValues,
+        pipelineEntry.fromGraph,
       ];
     }
 
@@ -108,9 +111,11 @@ class PipelineManager implements PipelineManagerInterface {
     if (!materialDescriptor.graph) {
       pipeline = this.getPipeline(materialDescriptor.type)!
 
-      this.pipelineMap.set(key, { pipeline, bindgroupLayout: null, properties: [], uniforms: null, uniformValues: null });
+      this.pipelineMap.set(key, { pipeline, bindgroupLayout: null, properties: [], uniforms: null, uniformValues: null, fromGraph: false });
     }
     else {
+      fromGraph = true;
+
       let vertexBufferLayout: GPUVertexBufferLayout[] = [];
 
       const [shaderModule, props, code, values] = generateShaderModule(materialDescriptor);  
@@ -119,7 +124,10 @@ class PipelineManager implements PipelineManagerInterface {
       uniformValues = values;
 
       const defs = makeShaderDataDefinitions(code);
-      uniforms = makeStructuredView(defs.structs.Properties);
+      
+      if (defs.structs.Properties) {
+        uniforms = makeStructuredView(defs.structs.Properties);
+      }
 
       vertexBufferLayout = [
         {
@@ -242,11 +250,11 @@ class PipelineManager implements PipelineManagerInterface {
       pipeline = new Pipeline();
       pipeline.pipeline = gpuPipeline;
 
-      this.pipelineMap.set(key, { pipeline, bindgroupLayout, properties, uniforms, uniformValues });
+      this.pipelineMap.set(key, { pipeline, bindgroupLayout, properties, uniforms, uniformValues, fromGraph });
     }
 
     console.log(`pipelines created: ${this.pipelineMap.size}`)
-    return [pipeline, bindgroupLayout, properties, uniforms, uniformValues];
+    return [pipeline, bindgroupLayout, properties, uniforms, uniformValues, fromGraph];
   }
 }
 

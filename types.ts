@@ -18,8 +18,6 @@ export interface RenderPassInterface {
 export interface WorldInterface {
   scene: ContainerNodeInterface;
 
-  animate: boolean;
-
   mainRenderPass: RenderPassInterface;
 }
 
@@ -89,5 +87,5 @@ export type PipelineAttributes = {
 export interface PipelineManagerInterface {
   getPipelineByArgs(
     args: PipelineAttributes,
-  ): [PipelineInterface, GPUBindGroupLayout | null, PropertyInterface[], StructuredView | null, Record<string, unknown> | null];
+  ): [PipelineInterface, GPUBindGroupLayout | null, PropertyInterface[], StructuredView | null, Record<string, unknown> | null, boolean];
 }
