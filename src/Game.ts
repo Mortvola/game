@@ -1,8 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 import { Vec4, vec2, vec4 } from 'wgpu-matrix';
-import {
-  intersectionPlane,
-} from './Renderer/Math';
+import { intersectionPlane } from './Renderer/Math';
 import { isContainerNode } from './Renderer/Drawables/SceneNodes/ContainerNode';
 import Line from './Renderer/Drawables/Line';
 import Collidees from './Collidees';

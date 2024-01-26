@@ -8,15 +8,11 @@ import { downloadFbx } from "./Fbx/LoadFbx";
 import ContainerNode from "./Renderer/Drawables/SceneNodes/ContainerNode";
 import { litMaterial } from "./Renderer/Materials/Lit";
 import { gpu } from "./Renderer/Gpu";
-import { soulerCoasterMaterial } from "./Renderer/Materials/SoulerCoaster";
-import { goblinMaterial } from "./Renderer/Materials/Goblin";
-import { koboldMaterial } from "./Renderer/Materials/Kobold";
 import { FbxNodeInterface, isFbxContainerNode, isFbxGeometryNode } from "./Fbx/types";
-import { DrawableNodeInterface, MaterialInterface, SceneNodeInterface } from "./Renderer/types";
+import { SceneNodeInterface } from "./Renderer/types";
 import { MaterialDescriptor } from "./Renderer/Materials/MaterialDescriptor";
 import { GameObjectRecord, MaterialRecord, NodeMaterials } from "./game-common/types";
 import Http from "./Http/src";
-import Material from "./Renderer/Materials/Material";
 
 class ModelManager {
   meshes: Map<string, Drawable> = new Map();

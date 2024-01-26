@@ -7,7 +7,7 @@ import DrawableInterface from './Renderer/Drawables/DrawableInterface';
 import { Weapon } from './Character/Equipment/Types';
 import { feetToMeters } from './Renderer/Math';
 import { SceneNodeInterface } from './Renderer/types';
-import Renderer from './Renderer/Renderer';
+import { RendererInterface } from './Renderer/types';
 
 export const maxInstances = 16;
 
@@ -63,7 +63,7 @@ export interface CollideesInterface {
 }
 
 export interface WorldInterface {
-  renderer: Renderer;
+  renderer: RendererInterface;
 
   collidees: CollideesInterface;
 
