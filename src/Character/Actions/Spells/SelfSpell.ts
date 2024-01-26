@@ -1,10 +1,10 @@
 import { Vec4 } from "wgpu-matrix";
 import Spell from "./Spell";
-import { CreatureActorInterface, WorldInterface } from '../../../types'
+import { CreatureActorInterface } from '../../../types'
 import Script from "../../../Script/Script";
 
 class SelfSpell extends Spell {
-  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null): Promise<void> {
     let success = 0;
 
     if (this.actor === target) {
@@ -12,8 +12,8 @@ class SelfSpell extends Spell {
       success = 100;  
     }
 
-    if (world.actionInfoCallback) {
-      world.actionInfoCallback({
+    if (this.world.actionInfoCallback) {
+      this.world.actionInfoCallback({
         action: this.name,
         description: `Select ${this.actor.character.name} to confirm.`,
         percentSuccess: success,
@@ -21,7 +21,7 @@ class SelfSpell extends Spell {
     }              
   }
 
-  async interact(script: Script, world: WorldInterface): Promise<boolean> {
+  async interact(script: Script): Promise<boolean> {
     if (this.focused && this.actor === this.focused) {
       this.targets.push(this.focused);
       this.focused = null;

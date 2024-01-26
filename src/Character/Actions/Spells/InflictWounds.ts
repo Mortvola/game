@@ -1,4 +1,4 @@
-import { CreatureActorInterface, WorldInterface } from '../../../types'
+import { CreatureActorInterface } from '../../../types'
 import Script from "../../../Script/Script";
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import TouchSpell from "./TouchSpell";
@@ -9,7 +9,7 @@ class InflictWounds extends TouchSpell {
     super(actor, 1, true, 'Inflict Wounds', 'Action', 1, 0, false, false)
   }
 
-  async cast(script: Script, world: WorldInterface): Promise<boolean> {
+  async cast(script: Script): Promise<boolean> {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,

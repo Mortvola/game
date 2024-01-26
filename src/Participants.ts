@@ -4,7 +4,7 @@ import { abilityModifier, diceRoll } from "./Dice";
 import Goblin from "./Character/Monsters/Goblin";
 import { XPThreshold, xpThresholds } from "./Tables";
 import Kobold from "./Character/Monsters/Kobold";
-import { CharacterInterface, CreatureActorInterface, ParticipantsInterface, Party } from "./types";
+import { CharacterInterface, CreatureActorInterface, ParticipantsInterface, Party, WorldInterface } from "./types";
 
 function createParty<Type extends CharacterInterface>(thresholds: XPThreshold, c: new (name: string) => Type, name: string): Party {
   const party: Party = {
@@ -111,7 +111,7 @@ class Participants implements ParticipantsInterface {
     this.turns.sort((a, b) => a.initiativeRoll - b.initiativeRoll);
   }
 
-  async createTeam(team: number, z: number, color: Vec4, teamColor: Vec4): Promise<CreatureActorInterface[]> {
+  async createTeam(team: number, z: number, color: Vec4, teamColor: Vec4, world: WorldInterface): Promise<CreatureActorInterface[]> {
     const actors: CreatureActorInterface[] = [];
     const numPlayers = this.parties[team].members.filter((t) => t.included).length;
     const spaceBetween = 4;
@@ -122,7 +122,7 @@ class Participants implements ParticipantsInterface {
         continue;
       }
 
-      const actor = await Actor.create(this.parties[team].members[i].character, color, teamColor, team, this.parties[team].automate);
+      const actor = await Actor.create(this.parties[team].members[i].character, color, teamColor, team, this.parties[team].automate, world);
 
       actor.character.hitPoints = actor.character.maxHitPoints;
       actor.character.conditions = [];
@@ -150,8 +150,8 @@ class Participants implements ParticipantsInterface {
     return actors;
   }
 
-  async createTeams() {
-    const players: CreatureActorInterface[] = await this.createTeam(0, 10, vec4.create(0, 0, 0.5, 1), vec4.create(0, 0.6, 0, 1));
+  async createTeams(world: WorldInterface) {
+    const players: CreatureActorInterface[] = await this.createTeam(0, 10, vec4.create(0, 0, 0.5, 1), vec4.create(0, 0.6, 0, 1), world);
 
     const thresholds: XPThreshold = {
       easy: 0,
@@ -188,7 +188,7 @@ class Participants implements ParticipantsInterface {
 
     this.parties[1] = party;
 
-    const opponents: CreatureActorInterface[] = await this.createTeam(1, -10, vec4.create(0.5, 0, 0, 1), vec4.create(1, 0, 0, 1));
+    const opponents: CreatureActorInterface[] = await this.createTeam(1, -10, vec4.create(0.5, 0, 0, 1), vec4.create(1, 0, 0, 1), world);
 
     this.participants[0] = players;
     this.participants[1] = opponents;

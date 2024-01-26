@@ -101,7 +101,9 @@ export interface WorldInterface {
 export type ActorOnFinishCallback = (timestamp: number) => void;
 
 export interface ActorInterface {
-  update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean>;
+  update(elapsedTime: number, timestamp: number): Promise<boolean>;
+
+  world: WorldInterface,
 }
 
 export interface CreatureInterface {
@@ -168,9 +170,9 @@ export interface ActionInterface {
 
   clear(): void;
 
-  prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void>;
+  prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null): Promise<void>;
 
-  interact(script: ScriptInterface, world: WorldInterface): Promise<boolean>;
+  interact(script: ScriptInterface): Promise<boolean>;
 }
 
 export type A<T> = {
@@ -317,7 +319,7 @@ export interface CreatureActorInterface extends ActorInterface {
 
   state: States;
 
-  startTurn(world: WorldInterface): void;
+  startTurn(): void;
 
   endTurn(): void;
 
@@ -336,7 +338,6 @@ export interface CreatureActorInterface extends ActorInterface {
   attack(
     targetActor: CreatureActorInterface,
     weapon: Weapon,
-    world: WorldInterface,
     script: ScriptInterface,
   ): void;
 

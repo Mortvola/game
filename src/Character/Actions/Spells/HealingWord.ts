@@ -1,4 +1,4 @@
-import { CreatureActorInterface, WorldInterface } from '../../../types'
+import { CreatureActorInterface } from '../../../types'
 import Script from "../../../Script/Script";
 import { abilityModifier, diceRoll } from "../../../Dice";
 import { feetToMeters } from "../../../Renderer/Math";
@@ -9,7 +9,7 @@ class HealingWord extends RangeSpell {
     super(actor, 1, true, 'Healing Word', 'Bonus', 1, feetToMeters(60), 0, false, false);
   }
 
-  async cast(script: Script, world: WorldInterface): Promise<boolean> {
+  async cast(script: Script): Promise<boolean> {
     this.targets[0].takeHealing(
       diceRoll(1, 4) + abilityModifier(this.actor.character.spellcastingAbilityScore),
       this.actor,

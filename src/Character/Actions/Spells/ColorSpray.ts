@@ -1,6 +1,6 @@
 import { feetToMeters } from "../../../Renderer/Math";
 import Script from "../../../Script/Script";
-import { CreatureActorInterface, WorldInterface } from '../../../types'
+import { CreatureActorInterface } from '../../../types'
 import RangeSpell from "./RangeSpell";
 
 class ColorSpray extends RangeSpell {
@@ -8,7 +8,7 @@ class ColorSpray extends RangeSpell {
     super(actor, 1, true, 'Color Spray', 'Action', 1, feetToMeters(15), 6, true, false)
   }
 
-  async cast(script: Script, world: WorldInterface): Promise<boolean> {
+  async cast(script: Script): Promise<boolean> {
     // const [damage, critical] = spellAttackRoll(
     //   actor.character,
     //   this.targets[0].character,

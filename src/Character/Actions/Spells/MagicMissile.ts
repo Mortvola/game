@@ -6,12 +6,11 @@ import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import { findPath2 } from "../../../Workers/PathPlannerQueue";
 import { PathPoint } from "../../../Workers/PathPlannerTypes";
 import Line from "../../../Renderer/Drawables/Line";
-import { getWorld } from "../../../Main";
 import { modelManager } from "../../../ModelManager";
 import FollowPath from "../../../Script/FollowPath";
 import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
 import Parallel from "../../../Script/Parallel";
-import { CreatureActorInterface, WorldInterface } from "../../../types";
+import { CreatureActorInterface } from "../../../types";
 import { lineMaterial } from "../../../Renderer/Materials/Line";
 
 class MagicMissile extends RangeSpell {
@@ -34,11 +33,11 @@ class MagicMissile extends RangeSpell {
     }
   }
 
-  async cast(script: Script, world: WorldInterface): Promise<boolean> {
-    const parallel = new Parallel();
+  async cast(script: Script): Promise<boolean> {
+    const parallel = new Parallel(this.world);
 
     for (let i = 0; i < this.paths.length; i += 1) {
-      const script = new Script();
+      const script = new Script(this.world);
 
       const shot = await modelManager.getModel('Shot');
 
@@ -46,14 +45,14 @@ class MagicMissile extends RangeSpell {
       shot.translate[1] = 1;
       shot.translate[2] = this.paths[i][this.paths[i].length - 1].point[1];
   
-      world.renderer.scene.addNode(shot);
+      this.world.renderer.scene.addNode(shot);
   
-      script.entries.push(new FollowPath(shot, this.paths[i], false, 24))  
+      script.entries.push(new FollowPath(shot, this.paths[i], this.world, false, 24))  
 
       this.targets[i].takeDamage(diceRoll(1, 4) + 1, false, this.actor, 'Magic Missle', script)
 
       script.onFinish = () => {
-        world.renderer.scene.removeNode(shot);
+        this.world.renderer.scene.removeNode(shot);
       };
 
       parallel.entries.push(script)  
@@ -64,7 +63,7 @@ class MagicMissile extends RangeSpell {
     return true;
   }
 
-  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null): Promise<void> {
     let description = `Select ${this.maxTargets  - this.targets.length} more targets.`;
 
     if (this.maxTargets === 1) {
@@ -84,8 +83,8 @@ class MagicMissile extends RangeSpell {
       this.focused = null;
     }
 
-    if (world.actionInfoCallback) {
-      world.actionInfoCallback({
+    if (this.world.actionInfoCallback) {
+      this.world.actionInfoCallback({
         action: this.name,
         description,
         percentSuccess: this.focused ? 100 : 0,
@@ -129,7 +128,7 @@ class MagicMissile extends RangeSpell {
     }
   }
 
-  async interact(script: Script, world: WorldInterface): Promise<boolean> {
+  async interact(script: Script): Promise<boolean> {
     if (this.focused) {
       this.targets.push(this.focused);
       this.paths.push(this.path)
@@ -140,8 +139,8 @@ class MagicMissile extends RangeSpell {
       this.lines = [];
 
       if (this.targets.length < this.maxTargets) {
-        if (world.actionInfoCallback) {
-          world.actionInfoCallback({
+        if (this.world.actionInfoCallback) {
+          this.world.actionInfoCallback({
             action: this.name,
             description: `Select ${this.maxTargets - this.targets.length} more targets.`,
             percentSuccess: 100,
@@ -157,19 +156,15 @@ class MagicMissile extends RangeSpell {
   }
 
   async addMissileLines(lines: number[][]) {
-    const world = getWorld();
-
     if (!this.cleared && lines.length > 0) {
       this.missileLines.push(await DrawableNode.create(new Line(lines), lineMaterial));
-      world.renderer.scene.addNode(this.missileLines[this.missileLines.length - 1]);
+      this.world.renderer.scene.addNode(this.missileLines[this.missileLines.length - 1]);
     }
   }
 
   removeMissileLines() {
-    const world = getWorld();
-
     if (this.missileLines.length > 0) {
-      world.renderer.scene.removeNode(this.missileLines[this.missileLines.length - 1]);
+      this.world.renderer.scene.removeNode(this.missileLines[this.missileLines.length - 1]);
       this.missileLines.pop();
     }
   }

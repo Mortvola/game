@@ -1,7 +1,7 @@
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import { feetToMeters } from "../../../Renderer/Math";
 import Script from "../../../Script/Script";
-import { CreatureActorInterface, WorldInterface } from '../../../types'
+import { CreatureActorInterface } from '../../../types'
 import { DamageType } from "../../Equipment/Types";
 import RangeSpell from "./RangeSpell";
 
@@ -10,7 +10,7 @@ class ChillTouch extends RangeSpell {
     super(actor, 1, true, 'Chill Touch', 'Action', 0, feetToMeters(120), 6, false, false);
   }
 
-  async cast(script: Script, world: WorldInterface): Promise<boolean> {
+  async cast(script: Script): Promise<boolean> {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,

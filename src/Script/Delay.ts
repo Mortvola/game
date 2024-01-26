@@ -5,11 +5,14 @@ class Delay implements ActorInterface {
 
   duration: number;
 
-  constructor(duration: number) {
+  world: WorldInterface;
+
+  constructor(duration: number, world: WorldInterface) {
     this.duration = duration;
+    this.world = world;
   }
 
-  async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
+  async update(elapsedTime: number, timestamp: number): Promise<boolean> {
     if (this.startTime === null) {
       this.startTime = timestamp;
     }

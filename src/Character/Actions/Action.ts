@@ -3,7 +3,6 @@ import Script from "../../Script/Script";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Line from "../../Renderer/Drawables/Line";
 import FollowPath from "../../Script/FollowPath";
-import { getWorld } from "../../Main";
 import { PathPoint } from "../../Workers/PathPlannerTypes";
 import DrawableNode from "../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { ActionInterface, CreatureActorInterface, TimeType, WorldInterface } from "../../types";
@@ -37,7 +36,16 @@ class Action implements ActionInterface {
 
   cleared = false;
 
-  constructor(actor: CreatureActorInterface, maxTargets: number, name: string, time: TimeType, duration: number, endOfTurn: boolean) {
+  world: WorldInterface;
+
+  constructor(
+    actor: CreatureActorInterface,
+    maxTargets: number,
+    name: string,
+    time: TimeType,
+    duration: number,
+    endOfTurn: boolean,
+  ) {
     this.actor = actor;
     this.maxTargets = maxTargets;
 
@@ -46,13 +54,15 @@ class Action implements ActionInterface {
 
     this.duration = duration;
     this.endOfTurn = endOfTurn;
+
+    this.world = actor.world;
   }
   
-  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null): Promise<void> {
 
   }
 
-  async interact(script: Script, world: WorldInterface): Promise<boolean> {
+  async interact(script: Script): Promise<boolean> {
     return true;
   }
 
@@ -62,32 +72,28 @@ class Action implements ActionInterface {
   clear() {
     this.cleared = true;
 
-    const world = getWorld();
-
     this.showPathLines(null);
 
     if (this.trajectory) {
-      world.renderer.scene.removeNode(this.trajectory);
+      this.world.renderer.scene.removeNode(this.trajectory);
       this.trajectory = null;
     }
   }
 
   async showPathLines(lines: number[][] | null) {
-    const world = getWorld();
-
     if (this.pathLines) {
-      world.renderer.scene.removeNode(this.pathLines);
+      this.world.renderer.scene.removeNode(this.pathLines);
     }
 
     if (lines !== null && !this.cleared && lines.length > 0) {
       this.pathLines = await DrawableNode.create(new Line(lines), lineMaterial);
-      world.renderer.scene.addNode(this.pathLines);
+      this.world.renderer.scene.addNode(this.pathLines);
 
       // world.mainRenderPass.addDrawable(this.pathLines);  
     }
   }
 
-  async prepareZeroDistAction(actionPercent: number, target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareZeroDistAction(actionPercent: number, target: CreatureActorInterface | null, point: Vec4 | null): Promise<void> {
     if (target) {
       const wp = this.actor.getWorldPosition();
       const targetWp = target.getWorldPosition();
@@ -124,8 +130,8 @@ class Action implements ActionInterface {
               // this.type = 'MoveAndMelee';
               this.focused = target;
 
-              if (world.actionInfoCallback) {
-                world.actionInfoCallback({
+              if (this.world.actionInfoCallback) {
+                this.world.actionInfoCallback({
                   action: this.name,
                   percentSuccess: actionPercent,
                 })
@@ -135,8 +141,8 @@ class Action implements ActionInterface {
               // this.type = 'Move';
               this.focused = null;
 
-              if (world.actionInfoCallback) {
-                world.actionInfoCallback({
+              if (this.world.actionInfoCallback) {
+                this.world.actionInfoCallback({
                   action: this.name,
                   percentSuccess: actionPercent,
                 })
@@ -147,7 +153,7 @@ class Action implements ActionInterface {
       }
       else {
         if (this.trajectory) {
-          world.renderer.scene.removeNode(this.trajectory);
+          this.world.renderer.scene.removeNode(this.trajectory);
           this.trajectory = null;
         }
 
@@ -157,8 +163,8 @@ class Action implements ActionInterface {
         this.distance = 0;
         this.path = [];
 
-        if (world.actionInfoCallback) {
-          world.actionInfoCallback({
+        if (this.world.actionInfoCallback) {
+          this.world.actionInfoCallback({
             action: this.name,
             percentSuccess: actionPercent,
           })
@@ -169,7 +175,7 @@ class Action implements ActionInterface {
       this.focused = null;
 
       if (this.trajectory) {
-        world.renderer.scene.removeNode(this.trajectory);
+        this.world.renderer.scene.removeNode(this.trajectory);
         this.trajectory = null;
       }
 
@@ -193,8 +199,8 @@ class Action implements ActionInterface {
           this.path = path;
           this.distance = distance;
 
-          if (world.actionInfoCallback) {
-            world.actionInfoCallback({
+          if (this.world.actionInfoCallback) {
+            this.world.actionInfoCallback({
               action: 'Move',
               percentSuccess: null,
             })
@@ -204,10 +210,10 @@ class Action implements ActionInterface {
     }
   }
 
-  async zeroDistanceAction(script: Script, world: WorldInterface, action: () => Promise<boolean>): Promise<boolean> {
+  async zeroDistanceAction(script: Script, action: () => Promise<boolean>): Promise<boolean> {
     if (this.path.length > 0) {
       const path = this.actor.processPath(this.path, script);
-      script.entries.push(new FollowPath(this.actor.sceneNode, path));    
+      script.entries.push(new FollowPath(this.actor.sceneNode, path, this.world));    
     }
 
     await this.showPathLines(null);

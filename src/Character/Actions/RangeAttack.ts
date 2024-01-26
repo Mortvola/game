@@ -6,7 +6,7 @@ import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Shot from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
 import DrawableNode from "../../Renderer/Drawables/SceneNodes/DrawableNode";
-import { CreatureActorInterface, ShotData, WorldInterface } from "../../types";
+import { CreatureActorInterface, ShotData } from "../../types";
 import { trajectoryMaterial } from "../../Renderer/Materials/Trajectory";
 import { modelManager } from "../../ModelManager";
 
@@ -15,12 +15,12 @@ class RangeAttack extends Action {
     super(actor, 1, 'Range', 'Action', 0, false)
   }
   
-  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null): Promise<void> {
     if (target) {
       const result = this.actor.computeShotData(target);
       
       if (this.trajectory) {
-        world.renderer.scene.removeNode(this.trajectory);
+        this.world.renderer.scene.removeNode(this.trajectory);
         this.trajectory = null;
       }
     
@@ -32,12 +32,12 @@ class RangeAttack extends Action {
         distance: result.distance,
       }), trajectoryMaterial);
   
-      world.renderer.scene.addNode(this.trajectory);
+      this.world.renderer.scene.addNode(this.trajectory);
   
       await this.showPathLines(null);
   
-      if (world.actionInfoCallback) {
-        world.actionInfoCallback({
+      if (this.world.actionInfoCallback) {
+        this.world.actionInfoCallback({
           action: this.name,
           percentSuccess: this.actor.character.percentSuccess(target.character, this.actor.character.equipped.rangeWeapon!),
         })
@@ -51,7 +51,7 @@ class RangeAttack extends Action {
       this.focused = null;
 
       if (this.trajectory) {
-        world.renderer.scene.removeNode(this.trajectory);
+        this.world.renderer.scene.removeNode(this.trajectory);
         this.trajectory = null;
       }
 
@@ -75,8 +75,8 @@ class RangeAttack extends Action {
           this.path = path;
           this.distance = distance;
 
-          if (world.actionInfoCallback) {
-            world.actionInfoCallback({
+          if (this.world.actionInfoCallback) {
+            this.world.actionInfoCallback({
               action: 'Move',
               percentSuccess: null,
             })
@@ -86,10 +86,10 @@ class RangeAttack extends Action {
     }
   }
 
-  async interact(script: Script, world: WorldInterface): Promise<boolean> {
+  async interact(script: Script): Promise<boolean> {
     if (this.path.length > 0) {
       const path = this.actor.processPath(this.path, script);
-      script.entries.push(new FollowPath(this.actor.sceneNode, path));    
+      script.entries.push(new FollowPath(this.actor.sceneNode, path, this.world));    
 
       await this.showPathLines(null);
     }
@@ -107,17 +107,16 @@ class RangeAttack extends Action {
         distance: shotData.distance,
       };
 
-      script.entries.push(new Shot(await modelManager.getModel('Shot'), this.actor, data));
+      script.entries.push(new Shot(await modelManager.getModel('Shot'), this.actor, data, this.world));
 
       this.actor.attack(
         this.targets[0],
         this.actor.character.equipped.rangeWeapon!,
-        world,
         script,
       );
 
       if (this.trajectory) {
-        world.renderer.scene.removeNode(this.trajectory);
+        this.world.renderer.scene.removeNode(this.trajectory);
         this.trajectory = null;
       }
 

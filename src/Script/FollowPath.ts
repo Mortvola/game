@@ -12,16 +12,19 @@ class FollowPath implements ActorInterface {
 
   ground: boolean;
 
+  world: WorldInterface;
+
   onFinish: (() => void) | null = null;
 
-  constructor(sceneNode: SceneNodeInterface, path: PathPoint[], ground = true, metersPerSecond = 6) {
+  constructor(sceneNode: SceneNodeInterface, path: PathPoint[], world: WorldInterface, ground = true, metersPerSecond = 6) {
     this.sceneNode = sceneNode;
     this.path = path;
     this.ground = ground;
     this.metersPerSecond = metersPerSecond;
+    this.world = world;
   }
 
-  async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
+  async update(elapsedTime: number, timestamp: number): Promise<boolean> {
     if (this.path.length < 2) {
       return true;
     }

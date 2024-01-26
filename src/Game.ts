@@ -35,20 +35,6 @@ class Game implements WorldInterface {
 
   onFpsChange?: (fps: number) => void;
 
-  // camera = new Camera(18, vec4.create(0, 0, 20, 1));
-
-  // aspectRatio = new Float32Array(1);
-
-  // context: GPUCanvasContext | null = null;
-
-  // depthTextureView: GPUTextureView | null = null;
-
-  // renderedDimensions: [number, number] = [0, 0];
-
-  // scene = new ContainerNode();
-
-  // mainRenderPass = new RenderPass();
-
   left = 0;
 
   right = 0;
@@ -138,7 +124,7 @@ class Game implements WorldInterface {
         }
       }
 
-      this.participants.activeActor.startTurn(this);
+      this.participants.activeActor.startTurn();
 
       const point = this.participants.activeActor.getWorldPosition();
 
@@ -190,7 +176,7 @@ class Game implements WorldInterface {
     for (let i = 0; i < this.actors.length; i += 1) {
       const actor = this.actors[i];
 
-      const remove = await actor.update(elapsedTime, timestamp, this);
+      const remove = await actor.update(elapsedTime, timestamp);
 
       if (remove) {
         this.actors = [
@@ -239,7 +225,7 @@ class Game implements WorldInterface {
     }
 
     // Set up teams.
-    await this.participants.createTeams();
+    await this.participants.createTeams(this);
 
     this.participants.initiativeRolls();
 
@@ -490,7 +476,7 @@ class Game implements WorldInterface {
           const action = activeActor.getAction();
 
           if (action) {
-            await action.prepareInteraction(actor ?? null, point ?? null, this)            
+            await action.prepareInteraction(actor ?? null, point ?? null)            
           }
         }
       }
@@ -519,12 +505,12 @@ class Game implements WorldInterface {
       && this.participants.activeActor.state !== States.scripting
     ) {
       const activeActor = this.participants.activeActor;
-      const script = new Script();
+      const script = new Script(this);
 
       const action = activeActor.getAction();
 
       if (action) {
-        if (await action.interact(script, this)) {
+        if (await action.interact(script)) {
           if (action.time === 'Action') {
             if (activeActor.character.actionsLeft > 0) {
               activeActor.character.actionsLeft -= 1;

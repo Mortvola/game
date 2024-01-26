@@ -1,8 +1,7 @@
 import { Vec4 } from "wgpu-matrix";
 import Script from "../../../Script/Script";
-import { CreatureActorInterface, SpellInterface, TimeType, WorldInterface } from '../../../types'
+import { CreatureActorInterface, SpellInterface, TimeType } from '../../../types'
 import Action from "../Action";
-import { getWorld } from "../../../Main";
 
 class Spell extends Action implements SpellInterface {
   level: number;
@@ -37,25 +36,23 @@ class Spell extends Action implements SpellInterface {
   clear() {
   }
 
-  async cast(script: Script, world: WorldInterface): Promise<boolean> {
+  async cast(script: Script): Promise<boolean> {
     return false;
   }
 
   async castSpell(script: Script): Promise<boolean> {
-    const world = getWorld();
-
     // End concentration of the curren spell if this spell 
     // requires concentration.
     if (this.concentration) {
       this.actor.character.stopConcentrating();
     }
 
-    if (await this.cast(script, world) && this.duration > 0) {
+    if (await this.cast(script) && this.duration > 0) {
       this.actor.character.enduringActions.push(this);
     }
 
-    if (world.actionInfoCallback) {
-      world.actionInfoCallback(null);
+    if (this.world.actionInfoCallback) {
+      this.world.actionInfoCallback(null);
     }
 
     if (this.level >= 1 && this.actor.character.spellSlots[this.level - 1] > 0) {
@@ -65,10 +62,10 @@ class Spell extends Action implements SpellInterface {
     return true;
   }
 
-  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null): Promise<void> {
   }
 
-  async interact(script: Script, world: WorldInterface): Promise<boolean> {
+  async interact(script: Script): Promise<boolean> {
     return true;
   }
 }

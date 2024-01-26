@@ -1,5 +1,5 @@
 import { feetToMeters } from "../../../Renderer/Math";
-import { CreatureActorInterface, WorldInterface } from '../../../types'
+import { CreatureActorInterface } from '../../../types'
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
@@ -14,7 +14,7 @@ class GuidingBolt extends RangeSpell {
     super(actor, 1, true, 'Guiding Bolt', 'Action', 1, feetToMeters(120), 6, true, false)
   }
 
-  async cast(script: Script, world: WorldInterface): Promise<boolean> {
+  async cast(script: Script): Promise<boolean> {
     const shot = await modelManager.getModel('Shot');
 
     const wp = this.actor.getWorldPosition();
@@ -29,12 +29,12 @@ class GuidingBolt extends RangeSpell {
     shot.translate[1] = 1;
     shot.translate[2] = path[path.length - 1].point[1];
 
-    world.renderer.scene.addNode(shot);
+    this.world.renderer.scene.addNode(shot);
 
-    const followPath = new FollowPath(shot, path, false, 24);
+    const followPath = new FollowPath(shot, path, this.world, false, 24);
     
     followPath.onFinish = () => {
-      world.renderer.scene.removeNode(shot);
+      this.world.renderer.scene.removeNode(shot);
     }
 
     script.entries.push(followPath)  

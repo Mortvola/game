@@ -1,5 +1,5 @@
 import { feetToMeters } from "../../../Renderer/Math";
-import { CreatureActorInterface, WorldInterface } from '../../../types'
+import { CreatureActorInterface } from '../../../types'
 import { diceRoll, savingThrow, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
@@ -10,7 +10,7 @@ class RayOfSickness extends RangeSpell {
     super(actor, 1, true, 'Ray of Sickness', 'Action', 1, feetToMeters(60), 0, false, false)
   }
 
-  async cast(script: Script, world: WorldInterface): Promise<boolean> {
+  async cast(script: Script): Promise<boolean> {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,

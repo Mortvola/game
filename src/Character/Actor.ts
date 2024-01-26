@@ -3,7 +3,6 @@ import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, pointWithinCir
 import Circle from "../Renderer/Drawables/Circle";
 import RenderPass from "../Renderer/RenderPass";
 import Shot from "../Script/Shot";
-import { playShot } from "../Audio";
 import { Advantage, attackRoll, savingThrow } from "../Dice";
 import Mover from "../Script/Mover";
 import Script from "../Script/Script";
@@ -17,11 +16,9 @@ import UniformGridSearch from "../Search/UniformGridSearch";
 import { findPath2, getOccupants, populateGrid } from "../Workers/PathPlannerQueue";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
-import { getWorld } from "../Main";
 import { modelManager } from "../ModelManager";
 import { PathPoint } from "../Workers/PathPlannerTypes";
 import DrawableNode from "../Renderer/Drawables/SceneNodes/DrawableNode";
-import SceneNode from "../Renderer/Drawables/SceneNodes/SceneNode";
 import { ActionInterface, CharacterInterface, CreatureActorInterface, ShotData, States, WorldInterface } from "../types";
 import { circleMaterial } from "../Renderer/Materials/Circle";
 import { DamageType, Weapon, WeaponType } from "./Equipment/Types";
@@ -81,6 +78,8 @@ class Actor implements CreatureActorInterface {
 
   state = States.idle;
 
+  world: WorldInterface;
+
   private action: ActionInterface | null = null;
 
   private useQLearning = false;
@@ -95,7 +94,10 @@ class Actor implements CreatureActorInterface {
     circleDrawable: Circle,
     circle: DrawableNode,
     outerCircle: DrawableNode,
+    world: WorldInterface,
   ) {
+    this.world = world;
+
     this.id = getActorId();
 
     this.character = character;
@@ -124,7 +126,7 @@ class Actor implements CreatureActorInterface {
   }
 
   static async create(
-    character: CharacterInterface, color: Vec4, teamColor: Vec4, team: number, automated: boolean,
+    character: CharacterInterface, color: Vec4, teamColor: Vec4, team: number, automated: boolean, world: WorldInterface,
   ) {
     const playerHeight = character.race.height;
 
@@ -135,7 +137,7 @@ class Actor implements CreatureActorInterface {
 
     const outerCircle = await DrawableNode.create(new Circle(0.75 + feetToMeters(5), 0.01, color), circleMaterial);
 
-    return new Actor(character, mesh, playerHeight, teamColor, team, automated, circleDrawable, circle, outerCircle);
+    return new Actor(character, mesh, playerHeight, teamColor, team, automated, circleDrawable, circle, outerCircle, world);
   }
 
   getWorldPosition(): Vec4 {
@@ -146,7 +148,7 @@ class Actor implements CreatureActorInterface {
     );    
   }
 
-  startTurn(world: WorldInterface) {
+  startTurn() {
     this.character.actionsLeft = 1;
     this.character.bonusActionsLeft = 1;
 
@@ -164,8 +166,8 @@ class Actor implements CreatureActorInterface {
     if (!this.automated) {
       this.setDefaultAction();
 
-      const participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-      const occupants = getOccupants(this, participants, world.occupants);
+      const participants = this.world.participants.turns.filter((a) => a.character.hitPoints > 0);
+      const occupants = getOccupants(this, participants, this.world.occupants);
 
       populateGrid(this, occupants);
     }
@@ -195,11 +197,10 @@ class Actor implements CreatureActorInterface {
     // check if the actor is standing on grease. If so,
     // do the dexterity saving throw to see if they fall prone.
     if (!this.character.hasCondition('Prone')) {
-      const world = getWorld();
       const wp = this.getWorldPosition();
       const wpV2 = vec2.create(wp[0], wp[2]);
   
-      for (const occupant of world.occupants) {
+      for (const occupant of this.world.occupants) {
         if (occupant.name === 'Grease' && pointWithinCircle(occupant.center, occupant.radius, wpV2)) {
           const st = savingThrow(this.character, this.character.abilityScores.dexterity, 'Neutral');
 
@@ -281,11 +282,11 @@ class Actor implements CreatureActorInterface {
   }
 
   addMove(script: Script, newPos: Vec4) {
-    const mover = new Mover(this.sceneNode, vec2.create(newPos[0], newPos[2]));
+    const mover = new Mover(this.sceneNode, vec2.create(newPos[0], newPos[2]), this.world);
     script.entries.push(mover);
   }
 
-  async rangeAttack(target: CreatureActorInterface, script: Script, world: WorldInterface) {
+  async rangeAttack(target: CreatureActorInterface, script: Script) {
     const shotData = this.computeShotData(target);
   
     const data: ShotData = {
@@ -296,13 +297,12 @@ class Actor implements CreatureActorInterface {
       distance: shotData.distance,
     };
 
-    const shot = new Shot(await modelManager.getModel('Shot'), this, data);
+    const shot = new Shot(await modelManager.getModel('Shot'), this, data, this.world);
     script.entries.push(shot);
 
     this.attack(
       target,
       this.character.equipped.rangeWeapon!,
-      world,
       script,
     );
 
@@ -311,11 +311,11 @@ class Actor implements CreatureActorInterface {
     }
   }
 
-  async chooseAction(timestamp: number, world: WorldInterface) {
-    const otherTeam = world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
+  async chooseAction(timestamp: number) {
+    const otherTeam = this.world.participants.participants[this.team ^ 1].filter((a) => a.character.hitPoints > 0);
     
     if (otherTeam.length > 0) {
-      const script = new Script();
+      const script = new Script(this.world);
 
       if (this.useQLearning) {
         // let action: Action | null = null;
@@ -340,12 +340,12 @@ class Actor implements CreatureActorInterface {
         // this.state = States.scripting;
       }
       else {
-        script.entries.push(new Delay(2000));
+        script.entries.push(new Delay(2000, this.world));
 
         const charmed = this.character.getInfluencingAction('Charm Person');
 
-        let participants = world.participants.turns.filter((a) => a.character.hitPoints > 0);
-        const otherTeam = world.participants.participants[this.team ^ 1]
+        let participants = this.world.participants.turns.filter((a) => a.character.hitPoints > 0);
+        const otherTeam = this.world.participants.participants[this.team ^ 1]
           .filter((a) => (
             a.character.hitPoints > 0
             && !a.character.hasInfluencingAction('Sanctuary')
@@ -370,7 +370,7 @@ class Actor implements CreatureActorInterface {
           const target = otherTeam[closest.index];
 
           if (this.character.hasCondition('Prone') && this.distanceLeft >= this.character.race.speed / 2) {
-            script.entries.push(new Logger(`${this.character.name} stood up`));
+            script.entries.push(new Logger(`${this.character.name} stood up`, this.world));
             this.character.removeCondition('Prone');
             this.distanceLeft -= this.character.race.speed / 2;
           }
@@ -381,7 +381,6 @@ class Actor implements CreatureActorInterface {
               this.attack(
                 target,
                 this.character.equipped.meleeWeapon!,
-                world,
                 script,
               );
 
@@ -403,7 +402,7 @@ class Actor implements CreatureActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              const occupants = getOccupants(this, participants, world.occupants);
+              const occupants = getOccupants(this, participants, this.world.occupants);
 
               populateGrid(this, occupants);
 
@@ -415,7 +414,7 @@ class Actor implements CreatureActorInterface {
                 this.distanceLeft,
               );
               
-              if (this !== world.participants.activeActor) {
+              if (this !== this.world.participants.activeActor) {
                 return;
               }
 
@@ -426,14 +425,13 @@ class Actor implements CreatureActorInterface {
                 if (distanceToTarget < this.attackRadius) {
                   path = this.processPath(path, script);
 
-                  script.entries.push(new FollowPath(this.sceneNode, path));  
+                  script.entries.push(new FollowPath(this.sceneNode, path, this.world));  
 
                   myPosition = vec4.create(path[0].point[0], 0, path[0].point[1], 1);
 
                   this.attack(
                     target,
                     this.character.equipped.meleeWeapon!,
-                    world,
                     script,
                   );  
 
@@ -453,7 +451,7 @@ class Actor implements CreatureActorInterface {
                   // Moving to towards the target won't get us close enough 
                   // for a melee attack.
                   if (this.character.equipped.rangeWeapon) {
-                    await this.rangeAttack(target, script, world);
+                    await this.rangeAttack(target, script);
       
                     if (target.character.hitPoints === 0) {
                       targets = targets.filter((t) => t !== closest);
@@ -463,14 +461,14 @@ class Actor implements CreatureActorInterface {
                   }
   
                   path = this.processPath(path, script);
-                  script.entries.push(new FollowPath(this.sceneNode, path));
+                  script.entries.push(new FollowPath(this.sceneNode, path, this.world));
 
                   done = true;
                 }
               }
               else {
                 if (this.character.equipped.rangeWeapon) {
-                  await this.rangeAttack(target, script, world);
+                  await this.rangeAttack(target, script);
 
                   if (target.character.hitPoints === 0) {
                     targets = targets.filter((t) => t !== closest);
@@ -492,7 +490,7 @@ class Actor implements CreatureActorInterface {
               const t = target.getWorldPosition();
               const goal = vec2.create(t[0], t[2])
 
-              const occupants = getOccupants(this, participants, world.occupants);
+              const occupants = getOccupants(this, participants, this.world.occupants);
 
               populateGrid(this, occupants);
 
@@ -504,13 +502,13 @@ class Actor implements CreatureActorInterface {
                 this.distanceLeft,
               );
 
-              if (this !== world.participants.activeActor) {
+              if (this !== this.world.participants.activeActor) {
                 return;
               }
 
               if (path.length > 0) {
                 path = this.processPath(path, script);
-                script.entries.push(new FollowPath(this.sceneNode, path));    
+                script.entries.push(new FollowPath(this.sceneNode, path, this.world));    
 
                 done = true;
               }
@@ -530,32 +528,32 @@ class Actor implements CreatureActorInterface {
 
       if (script.entries.length > 0) {
         if (this.automated) {
-          script.entries.push(new Delay(2000));
+          script.entries.push(new Delay(2000, this.world));
 
           script.onFinish = (timestamp: number) => {
-            world.endTurn2(this);  
+            this.world.endTurn2(this);  
           }
         }
 
-        world.actors.push(script);
+        this.world.actors.push(script);
       }
     }
     else {
-      world.endTurn2(this);
+      this.world.endTurn2(this);
     }
   }
 
-  async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
+  async update(elapsedTime: number, timestamp: number): Promise<boolean> {
     if (this.automated) {
       if (this.character.hitPoints > 0) {
-        if (world.participants.activeActor === this) {
+        if (this.world.participants.activeActor === this) {
           // if (this.actionsLeft) {
-            if (world.animate) {
+            if (this.world.animate) {
               switch (this.state) {
                 case States.idle:
                   if (this.character.actionsLeft) {
                     this.state = States.planning;
-                    this.chooseAction(timestamp, world);
+                    this.chooseAction(timestamp);
                   }
                   break;
 
@@ -567,15 +565,15 @@ class Actor implements CreatureActorInterface {
               }
             }
             else {
-              this.chooseAction(timestamp, world);
-              world.endTurn2(this);
+              this.chooseAction(timestamp);
+              this.world.endTurn2(this);
             }
           // }
         }
       }
       else {
-        if (world.participants.activeActor === this) {
-          world.endTurn2(this);
+        if (this.world.participants.activeActor === this) {
+          this.world.endTurn2(this);
         }
       }
     }
@@ -586,7 +584,6 @@ class Actor implements CreatureActorInterface {
   attack(
     targetActor: CreatureActorInterface,
     weapon: Weapon,
-    world: WorldInterface,
     script: Script,
   ): void {
     let advantage: Advantage = 'Neutral';
@@ -613,7 +610,7 @@ class Actor implements CreatureActorInterface {
 
     if (this.character.hasInfluencingAction('Sanctuary')) {
       this.character.removeInfluencingAction('Sanctuary')
-      script.entries.push(new Logger(`${this.character.name} lost sanctuary.`))
+      script.entries.push(new Logger(`${this.character.name} lost sanctuary.`, this.world))
     }
   }
 
@@ -633,7 +630,7 @@ class Actor implements CreatureActorInterface {
       }
 
       if (damage > 0) {
-        script.entries.push(new Logger(`${from.character.name} ${critical ? 'critically ' : ''}hit ${this.character.name} for ${damage} points with a ${weaponName}.`))
+        script.entries.push(new Logger(`${from.character.name} ${critical ? 'critically ' : ''}hit ${this.character.name} for ${damage} points with a ${weaponName}.`, this.world))
 
         this.character.removeInfluencingAction('Charm Person')
 
@@ -641,10 +638,10 @@ class Actor implements CreatureActorInterface {
           const st = savingThrow(this.character, this.character.abilityScores.constitution, 'Neutral');
 
           if (st < Math.min(10, damage / 2)) {
-            script.entries.push(new Logger(`${this.character.name} stopped concentrating on ${this.character.concentration.name}.`))
+            script.entries.push(new Logger(`${this.character.name} stopped concentrating on ${this.character.concentration.name}.`, this.world))
 
             for (const target of this.character.concentration.targets) {
-              script.entries.push(new Logger(`${target.character.name} lost ${this.character.concentration.name}.`))
+              script.entries.push(new Logger(`${target.character.name} lost ${this.character.concentration.name}.`, this.world))
             }
   
             this.character.stopConcentrating();
@@ -652,23 +649,23 @@ class Actor implements CreatureActorInterface {
         }
       }
       else {
-        script.entries.push(new Logger(`${from.character.name} missed ${this.character.name} with a ${weaponName}.`))
+        script.entries.push(new Logger(`${from.character.name} missed ${this.character.name} with a ${weaponName}.`, this.world))
       }
 
       if (this.character.hitPoints <= 0) {
         this.character.hitPoints = 0;
 
-        script.entries.push(new Logger(`${this.character.name} died.`))
+        script.entries.push(new Logger(`${this.character.name} died.`, this.world))
 
         if (this.character.concentration) {
           for (const target of this.character.concentration.targets) {
-            script.entries.push(new Logger(`${target.character.name} lost ${this.character.concentration.name}.`))
+            script.entries.push(new Logger(`${target.character.name} lost ${this.character.concentration.name}.`, this.world))
           }
           
           this.character.stopConcentrating();
         }
 
-        script.entries.push(new Remover(this));
+        script.entries.push(new Remover(this, this.world));
       }
     }
   }
@@ -677,10 +674,10 @@ class Actor implements CreatureActorInterface {
     if (!this.character.hasInfluencingAction('Chill Touch')) {
       this.character.hitPoints = Math.min(this.character.hitPoints + hitPoints, this.character.maxHitPoints);
 
-      script.entries.push(new Logger(`${this.character.name} healed ${hitPoints} hit points by ${by} from ${from.character.name}.`))  
+      script.entries.push(new Logger(`${this.character.name} healed ${hitPoints} hit points by ${by} from ${from.character.name}.`, this.world))  
     }
     else {
-      script.entries.push(new Logger(`${this.character.name} could not be healed because of Bone Chill.`))  
+      script.entries.push(new Logger(`${this.character.name} could not be healed because of Bone Chill.`, this.world))  
     }
   }
 
@@ -799,13 +796,13 @@ class Actor implements CreatureActorInterface {
         const st = savingThrow(this.character, this.character.abilityScores.dexterity, 'Neutral');
 
         if (st < this.character.spellCastingDc) {
-          script.entries.push(new Logger(`${this.character.name} fell prone.`))
+          script.entries.push(new Logger(`${this.character.name} fell prone.`, this.world))
           this.character.addCondition('Prone')
 
           if (this.distanceLeft >= this.character.race.speed / 2) {
             this.distanceLeft -= this.character.race.speed / 2;
             this.character.removeCondition('Prone')
-            script.entries.push(new Logger(`${this.character.name} stood up.`))
+            script.entries.push(new Logger(`${this.character.name} stood up.`, this.world))
           }
           else {
             this.distanceLeft = 0;
@@ -813,7 +810,7 @@ class Actor implements CreatureActorInterface {
           }
         }
         else {
-          script.entries.push(new Logger(`${this.character.name} succeeded a dexterity saving throw.`))
+          script.entries.push(new Logger(`${this.character.name} succeeded a dexterity saving throw.`, this.world))
         }
       }
     }

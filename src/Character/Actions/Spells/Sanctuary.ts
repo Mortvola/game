@@ -1,4 +1,4 @@
-import { CreatureActorInterface, WorldInterface } from '../../../types'
+import { CreatureActorInterface } from '../../../types'
 import Script from "../../../Script/Script";
 import Logger from "../../../Script/Logger";
 import { feetToMeters } from "../../../Renderer/Math";
@@ -9,10 +9,10 @@ class Sanctuary extends RangeSpell {
     super(actor, 1, true, 'Sanctuary', 'Bonus', 1, feetToMeters(30), 60, false, false);
   }
 
-  async cast(script: Script, world: WorldInterface): Promise<boolean> {
+  async cast(script: Script): Promise<boolean> {
     this.targets[0].character.addInfluencingAction(this);
 
-    script.entries.push(new Logger(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`))
+    script.entries.push(new Logger(`${this.actor.character.name} cast ${this.name} on ${this.targets[0].character.name}.`, this.world))
 
     return true;
   }

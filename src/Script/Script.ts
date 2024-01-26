@@ -5,12 +5,18 @@ class Script implements ActorInterface {
 
   onFinish: ((timestamp: number) => void) | null = null;
 
-  async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
+  world: WorldInterface;
+
+  constructor(world: WorldInterface) {
+    this.world = world;
+  }
+
+  async update(elapsedTime: number, timestamp: number): Promise<boolean> {
     if (this.entries.length === 0) {
       return true;
     }
 
-    const remove = await this.entries[0].update(elapsedTime, timestamp, world);
+    const remove = await this.entries[0].update(elapsedTime, timestamp);
 
     if (remove) {
       this.entries = this.entries.slice(1);

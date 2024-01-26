@@ -12,20 +12,24 @@ class Shot implements ActorInterface {
 
   actor: ActorInterface;
 
+  world: WorldInterface;
+
   constructor(
     mesh: SceneNodeInterface,
     actor: ActorInterface,
     data: ShotData,
+    world: WorldInterface,
   ) {
     this.mesh = mesh;
     this.actor = actor;
     this.data = data;
+    this.world = world;
   }
 
-  async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
+  async update(elapsedTime: number, timestamp: number): Promise<boolean> {
     if (this.startTime === null) {
       this.startTime = timestamp;
-      this.addToScene(world);
+      this.addToScene();
     }
     else {
       const shotElapsedTime = (timestamp - this.startTime) * 0.001;
@@ -41,10 +45,10 @@ class Shot implements ActorInterface {
         1,
       );
 
-      const result = world.collidees.detectCollision(this.data.position, newPosition, (actor: ActorInterface) => actor !== this.actor);
+      const result = this.world.collidees.detectCollision(this.data.position, newPosition, (actor: ActorInterface) => actor !== this.actor);
 
       if (result || newPosition[1] < 0 || xPos >= this.data.distance) {
-        this.removeFromScene(world);
+        this.removeFromScene();
         return true;
       }
       
@@ -58,12 +62,12 @@ class Shot implements ActorInterface {
     return false;
   }
 
-  addToScene(world: WorldInterface) {
-    world.renderer.scene.addNode(this.mesh);
+  addToScene() {
+    this.world.renderer.scene.addNode(this.mesh);
   }
 
-  removeFromScene(world: WorldInterface) {
-    world.renderer.scene.removeNode(this.mesh);
+  removeFromScene() {
+    this.world.renderer.scene.removeNode(this.mesh);
   }
 }
 

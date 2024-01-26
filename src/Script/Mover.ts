@@ -11,13 +11,16 @@ class Mover implements ActorInterface {
 
   metersPerSecond = 6;
 
-  constructor(sceneNode: SceneNode, moveTo: Vec2, onFinish?: ActorOnFinishCallback) {
+  world: WorldInterface;
+
+  constructor(sceneNode: SceneNode, moveTo: Vec2, world: WorldInterface, onFinish?: ActorOnFinishCallback) {
     this.sceneNode = sceneNode;
     this.moveTo = moveTo;
     this.onFinish = onFinish ?? null;
+    this.world = world;
   }
 
-  async update(elapsedTime: number, timestamp: number, world: WorldInterface): Promise<boolean> {
+  async update(elapsedTime: number, timestamp: number): Promise<boolean> {
     // Get the distance to target Using the mesh's world
     // position (found in mesh.translate) and the target location
     const distanceToTarget = vec2.distance(

@@ -1,11 +1,10 @@
 import { Vec4, mat4, quat, vec3, vec4 } from "wgpu-matrix";
 import Spell from "./Spell";
 import Script from "../../../Script/Script";
-import { getWorld } from "../../../Main";
 import Circle from "../../../Renderer/Drawables/Circle";
 import { degToRad } from "../../../Renderer/Math";
 import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
-import { CreatureActorInterface, TimeType, WorldInterface } from "../../../types";
+import { CreatureActorInterface, TimeType } from "../../../types";
 import { circleMaterial } from "../../../Renderer/Materials/Circle";
 
 class RangeSpell extends Spell {
@@ -38,7 +37,7 @@ class RangeSpell extends Spell {
     this.hideRangeCircle();
   }
 
-  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null): Promise<void> {
     let description = `Select ${this.maxTargets  - this.targets.length} more targets.`;
 
     if (this.maxTargets === 1) {
@@ -58,8 +57,8 @@ class RangeSpell extends Spell {
       this.focused = null;
     }
 
-    if (world.actionInfoCallback) {
-      world.actionInfoCallback({
+    if (this.world.actionInfoCallback) {
+      this.world.actionInfoCallback({
         action: this.name,
         description,
         percentSuccess: this.focused ? 100 : 0,
@@ -67,14 +66,14 @@ class RangeSpell extends Spell {
     }              
   }
 
-  async interact(script: Script, world: WorldInterface): Promise<boolean> {
+  async interact(script: Script): Promise<boolean> {
     if (this.focused) {
       this.targets.push(this.focused);
       this.focused = null;
 
       if (this.targets.length < this.maxTargets) {
-        if (world.actionInfoCallback) {
-          world.actionInfoCallback({
+        if (this.world.actionInfoCallback) {
+          this.world.actionInfoCallback({
             action: this.name,
             description: `Select ${this.maxTargets - this.targets.length} more targets.`,
             percentSuccess: 100,
@@ -91,12 +90,10 @@ class RangeSpell extends Spell {
 
   async showRangeCircle() {
     if (this.range > 0) {
-      const world = getWorld();
-
       this.rangeCircle = await DrawableNode.create(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), circleMaterial)
       this.rangeCircle.translate = vec3.copy(this.actor.sceneNode.translate)
   
-      world.renderer.scene.addNode(this.rangeCircle);
+      this.world.renderer.scene.addNode(this.rangeCircle);
   
       const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
       this.rangeCircle.postTransforms.push(mat4.fromQuat(q));  
@@ -105,8 +102,7 @@ class RangeSpell extends Spell {
 
   hideRangeCircle() {
     if (this.rangeCircle) {
-      const world = getWorld();
-      world.renderer.scene.removeNode(this.rangeCircle)
+      this.world.renderer.scene.removeNode(this.rangeCircle)
       this.rangeCircle = null;
     }
   }

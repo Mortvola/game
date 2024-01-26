@@ -4,7 +4,7 @@ import Action from "./Action";
 import { findPath2 } from "../../Workers/PathPlannerQueue";
 import FollowPath from "../../Script/FollowPath";
 import { PathPoint } from "../../Workers/PathPlannerTypes";
-import { CreatureActorInterface, WorldInterface } from "../../types";
+import { CreatureActorInterface } from "../../types";
 
 class MoveAction extends Action {
   path: PathPoint[] = [];
@@ -15,9 +15,9 @@ class MoveAction extends Action {
     super(actor, 0, 'Move', 'Move', 0, false)
   }
 
-  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null): Promise<void> {
     if (this.trajectory) {
-      world.renderer.scene.removeNode(this.trajectory);
+      this.world.renderer.scene.removeNode(this.trajectory);
       this.trajectory = null;
     }
 
@@ -50,8 +50,8 @@ class MoveAction extends Action {
       this.path = path;
       this.distance = distance;
 
-      if (world.actionInfoCallback) {
-        world.actionInfoCallback({
+      if (this.world.actionInfoCallback) {
+        this.world.actionInfoCallback({
           action: 'Move',
           percentSuccess: null,
         })
@@ -59,14 +59,14 @@ class MoveAction extends Action {
     }
   }
 
-  async interact(script: Script, world: WorldInterface): Promise<boolean> {
+  async interact(script: Script): Promise<boolean> {
     const path = this.actor.processPath(this.path, script);
-    script.entries.push(new FollowPath(this.actor.sceneNode, path));    
+    script.entries.push(new FollowPath(this.actor.sceneNode, path, this.world));    
 
     await this.showPathLines(null);
 
-    if (world.actionInfoCallback) {
-      world.actionInfoCallback(null)
+    if (this.world.actionInfoCallback) {
+      this.world.actionInfoCallback(null)
     }              
 
     this.path = [];

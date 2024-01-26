@@ -1,14 +1,14 @@
 import { Vec4 } from "wgpu-matrix";
 import Action from "./Action";
 import Script from "../../Script/Script";
-import { CreatureActorInterface, WorldInterface } from "../../types";
+import { CreatureActorInterface } from "../../types";
 
 class Rage extends Action {
   constructor(actor: CreatureActorInterface) {
     super(actor, 1, 'Rage', 'Bonus', 60, false)
   }
 
-  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null, world: WorldInterface): Promise<void> {
+  async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null): Promise<void> {
     let success = 0;
 
     if (this.actor === target && !target.character.hasInfluencingAction('Rage')) {
@@ -16,8 +16,8 @@ class Rage extends Action {
       success = 100;  
     }
 
-    if (world.actionInfoCallback) {
-      world.actionInfoCallback({
+    if (this.world.actionInfoCallback) {
+      this.world.actionInfoCallback({
         action: this.name,
         description: `Select ${this.actor.character.name} to confirm.`,
         percentSuccess: success,
@@ -25,7 +25,7 @@ class Rage extends Action {
     }              
   }
 
-  async interact(script: Script, world: WorldInterface): Promise<boolean> {
+  async interact(script: Script): Promise<boolean> {
     if (this.focused && this.actor === this.focused) {
       this.targets.push(this.focused);
       this.focused = null;

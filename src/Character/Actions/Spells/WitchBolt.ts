@@ -1,7 +1,7 @@
 import { diceRoll, spellAttackRoll } from "../../../Dice";
 import { feetToMeters } from "../../../Renderer/Math";
 import Script from "../../../Script/Script";
-import { CreatureActorInterface, WorldInterface } from '../../../types'
+import { CreatureActorInterface } from '../../../types'
 import { DamageType } from "../../Equipment/Types";
 import RangeSpell from "./RangeSpell";
 
@@ -10,7 +10,7 @@ class WitchBolt extends RangeSpell {
     super(actor, 1, true, 'Witch Bolt', 'Action', 1, feetToMeters(30), 60, false, true);
   }
 
-  async cast(script: Script, wolrd: WorldInterface): Promise<boolean> {
+  async cast(script: Script): Promise<boolean> {
     const [damage, critical] = spellAttackRoll(
       this.actor.character,
       this.targets[0].character,
