@@ -5,6 +5,7 @@ import { degToRad } from '../Renderer/Math';
 import FbxNode from './FbxNode';
 import FbxGeometryNode from './FbxGeometryNode';
 import FbxContainerNode from './FbxContainerNode';
+import Http from '../Http/src';
 
 // export const yieldToMain = () => {
 //   return new Promise(resolve => {
@@ -329,7 +330,7 @@ const traverseTree = async (
 
 export const downloadFbx = async (url: string): Promise<FbxNode | undefined> => {
   try {
-    const res = await fetch(url);
+    const res = await Http.get(url);
     const blob = await res.blob();
 
     const arrayBuffer = await blob.arrayBuffer();
