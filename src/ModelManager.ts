@@ -14,9 +14,12 @@ import { koboldMaterial } from "./Renderer/Materials/Kobold";
 import { FbxNodeInterface, isFbxContainerNode, isFbxGeometryNode } from "./Fbx/types";
 import { SceneNodeInterface } from "./Renderer/types";
 import { MaterialDescriptor } from "./Renderer/Materials/MaterialDescriptor";
+import { GameObjectRecord } from "./game-common/types";
 
 class ModelManager {
   meshes: Map<string, Drawable> = new Map();
+
+  gameObjects: GameObjectRecord[] = [];
 
   async ready() {
     return gpu.ready();
