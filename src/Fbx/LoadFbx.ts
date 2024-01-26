@@ -327,7 +327,7 @@ const traverseTree = async (
   return result;
 }
 
-export const downloadFbx = async (url: string) => {
+export const downloadFbx = async (url: string): Promise<FbxNode | undefined> => {
   try {
     const res = await fetch(url);
     const blob = await res.blob();

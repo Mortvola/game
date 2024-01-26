@@ -12,9 +12,11 @@ import { soulerCoasterMaterial } from "./Renderer/Materials/SoulerCoaster";
 import { goblinMaterial } from "./Renderer/Materials/Goblin";
 import { koboldMaterial } from "./Renderer/Materials/Kobold";
 import { FbxNodeInterface, isFbxContainerNode, isFbxGeometryNode } from "./Fbx/types";
-import { SceneNodeInterface } from "./Renderer/types";
+import { DrawableNodeInterface, MaterialInterface, SceneNodeInterface } from "./Renderer/types";
 import { MaterialDescriptor } from "./Renderer/Materials/MaterialDescriptor";
-import { GameObjectRecord } from "./game-common/types";
+import { GameObjectRecord, MaterialRecord, NodeMaterials } from "./game-common/types";
+import Http from "./Http/src";
+import Material from "./Renderer/Materials/Material";
 
 class ModelManager {
   meshes: Map<string, Drawable> = new Map();
@@ -26,6 +28,14 @@ class ModelManager {
   }
 
   async getModel(name: string): Promise<SceneNodeInterface> {
+    if (this.gameObjects.length === 0) {
+      const response = await Http.get<GameObjectRecord[]>('/game-objects-list');
+
+      if (response.ok) {
+        this.gameObjects = await response.body();
+      }
+    }
+
     let mesh = this.meshes.get(name);
 
     let node: SceneNodeInterface | null = null;
@@ -137,38 +147,20 @@ class ModelManager {
       }
 
       case 'Goblin': {
-        node = await this.loadFbx('./models/goblin.fbx', goblinMaterial)
+        const object = this.gameObjects.find((o) => o.name === 'Goblin');
 
-        if (!mesh) {
-          const playerWidth = 1;
-          const playerHeight = feetToMeters(3);
-      
-          if (!mesh) {
-            mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0.5, 0, 0, 1)))
-            this.meshes.set(name, mesh)
-          }
-
-          node = await DrawableNode.create(mesh, goblinMaterial);
-          node.translate[1] = playerHeight / 2;
+        if (object) {
+          node = await this.loadObject(object) ?? null;
         }
 
         break;
       }
 
       case 'Kobold':  {
-        node = await this.loadFbx('./models/kobold.fbx', koboldMaterial)
+        const object = this.gameObjects.find((o) => o.name === 'kobold');
 
-        if (!node) {
-          const playerWidth = 1;
-          const playerHeight = feetToMeters(3);
-      
-          if (!mesh) {
-            mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0.5, 0, 0, 1)))
-            this.meshes.set(name, mesh)
-          }
-
-          node = await DrawableNode.create(mesh, koboldMaterial);
-          node.translate[1] = playerHeight / 2;  
+        if (object) {
+          node = await this.loadObject(object) ?? null;
         }
 
         break;
@@ -186,15 +178,10 @@ class ModelManager {
       }
 
       case 'SoulerCoaster': {
-        node = await this.loadFbx('./models/SoulerCoaster.fbx', soulerCoasterMaterial)
+        const object = this.gameObjects.find((o) => o.name === 'SoulerCoaster');
 
-        if (!node) {
-          if (!mesh) {
-            mesh = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
-            this.meshes.set(name, mesh)
-          }
-
-          node = await DrawableNode.create(mesh, litMaterial);
+        if (object) {
+          node = await this.loadObject(object) ?? null;
         }
 
         break;
@@ -211,12 +198,40 @@ class ModelManager {
     return node;
   }
 
+  async loadFbx2(id: number): Promise<FbxNodeInterface | undefined> {
+    let model: FbxNodeInterface | undefined = this.fbxModels.get(id.toString());
+
+    if (!model) {
+      model = await downloadFbx(`/models/${id}`)
+
+      if (model) {
+        this.fbxModels.set(id.toString(), model);
+      }
+    }
+
+    return model;
+  }
+
+  async loadObject(object: GameObjectRecord): Promise<SceneNodeInterface | undefined> {
+    const fbxModel = await this.loadFbx2(object.object.modelId);
+
+    if (fbxModel) {
+      return await this.parseFbxModel(fbxModel, object.name, object.object.materials) ?? undefined
+    }
+  }
+
   fbxModels: Map<string, FbxNodeInterface> = new Map();
+
+  materialMap: Map<number, MaterialRecord> = new Map();
+
+  materialDescrMap: Map<number, MaterialDescriptor> = new Map();
+
+  shaderMap: Map<number, MaterialDescriptor> = new Map();
 
   async parseFbxModel(
     node: FbxNodeInterface,
-    materialDescriptor: MaterialDescriptor,
     name: string,
+    nodeMaterials?: NodeMaterials,
   ): Promise<SceneNodeInterface | null> {
     if (isFbxContainerNode(node)) {
       const container = new ContainerNode();
@@ -227,7 +242,7 @@ class ModelManager {
       container.angles = node.angles.map((a) => a);
 
       for (const n of node.nodes) {
-        const newNode = await this.parseFbxModel(n, materialDescriptor, name);
+        const newNode = await this.parseFbxModel(n, name, nodeMaterials);
 
         if (newNode) {
           container.addNode(newNode);          
@@ -246,13 +261,29 @@ class ModelManager {
     }
 
     if (isFbxGeometryNode(node)) {
+      // Have we already created this mesh?
       let mesh = this.meshes.get(`${name}:${node.name}`)
 
       if (!mesh) {
+        // No, create the mesh now.
         mesh = new Mesh(node.mesh, node.vertices, node.normals, node.texcoords, node.indices);
 
         this.meshes.set(`${name}:${node.name}`, mesh)
       }
+
+      let materialDescriptor: MaterialDescriptor | undefined
+
+      if (nodeMaterials) {
+        const materialId = nodeMaterials[node.name]
+
+        if (materialId !== undefined) {
+          materialDescriptor = await this.getMaterial(materialId);
+        }  
+      }
+
+      if (!materialDescriptor) {
+        materialDescriptor = litMaterial;
+      }  
 
       const drawableNode = await DrawableNode.create(mesh, materialDescriptor);
 
@@ -267,22 +298,40 @@ class ModelManager {
     return null;
   }
 
-  async loadFbx(name: string, materialDescriptor: MaterialDescriptor): Promise<SceneNodeInterface | null> {
-    let model = this.fbxModels.get(name);
+  async getMaterial(id: number): Promise<MaterialDescriptor | undefined> {
+    let material = this.materialDescrMap.get(id);
 
-    if (!model) {
-      model = await downloadFbx(name)
+    if (!material) {
+      let materialRecord = this.materialMap.get(id);
 
-      if (model) {
-        this.fbxModels.set(name, model);
+      if (!materialRecord) {
+        const response = await Http.get<MaterialRecord>(`/materials/${id}`);
+
+        if (response.ok) {
+          materialRecord = await response.body();
+
+          this.materialMap.set(id, materialRecord)
+        }
+      }
+
+      if (materialRecord) {
+        const shaderDescr = this.shaderMap.get(materialRecord.shaderId);
+
+        if (!shaderDescr) {
+          const response = await Http.get<{ name: string, descriptor: MaterialDescriptor }>(`/shader-descriptors/${materialRecord.shaderId}`);
+
+          if (response.ok) {
+            const descr = await response.body();
+
+            material = descr.descriptor;
+
+            this.materialDescrMap.set(id, material);
+          }
+        }
       }
     }
 
-    if (model) {
-      return this.parseFbxModel(model, materialDescriptor, name);
-    }
-
-    return null;
+    return material;
   }
 }
 
