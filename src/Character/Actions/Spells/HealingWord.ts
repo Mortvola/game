@@ -4,6 +4,7 @@ import { abilityModifier, diceRoll } from "../../../Dice";
 import { feetToMeters } from "../../../Renderer/Math";
 import RangeSpell from "./RangeSpell";
 import { modelManager } from '../../../ModelManager';
+import Animate from '../../../Script/Animate';
 
 class HealingWord extends RangeSpell {
   constructor(actor: CreatureActorInterface) {
@@ -12,10 +13,9 @@ class HealingWord extends RangeSpell {
 
   async cast(script: Script): Promise<boolean> {
     const soulercoaster = await modelManager.getModel('SoulerCoaster');
-
     soulercoaster.translate = this.targets[0].getWorldPosition();
-    
-    this.world.renderer.scene.addNode(soulercoaster);
+
+    script.entries.push(new Animate(soulercoaster, this.world));
 
     this.targets[0].takeHealing(
       diceRoll(1, 4) + abilityModifier(this.actor.character.spellcastingAbilityScore),

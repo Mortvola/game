@@ -194,7 +194,7 @@ class ModelManager {
     return node;
   }
 
-  async loadFbx2(id: number): Promise<FbxNodeInterface | undefined> {
+  async loadFbx(id: number): Promise<FbxNodeInterface | undefined> {
     let model: FbxNodeInterface | undefined = this.fbxModels.get(id.toString());
 
     if (!model) {
@@ -209,7 +209,7 @@ class ModelManager {
   }
 
   async loadObject(object: GameObjectRecord): Promise<SceneNodeInterface | undefined> {
-    const fbxModel = await this.loadFbx2(object.object.modelId);
+    const fbxModel = await this.loadFbx(object.object.modelId);
 
     if (fbxModel) {
       return await this.parseFbxModel(fbxModel, object.name, object.object.materials) ?? undefined
@@ -283,6 +283,7 @@ class ModelManager {
 
       const drawableNode = await DrawableNode.create(mesh, materialDescriptor);
 
+      drawableNode.name = node.name;
       drawableNode.scale = node.scale;
       drawableNode.translate = node.translate;
       drawableNode.qRotate = node.qRotate;
