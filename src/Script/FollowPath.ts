@@ -2,6 +2,7 @@ import { vec2, vec3 } from "wgpu-matrix";
 import { PathPoint } from "../Workers/PathPlannerTypes";
 import { ActorInterface, WorldInterface } from "../types";
 import { SceneNodeInterface } from "../Renderer/types";
+import { degToRad } from "../Renderer/Math";
 
 class FollowPath implements ActorInterface {
   path: PathPoint[];
@@ -37,6 +38,9 @@ class FollowPath implements ActorInterface {
 
       const moveTo = this.path[this.path.length - 2].point;
 
+      const angle = Math.atan2(moveTo[0] - this.sceneNode.translate[0], moveTo[1] - this.sceneNode.translate[2]);
+      this.sceneNode.setFromAngles(0, angle, 0);
+  
       // Get the distance to target Using the mesh's world
       // position (found in mesh.translate) and the target location
       const distanceToTarget = vec2.distance(
