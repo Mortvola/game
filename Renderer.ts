@@ -11,13 +11,13 @@ import RenderPass from './RenderPass';
 import Light, { isLight } from './Drawables/Light';
 import CartesianAxes from './Drawables/CartesianAxes';
 import DrawableNode from './Drawables/SceneNodes/DrawableNode';
-import SceneNode from './Drawables/SceneNodes/SceneNode';
 import { SceneNodeInterface, RendererInterface } from './types';
 import { lineMaterial } from './Materials/Line';
 import { lights } from "./shaders/lights";
 import { gpu } from './Gpu';
 import { bindGroups } from './BindGroups';
 import { pipelineManager } from './Pipelines/PipelineManager';
+import TransparentRenderPass from './TransparentRenderPass';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -64,11 +64,13 @@ class Renderer implements RendererInterface {
 
   mainRenderPass = new RenderPass();
 
+  transparentPass = new TransparentRenderPass();
+
   lights: Light[] = [];
 
   reticlePosition = vec2.create(0, 0);
 
-  constructor(frameBindGroupLayout: GPUBindGroupLayout, cartesianAxes: DrawableNode, test?: SceneNode) {
+  constructor(frameBindGroupLayout: GPUBindGroupLayout, cartesianAxes: DrawableNode, test?: SceneNodeInterface) {
     this.createCameraBindGroups(frameBindGroupLayout);
 
     // this.reticle = reticle;
@@ -337,6 +339,8 @@ class Renderer implements RendererInterface {
 
     this.mainRenderPass.render(view, this.depthTextureView!, commandEncoder, this.frameBindGroup.bindGroup);
 
+    this.transparentPass.render(view, this.depthTextureView!, commandEncoder, this.frameBindGroup.bindGroup);
+    
     // if (this.selected.selection.length > 0) {
     //   // Transform camera position to world space.
     //   const origin = vec4.transformMat4(vec4.create(0, 0, 0, 1), this.camera.viewTransform);
