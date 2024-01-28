@@ -1,4 +1,4 @@
-import { vec4 } from "wgpu-matrix";
+import { vec3, vec4 } from "wgpu-matrix";
 import Mesh from "./Renderer/Drawables/Mesh";
 import { box } from "./Renderer/Drawables/Shapes/box";
 import { feetToMeters } from "./Renderer/Math";
@@ -142,18 +142,8 @@ class ModelManager {
         break;
       }
 
-      case 'Goblin': {
-        const object = this.gameObjects.find((o) => o.name === 'Goblin');
-
-        if (object) {
-          node = await this.loadObject(object) ?? null;
-        }
-
-        break;
-      }
-
       case 'Kobold':  {
-        const object = this.gameObjects.find((o) => o.name === 'kobold');
+        const object = this.gameObjects.find((o) => o.name === 'kobold2');
 
         if (object) {
           node = await this.loadObject(object) ?? null;
@@ -173,8 +163,8 @@ class ModelManager {
         break;
       }
 
-      case 'SoulerCoaster': {
-        const object = this.gameObjects.find((o) => o.name === 'SoulerCoaster');
+      default: {
+        const object = this.gameObjects.find((o) => o.name === name);
 
         if (object) {
           node = await this.loadObject(object) ?? null;
@@ -182,9 +172,6 @@ class ModelManager {
 
         break;
       }
-
-      default:
-        throw new Error(`model not found: ${name}`)
     }
 
     if (!node) {
@@ -212,7 +199,20 @@ class ModelManager {
     const fbxModel = await this.loadFbx(object.object.modelId);
 
     if (fbxModel) {
-      return await this.parseFbxModel(fbxModel, object.name, object.object.materials) ?? undefined
+      let node = await this.parseFbxModel(fbxModel, object.name, object.object.materials)
+
+      // Wrap the root node of hte model in a container node for the purpposes
+      // of applying transformations to the entire model without stepping on
+      // any existing transformations already in the root node.
+      // TODO: Find a better way of doing this
+      if (node) {
+        const container = new ContainerNode();
+        container.addNode(node);  
+
+        node = container;
+      }
+
+      return node;
     }
   }
 
@@ -228,14 +228,14 @@ class ModelManager {
     node: FbxNodeInterface,
     name: string,
     nodeMaterials?: NodeMaterials,
-  ): Promise<SceneNodeInterface | null> {
+  ): Promise<SceneNodeInterface | undefined> {
     if (isFbxContainerNode(node)) {
       const container = new ContainerNode();
 
-      container.scale = node.scale;
-      container.translate = node.translate;
-      container.qRotate = node.qRotate;
-      container.angles = node.angles.map((a) => a);
+      container.scale = vec3.copy(node.scale);
+      container.translate = vec3.copy(node.translate);
+      container.qRotate = node.qRotate.slice()
+      container.angles = node.angles.slice()
 
       for (const n of node.nodes) {
         const newNode = await this.parseFbxModel(n, name, nodeMaterials);
@@ -246,7 +246,7 @@ class ModelManager {
       }
 
       if (container.nodes.length === 0) {
-        return null;
+        return undefined;
       }
 
       // if (container.nodes.length === 1) {
@@ -284,15 +284,13 @@ class ModelManager {
       const drawableNode = await DrawableNode.create(mesh, materialDescriptor);
 
       drawableNode.name = node.name;
-      drawableNode.scale = node.scale;
-      drawableNode.translate = node.translate;
-      drawableNode.qRotate = node.qRotate;
-      drawableNode.angles = node.angles.map((a) => a);
+      drawableNode.scale = vec3.copy(node.scale);
+      drawableNode.translate = vec3.copy(node.translate);
+      drawableNode.qRotate = node.qRotate.slice()
+      drawableNode.angles = node.angles.slice()
 
       return drawableNode;
     }
-
-    return null;
   }
 
   async getMaterial(id: number): Promise<MaterialDescriptor | undefined> {
