@@ -39,7 +39,7 @@ class MagicMissile extends RangeSpell {
     for (let i = 0; i < this.paths.length; i += 1) {
       const subScript = new Script(this.world);
 
-      const shot = await modelManager.getModel('projectile7');
+      const shot = await modelManager.getModel('magic-missile');
 
       shot.translate[0] = this.paths[i][this.paths[i].length - 1].point[0];
       shot.translate[1] = 1;

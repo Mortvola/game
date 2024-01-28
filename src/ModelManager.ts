@@ -142,16 +142,6 @@ class ModelManager {
         break;
       }
 
-      case 'Kobold':  {
-        const object = this.gameObjects.find((o) => o.name === 'kobold2');
-
-        if (object) {
-          node = await this.loadObject(object) ?? null;
-        }
-
-        break;
-      }
-
       case 'Shot': {
         if (!mesh) {
           mesh = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
