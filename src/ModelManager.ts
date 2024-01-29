@@ -1,7 +1,6 @@
 import { vec3, vec4 } from "wgpu-matrix";
 import Mesh from "./Renderer/Drawables/Mesh";
 import { box } from "./Renderer/Drawables/Shapes/box";
-import { feetToMeters } from "./Renderer/Math";
 import DrawableNode from "./Renderer/Drawables/SceneNodes/DrawableNode";
 import Drawable from "./Renderer/Drawables/Drawable";
 import { downloadFbx } from "./Fbx/LoadFbx";
@@ -37,111 +36,6 @@ class ModelManager {
     let node: SceneNodeInterface | null = null;
 
     switch (name) {
-      case 'Human': {
-        const playerWidth = 1;
-        const playerHeight = feetToMeters(5.75);
-    
-        if (!mesh) {
-          mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
-          this.meshes.set(name, mesh)
-        }
-
-        node = await DrawableNode.create(mesh, litMaterial);
-        node.translate[1] = playerHeight / 2;  
-
-        break;
-      }
-
-      case 'High Elf': {
-        const playerWidth = 1;
-        const playerHeight = feetToMeters(5.75);
-
-        if (!mesh) {
-          mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
-          this.meshes.set(name, mesh);
-        }
-
-        node = await DrawableNode.create(mesh, litMaterial);
-        node.translate[1] = playerHeight / 2;  
-
-        break;
-      }
-
-      case 'Wood Elf': {
-        const playerWidth = 1;
-        const playerHeight = feetToMeters(4.5);
-    
-        if (!mesh) {
-          mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
-          this.meshes.set(name, mesh);
-        }
-
-        node = await DrawableNode.create(mesh, litMaterial);
-        node.translate[1] = playerHeight / 2;  
-
-        break;
-      }
-
-      case 'Hill Dwarf': {
-        const playerWidth = 1;
-        const playerHeight = feetToMeters(4.5);
-    
-        if (!mesh) {
-          mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
-          this.meshes.set(name, mesh)
-        }
-
-        node = await DrawableNode.create(mesh, litMaterial);
-        node.translate[1] = playerHeight / 2;  
-
-        break;
-      }
-
-      case 'Mountain Dwarf': {
-        const playerWidth = 1;
-        const playerHeight = feetToMeters(5.75);
-    
-        if (!mesh) {
-          mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
-          this.meshes.set(name, mesh)
-        }
-
-        node = await DrawableNode.create(mesh, litMaterial);
-        node.translate[1] = playerHeight / 2;  
-
-        break;
-      }
-
-      case 'Lightfoot Halfling': {
-        const playerWidth = 1;
-        const playerHeight = feetToMeters(3);
-    
-        if (!mesh) {
-          mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
-          this.meshes.set(name, mesh)
-        }
-
-        node = await DrawableNode.create(mesh, litMaterial);
-        node.translate[1] = playerHeight / 2;  
-
-        break;
-      }
-
-      case  'Stout Halfling': {
-        const playerWidth = 1;
-        const playerHeight = feetToMeters(3);
-    
-        if (!mesh) {
-          mesh = await Mesh.create(box(playerWidth, playerHeight, playerWidth, vec4.create(0, 0, 0.5, 1)))
-          this.meshes.set(name, mesh)
-        }
-
-        node = await DrawableNode.create(mesh, litMaterial);
-        node.translate[1] = playerHeight / 2;  
-
-        break;
-      }
-
       case 'Shot': {
         if (!mesh) {
           mesh = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));

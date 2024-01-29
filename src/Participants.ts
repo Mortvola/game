@@ -117,7 +117,7 @@ class Participants implements ParticipantsInterface {
     const spaceBetween = 4;
     const playerWidth = 4;
 
-    for (let i = 0; i < numPlayers; i += 1) {
+    for (let i = 0; i < this.parties[team].members.length; i += 1) {
       if (!this.parties[team].members[i].included) {
         continue;
       }
@@ -139,7 +139,7 @@ class Participants implements ParticipantsInterface {
         actor.character.spellSlots.push(slots)
       }
 
-      actor.sceneNode.translate[0] = (i - ((numPlayers - 1) / 2))
+      actor.sceneNode.translate[0] = (actors.length - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()
         * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
       actor.sceneNode.translate[2] = z + Math.random() * 10 - 5;
