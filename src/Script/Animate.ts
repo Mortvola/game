@@ -29,7 +29,7 @@ class Animate implements ActorInterface {
 
       if (isDrawableNode(node)) {
         console.log(`fade: ${this.initialFade}`)
-        node.material.updateProperty('fade', this.initialFade)
+        node.material.updateProperty(GPUShaderStage.FRAGMENT, 'fade', this.initialFade)
       }
     }
     else {
@@ -47,7 +47,7 @@ class Animate implements ActorInterface {
 
       if (isDrawableNode(node)) {
         console.log(`fade: ${this.initialFade + f}`)
-        node.material.updateProperty('fade', this.initialFade + f)
+        node.material.updateProperty(GPUShaderStage.FRAGMENT, 'fade', this.initialFade + f)
       }
     }
 

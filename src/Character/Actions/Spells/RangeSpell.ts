@@ -5,7 +5,6 @@ import Circle from "../../../Renderer/Drawables/Circle";
 import { degToRad } from "../../../Renderer/Math";
 import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface, TimeType } from "../../../types";
-import { circleMaterial } from "../../../Renderer/Materials/Circle";
 
 class RangeSpell extends Spell {
   range: number;
@@ -90,7 +89,7 @@ class RangeSpell extends Spell {
 
   async showRangeCircle() {
     if (this.range > 0) {
-      this.rangeCircle = await DrawableNode.create(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), circleMaterial)
+      this.rangeCircle = await DrawableNode.create(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)))
       this.rangeCircle.translate = vec3.copy(this.actor.sceneNode.translate)
   
       this.world.renderer.scene.addNode(this.rangeCircle);

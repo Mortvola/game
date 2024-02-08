@@ -1,7 +1,6 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, pointWithinCircle, timeToTarget } from "../Renderer/Math";
 import Circle from "../Renderer/Drawables/Circle";
-import RenderPass from "../Renderer/RenderPass";
 import Shot from "../Script/Shot";
 import { Advantage, attackRoll, savingThrow } from "../Dice";
 import Mover from "../Script/Mover";
@@ -20,10 +19,10 @@ import { modelManager } from "../ModelManager";
 import { PathPoint } from "../Workers/PathPlannerTypes";
 import DrawableNode from "../Renderer/Drawables/SceneNodes/DrawableNode";
 import { ActionInterface, CharacterInterface, CreatureActorInterface, ShotData, States, WorldInterface } from "../types";
-import { circleMaterial } from "../Renderer/Materials/Circle";
 import { DamageType, Weapon, WeaponType } from "./Equipment/Types";
 import MoveAction from "./Actions/MoveAction";
 import { SceneNodeInterface } from "../Renderer/types";
+import RenderPass from "../Renderer/RenderPasses/RenderPass";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -133,9 +132,9 @@ class Actor implements CreatureActorInterface {
     const mesh = await modelManager.getModel(character.race.name)
 
     const circleDrawable = new Circle(0.75, 0.025, color);
-    const circle = await DrawableNode.create(circleDrawable, circleMaterial);
+    const circle = await DrawableNode.create(circleDrawable);
 
-    const outerCircle = await DrawableNode.create(new Circle(0.75 + feetToMeters(5), 0.01, color), circleMaterial);
+    const outerCircle = await DrawableNode.create(new Circle(0.75 + feetToMeters(5), 0.01, color));
 
     return new Actor(character, mesh, playerHeight, teamColor, team, automated, circleDrawable, circle, outerCircle, world);
   }
@@ -154,10 +153,10 @@ class Actor implements CreatureActorInterface {
 
     this.distanceLeft = this.character.race.speed;
 
-    this.circleDrawable.color[0] = 1;
-    this.circleDrawable.color[1] = 1;
-    this.circleDrawable.color[2] = 1;
-    this.circleDrawable.color[3] = 1;
+    // this.circleDrawable.color[0] = 1;
+    // this.circleDrawable.color[1] = 1;
+    // this.circleDrawable.color[2] = 1;
+    // this.circleDrawable.color[3] = 1;
 
     this.state = States.idle;
 
@@ -217,10 +216,10 @@ class Actor implements CreatureActorInterface {
       }
     }
 
-    this.circleDrawable.color[0] = this.teamColor[0];
-    this.circleDrawable.color[1] = this.teamColor[1];
-    this.circleDrawable.color[2] = this.teamColor[2];
-    this.circleDrawable.color[3] = this.teamColor[3];
+    // this.circleDrawable.color[0] = this.teamColor[0];
+    // this.circleDrawable.color[1] = this.teamColor[1];
+    // this.circleDrawable.color[2] = this.teamColor[2];
+    // this.circleDrawable.color[3] = this.teamColor[3];
 
     this.setAction(null);
     

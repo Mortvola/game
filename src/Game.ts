@@ -489,7 +489,7 @@ class Game implements WorldInterface {
   }
 
   mouseWheel(deltaX: number, deltaY: number, x: number, y: number) {
-    this.renderer.camera.changeRotation(-deltaX * 0.2);
+    this.renderer.camera.changeRotation(-deltaX * 0.2, 0);
   }
 
   updateDirection(direction: Vec4) {

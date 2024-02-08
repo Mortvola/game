@@ -5,7 +5,6 @@ import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
 import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface, TimeType } from "../../../types";
-import { circleMaterial } from "../../../Renderer/Materials/Circle";
 
 class AreaSpell extends RangeSpell {
   center: Vec2 | null = null;
@@ -54,7 +53,7 @@ class AreaSpell extends RangeSpell {
 
   async showAreaOfEffect() {
     if (this.areaOfEffect === null) {
-      this.areaOfEffect = await DrawableNode.create(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)), circleMaterial)
+      this.areaOfEffect = await DrawableNode.create(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)))
       this.areaOfEffect.translate = vec3.copy(this.actor.sceneNode.translate)
   
       this.world.renderer.scene.addNode(this.areaOfEffect);

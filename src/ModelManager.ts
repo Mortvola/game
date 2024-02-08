@@ -5,13 +5,13 @@ import DrawableNode from "./Renderer/Drawables/SceneNodes/DrawableNode";
 import Drawable from "./Renderer/Drawables/Drawable";
 import { downloadFbx } from "./Fbx/LoadFbx";
 import ContainerNode from "./Renderer/Drawables/SceneNodes/ContainerNode";
-import { litMaterial } from "./Renderer/Materials/Lit";
 import { gpu } from "./Renderer/Gpu";
 import { FbxNodeInterface, isFbxContainerNode, isFbxGeometryNode } from "./Fbx/types";
-import { SceneNodeInterface } from "./Renderer/types";
+import { GameObjectRecord, ModelItem, SceneNodeInterface } from "./Renderer/types";
 import { MaterialDescriptor } from "./Renderer/Materials/MaterialDescriptor";
-import { GameObjectRecord, MaterialRecord, NodeMaterials } from "./game-common/types";
+import { MaterialRecord, NodeMaterials } from "./game-common/types";
 import Http from "./Http/src";
+import { ShaderDescriptor } from "./Renderer/shaders/ShaderDescriptor";
 
 class ModelManager {
   meshes: Map<string, Drawable> = new Map();
@@ -42,7 +42,7 @@ class ModelManager {
           this.meshes.set(name, mesh)
         }
 
-        node = await DrawableNode.create(mesh, litMaterial);
+        node = await DrawableNode.create(mesh);
 
         break;
       }
@@ -80,23 +80,24 @@ class ModelManager {
   }
 
   async loadObject(object: GameObjectRecord): Promise<SceneNodeInterface | undefined> {
-    const fbxModel = await this.loadFbx(object.object.modelId);
+    const container = new ContainerNode();
 
-    if (fbxModel) {
-      let node = await this.parseFbxModel(fbxModel, object.name, object.object.materials)
+    for (const item of object.object.items) {
+      if (item.type === 'model') {
+        const fbxModel = await this.loadFbx(item.item.id);
 
-      // Wrap the root node of hte model in a container node for the purpposes
-      // of applying transformations to the entire model without stepping on
-      // any existing transformations already in the root node.
-      // TODO: Find a better way of doing this
-      if (node) {
-        const container = new ContainerNode();
-        container.addNode(node);  
-
-        node = container;
+        if (fbxModel) {
+          let node = await this.parseFbxModel(fbxModel, object.name, (item.item as ModelItem).materials)
+    
+          if (node) {
+            container.addNode(node);  
+          }
+        }
       }
 
-      return node;
+      if (container.nodes.length > 0) {
+        return container;
+      }
     }
   }
 
@@ -106,7 +107,7 @@ class ModelManager {
 
   materialDescrMap: Map<number, MaterialDescriptor> = new Map();
 
-  shaderMap: Map<number, MaterialDescriptor> = new Map();
+  shaderMap: Map<number, ShaderDescriptor> = new Map();
 
   async parseFbxModel(
     node: FbxNodeInterface,
@@ -161,11 +162,11 @@ class ModelManager {
         }  
       }
 
-      if (!materialDescriptor) {
-        materialDescriptor = litMaterial;
-      }  
+      // if (!materialDescriptor) {
+      //   materialDescriptor = litMaterial;
+      // }  
 
-      const drawableNode = await DrawableNode.create(mesh, materialDescriptor);
+      const drawableNode = await DrawableNode.create(mesh, materialDescriptor?.shaderDescriptor);
 
       drawableNode.name = node.name;
       drawableNode.scale = vec3.copy(node.scale);
@@ -194,23 +195,31 @@ class ModelManager {
       }
 
       if (materialRecord) {
-        const shaderDescr = this.shaderMap.get(materialRecord.shaderId);
+        let shaderDescr = this.shaderMap.get(materialRecord.shaderId);
 
         if (!shaderDescr) {
-          const response = await Http.get<{ name: string, descriptor: MaterialDescriptor }>(`/shader-descriptors/${materialRecord.shaderId}`);
+          const response = await Http.get<{ name: string, descriptor: ShaderDescriptor }>(`/shader-descriptors/${materialRecord.shaderId}`);
 
           if (response.ok) {
             const descr = await response.body();
 
-            material = descr.descriptor;
+            shaderDescr = descr.descriptor;
 
-            this.materialDescrMap.set(id, material);
+            this.shaderMap.set(id, shaderDescr);
           }
+        }
+
+        if (shaderDescr) {
+          const material: MaterialDescriptor = {
+            properties: [], // materialRecord.properties,
+  
+            shaderDescriptor: shaderDescr,
+          }
+
+          return material
         }
       }
     }
-
-    return material;
   }
 }
 
