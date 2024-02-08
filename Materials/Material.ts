@@ -1,16 +1,18 @@
-import { StructuredView } from "webgpu-utils";
 import { bindGroups } from "../BindGroups";
 import DrawableInterface from "../Drawables/DrawableInterface";
 import { gpu } from "../Gpu";
 import { pipelineManager } from "../Pipelines/PipelineManager";
-import { DrawableNodeInterface, MaterialInterface, PipelineInterface, maxInstances } from "../types";
-import { MaterialDescriptor } from "./MaterialDescriptor";
+import { DrawableNodeInterface, DrawableType, MaterialInterface, PipelineInterface, StageBindings } from "../types";
+import { ShaderDescriptor } from "../shaders/ShaderDescriptor";
 import { PropertyInterface, ValueType } from "../ShaderBuilder/Types";
 import Http from "../../Http/src";
 
-type Bitmap = {
-  image: ImageBitmap,
-  flipY: boolean,
+const downloadedTextures: Map<number, GPUTexture> = new Map();
+
+type MaterialBindings = {
+  uniformsBuffer: GPUBuffer | null,
+  stageBindings: StageBindings,
+  bindGroup: GPUBindGroup,
 }
 
 class Material implements MaterialInterface {
@@ -18,183 +20,220 @@ class Material implements MaterialInterface {
 
   color = new Float32Array(4);
 
-  uniformsBuffer: GPUBuffer | null = null;
+  vertBindings: MaterialBindings | null = null;
 
-  properties: PropertyInterface[] | null = null;
-
-  propertiesStructure: StructuredView | null = null;
-
-  colorBuffer: GPUBuffer;
-
-  textureAttributesBuffer: GPUBuffer | null = null;
-
-  bindGroup: GPUBindGroup;
+  fragBindings: MaterialBindings | null = null;
 
   drawables: DrawableInterface[] = [];
 
   transparent: boolean;
 
   private constructor(
-    materialDescriptor: MaterialDescriptor,
+    materialDescriptor: ShaderDescriptor | null,
     pipeline: PipelineInterface,
-    bindGroupLayout: GPUBindGroupLayout | null,
-    bitmaps: Bitmap[],
-    properties: PropertyInterface[],
-    propertiesStructure: StructuredView | null,
+    vertStageBindings: StageBindings | null,
+    fragStageBindings: StageBindings | null,
+    textures: GPUTexture[],
     fromGraph: boolean,
   ) {
     this.pipeline = pipeline;
     
-    this.transparent = materialDescriptor.transparent ?? false;
-
-    if (materialDescriptor.color) {
-      this.color[0] = materialDescriptor.color[0];
-      this.color[1] = materialDescriptor.color[1];
-      this.color[2] = materialDescriptor.color[2];
-      this.color[3] = materialDescriptor.color[3];  
-    }
-    else {
-      this.color[0] = 0.8;
-      this.color[1] = 0.8;
-      this.color[2] = 0.8;
-      this.color[3] = 1.0;  
-    }
+    this.color[0] = materialDescriptor?.color ? materialDescriptor.color[0] : 0.5;
+    this.color[1] = materialDescriptor?.color ? materialDescriptor.color[1] : 0.5;
+    this.color[2] = materialDescriptor?.color ? materialDescriptor.color[2] : 0.5;
+    this.color[3] = materialDescriptor?.color ? materialDescriptor.color[3] : 1;
+    
+    this.transparent = materialDescriptor?.transparent ?? false;
 
     if (fromGraph) {
-      const textures: GPUTexture[] = [];
+      if (vertStageBindings) {
+        const [uniformsBuffer, bindGroup] = this.createBindGroup(vertStageBindings, [])
 
-      for (const bitmap of bitmaps) {
-        const texture = gpu.device.createTexture({
-          format: 'rgba8unorm',
-          size: [bitmap.image.width, bitmap.image.height],
-          usage: GPUTextureUsage.TEXTURE_BINDING |
-                GPUTextureUsage.COPY_DST |
-                GPUTextureUsage.RENDER_ATTACHMENT,
-        });
-    
-        gpu.device.queue.copyExternalImageToTexture(
-          { source: bitmap.image, flipY: bitmap.flipY },
-          { texture },
-          { width: bitmap.image.width, height: bitmap.image.height },
-        );
+        this.vertBindings = {
+          stageBindings: vertStageBindings,
+          uniformsBuffer,
+          bindGroup,
+        }
 
-        textures.push(texture);
-      }
-  
-      this.colorBuffer = gpu.device.createBuffer({
-        label: 'color',
-        size: 4 * Float32Array.BYTES_PER_ELEMENT * maxInstances,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      });
-
-      let entries: GPUBindGroupEntry[] = [];
-
-      let numBindings = 0;
-
-      if (textures.length > 0) {
-        entries = [
-          { binding: 0, resource: gpu.device.createSampler() },
-          ...textures.map((texture, index) => ({
-            binding: 1 + index, resource: texture.createView(),
-          })),
-        ]
-
-        numBindings += 1 + textures.length;
+        this.setPropertyValues(GPUShaderStage.VERTEX, vertStageBindings.properties);  
       }
 
-      this.properties = properties;
-      this.propertiesStructure = propertiesStructure;
+      if (fragStageBindings) {
+        const [uniformsBuffer, bindGroup] = this.createBindGroup(fragStageBindings, textures)
 
-      if (this.propertiesStructure) {
-        this.uniformsBuffer = gpu.device.createBuffer({
-          label: 'uniforms',
-          size: this.propertiesStructure.arrayBuffer.byteLength,
-          usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });  
+        this.fragBindings = {
+          stageBindings: fragStageBindings,
+          uniformsBuffer,
+          bindGroup,
+        }
 
-        entries = entries.concat(
-          { binding: numBindings, resource: { buffer: this.uniformsBuffer }},
-        )
+        this.setPropertyValues(GPUShaderStage.FRAGMENT, fragStageBindings.properties);  
       }
-
-      this.setPropertyValues(properties);
-
-      this.bindGroup = gpu.device.createBindGroup({
-        label: 'material',
-        layout: bindGroupLayout ?? bindGroups.getBindGroupLayout2(),
-        entries,
-      });
-    }
-    else {
-      this.colorBuffer = gpu.device.createBuffer({
-        label: 'color',
-        size: 4 * Float32Array.BYTES_PER_ELEMENT * maxInstances,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      });
-
-      this.bindGroup = gpu.device.createBindGroup({
-        label: 'Color',
-        layout: bindGroups.getBindGroupLayout2A(),
-        entries: [
-          { binding: 0, resource: { buffer: this.colorBuffer }},
-        ],
-      });
     }
   }
 
-  static async create(materialDescriptor: MaterialDescriptor): Promise<Material> {
-    const [pipeline, bindGroupLayout, properties, propertiesStructure, fromGraph] = pipelineManager.getPipelineByArgs(materialDescriptor)
+  static async create(
+    drawableType: DrawableType,
+    vertexProperties: PropertyInterface[],
+    materialDescriptor?: ShaderDescriptor,
+  ): Promise<Material> {
+    const [
+      pipeline, vertStageBindings, fragStageBindings, fromGraph,
+    ] = pipelineManager.getPipeline(drawableType, vertexProperties, materialDescriptor)
 
-    let bitmap: Bitmap[] = [];
+    const textures: GPUTexture[] = [];
 
     // Find textures in the properties
-    for (const property of properties) {
-      if (property.value.dataType === 'texture2D') {
-        let url: string;
-        let flipY = false;
+    if (fragStageBindings) {
+      for (const property of fragStageBindings.properties) {
+        if (property.value.dataType === 'texture2D') {
+          const textureId = property.value.value as number;
 
-        if (typeof property.value.value === 'string') {
-          url = property.value.value;
-        }
-        else if (typeof property.value.value === 'number') {
-          url = `/textures/${property.value.value}/file`
+          let flipY = false;
 
-          const response = await Http.get<{ flipY: boolean }>(`/textures/${property.value.value}`)
+          const response = await Http.get<{ flipY: boolean }>(`/textures/${textureId}`)
 
           if (response.ok) {
             flipY = (await response.body()).flipY;
           }
-        }
-        else {
-          throw new Error('texture value is unknown type')
-        }
 
-        const res = await fetch(url);
+          const texture = await Material.retrieveTexture(textureId, flipY);
 
-        if (res.ok) {
-          const blob = await res.blob();
-          try {
-            bitmap.push({ image: await createImageBitmap(blob, { colorSpaceConversion: 'none' }), flipY, });  
-          }
-          catch (error) {
-            console.log(error);
-            throw(error);
-          }  
-        }
-        else {
-          throw new Error('texture failed to download')
+          textures.push(texture);
         }
       }
     }
 
-    return new Material(materialDescriptor, pipeline, bindGroupLayout, bitmap, properties, propertiesStructure, fromGraph);
+    return new Material(
+      materialDescriptor ?? null,
+      pipeline,
+      vertStageBindings,
+      fragStageBindings,
+      textures,
+      fromGraph,
+    );
   }
 
-  setPropertyValues(properties: PropertyInterface[]) {
-    if (this.uniformsBuffer && this.propertiesStructure) {
+  createBindGroup(
+    bindings: StageBindings,
+    textures: GPUTexture[],
+  ): [GPUBuffer | null, GPUBindGroup] {
+    let entries: GPUBindGroupEntry[] = [];
+    let numBindings = 0;
+    let textureIndex = 0
+
+    // Set up the bind group entries for the samplers and textures.
+    for (const property of bindings.properties) {
+      if (property.value.dataType === 'sampler') {
+        entries.push({
+          binding: numBindings,
+          resource: gpu.device.createSampler(property.value.value as GPUSamplerDescriptor)
+        })
+
+        numBindings += 1
+      }
+      else if (property.value.dataType === 'texture2D') {
+        entries.push({
+          binding: numBindings, resource: textures[textureIndex].createView(),
+        })
+
+        textureIndex += 1
+        numBindings += 1
+      }
+    }
+
+    let uniformsBuffer: GPUBuffer | null = null
+
+    if (bindings.structuredView) {
+      uniformsBuffer = gpu.device.createBuffer({
+        label: 'uniforms',
+        size: bindings.structuredView.arrayBuffer.byteLength,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });  
+
+      entries = entries.concat(
+        { binding: numBindings, resource: { buffer: uniformsBuffer }},
+      )
+    }
+
+    return [
+      uniformsBuffer,
+      gpu.device.createBindGroup({
+        label: 'material',
+        layout: bindings.layout ?? bindGroups.getBindGroupLayout2(),
+        entries,
+      }),
+    ]
+  }
+
+  static async retrieveTexture(textureId: number, flipY: boolean): Promise<GPUTexture> {
+    let texture = downloadedTextures.get(textureId)
+
+    if (!texture) {
+      const url = `/textures/${textureId}/file`
+
+      const res = await Http.get(url);
+
+      if (res.ok) {
+        const blob = await res.blob();
+
+        try {
+          const image = await createImageBitmap(blob, { colorSpaceConversion: 'none' })
+          
+          texture = gpu.device.createTexture({
+            format: 'rgba8unorm',
+            size: [image.width, image.height],
+            usage: GPUTextureUsage.TEXTURE_BINDING |
+                  GPUTextureUsage.COPY_DST |
+                  GPUTextureUsage.RENDER_ATTACHMENT,
+          });
+      
+          gpu.device.queue.copyExternalImageToTexture(
+            { source: image, flipY },
+            { texture },
+            { width: image.width, height: image.height },
+          );
+  
+          downloadedTextures.set(textureId, texture)
+        }
+        catch (error) {
+          console.log(error);
+          throw(error);
+        }  
+      }
+      else {
+        throw new Error('texture failed to download')
+      }
+    }
+
+    return texture;
+  }
+  
+  setBindGroups(passEncoder: GPURenderPassEncoder): void {
+    if (this.vertBindings) {
+      passEncoder.setBindGroup(this.vertBindings.stageBindings.binding, this.vertBindings.bindGroup);
+    }
+
+    if (this.fragBindings) {
+      passEncoder.setBindGroup(this.fragBindings.stageBindings.binding, this.fragBindings.bindGroup);
+    }
+  }
+
+  setPropertyValues(stage: GPUShaderStageFlags, properties: PropertyInterface[]) {
+    let bindings: MaterialBindings | null = null
+
+    if (stage === GPUShaderStage.VERTEX) {
+      bindings = this.vertBindings
+    }
+
+    if (stage === GPUShaderStage.FRAGMENT) {
+      bindings = this.fragBindings
+    }
+
+    if (bindings?.uniformsBuffer && bindings?.stageBindings.structuredView) {
       let values: Record<string, unknown> = {};
 
-      this.properties = properties;
+      bindings.stageBindings.properties = properties;
 
       // Extract the values from the properties and put them into an object
       for (const property of properties) {
@@ -206,19 +245,29 @@ class Material implements MaterialInterface {
         }
       }
       
-      this.propertiesStructure.set(values);
-      gpu.device.queue.writeBuffer(this.uniformsBuffer, 0, this.propertiesStructure.arrayBuffer);  
+      bindings.stageBindings.structuredView.set(values);
+      gpu.device.queue.writeBuffer(bindings.uniformsBuffer, 0, bindings.stageBindings.structuredView.arrayBuffer);  
     }
   }
 
-  updateProperty(name: string, value: ValueType): void {
-    if (this.uniformsBuffer && this.propertiesStructure) {
+  updateProperty(stage: GPUShaderStageFlags, name: string, value: ValueType): void {
+    let bindings: MaterialBindings | null = null
+
+    if (stage === GPUShaderStage.VERTEX) {
+      bindings = this.vertBindings
+    }
+
+    if (stage === GPUShaderStage.FRAGMENT) {
+      bindings = this.fragBindings
+    }
+
+    if (bindings?.uniformsBuffer && bindings?.stageBindings.structuredView) {
       let values: Record<string, unknown> = {};
 
       values[name] = value
 
-      this.propertiesStructure.set(values);
-      gpu.device.queue.writeBuffer(this.uniformsBuffer, 0, this.propertiesStructure.arrayBuffer);  
+      bindings.stageBindings.structuredView.set(values);
+      gpu.device.queue.writeBuffer(bindings.uniformsBuffer, 0, bindings.stageBindings.structuredView.arrayBuffer);  
     }
   }
 
