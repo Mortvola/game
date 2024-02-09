@@ -1,31 +1,31 @@
 import { isContainerNode } from "../Renderer/Drawables/SceneNodes/ContainerNode";
 import { isDrawableNode } from "../Renderer/Drawables/SceneNodes/utils";
 import { SceneNodeInterface } from "../Renderer/types";
-import { ActorInterface, WorldInterface } from "../types";
+import { ActorInterface, SceneObjectInterface, WorldInterface } from "../types";
 
 class Animate implements ActorInterface {
   startTime: number | null = null;
 
-  node: SceneNodeInterface;
+  sceneObject: SceneObjectInterface;
 
   world: WorldInterface;
 
   initialFade = 1;
 
   constructor(
-    node: SceneNodeInterface,
+    sceneObject: SceneObjectInterface,
     world: WorldInterface,
   ) {
-    this.node = node;
+    this.sceneObject = sceneObject;
     this.world = world;
   }
 
   async update(elapsedTime: number, timestamp: number): Promise<boolean> {
     if (this.startTime === null) {
       this.startTime = timestamp;
-      this.world.renderer.scene.addNode(this.node);
+      this.world.renderer.scene.addNode(this.sceneObject.sceneNode);
 
-      const node = this.findSceneNode(this.node, 'SoularCoaster');
+      const node = this.findSceneNode(this.sceneObject.sceneNode, 'SoularCoaster');
 
       if (isDrawableNode(node)) {
         console.log(`fade: ${this.initialFade}`)
@@ -36,14 +36,14 @@ class Animate implements ActorInterface {
       const animateElapsedTime = (timestamp - this.startTime) * 0.001;
 
       if (animateElapsedTime > 1) {
-        this.world.renderer.scene.removeNode(this.node);
+        this.world.renderer.scene.removeNode(this.sceneObject.sceneNode);
 
         return true;
       }
 
       const f = -2 * animateElapsedTime;
 
-      const node = this.findSceneNode(this.node, 'SoularCoaster');
+      const node = this.findSceneNode(this.sceneObject.sceneNode, 'SoularCoaster');
 
       if (isDrawableNode(node)) {
         console.log(`fade: ${this.initialFade + f}`)

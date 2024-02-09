@@ -1,12 +1,12 @@
 import { vec4 } from "wgpu-matrix";
 import { gravity } from "../Renderer/Math";
-import { ActorInterface, ShotData, WorldInterface } from "../types";
+import { ActorInterface, SceneObjectInterface, ShotData, WorldInterface } from "../types";
 import { SceneNodeInterface } from "../Renderer/types";
 
 class Shot implements ActorInterface {
   startTime: number | null = null;
 
-  mesh: SceneNodeInterface;
+  sceneObject: SceneObjectInterface;
 
   data: ShotData;
 
@@ -15,12 +15,12 @@ class Shot implements ActorInterface {
   world: WorldInterface;
 
   constructor(
-    mesh: SceneNodeInterface,
+    sceneObject: SceneObjectInterface,
     actor: ActorInterface,
     data: ShotData,
     world: WorldInterface,
   ) {
-    this.mesh = mesh;
+    this.sceneObject = sceneObject;
     this.actor = actor;
     this.data = data;
     this.world = world;
@@ -54,20 +54,20 @@ class Shot implements ActorInterface {
       
       this.data.position = newPosition;
 
-      this.mesh.translate[0] = this.data.position[0];
-      this.mesh.translate[1] = this.data.position[1];
-      this.mesh.translate[2] = this.data.position[2];
+      this.sceneObject.sceneNode.translate[0] = this.data.position[0];
+      this.sceneObject.sceneNode.translate[1] = this.data.position[1];
+      this.sceneObject.sceneNode.translate[2] = this.data.position[2];
     }
 
     return false;
   }
 
   addToScene() {
-    this.world.renderer.scene.addNode(this.mesh);
+    this.world.renderer.scene.addNode(this.sceneObject.sceneNode);
   }
 
   removeFromScene() {
-    this.world.renderer.scene.removeNode(this.mesh);
+    this.world.renderer.scene.removeNode(this.sceneObject.sceneNode);
   }
 }
 

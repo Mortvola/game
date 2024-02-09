@@ -12,57 +12,67 @@ import { MaterialDescriptor } from "./Renderer/Materials/MaterialDescriptor";
 import { MaterialRecord, NodeMaterials } from "./game-common/types";
 import Http from "./Http/src";
 import { ShaderDescriptor } from "./Renderer/shaders/ShaderDescriptor";
+import { particleSystemManager } from "./Renderer/ParticleSystemManager";
+import SceneObject from "./SceneObject";
+import { WorldInterface } from "./types";
 
-class ModelManager {
+class SceneObjectManager {
   meshes: Map<string, Drawable> = new Map();
 
-  gameObjects: GameObjectRecord[] = [];
+  gameObjects: Map<string, GameObjectRecord> = new Map()
 
   async ready() {
     return gpu.ready();
   }
 
-  async getModel(name: string): Promise<SceneNodeInterface> {
-    if (this.gameObjects.length === 0) {
+  async getSceneObject(name: string, world: WorldInterface): Promise<SceneObject> {
+    if (this.gameObjects.size === 0) {
       const response = await Http.get<GameObjectRecord[]>('/game-objects-list');
 
       if (response.ok) {
-        this.gameObjects = await response.body();
+        const gameObjects = await response.body();
+
+        for (const object of gameObjects) {
+          this.gameObjects.set(object.name, object)
+        }
       }
     }
 
-    let mesh = this.meshes.get(name);
-
-    let node: SceneNodeInterface | null = null;
+    let sceneObject: SceneObject | null = null;
 
     switch (name) {
       case 'Shot': {
+        let mesh = this.meshes.get(name);
+
         if (!mesh) {
           mesh = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
           this.meshes.set(name, mesh)
         }
 
-        node = await DrawableNode.create(mesh);
+        const node = await DrawableNode.create(mesh);
+
+        sceneObject = new SceneObject(world)
+        sceneObject.sceneNode.addNode(node);
 
         break;
       }
 
       default: {
-        const object = this.gameObjects.find((o) => o.name === name);
+        const object = this.gameObjects.get(name);
 
         if (object) {
-          node = await this.loadObject(object) ?? null;
+          sceneObject = await this.loadObject(object, world) ?? null;
         }
 
         break;
       }
     }
 
-    if (!node) {
+    if (!sceneObject) {
       throw new Error('node is null')
     }
 
-    return node;
+    return sceneObject;
   }
 
   async loadFbx(id: number): Promise<FbxNodeInterface | undefined> {
@@ -79,8 +89,8 @@ class ModelManager {
     return model;
   }
 
-  async loadObject(object: GameObjectRecord): Promise<SceneNodeInterface | undefined> {
-    const container = new ContainerNode();
+  async loadObject(object: GameObjectRecord, world: WorldInterface): Promise<SceneObject | undefined> {
+    const sceneObject = new SceneObject(world);
 
     for (const item of object.object.items) {
       if (item.type === 'model') {
@@ -90,15 +100,21 @@ class ModelManager {
           let node = await this.parseFbxModel(fbxModel, object.name, (item.item as ModelItem).materials)
     
           if (node) {
-            container.addNode(node);  
+            sceneObject.sceneNode.addNode(node);
           }
         }
       }
+      else if (item.type === 'particle') {
+        const particleSystem = await particleSystemManager.getParticleSystem(item.item.id)
 
-      if (container.nodes.length > 0) {
-        return container;
+        if (particleSystem) {
+          particleSystem.reset()
+          sceneObject.particleSystems.push(particleSystem);
+        }
       }
     }
+
+    return sceneObject;
   }
 
   fbxModels: Map<string, FbxNodeInterface> = new Map();
@@ -223,6 +239,6 @@ class ModelManager {
   }
 }
 
-export const modelManager = new ModelManager();
+export const sceneObjectlManager = new SceneObjectManager();
 
-export default ModelManager;
+export default SceneObjectManager;

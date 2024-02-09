@@ -3,7 +3,7 @@ import Script from "../../../Script/Script";
 import { abilityModifier, diceRoll } from "../../../Dice";
 import { feetToMeters } from "../../../Renderer/Math";
 import RangeSpell from "./RangeSpell";
-import { modelManager } from '../../../ModelManager';
+import { sceneObjectlManager } from '../../../SceneObjectManager';
 import Animate from '../../../Script/Animate';
 
 class HealingWord extends RangeSpell {
@@ -12,8 +12,8 @@ class HealingWord extends RangeSpell {
   }
 
   async cast(script: Script): Promise<boolean> {
-    const soulercoaster = await modelManager.getModel('SoulerCoaster');
-    soulercoaster.translate = this.targets[0].getWorldPosition();
+    const soulercoaster = await sceneObjectlManager.getSceneObject('SoulerCoaster', this.world);
+    soulercoaster.sceneNode.translate = this.targets[0].getWorldPosition();
 
     script.entries.push(new Animate(soulercoaster, this.world));
 

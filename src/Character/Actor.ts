@@ -5,7 +5,6 @@ import Shot from "../Script/Shot";
 import { Advantage, attackRoll, savingThrow } from "../Dice";
 import Mover from "../Script/Mover";
 import Script from "../Script/Script";
-import ContainerNode from "../Renderer/Drawables/SceneNodes/ContainerNode";
 import Logger from "../Script/Logger";
 import Remover from "../Script/Remover";
 import Delay from "../Script/Delay";
@@ -15,13 +14,12 @@ import UniformGridSearch from "../Search/UniformGridSearch";
 import { findPath2, getOccupants, populateGrid } from "../Workers/PathPlannerQueue";
 import MeleeAttack from "./Actions/MeleeAttack";
 import RangeAttack from "./Actions/RangeAttack";
-import { modelManager } from "../ModelManager";
+import { sceneObjectlManager } from "../SceneObjectManager";
 import { PathPoint } from "../Workers/PathPlannerTypes";
 import DrawableNode from "../Renderer/Drawables/SceneNodes/DrawableNode";
-import { ActionInterface, CharacterInterface, CreatureActorInterface, ShotData, States, WorldInterface } from "../types";
+import { ActionInterface, CharacterInterface, CreatureActorInterface, SceneObjectInterface, ShotData, States, WorldInterface } from "../types";
 import { DamageType, Weapon, WeaponType } from "./Equipment/Types";
 import MoveAction from "./Actions/MoveAction";
-import { SceneNodeInterface } from "../Renderer/types";
 import RenderPass from "../Renderer/RenderPasses/RenderPass";
 
 // let findPathPromise: {
@@ -61,7 +59,7 @@ class Actor implements CreatureActorInterface {
 
   attackRadius = this.occupiedRadius + feetToMeters(5);
 
-  sceneNode = new ContainerNode();
+  sceneObject: SceneObjectInterface
 
   circleDrawable: Circle;
 
@@ -85,7 +83,7 @@ class Actor implements CreatureActorInterface {
 
   private constructor(
     character: CharacterInterface,
-    mesh: SceneNodeInterface,
+    sceneObject: SceneObjectInterface,
     height: number,
     color: Vec4,
     team: number,
@@ -104,12 +102,12 @@ class Actor implements CreatureActorInterface {
 
     this.team = team;
     this.automated = automated;
-    this.sceneNode.addNode(mesh);
+    this.sceneObject = sceneObject
     this.height = height;
     this.chestHeight = height - 0.5;
     this.teamColor = color;
 
-    this.sceneNode.name = character.name;
+    // this.sceneObject.sceneNode.name = character.name;
 
     const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
 
@@ -120,8 +118,8 @@ class Actor implements CreatureActorInterface {
     this.outerCircle = outerCircle;
     this.outerCircle.postTransforms.push(mat4.fromQuat(q));
 
-    this.sceneNode.addNode(this.circle)
-    this.sceneNode.addNode(this.outerCircle)
+    this.sceneObject.sceneNode.addNode(this.circle)
+    this.sceneObject.sceneNode.addNode(this.outerCircle)
   }
 
   static async create(
@@ -129,21 +127,21 @@ class Actor implements CreatureActorInterface {
   ) {
     const playerHeight = character.race.height;
 
-    const mesh = await modelManager.getModel(character.race.name)
+    const sceneObject = await sceneObjectlManager.getSceneObject(character.race.name, world)
 
     const circleDrawable = new Circle(0.75, 0.025, color);
     const circle = await DrawableNode.create(circleDrawable);
 
     const outerCircle = await DrawableNode.create(new Circle(0.75 + feetToMeters(5), 0.01, color));
 
-    return new Actor(character, mesh, playerHeight, teamColor, team, automated, circleDrawable, circle, outerCircle, world);
+    return new Actor(character, sceneObject, playerHeight, teamColor, team, automated, circleDrawable, circle, outerCircle, world);
   }
 
   getWorldPosition(): Vec4 {
     // Transforms the position to world space.
     return vec4.transformMat4(
       vec4.create(0, 0, 0, 1),
-      this.sceneNode.transform,
+      this.sceneObject.sceneNode.transform,
     );    
   }
 
@@ -281,7 +279,7 @@ class Actor implements CreatureActorInterface {
   }
 
   addMove(script: Script, newPos: Vec4) {
-    const mover = new Mover(this.sceneNode, vec2.create(newPos[0], newPos[2]), this.world);
+    const mover = new Mover(this.sceneObject, vec2.create(newPos[0], newPos[2]), this.world);
     script.entries.push(mover);
   }
 
@@ -296,7 +294,9 @@ class Actor implements CreatureActorInterface {
       distance: shotData.distance,
     };
 
-    const shot = new Shot(await modelManager.getModel('Shot'), this, data, this.world);
+    const sceneObject = await sceneObjectlManager.getSceneObject('Shot', this.world);
+
+    const shot = new Shot(sceneObject, this, data, this.world);
     script.entries.push(shot);
 
     this.attack(
@@ -424,7 +424,7 @@ class Actor implements CreatureActorInterface {
                 if (distanceToTarget < this.attackRadius) {
                   path = this.processPath(path, script);
 
-                  script.entries.push(new FollowPath(this.sceneNode, path, this.world));  
+                  script.entries.push(new FollowPath(this.sceneObject, path, this.world));  
 
                   myPosition = vec4.create(path[0].point[0], 0, path[0].point[1], 1);
 
@@ -460,7 +460,7 @@ class Actor implements CreatureActorInterface {
                   }
   
                   path = this.processPath(path, script);
-                  script.entries.push(new FollowPath(this.sceneNode, path, this.world));
+                  script.entries.push(new FollowPath(this.sceneObject, path, this.world));
 
                   done = true;
                 }
@@ -507,7 +507,7 @@ class Actor implements CreatureActorInterface {
 
               if (path.length > 0) {
                 path = this.processPath(path, script);
-                script.entries.push(new FollowPath(this.sceneNode, path, this.world));    
+                script.entries.push(new FollowPath(this.sceneObject, path, this.world));    
 
                 done = true;
               }
@@ -684,13 +684,13 @@ class Actor implements CreatureActorInterface {
     // Transforms the position to world space.
     const target = vec4.transformMat4(
       vec4.create(0, 0, 0, 1),
-      targetActor.sceneNode.transform,
+      targetActor.sceneObject.sceneNode.transform,
     );
     target[1] = targetActor.chestHeight;
 
     const startPos = vec4.transformMat4(
       vec4.create(0, 0, 0, 1),
-      this.sceneNode.transform,
+      this.sceneObject.sceneNode.transform,
     );
     startPos[1] = this.chestHeight;
 
@@ -708,7 +708,7 @@ class Actor implements CreatureActorInterface {
 
     const timeLow = timeToTarget(distance, velocity, lowAngle);
 
-    const angle = Math.atan2(target[0] - this.sceneNode.translate[0], target[2] - this.sceneNode.translate[2]);
+    const angle = Math.atan2(target[0] - this.sceneObject.sceneNode.translate[0], target[2] - this.sceneObject.sceneNode.translate[2]);
     const rotate = mat4.rotationY(angle);
 
     const orientation = vec3.normalize(vec4.transformMat4(vec4.create(0, 0, 1, 0), rotate));

@@ -54,7 +54,7 @@ class AreaSpell extends RangeSpell {
   async showAreaOfEffect() {
     if (this.areaOfEffect === null) {
       this.areaOfEffect = await DrawableNode.create(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)))
-      this.areaOfEffect.translate = vec3.copy(this.actor.sceneNode.translate)
+      this.areaOfEffect.translate = vec3.copy(this.actor.sceneObject.sceneNode.translate)
   
       this.world.renderer.scene.addNode(this.areaOfEffect);
   

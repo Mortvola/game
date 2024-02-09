@@ -1,11 +1,10 @@
 import { Vec2, vec2, vec3 } from "wgpu-matrix";
-import { ActorInterface, ActorOnFinishCallback, WorldInterface } from "../types";
-import SceneNode from "../Renderer/Drawables/SceneNodes/SceneNode";
+import { ActorInterface, ActorOnFinishCallback, SceneObjectInterface, WorldInterface } from "../types";
 
 class Mover implements ActorInterface {
   onFinish: ActorOnFinishCallback | null = null;
 
-  sceneNode: SceneNode;
+  sceneObject: SceneObjectInterface;
 
   moveTo: Vec2;
 
@@ -13,8 +12,8 @@ class Mover implements ActorInterface {
 
   world: WorldInterface;
 
-  constructor(sceneNode: SceneNode, moveTo: Vec2, world: WorldInterface, onFinish?: ActorOnFinishCallback) {
-    this.sceneNode = sceneNode;
+  constructor(sceneObject: SceneObjectInterface, moveTo: Vec2, world: WorldInterface, onFinish?: ActorOnFinishCallback) {
+    this.sceneObject = sceneObject;
     this.moveTo = moveTo;
     this.onFinish = onFinish ?? null;
     this.world = world;
@@ -25,15 +24,15 @@ class Mover implements ActorInterface {
     // position (found in mesh.translate) and the target location
     const distanceToTarget = vec2.distance(
       vec2.create(
-        this.sceneNode.translate[0],
-        this.sceneNode.translate[2],
+        this.sceneObject.sceneNode.translate[0],
+        this.sceneObject.sceneNode.translate[2],
       ),
       this.moveTo,
     );
 
     if (this.metersPerSecond * elapsedTime > distanceToTarget) {
-      this.sceneNode.translate[0] = this.moveTo[0];
-      this.sceneNode.translate[2] = this.moveTo[1];
+      this.sceneObject.sceneNode.translate[0] = this.moveTo[0];
+      this.sceneObject.sceneNode.translate[2] = this.moveTo[1];
 
       if (this.onFinish) {
         this.onFinish(timestamp)
@@ -44,17 +43,17 @@ class Mover implements ActorInterface {
 
     // Create a unit vector to the target.
     let v = vec3.normalize(vec3.create(
-      this.moveTo[0] - this.sceneNode.translate[0],
+      this.moveTo[0] - this.sceneObject.sceneNode.translate[0],
       0,
-      this.moveTo[1] - this.sceneNode.translate[2],
+      this.moveTo[1] - this.sceneObject.sceneNode.translate[2],
     ));
 
     // Scale by the distance to move in this period of time
     v = vec3.mulScalar(v, elapsedTime * this.metersPerSecond);
 
     // Add it to the current position to get the new position.
-    this.sceneNode.translate[0] += v[0];
-    this.sceneNode.translate[2] += v[2];
+    this.sceneObject.sceneNode.translate[0] += v[0];
+    this.sceneObject.sceneNode.translate[2] += v[2];
 
     return false;
   }

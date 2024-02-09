@@ -213,7 +213,7 @@ class Action implements ActionInterface {
   async zeroDistanceAction(script: Script, action: () => Promise<boolean>): Promise<boolean> {
     if (this.path.length > 0) {
       const path = this.actor.processPath(this.path, script);
-      script.entries.push(new FollowPath(this.actor.sceneNode, path, this.world));    
+      script.entries.push(new FollowPath(this.actor.sceneObject, path, this.world));    
     }
 
     await this.showPathLines(null);

@@ -4,7 +4,7 @@ import { diceRoll, spellAttackRoll } from "../../../Dice";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
 import { DamageType } from "../../Equipment/Types";
-import { modelManager } from "../../../ModelManager";
+import { sceneObjectlManager } from "../../../SceneObjectManager";
 import { PathPoint } from "../../../Workers/PathPlannerTypes";
 import { vec2 } from "wgpu-matrix";
 import FollowPath from "../../../Script/FollowPath";
@@ -15,7 +15,7 @@ class GuidingBolt extends RangeSpell {
   }
 
   async cast(script: Script): Promise<boolean> {
-    const shot = await modelManager.getModel('Shot');
+    const shot = await sceneObjectlManager.getSceneObject('Guiding Shot', this.world);
 
     const wp = this.actor.getWorldPosition();
     const targetWp = this.targets[0].getWorldPosition();
@@ -25,16 +25,16 @@ class GuidingBolt extends RangeSpell {
       { point: vec2.create(wp[0], wp[2]), difficult: false, type: 'Creature' },
     ]
 
-    shot.translate[0] = path[path.length - 1].point[0];
-    shot.translate[1] = 1;
-    shot.translate[2] = path[path.length - 1].point[1];
+    shot.sceneNode.translate[0] = path[path.length - 1].point[0];
+    shot.sceneNode.translate[1] = 1;
+    shot.sceneNode.translate[2] = path[path.length - 1].point[1];
 
-    this.world.renderer.scene.addNode(shot);
+    this.world.renderer.scene.addNode(shot.sceneNode);
 
     const followPath = new FollowPath(shot, path, this.world, false, 24);
     
     followPath.onFinish = () => {
-      this.world.renderer.scene.removeNode(shot);
+      this.world.renderer.scene.removeNode(shot.sceneNode);
     }
 
     script.entries.push(followPath)  

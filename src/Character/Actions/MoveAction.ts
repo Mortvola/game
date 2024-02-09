@@ -61,7 +61,7 @@ class MoveAction extends Action {
 
   async interact(script: Script): Promise<boolean> {
     const path = this.actor.processPath(this.path, script);
-    script.entries.push(new FollowPath(this.actor.sceneNode, path, this.world));    
+    script.entries.push(new FollowPath(this.actor.sceneObject, path, this.world));    
 
     await this.showPathLines(null);
 

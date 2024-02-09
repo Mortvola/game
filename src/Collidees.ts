@@ -17,8 +17,8 @@ class Collidees implements CollideesInterface {
         continue;
       }
 
-      if (isDrawableNode(actor.sceneNode)) {
-        const result = actor.sceneNode.hitTest(p1, ray);
+      if (isDrawableNode(actor.sceneObject.sceneNode)) {
+        const result = actor.sceneObject.sceneNode.hitTest(p1, ray);
 
         if (result && result.t <= 1) {
           if (best === null || best.t > result.t) {

@@ -6,7 +6,7 @@ import { Abilities } from './Character/Classes/Abilities';
 import DrawableInterface from './Renderer/Drawables/DrawableInterface';
 import { Weapon } from './Character/Equipment/Types';
 import { feetToMeters } from './Renderer/Math';
-import { SceneNodeInterface } from './Renderer/types';
+import { ContainerNodeInterface, SceneNodeInterface } from './Renderer/types';
 import { RendererInterface } from './Renderer/types';
 
 export const maxInstances = 16;
@@ -307,8 +307,8 @@ export interface CreatureActorInterface extends ActorInterface {
 
   character: CharacterInterface;
 
-  sceneNode: SceneNodeInterface;
-  
+  sceneObject: SceneObjectInterface
+
   chestHeight: number;
 
   team: number;
@@ -352,4 +352,10 @@ export type Party = {
   members: { included: boolean, character: CharacterInterface }[],
   automate: boolean,
   experiencePoints?: number,
+}
+
+export interface SceneObjectInterface {
+  sceneNode: ContainerNodeInterface
+
+  update(time: number, elapsedTime: number): Promise<void>
 }

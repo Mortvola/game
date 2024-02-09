@@ -8,7 +8,7 @@ import FollowPath from "../../Script/FollowPath";
 import DrawableNode from "../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface, ShotData } from "../../types";
 import { trajectoryMaterial } from "../../Renderer/Materials/Trajectory";
-import { modelManager } from "../../ModelManager";
+import { sceneObjectlManager } from "../../SceneObjectManager";
 
 class RangeAttack extends Action {
   constructor(actor: CreatureActorInterface) {
@@ -89,7 +89,7 @@ class RangeAttack extends Action {
   async interact(script: Script): Promise<boolean> {
     if (this.path.length > 0) {
       const path = this.actor.processPath(this.path, script);
-      script.entries.push(new FollowPath(this.actor.sceneNode, path, this.world));    
+      script.entries.push(new FollowPath(this.actor.sceneObject, path, this.world));    
 
       await this.showPathLines(null);
     }
@@ -107,7 +107,9 @@ class RangeAttack extends Action {
         distance: shotData.distance,
       };
 
-      script.entries.push(new Shot(await modelManager.getModel('Shot'), this.actor, data, this.world));
+      const shot = await sceneObjectlManager.getSceneObject('Shot', this.world);
+
+      script.entries.push(new Shot(shot, this.actor, data, this.world));
 
       this.actor.attack(
         this.targets[0],

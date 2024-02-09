@@ -199,7 +199,7 @@ class Game implements WorldInterface {
       this.participants.remove(removedActor as CreatureActorInterface);
 
       this.collidees.remove(removedActor as CreatureActorInterface);
-      this.renderer.scene.removeNode((removedActor as CreatureActorInterface).sceneNode);
+      this.renderer.scene.removeNode((removedActor as CreatureActorInterface).sceneObject.sceneNode);
     }
 
     this.removeActors = [];
@@ -210,7 +210,7 @@ class Game implements WorldInterface {
     for (const actor of this.participants.turns) {
       actor.setAction(null);
 
-      this.renderer.scene.removeNode(actor.sceneNode);
+      this.renderer.scene.removeNode(actor.sceneObject.sceneNode);
 
       this.collidees.remove(actor);
       this.actors.push(actor);
@@ -228,7 +228,7 @@ class Game implements WorldInterface {
     this.participants.initiativeRolls();
 
     for (const actor of this.participants.turns) {
-      this.renderer.scene.addNode(actor.sceneNode);
+      this.renderer.scene.addNode(actor.sceneObject.sceneNode);
       this.collidees.actors.push(actor);
       this.actors.push(actor);
     }
@@ -266,6 +266,10 @@ class Game implements WorldInterface {
             console.log('*** starting new round ***');
             this.participants.state = ParticipantsState.preparing;
             this.prepareTeams()
+          }
+
+          for (const particleSystem of this.renderer.particleSystems) {
+            particleSystem.update(timestamp, elapsedTime, this.renderer.scene)
           }
 
           this.renderer.camera.updatePosition(elapsedTime, timestamp);
@@ -393,8 +397,8 @@ class Game implements WorldInterface {
     } | null = null;
 
     for (const actor of this.participants.turns) {
-      if (isContainerNode(actor.sceneNode)) {
-        const result = actor.sceneNode.modelHitTest(origin, ray);
+      if (isContainerNode(actor.sceneObject.sceneNode)) {
+        const result = actor.sceneObject.sceneNode.modelHitTest(origin, ray);
 
         if (result) {
           if (best === null || result.t < best.t) {

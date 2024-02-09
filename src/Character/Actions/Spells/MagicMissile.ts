@@ -6,7 +6,7 @@ import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import { findPath2 } from "../../../Workers/PathPlannerQueue";
 import { PathPoint } from "../../../Workers/PathPlannerTypes";
 import Line from "../../../Renderer/Drawables/Line";
-import { modelManager } from "../../../ModelManager";
+import { sceneObjectlManager } from "../../../SceneObjectManager";
 import FollowPath from "../../../Script/FollowPath";
 import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
 import Parallel from "../../../Script/Parallel";
@@ -39,17 +39,17 @@ class MagicMissile extends RangeSpell {
     for (let i = 0; i < this.paths.length; i += 1) {
       const subScript = new Script(this.world);
 
-      const shot = await modelManager.getModel('magic-missile');
+      const shot = await sceneObjectlManager.getSceneObject('magic-missile', this.world);
 
-      shot.translate[0] = this.paths[i][this.paths[i].length - 1].point[0];
-      shot.translate[1] = 1;
-      shot.translate[2] = this.paths[i][this.paths[i].length - 1].point[1];
+      shot.sceneNode.translate[0] = this.paths[i][this.paths[i].length - 1].point[0];
+      shot.sceneNode.translate[1] = 1;
+      shot.sceneNode.translate[2] = this.paths[i][this.paths[i].length - 1].point[1];
   
-      this.world.renderer.scene.addNode(shot);
+      this.world.renderer.scene.addNode(shot.sceneNode);
   
       const followPath = new FollowPath(shot, this.paths[i], this.world, false, 24);
       followPath.onFinish = () => {
-        this.world.renderer.scene.removeNode(shot);
+        this.world.renderer.scene.removeNode(shot.sceneNode);
       };
 
       subScript.entries.push(followPath) 

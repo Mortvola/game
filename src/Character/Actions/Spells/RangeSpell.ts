@@ -90,7 +90,7 @@ class RangeSpell extends Spell {
   async showRangeCircle() {
     if (this.range > 0) {
       this.rangeCircle = await DrawableNode.create(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)))
-      this.rangeCircle.translate = vec3.copy(this.actor.sceneNode.translate)
+      this.rangeCircle.translate = vec3.copy(this.actor.sceneObject.sceneNode.translate)
   
       this.world.renderer.scene.addNode(this.rangeCircle);
   

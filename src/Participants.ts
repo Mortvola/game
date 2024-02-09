@@ -139,10 +139,10 @@ class Participants implements ParticipantsInterface {
         actor.character.spellSlots.push(slots)
       }
 
-      actor.sceneNode.translate[0] = (actors.length - ((numPlayers - 1) / 2))
+      actor.sceneObject.sceneNode.translate[0] = (actors.length - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()
         * (spaceBetween - (playerWidth / 2)) - (spaceBetween - (playerWidth / 2)) / 2;
-      actor.sceneNode.translate[2] = z + Math.random() * 10 - 5;
+      actor.sceneObject.sceneNode.translate[2] = z + Math.random() * 10 - 5;
 
       actors.push(actor);
     }
