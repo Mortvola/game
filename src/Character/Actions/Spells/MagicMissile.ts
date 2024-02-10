@@ -158,7 +158,7 @@ class MagicMissile extends RangeSpell {
 
   async addMissileLines(lines: number[][]) {
     if (!this.cleared && lines.length > 0) {
-      this.missileLines.push(await DrawableNode.create(new Line(lines), lineMaterial));
+      this.missileLines.push(await DrawableNode.create(new Line(lines), { shaderDescriptor: lineMaterial }));
       this.world.renderer.scene.addNode(this.missileLines[this.missileLines.length - 1]);
     }
   }

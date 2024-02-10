@@ -86,7 +86,7 @@ class Action implements ActionInterface {
     }
 
     if (lines !== null && !this.cleared && lines.length > 0) {
-      this.pathLines = await DrawableNode.create(new Line(lines), lineMaterial);
+      this.pathLines = await DrawableNode.create(new Line(lines), { shaderDescriptor: lineMaterial });
       this.world.renderer.scene.addNode(this.pathLines);
 
       // world.mainRenderPass.addDrawable(this.pathLines);  

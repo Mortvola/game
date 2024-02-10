@@ -1,4 +1,4 @@
-import { vec3, vec4 } from "wgpu-matrix";
+import { vec4 } from "wgpu-matrix";
 import Mesh from "./Renderer/Drawables/Mesh";
 import { box } from "./Renderer/Drawables/Shapes/box";
 import DrawableNode from "./Renderer/Drawables/SceneNodes/DrawableNode";
@@ -133,8 +133,8 @@ class SceneObjectManager {
     if (isFbxContainerNode(node)) {
       const container = new ContainerNode();
 
-      container.scale = vec3.copy(node.scale);
-      container.translate = vec3.copy(node.translate);
+      container.scale = node.scale.slice();
+      container.translate = node.translate.slice();
       container.qRotate = node.qRotate.slice()
       container.angles = node.angles.slice()
 
@@ -168,25 +168,17 @@ class SceneObjectManager {
         this.meshes.set(`${name}:${node.name}`, mesh)
       }
 
-      let materialDescriptor: MaterialDescriptor | undefined
+      let materialId: number | undefined = undefined
 
       if (nodeMaterials) {
-        const materialId = nodeMaterials[node.name]
-
-        if (materialId !== undefined) {
-          materialDescriptor = await this.getMaterial(materialId);
-        }  
+        materialId = nodeMaterials[node.name]
       }
 
-      // if (!materialDescriptor) {
-      //   materialDescriptor = litMaterial;
-      // }  
-
-      const drawableNode = await DrawableNode.create(mesh, materialDescriptor?.shaderDescriptor);
+      const drawableNode = await DrawableNode.create(mesh, materialId);
 
       drawableNode.name = node.name;
-      drawableNode.scale = vec3.copy(node.scale);
-      drawableNode.translate = vec3.copy(node.translate);
+      drawableNode.scale = node.scale.slice();
+      drawableNode.translate = node.translate.slice();
       drawableNode.qRotate = node.qRotate.slice()
       drawableNode.angles = node.angles.slice()
 

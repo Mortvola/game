@@ -30,7 +30,7 @@ class RangeAttack extends Action {
         startPos: result.startPos,
         orientation: result.orientation,
         distance: result.distance,
-      }), trajectoryMaterial);
+      }), { shaderDescriptor: trajectoryMaterial });
   
       this.world.renderer.scene.addNode(this.trajectory);
   
