@@ -20,7 +20,6 @@ import { pipelineManager } from './Pipelines/PipelineManager';
 import TransparentRenderPass from './RenderPasses/TransparentRenderPass';
 import BloomPass from './RenderPasses/BloomPass';
 import { outputFormat } from './RenderSetings';
-import Circle from './Drawables/Circle';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -96,7 +95,7 @@ class Renderer implements RendererInterface {
     await gpu.ready();
     await pipelineManager.ready();
 
-    const cartesianAxes = await DrawableNode.create(new CartesianAxes(), lineMaterial)
+    const cartesianAxes = await DrawableNode.create(new CartesianAxes(), { shaderDescriptor: lineMaterial })
     
     return new Renderer(bindGroups.getBindGroupLayout0(), cartesianAxes);
   }
@@ -405,6 +404,7 @@ class Renderer implements RendererInterface {
 
   addParticleSystem(particleSystem: ParticleSystemInterface): void {
     if (!this.particleSystems.some((p) => p === particleSystem)) {
+      particleSystem.reset()
       this.particleSystems.push(particleSystem)
     }
   }
