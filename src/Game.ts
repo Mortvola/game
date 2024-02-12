@@ -349,6 +349,14 @@ class Game implements WorldInterface {
       this.reticlePosition[0] = x;
       this.reticlePosition[1] = y;
 
+      const { origin, ray } = this.renderer.camera.computeHitTestRay(this.reticlePosition[0], this.reticlePosition[1]);
+
+      const point = intersectionPlane(vec4.create(0, 0, 0, 1), vec4.create(0, 1, 0, 0), origin, ray);
+
+      if (point) {
+        this.renderer.camera.setRotatePoint(point)
+      }
+
       // let panVector = vec4.create(0, 0, 0, 0);
 
       // const borderBoundary = 0.85;
