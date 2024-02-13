@@ -9,6 +9,9 @@ import Script from './Script/Script';
 import { Occupant } from './Workers/PathPlannerTypes';
 import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, EpisodeInfo, Party } from './types';
 import Renderer from './Renderer/Renderer';
+import DrawableNode from './Renderer/Drawables/SceneNodes/DrawableNode';
+import Reticle from './Renderer/Drawables/Reticle';
+import Property from './Renderer/ShaderBuilder/Property';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -17,6 +20,9 @@ const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
     }, 0);
   });
 };
+
+const reticleWidth = 0.05
+const reticleHeight = 0.05
 
 class Game implements WorldInterface {
   initialized = false;
@@ -57,7 +63,7 @@ class Game implements WorldInterface {
 
   path4: Line | null = null;
 
-  // reticle: DrawableNode;
+  reticle: DrawableNode;
 
   reticlePosition = vec2.create(0, 0);
 
@@ -83,17 +89,21 @@ class Game implements WorldInterface {
 
   occupants: Occupant[] = [];
 
-  constructor(renderer: Renderer) {
+  constructor(renderer: Renderer, reticle: DrawableNode) {
     this.renderer = renderer;
 
     this.renderer.camera.offset = 18;
     this.renderer.camera.position = vec4.create(0, 0, 20, 1);
+
+    this.reticle = reticle;
   }
 
   static async create() {
     const renderer = await Renderer.create();
     
-    return new Game(renderer);
+    const reticle = await DrawableNode.create(await Reticle.create(-reticleWidth / 2, reticleHeight / 2, reticleWidth, reticleHeight))
+
+    return new Game(renderer, reticle);
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
@@ -107,14 +117,14 @@ class Game implements WorldInterface {
   startTurn() {
     if (this.participants.activeActor) {
       if (this.participants.activeActor.automated) {
-        // this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
+        this.renderer.scene.removeNode(this.reticle);
 
         if (this.characterChangeCallback) {
           this.characterChangeCallback(null);
         }
       } else {
         // if (this.inputMode === 'Controller') {
-        //   this.mainRenderPass.addDrawable(this.reticle, 'reticle');
+          this.renderer.scene.addNode(this.reticle);
         // }
 
         if (this.characterChangeCallback) {
@@ -352,6 +362,11 @@ class Game implements WorldInterface {
     if (this.inputMode === 'Mouse') {
       this.reticlePosition[0] = x;
       this.reticlePosition[1] = y;
+
+      this.reticle.material.setPropertyValues(GPUShaderStage.VERTEX, [
+        new Property('x', 'float', this.reticlePosition[0] - reticleWidth / 2),
+        new Property('y', 'float', this.reticlePosition[1] + reticleHeight / 2 * this.renderer.aspectRatio[0]),
+      ])
 
       const { origin, ray } = this.renderer.camera.computeHitTestRay(this.reticlePosition[0], this.reticlePosition[1]);
 
