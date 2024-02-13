@@ -343,6 +343,10 @@ class Game implements WorldInterface {
   pointerDown(x: number, y: number) {
   }
 
+  pointerDeltaMove(xDelta: number, yDelta: number) {
+    this.pointerMove(this.reticlePosition[0] + xDelta, this.reticlePosition[1] + yDelta)
+  }
+
   pointerMove(x: number, y: number) {
     // Pan the view if the mouse is near the edge of the window.
     if (this.inputMode === 'Mouse') {

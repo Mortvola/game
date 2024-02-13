@@ -29,6 +29,8 @@ function App() {
     backward: 0,
   })
 
+  const [pointerLocked, setPointerLocked] = React.useState<boolean>(false)
+
   React.useEffect(() => {
     const element = canvasRef.current;
 
@@ -37,7 +39,17 @@ function App() {
 
       (async () => {
         await game.setCanvas(element);
-      })()  
+      })()
+
+      const lockChange = () => {
+        setPointerLocked(document.pointerLockElement === element)
+      }
+
+      document.addEventListener('pointerlockchange', lockChange, )
+
+      return (() => {
+        document.removeEventListener('pointerlockchange', lockChange)
+      })
     }
   }, [])
 
@@ -150,7 +162,8 @@ function App() {
     const element = canvasRef.current;
 
     if (element) {
-      element.setPointerCapture(event.pointerId);
+      // element.setPointerCapture(event.pointerId);
+      element.requestPointerLock()
       const rect = element.getBoundingClientRect();
 
       const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
@@ -173,9 +186,15 @@ function App() {
       const rect = element.getBoundingClientRect();
 
       setActionInfoStyle({ left: event.clientX + 10, top: event.clientY + 10 })
-      const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
-      const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-      game?.pointerMove(clipX, clipY);
+
+      if (!pointerLocked) {
+        const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
+        const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
+        game?.pointerMove(clipX, clipY);  
+      }
+      else {
+        game?.pointerDeltaMove(event.movementX * 2 / element.clientWidth, -event.movementY / element.clientHeight)
+      }
     }
   }
 
@@ -373,6 +392,7 @@ function App() {
       <canvas
         ref={canvasRef}
         tabIndex={0}
+        autoFocus
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
