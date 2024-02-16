@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax */
-import { Vec4, mat4, vec2, vec4 } from 'wgpu-matrix';
+import { Vec4, mat4, vec4 } from 'wgpu-matrix';
 import {
   makeShaderDataDefinitions,
   makeStructuredView,
@@ -20,6 +20,9 @@ import { pipelineManager } from './Pipelines/PipelineManager';
 import TransparentRenderPass from './RenderPasses/TransparentRenderPass';
 import BloomPass from './RenderPasses/BloomPass';
 import { outputFormat } from './RenderSetings';
+import SceneNode2d from './Drawables/SceneNodes/SceneNode2d';
+import ContainerNode2d from './Drawables/SceneNodes/ContainerNode2d';
+import RenderPass2D from './RenderPasses/RenderPass2D';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -64,22 +67,22 @@ class Renderer implements RendererInterface {
 
   scene = new ContainerNode();
 
+  scene2d = new ContainerNode2d();
+
   mainRenderPass = new RenderPass();
 
   transparentPass = new TransparentRenderPass();
+
+  renderPass2D = new RenderPass2D();
 
   bloomPass: BloomPass | null = null;
 
   lights: Light[] = [];
 
-  reticlePosition = vec2.create(0, 0);
-
   particleSystems: ParticleSystemInterface[] = [];
 
   constructor(frameBindGroupLayout: GPUBindGroupLayout, cartesianAxes: DrawableNode, test?: SceneNodeInterface) {
     this.createCameraBindGroups(frameBindGroupLayout);
-
-    // this.reticle = reticle;
 
     this.aspectRatio[0] = 1.0;
     this.scene.addNode(cartesianAxes);
@@ -249,6 +252,23 @@ class Renderer implements RendererInterface {
     this.render = false;
   }
 
+  update2DLayout() {
+    let stack: SceneNode2d[] = [...this.scene2d.nodes]
+
+    while (stack.length > 0) {
+      const node = stack[0];
+      stack = stack.slice(1);
+
+      if (node.material) {
+        // node.addInstanceInfo()
+
+        this.renderPass2D.addDrawable(node)
+      }
+
+      stack = stack.concat(...node.nodes)
+    }
+  }
+
   updateTransforms() {
     this.scene.updateTransforms(undefined, this);
 
@@ -270,6 +290,8 @@ class Renderer implements RendererInterface {
 
     // this.cursor.translate[0] = this.camera.position[0];
     // this.cursor.translate[2] = this.camera.position[2];
+
+    this.update2DLayout()
 
     this.updateTransforms();
 
@@ -356,6 +378,8 @@ class Renderer implements RendererInterface {
     this.mainRenderPass.render(sceneView!, bloomView!, this.depthTextureView!, commandEncoder, this.frameBindGroup.bindGroup);
     this.transparentPass.render(sceneView!, bloomView!, this.depthTextureView!, commandEncoder, this.frameBindGroup.bindGroup);
     
+    this.renderPass2D.render(sceneView!, bloomView!, this.depthTextureView!, commandEncoder, this.frameBindGroup.bindGroup);
+
     if (this.bloomPass) {
       this.bloomPass.render(this.context.getCurrentTexture().createView(), commandEncoder);      
     }
