@@ -1,6 +1,5 @@
 import { Vec4, Mat4 } from 'wgpu-matrix';
 import Drawable from './Drawable';
-import Value from '../ShaderBuilder/Value';
 import Property from '../ShaderBuilder/Property';
 
 class Circle extends Drawable {
