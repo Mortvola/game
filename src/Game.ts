@@ -11,6 +11,7 @@ import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, 
 import Renderer from './Renderer/Renderer';
 import SceneNode2d from './Renderer/Drawables/SceneNodes/SceneNode2d';
 import { sceneObjectlManager } from './SceneObjectManager';
+import FlexBox from './Renderer/Drawables/SceneNodes/FlexBox';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -108,7 +109,38 @@ class Game implements WorldInterface {
     reticle.height = r.height
     reticle.material = r.material
 
-    return new Game(renderer, reticle);
+    const game = new Game(renderer, reticle);
+
+    await game.addUI()
+
+    return game;
+  }
+
+  async addUI() {
+    const green = new SceneNode2d()
+
+    green.width = 53
+    green.height = 53
+    green.color = [0, 0.5, 0, 1]
+    green.margin = { left: 8, top: 24, right: 4, bottom: 24 }
+    green.border = { color: [1, 1, 1, 1], width: 1 }
+
+    const blue = new SceneNode2d()
+
+    blue.width = 53
+    blue.height = 53
+    blue.color = [0, 0.0, 0.5, 1]
+    blue.margin = { left: 4, top: 4, right: 8, bottom: 4 }
+    blue.border = { color: [1, 1, 1, 1], width: 1 }
+
+    const flex = new FlexBox()
+
+    flex.color = [0.25, 0, 0, 1]
+    flex.border = { color: [1, 1, 1, 1], width: 1 }
+
+    flex.nodes.push(green, blue)
+    
+    this.renderer.scene2d.nodes.push(flex)
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
@@ -368,8 +400,8 @@ class Game implements WorldInterface {
       this.reticlePosition[0] = x;
       this.reticlePosition[1] = y;
 
-      this.reticle.x = this.reticlePosition[0] - this.reticle.width / 2
-      this.reticle.y = this.reticlePosition[1] + this.reticle.height / 2 * this.renderer.aspectRatio[0]
+      this.reticle.x = this.reticlePosition[0] - (this.reticle.width as number) / 2
+      this.reticle.y = this.reticlePosition[1] + (this.reticle.height as number) / 2 * this.renderer.aspectRatio[0]
       
       const { origin, ray } = this.renderer.camera.computeHitTestRay(this.reticlePosition[0], this.reticlePosition[1]);
 
