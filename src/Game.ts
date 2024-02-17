@@ -9,9 +9,8 @@ import Script from './Script/Script';
 import { Occupant } from './Workers/PathPlannerTypes';
 import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, EpisodeInfo, Party } from './types';
 import Renderer from './Renderer/Renderer';
-import DrawableNode from './Renderer/Drawables/SceneNodes/DrawableNode';
-import Reticle from './Renderer/Drawables/Reticle';
-import Property from './Renderer/ShaderBuilder/Property';
+import SceneNode2d from './Renderer/Drawables/SceneNodes/SceneNode2d';
+import { sceneObjectlManager } from './SceneObjectManager';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -20,9 +19,6 @@ const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
     }, 0);
   });
 };
-
-const reticleWidth = 0.05
-const reticleHeight = 0.05
 
 class Game implements WorldInterface {
   initialized = false;
@@ -63,7 +59,7 @@ class Game implements WorldInterface {
 
   path4: Line | null = null;
 
-  reticle: DrawableNode;
+  reticle: SceneNode2d;
 
   reticlePosition = vec2.create(0, 0);
 
@@ -89,19 +85,28 @@ class Game implements WorldInterface {
 
   occupants: Occupant[] = [];
 
-  constructor(renderer: Renderer, reticle: DrawableNode) {
+  constructor(renderer: Renderer, reticle: SceneNode2d) {
     this.renderer = renderer;
 
     this.renderer.camera.offset = 18;
     this.renderer.camera.position = vec4.create(0, 0, 20, 1);
 
     this.reticle = reticle;
+    this.renderer.scene2d.nodes.push(this.reticle)
   }
 
   static async create() {
     const renderer = await Renderer.create();
     
-    const reticle = await DrawableNode.create(await Reticle.create(-reticleWidth / 2, reticleHeight / 2, reticleWidth, reticleHeight))
+    // const reticle = await DrawableNode.create(await Reticle.create(-reticleWidth / 2, reticleHeight / 2, reticleWidth, reticleHeight))
+    const r = await sceneObjectlManager.getSceneObject2d('Reticle')
+
+    const reticle = new SceneNode2d()
+    reticle.x = r.x;
+    reticle.y = r.y;
+    reticle.width = r.width
+    reticle.height = r.height
+    reticle.material = r.material
 
     return new Game(renderer, reticle);
   }
@@ -117,14 +122,14 @@ class Game implements WorldInterface {
   startTurn() {
     if (this.participants.activeActor) {
       if (this.participants.activeActor.automated) {
-        this.renderer.scene.removeNode(this.reticle);
+        // this.renderer.scene.removeNode(this.reticle);
 
         if (this.characterChangeCallback) {
           this.characterChangeCallback(null);
         }
       } else {
         // if (this.inputMode === 'Controller') {
-          this.renderer.scene.addNode(this.reticle);
+          // this.renderer.scene.addNode(this.reticle);
         // }
 
         if (this.characterChangeCallback) {
@@ -363,11 +368,9 @@ class Game implements WorldInterface {
       this.reticlePosition[0] = x;
       this.reticlePosition[1] = y;
 
-      this.reticle.material.setPropertyValues(GPUShaderStage.VERTEX, [
-        new Property('x', 'float', this.reticlePosition[0] - reticleWidth / 2),
-        new Property('y', 'float', this.reticlePosition[1] + reticleHeight / 2 * this.renderer.aspectRatio[0]),
-      ])
-
+      this.reticle.x = this.reticlePosition[0] - this.reticle.width / 2
+      this.reticle.y = this.reticlePosition[1] + this.reticle.height / 2 * this.renderer.aspectRatio[0]
+      
       const { origin, ray } = this.renderer.camera.computeHitTestRay(this.reticlePosition[0], this.reticlePosition[1]);
 
       const point = intersectionPlane(vec4.create(0, 0, 0, 1), vec4.create(0, 1, 0, 0), origin, ray);

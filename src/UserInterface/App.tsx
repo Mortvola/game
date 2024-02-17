@@ -163,18 +163,22 @@ function App() {
 
     if (element) {
       // element.setPointerCapture(event.pointerId);
-      element.requestPointerLock()
-      const rect = element.getBoundingClientRect();
-
-      const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
-      const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-      // game?.pointerDown(clipX, clipY);
-
-      if (event.metaKey) {
-        game?.centerOn(clipX, clipY)
+      if (!pointerLocked) {
+        element.requestPointerLock()
       }
-      else if (!event.ctrlKey) {
-        game?.interact()
+      else {
+        const rect = element.getBoundingClientRect();
+
+        const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
+        const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
+        // game?.pointerDown(clipX, clipY);
+
+        if (event.metaKey) {
+          game?.centerOn(clipX, clipY)
+        }
+        else if (!event.ctrlKey) {
+          game?.interact()
+        }
       }
     }
   }
