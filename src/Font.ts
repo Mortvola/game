@@ -16,23 +16,35 @@ type Character = {
   page: number,
 }
 
+type FontConfig = {
+  chars: Character[],
+  info: { size: number },
+  common: { scaleW: number, scaleH: number }
+}
+
 class Font {
   chars: Map<string, Character> = new Map()
 
-  textuerWidth = 512;
+  textuerWidth;
 
-  textureHeight = 512;
+  textureHeight;
 
-  private constructor(config: { chars: Character[] }) {
+  fontSize: number;
+
+  private constructor(config: FontConfig) {
     for (let character of config.chars) {
       this.chars.set(character.char, character)
     }
+
+    this.textuerWidth = config.common.scaleW
+    this.textureHeight = config.common.scaleH
+    this.fontSize = config.info.size;
   }
 
   static async create() {
-    let config: { chars: Character[] } | undefined = undefined
+    let config: FontConfig | undefined = undefined
 
-    const response = await Http.get<{ chars: Character[] }>('/fonts/OpenSans-Regular-msdf.json')
+    const response = await Http.get<FontConfig>('/fonts/OpenSans-Regular-msdf.json')
 
     if (response.ok) {
       config = await response.body()
@@ -51,8 +63,9 @@ class Font {
     const indexes: number[] = [];
 
     let width = 0;
-    let top = 0;
     let height = 0;
+
+    const scale = 16 / this.fontSize;
 
     for (const char of text) {
       const character = this.chars.get(char)
@@ -60,10 +73,15 @@ class Font {
       if (character) {
         const numVertices = vertices.length / 2;
 
-        vertices.push(width, top)
-        vertices.push(width, top + character.height)
-        vertices.push(width + character.width, top + character.height)
-        vertices.push(width + character.width, top)
+        const left = width + character.xoffset * scale
+        const right = left + character.width * scale
+        const top = character.yoffset * scale
+        const bottom = top + character.height * scale
+
+        vertices.push(left, top)
+        vertices.push(left, bottom)
+        vertices.push(right, bottom)
+        vertices.push(right, top)
 
         texcoords.push(character.x / this.textuerWidth, character.y / this.textureHeight)
         texcoords.push(character.x / this.textuerWidth, (character.y + character.height) / this.textureHeight)
@@ -79,8 +97,8 @@ class Font {
           numVertices + 2,
         )
 
-        width += character.width
-        height = Math.max(height, character.height)
+        width += character.xadvance * scale
+        height = Math.max(height, character.height * scale)
       }
     }
 

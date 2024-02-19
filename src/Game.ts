@@ -136,8 +136,7 @@ class Game implements WorldInterface {
     blue.margin = { left: 4, top: 4, right: 8, bottom: 4 }
     blue.border = { color: [1, 1, 1, 1], width: 1 }
 
-    const text = new TextBox(font.text("Test"));
-    // text.material = await Material.create('2D', [])
+    const text = await TextBox.create('Move');
     text.color = [0.5, 0, 0, 1]
 
     // blue.nodes.push(text);
