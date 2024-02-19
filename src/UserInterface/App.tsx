@@ -241,6 +241,11 @@ function App() {
           const canvas = entry.target as HTMLCanvasElement;
           canvas.width = Math.max(1, Math.min(width, gpu.device.limits.maxTextureDimension2D ?? 1));
           canvas.height = Math.max(1, Math.min(height, gpu?.device.limits.maxTextureDimension2D ?? 1));
+
+          const scaleX = canvas.width / entry.contentRect.width
+          const scaleY = canvas.height / entry.contentRect.height
+
+          game?.renderer.canvasResize(canvas.width, canvas.height, scaleX, scaleY)
         }
       })
 

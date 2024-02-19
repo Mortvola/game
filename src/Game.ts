@@ -12,6 +12,9 @@ import Renderer from './Renderer/Renderer';
 import SceneNode2d from './Renderer/Drawables/SceneNodes/SceneNode2d';
 import { sceneObjectlManager } from './SceneObjectManager';
 import FlexBox from './Renderer/Drawables/SceneNodes/FlexBox';
+import { font } from './Font';
+import TextBox from './Renderer/Drawables/SceneNodes/TextBox';
+import Material from './Renderer/Materials/Material';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -93,7 +96,7 @@ class Game implements WorldInterface {
     this.renderer.camera.position = vec4.create(0, 0, 20, 1);
 
     this.reticle = reticle;
-    this.renderer.scene2d.nodes.push(this.reticle)
+    // this.renderer.scene2d.nodes.push(this.reticle)
   }
 
   static async create() {
@@ -133,6 +136,12 @@ class Game implements WorldInterface {
     blue.margin = { left: 4, top: 4, right: 8, bottom: 4 }
     blue.border = { color: [1, 1, 1, 1], width: 1 }
 
+    const text = new TextBox(font.text("Test"));
+    // text.material = await Material.create('2D', [])
+    text.color = [0.5, 0, 0, 1]
+
+    // blue.nodes.push(text);
+
     const flex = new FlexBox()
 
     flex.color = [0.25, 0, 0, 1]
@@ -140,7 +149,8 @@ class Game implements WorldInterface {
 
     flex.nodes.push(green, blue)
     
-    this.renderer.scene2d.nodes.push(flex)
+    // this.renderer.scene2d.addNode(flex)
+    this.renderer.scene2d.addNode(text)
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
