@@ -118,19 +118,19 @@ class Game implements WorldInterface {
   }
 
   async addUI(actor: CreatureActorInterface) {
-    const flex = new FlexBox({ color: [0.25, 0, 0, 1], border: { color: [1, 1, 1, 1], width: 1 } })
+    const flex = new FlexBox({ backgroundColor: [0.25, 0, 0, 1], border: { color: [1, 1, 1, 1], width: 1 } })
 
     const actionStyle: Style = {
       width: 53,
       height: 53,
-      color: [0, 0.5, 0, 1],
+      backgroundColor: [0, 0.5, 0, 1],
       margin: { left: 8, top: 24, right: 4, bottom: 24 },
       border: { color: [1, 1, 1, 1], width: 1 },
     }
 
     const bonusStyle: Style = {
       ...actionStyle,
-      color: [1, 0.65, 0, 1],
+      backgroundColor: [1, 0.65, 0, 1],
     }
 
     if (actor.character.equipped.meleeWeapon) {
