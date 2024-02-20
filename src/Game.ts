@@ -9,12 +9,10 @@ import Script from './Script/Script';
 import { Occupant } from './Workers/PathPlannerTypes';
 import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, EpisodeInfo, Party } from './types';
 import Renderer from './Renderer/Renderer';
-import SceneNode2d from './Renderer/Drawables/SceneNodes/SceneNode2d';
+import SceneNode2d, { Style } from './Renderer/Drawables/SceneNodes/SceneNode2d';
 import { sceneObjectlManager } from './SceneObjectManager';
 import FlexBox from './Renderer/Drawables/SceneNodes/FlexBox';
-import { font } from './Font';
 import TextBox from './Renderer/Drawables/SceneNodes/TextBox';
-import Material from './Renderer/Materials/Material';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -106,46 +104,86 @@ class Game implements WorldInterface {
     const r = await sceneObjectlManager.getSceneObject2d('Reticle')
 
     const reticle = new SceneNode2d()
-    reticle.x = r.x;
-    reticle.y = r.y;
-    reticle.width = r.width
-    reticle.height = r.height
+    reticle.style.x = r.x;
+    reticle.style.y = r.y;
+    reticle.style.width = r.width
+    reticle.style.height = r.height
     reticle.material = r.material
 
     const game = new Game(renderer, reticle);
 
-    await game.addUI()
+    // await game.addUI()
 
     return game;
   }
 
-  async addUI() {
-    const green = new SceneNode2d()
+  async addUI(actor: CreatureActorInterface) {
+    const flex = new FlexBox({ color: [0.25, 0, 0, 1], border: { color: [1, 1, 1, 1], width: 1 } })
 
-    green.width = 53
-    green.height = 53
-    green.color = [0, 0.5, 0, 1]
-    green.margin = { left: 8, top: 24, right: 4, bottom: 24 }
-    green.border = { color: [1, 1, 1, 1], width: 1 }
-    green.nodes.push(await TextBox.create('Range'));
+    const actionStyle: Style = {
+      width: 53,
+      height: 53,
+      color: [0, 0.5, 0, 1],
+      margin: { left: 8, top: 24, right: 4, bottom: 24 },
+      border: { color: [1, 1, 1, 1], width: 1 },
+    }
 
-    const blue = new SceneNode2d()
+    const bonusStyle: Style = {
+      ...actionStyle,
+      color: [1, 0.65, 0, 1],
+    }
 
-    blue.width = 53
-    blue.height = 53
-    blue.color = [0, 0.0, 0.5, 1]
-    blue.margin = { left: 4, top: 4, right: 8, bottom: 4 }
-    blue.border = { color: [1, 1, 1, 1], width: 1 }
-    blue.nodes.push(await TextBox.create('Melee'))
+    if (actor.character.equipped.meleeWeapon) {
+      const green = new SceneNode2d(actionStyle)
+      green.nodes.push(await TextBox.create('Melee'));
 
-    const flex = new FlexBox()
+      flex.nodes.push(green)
+    }
 
-    flex.color = [0.25, 0, 0, 1]
-    flex.border = { color: [1, 1, 1, 1], width: 1 }
+    if (actor.character.equipped.rangeWeapon) {
+      const green = new SceneNode2d(actionStyle)
+      green.nodes.push(await TextBox.create('Range'));
 
-    flex.nodes.push(green, blue)
+      flex.nodes.push(green)
+    }
+
+    for (const spell of actor.character.spells) {
+      let style = actionStyle
+      if (spell.time === 'Bonus') {
+        style = bonusStyle
+      }
+
+      const green = new SceneNode2d(style)
+      green.nodes.push(await TextBox.create(spell.name));
+
+      flex.nodes.push(green)
+    }
+
+    for (const spell of actor.character.cantrips) {
+      let style = actionStyle
+      if (spell.time === 'Bonus') {
+        style = bonusStyle
+      }
+      
+      const green = new SceneNode2d(style)
+      green.nodes.push(await TextBox.create(spell.name));
+
+      flex.nodes.push(green)
+    }
+
+    for (const action of actor.character.charClass.actions) {
+      let style = actionStyle
+      if (action.time === 'Bonus') {
+        style = bonusStyle
+      }
+      
+      const green = new SceneNode2d(style)
+      green.nodes.push(await TextBox.create(action.name));
+
+      flex.nodes.push(green)
+    }
     
-    // this.renderer.scene2d.addNode(flex)
+    this.renderer.scene2d.scene2d = new SceneNode2d()
     this.renderer.scene2d.addNode(flex)
   }
 
@@ -172,6 +210,7 @@ class Game implements WorldInterface {
 
         if (this.characterChangeCallback) {
           this.characterChangeCallback(this.participants.activeActor);
+          this.addUI(this.participants.activeActor)
         }
       }
 
@@ -406,8 +445,8 @@ class Game implements WorldInterface {
       this.reticlePosition[0] = x;
       this.reticlePosition[1] = y;
 
-      this.reticle.x = this.reticlePosition[0] - (this.reticle.width as number) / 2
-      this.reticle.y = this.reticlePosition[1] + (this.reticle.height as number) / 2 * this.renderer.aspectRatio[0]
+      this.reticle.style.x = this.reticlePosition[0] - (this.reticle.style.width as number) / 2
+      this.reticle.style.y = this.reticlePosition[1] + (this.reticle.style.height as number) / 2 * this.renderer.aspectRatio[0]
       
       const { origin, ray } = this.renderer.camera.computeHitTestRay(this.reticlePosition[0], this.reticlePosition[1]);
 
