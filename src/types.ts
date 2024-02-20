@@ -75,7 +75,7 @@ export interface WorldInterface {
 
   animate: boolean;
   
-  endTurn2(actor: ActorInterface): void;
+  endTurn2(actor: ActorInterface): Promise<void>;
 
   removeActors: ActorInterface[];
 

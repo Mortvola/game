@@ -195,7 +195,7 @@ class Game implements WorldInterface {
     this.initialized = true;
   }
 
-  startTurn() {
+  async startTurn() {
     if (this.participants.activeActor) {
       if (this.participants.activeActor.automated) {
         // this.renderer.scene.removeNode(this.reticle);
@@ -210,7 +210,7 @@ class Game implements WorldInterface {
 
         if (this.characterChangeCallback) {
           this.characterChangeCallback(this.participants.activeActor);
-          this.addUI(this.participants.activeActor)
+          await this.addUI(this.participants.activeActor)
         }
       }
 
@@ -225,7 +225,7 @@ class Game implements WorldInterface {
     }
   }
 
-  endTurn2(actor: CreatureActorInterface) {
+  async endTurn2(actor: CreatureActorInterface) {
     if (this.participants.activeActor && this.participants.activeActor === actor) {
       this.participants.activeActor.endTurn();
 
@@ -248,16 +248,16 @@ class Game implements WorldInterface {
       }
 
       this.participants.turn = (this.participants.turn + 1) % this.participants.turns.length;
-      this.startTurn();
+      await this.startTurn();
 
       // Cause the focus information to update.
       this.updateFocus = true;
     }
   }
 
-  endTurn() {
+  async endTurn() {
     if (!this.participants.activeActor.automated) {
-      this.endTurn2(this.participants.activeActor);
+      await this.endTurn2(this.participants.activeActor);
     }
   }
 
@@ -327,7 +327,7 @@ class Game implements WorldInterface {
 
     // this.renderer.scene.updateTransforms(undefined, this);
 
-    this.startTurn();
+    await this.startTurn();
   }
 
   updateFrame = async (timestamp: number) => {

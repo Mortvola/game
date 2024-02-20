@@ -529,8 +529,8 @@ class Actor implements CreatureActorInterface {
         if (this.automated) {
           script.entries.push(new Delay(2000, this.world));
 
-          script.onFinish = (timestamp: number) => {
-            this.world.endTurn2(this);  
+          script.onFinish = async (timestamp: number) => {
+            await this.world.endTurn2(this);  
           }
         }
 
@@ -538,7 +538,7 @@ class Actor implements CreatureActorInterface {
       }
     }
     else {
-      this.world.endTurn2(this);
+      await this.world.endTurn2(this);
     }
   }
 
@@ -565,14 +565,14 @@ class Actor implements CreatureActorInterface {
             }
             else {
               this.chooseAction(timestamp);
-              this.world.endTurn2(this);
+              await this.world.endTurn2(this);
             }
           // }
         }
       }
       else {
         if (this.world.participants.activeActor === this) {
-          this.world.endTurn2(this);
+          await this.world.endTurn2(this);
         }
       }
     }
