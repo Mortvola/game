@@ -127,6 +127,7 @@ class Game implements WorldInterface {
     green.color = [0, 0.5, 0, 1]
     green.margin = { left: 8, top: 24, right: 4, bottom: 24 }
     green.border = { color: [1, 1, 1, 1], width: 1 }
+    green.nodes.push(await TextBox.create('Range'));
 
     const blue = new SceneNode2d()
 
@@ -135,11 +136,7 @@ class Game implements WorldInterface {
     blue.color = [0, 0.0, 0.5, 1]
     blue.margin = { left: 4, top: 4, right: 8, bottom: 4 }
     blue.border = { color: [1, 1, 1, 1], width: 1 }
-
-    const text = await TextBox.create('Move');
-    text.color = [0.5, 0, 0, 1]
-
-    // blue.nodes.push(text);
+    blue.nodes.push(await TextBox.create('Melee'))
 
     const flex = new FlexBox()
 
@@ -149,7 +146,7 @@ class Game implements WorldInterface {
     flex.nodes.push(green, blue)
     
     // this.renderer.scene2d.addNode(flex)
-    this.renderer.scene2d.addNode(text)
+    this.renderer.scene2d.addNode(flex)
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
