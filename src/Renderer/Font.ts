@@ -1,5 +1,5 @@
-import Http from "./Http/src"
-import Mesh2D from "./Renderer/Drawables/Mesh2D";
+import Http from "../Http/src"
+import Mesh2D from "./Drawables/Mesh2D";
 
 type Character = {
   id: number,
@@ -19,7 +19,7 @@ type Character = {
 type FontConfig = {
   chars: Character[],
   info: { size: number },
-  common: { scaleW: number, scaleH: number }
+  common: { scaleW: number, scaleH: number, lineHeight: number }
 }
 
 class Font {
@@ -31,6 +31,8 @@ class Font {
 
   fontSize: number;
 
+  lineHeight: number;
+
   private constructor(config: FontConfig) {
     for (let character of config.chars) {
       this.chars.set(character.char, character)
@@ -38,6 +40,7 @@ class Font {
 
     this.textuerWidth = config.common.scaleW
     this.textureHeight = config.common.scaleH
+    this.lineHeight = config.common.lineHeight
     this.fontSize = config.info.size;
   }
 
@@ -57,13 +60,16 @@ class Font {
     return new Font(config)
   }
 
-  text(text: string): Mesh2D {
+  text(text: string, maxWidth?: number): Mesh2D {
     const vertices: number[] = [];
     const texcoords: number[] = [];
     const indexes: number[] = [];
 
     let width = 0;
     let height = 0;
+    let line = 0;
+    let cursor = 0;
+    let wordBreak = false
 
     const scale = 16 / this.fontSize;
 
@@ -71,11 +77,28 @@ class Font {
       const character = this.chars.get(char)
 
       if (character) {
+        if (character.char === ' ') {
+          wordBreak = true
+          cursor += character.xadvance * scale
+          continue
+        }
+
         const numVertices = vertices.length / 2;
 
-        const left = width + character.xoffset * scale
-        const right = left + character.width * scale
-        const top = character.yoffset * scale
+        let left = cursor + character.xoffset * scale
+        let right = left + character.width * scale
+
+        if (maxWidth && right >= maxWidth && wordBreak) {
+          line += 1
+          cursor = 0
+
+          left = cursor + character.xoffset * scale
+          right = left + character.width * scale  
+
+          wordBreak = false
+        }
+
+        const top = line * this.lineHeight * scale + character.yoffset * scale
         const bottom = top + character.height * scale
 
         vertices.push(left, top)
@@ -97,8 +120,10 @@ class Font {
           numVertices + 2,
         )
 
-        width += character.xadvance * scale
-        height = Math.max(height, character.height * scale)
+        cursor += character.xadvance * scale
+
+        width = Math.max(width, cursor)
+        height = Math.max(height, line * this.lineHeight * scale)
       }
     }
 

@@ -135,14 +135,14 @@ class Game implements WorldInterface {
 
     if (actor.character.equipped.meleeWeapon) {
       const green = new SceneNode2d(actionStyle)
-      green.nodes.push(await TextBox.create('Melee'));
+      green.nodes.push(new TextBox('Melee'));
 
       flex.nodes.push(green)
     }
 
     if (actor.character.equipped.rangeWeapon) {
       const green = new SceneNode2d(actionStyle)
-      green.nodes.push(await TextBox.create('Range'));
+      green.nodes.push(new TextBox('Range'));
 
       flex.nodes.push(green)
     }
@@ -154,7 +154,7 @@ class Game implements WorldInterface {
       }
 
       const green = new SceneNode2d(style)
-      green.nodes.push(await TextBox.create(spell.name));
+      green.nodes.push(new TextBox(spell.name));
 
       flex.nodes.push(green)
     }
@@ -166,7 +166,7 @@ class Game implements WorldInterface {
       }
       
       const green = new SceneNode2d(style)
-      green.nodes.push(await TextBox.create(spell.name));
+      green.nodes.push(new TextBox(spell.name));
 
       flex.nodes.push(green)
     }
@@ -178,7 +178,7 @@ class Game implements WorldInterface {
       }
       
       const green = new SceneNode2d(style)
-      green.nodes.push(await TextBox.create(action.name));
+      green.nodes.push(new TextBox(action.name));
 
       flex.nodes.push(green)
     }
@@ -409,7 +409,7 @@ class Game implements WorldInterface {
           this.checkActorFocus();
         }
 
-        this.renderer.drawScene(timestamp);
+        await this.renderer.drawScene(timestamp);
 
         this.previousTimestamp = timestamp;
         this.framesRendered += 1;
