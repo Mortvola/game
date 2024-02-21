@@ -13,6 +13,8 @@ import SceneNode2d, { Style } from './Renderer/Drawables/SceneNodes/SceneNode2d'
 import { sceneObjectlManager } from './SceneObjectManager';
 import FlexBox from './Renderer/Drawables/SceneNodes/FlexBox';
 import TextBox from './Renderer/Drawables/SceneNodes/TextBox';
+import MeleeAttack from './Character/Actions/MeleeAttack';
+import RangeAttack from './Character/Actions/RangeAttack';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -135,17 +137,23 @@ class Game implements WorldInterface {
     }
 
     if (actor.character.equipped.meleeWeapon) {
-      const green = new SceneNode2d(actionStyle)
-      green.nodes.push(new TextBox('Melee'));
+      const action = new SceneNode2d(actionStyle)
+      action.nodes.push(new TextBox('Melee'));
+      action.onClick = () => {
+        actor.setAction(new MeleeAttack(actor));
+      }
 
-      flex.nodes.push(green)
+      flex.nodes.push(action)
     }
 
     if (actor.character.equipped.rangeWeapon) {
-      const green = new SceneNode2d(actionStyle)
-      green.nodes.push(new TextBox('Range'));
+      const action = new SceneNode2d(actionStyle)
+      action.nodes.push(new TextBox('Range'));
+      action.onClick = () => {
+        actor.setAction(new RangeAttack(actor));
+      }
 
-      flex.nodes.push(green)
+      flex.nodes.push(action)
     }
 
     for (const spell of actor.character.spells) {
@@ -154,10 +162,10 @@ class Game implements WorldInterface {
         style = bonusStyle
       }
 
-      const green = new SceneNode2d(style)
-      green.nodes.push(new TextBox(spell.name));
+      const action = new SceneNode2d(style)
+      action.nodes.push(new TextBox(spell.name));
 
-      flex.nodes.push(green)
+      flex.nodes.push(action)
     }
 
     for (const spell of actor.character.cantrips) {
@@ -609,6 +617,10 @@ class Game implements WorldInterface {
   }
 
   async interact() {
+    if (this.renderer.scene2d.click(this.reticlePosition[0], this.reticlePosition[1])) {
+      return
+    }
+
     if (
       this.participants.activeActor
       && !this.participants.activeActor.automated
