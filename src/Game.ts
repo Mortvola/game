@@ -9,12 +9,9 @@ import Script from './Script/Script';
 import { Occupant } from './Workers/PathPlannerTypes';
 import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, EpisodeInfo, Party } from './types';
 import Renderer from './Renderer/Renderer';
-import SceneNode2d, { Style } from './Renderer/Drawables/SceneNodes/SceneNode2d';
 import { sceneObjectlManager } from './SceneObjectManager';
-import FlexBox from './Renderer/Drawables/SceneNodes/FlexBox';
-import TextBox from './Renderer/Drawables/SceneNodes/TextBox';
-import MeleeAttack from './Character/Actions/MeleeAttack';
-import RangeAttack from './Character/Actions/RangeAttack';
+import { addActionBar } from './ActionBar';
+import ElementNode from './Renderer/Drawables/SceneNodes/ElementNode';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -63,7 +60,7 @@ class Game implements WorldInterface {
 
   path4: Line | null = null;
 
-  reticle: SceneNode2d;
+  reticle: ElementNode;
 
   reticlePosition = vec2.create(0, 0);
 
@@ -89,7 +86,7 @@ class Game implements WorldInterface {
 
   occupants: Occupant[] = [];
 
-  constructor(renderer: Renderer, reticle: SceneNode2d) {
+  constructor(renderer: Renderer, reticle: ElementNode) {
     this.renderer = renderer;
 
     this.renderer.camera.offset = 18;
@@ -105,7 +102,7 @@ class Game implements WorldInterface {
     // const reticle = await DrawableNode.create(await Reticle.create(-reticleWidth / 2, reticleHeight / 2, reticleWidth, reticleHeight))
     const r = await sceneObjectlManager.getSceneObject2d('Reticle')
 
-    const reticle = new SceneNode2d()
+    const reticle = new ElementNode()
     reticle.style.x = r.x;
     reticle.style.y = r.y;
     reticle.style.width = r.width
@@ -117,83 +114,6 @@ class Game implements WorldInterface {
     // await game.addUI()
 
     return game;
-  }
-
-  async addUI(actor: CreatureActorInterface) {
-    const flex = new FlexBox({ backgroundColor: [0.25, 0, 0, 1], border: { color: [1, 1, 1, 1], width: 1 } })
-
-    const actionStyle: Style = {
-      width: 53,
-      height: 53,
-      backgroundColor: [0, 0.5, 0, 1],
-      margin: { left: 8, top: 24, right: 4, bottom: 24 },
-      border: { color: [1, 1, 1, 1], width: 1 },
-    }
-
-    const bonusStyle: Style = {
-      ...actionStyle,
-      color: [0, 0, 0, 1],
-      backgroundColor: [1, 0.65, 0, 1],
-    }
-
-    if (actor.character.equipped.meleeWeapon) {
-      const action = new SceneNode2d(actionStyle)
-      action.nodes.push(new TextBox('Melee'));
-      action.onClick = () => {
-        actor.setAction(new MeleeAttack(actor));
-      }
-
-      flex.nodes.push(action)
-    }
-
-    if (actor.character.equipped.rangeWeapon) {
-      const action = new SceneNode2d(actionStyle)
-      action.nodes.push(new TextBox('Range'));
-      action.onClick = () => {
-        actor.setAction(new RangeAttack(actor));
-      }
-
-      flex.nodes.push(action)
-    }
-
-    for (const spell of actor.character.spells) {
-      let style = actionStyle
-      if (spell.time === 'Bonus') {
-        style = bonusStyle
-      }
-
-      const action = new SceneNode2d(style)
-      action.nodes.push(new TextBox(spell.name));
-
-      flex.nodes.push(action)
-    }
-
-    for (const spell of actor.character.cantrips) {
-      let style = actionStyle
-      if (spell.time === 'Bonus') {
-        style = bonusStyle
-      }
-      
-      const green = new SceneNode2d(style)
-      green.nodes.push(new TextBox(spell.name));
-
-      flex.nodes.push(green)
-    }
-
-    for (const action of actor.character.charClass.actions) {
-      let style = actionStyle
-      if (action.time === 'Bonus') {
-        style = bonusStyle
-      }
-      
-      const green = new SceneNode2d(style)
-      green.nodes.push(new TextBox(action.name));
-
-      flex.nodes.push(green)
-    }
-    
-    this.renderer.scene2d.scene2d = new SceneNode2d()
-    this.renderer.scene2d.addNode(flex)
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
@@ -219,7 +139,7 @@ class Game implements WorldInterface {
 
         if (this.characterChangeCallback) {
           this.characterChangeCallback(this.participants.activeActor);
-          await this.addUI(this.participants.activeActor)
+          await addActionBar(this.participants.activeActor, this.renderer.scene2d)
         }
       }
 
