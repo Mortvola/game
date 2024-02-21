@@ -130,6 +130,7 @@ class Game implements WorldInterface {
 
     const bonusStyle: Style = {
       ...actionStyle,
+      color: [0, 0, 0, 1],
       backgroundColor: [1, 0.65, 0, 1],
     }
 
