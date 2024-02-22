@@ -6,7 +6,29 @@ import TextBox from "./Renderer/Drawables/SceneNodes/TextBox"
 import SceneGraph2D from "./Renderer/SceneGraph2d"
 import { CreatureActorInterface } from "./types"
 
-export const addActionBar = async (actor: CreatureActorInterface, scene2d: SceneGraph2D) => {
+export const statusBar = (actor: CreatureActorInterface) => {
+  const flex = new FlexBox()
+
+  const actionStyle = {
+    width: 32,
+    height: 32,
+    backgroundColor: [0, 0.5, 0, 1],
+  }
+
+  const bonusStyle = {
+    ...actionStyle,
+    backgroundColor: [1, 0.65, 0, 1],
+  }
+
+  const action = new ElementNode(actionStyle);
+  const bonus  = new ElementNode(bonusStyle);
+
+  flex.nodes.push(action, bonus)
+
+  return flex;
+}
+
+const actionItems = (actor: CreatureActorInterface) => {
   const flex = new FlexBox({
     backgroundColor: [0.25, 0, 0, 1],
     border: { color: [1, 1, 1, 1], width: 1 },
@@ -14,8 +36,8 @@ export const addActionBar = async (actor: CreatureActorInterface, scene2d: Scene
   })
 
   const actionStyle: Style = {
-    width: 53,
-    height: 53,
+    width: 48,
+    height: 48,
     backgroundColor: [0, 0.5, 0, 1],
     margin: { left: 4, top: 8, right: 4, bottom: 8 },
     border: { color: [1, 1, 1, 1], width: 1 },
@@ -82,6 +104,17 @@ export const addActionBar = async (actor: CreatureActorInterface, scene2d: Scene
 
     flex.nodes.push(green)
   }
+  
+  return flex;
+}
+
+export const addActionBar = async (actor: CreatureActorInterface, scene2d: SceneGraph2D) => {
+  const status = statusBar(actor)
+  const actions = actionItems(actor)
+
+  const flex = new FlexBox({ flexDirection: 'column' })
+
+  flex.nodes.push(status, actions)
   
   scene2d.scene2d = new ElementNode()
   scene2d.addNode(flex)

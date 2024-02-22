@@ -242,9 +242,11 @@ function App() {
           canvas.width = Math.max(1, Math.min(width, gpu.device.limits.maxTextureDimension2D ?? 1));
           canvas.height = Math.max(1, Math.min(height, gpu?.device.limits.maxTextureDimension2D ?? 1));
 
-          const scaleX = canvas.width / entry.contentRect.width
-          const scaleY = canvas.height / entry.contentRect.height
+          const scaleX = canvas.width / entry.contentRect.width * window.devicePixelRatio
+          const scaleY = canvas.height / entry.contentRect.height * window.devicePixelRatio
 
+          console.log(visualViewport?.scale)
+          console.log(`inner: ${window.innerWidth}, ${window.innerHeight}, canvas ${canvas.width}, ${canvas.height}, content: ${entry.contentRect.width}, ${entry.contentRect.height}`)
           game?.renderer.canvasResize(canvas.width, canvas.height, scaleX, scaleY)
         }
       })
