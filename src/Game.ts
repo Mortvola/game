@@ -93,25 +93,28 @@ class Game implements WorldInterface {
     this.renderer.camera.position = vec4.create(0, 0, 20, 1);
 
     this.reticle = reticle;
-    // this.renderer.scene2d.nodes.push(this.reticle)
+    this.renderer.scene2d.addNode(this.reticle)
   }
 
   static async create() {
     const renderer = await Renderer.create();
     
     // const reticle = await DrawableNode.create(await Reticle.create(-reticleWidth / 2, reticleHeight / 2, reticleWidth, reticleHeight))
-    const r = await sceneObjectlManager.getSceneObject2d('Reticle')
+    // const r = await sceneObjectlManager.getSceneObject2d('Reticle')
 
-    const reticle = new ElementNode()
-    reticle.style.x = r.x;
-    reticle.style.y = r.y;
-    reticle.style.width = r.width
-    reticle.style.height = r.height
-    reticle.material = r.material
+    const reticle = new ElementNode({
+      position: 'absolute',
+      width: 16,
+      height: 16,
+      backgroundColor: [1, 0, 0, 1] },
+    )
+    // reticle.style.x = r.x;
+    // reticle.style.y = r.y;
+    // reticle.style.width = r.width
+    // reticle.style.height = r.height
+    // reticle.material = r.material
 
     const game = new Game(renderer, reticle);
-
-    // await game.addUI()
 
     return game;
   }
@@ -374,9 +377,12 @@ class Game implements WorldInterface {
       this.reticlePosition[0] = x;
       this.reticlePosition[1] = y;
 
-      this.reticle.style.x = this.reticlePosition[0] - (this.reticle.style.width as number) / 2
-      this.reticle.style.y = this.reticlePosition[1] + (this.reticle.style.height as number) / 2 * this.renderer.aspectRatio[0]
-      
+      const screen = this.renderer.scene2d.ndcToScreen(this.reticlePosition[0], this.reticlePosition[1])
+
+      this.reticle.style.x = screen[0];
+      this.reticle.style.y = screen[1];
+      this.renderer.scene2d.needsUpdate = true
+
       const { origin, ray } = this.renderer.camera.computeHitTestRay(this.reticlePosition[0], this.reticlePosition[1]);
 
       const point = intersectionPlane(vec4.create(0, 0, 0, 1), vec4.create(0, 1, 0, 0), origin, ray);
