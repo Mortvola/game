@@ -245,8 +245,8 @@ function App() {
           const scaleX = canvas.width / entry.contentRect.width * window.devicePixelRatio
           const scaleY = canvas.height / entry.contentRect.height * window.devicePixelRatio
 
-          console.log(visualViewport?.scale)
-          console.log(`inner: ${window.innerWidth}, ${window.innerHeight}, canvas ${canvas.width}, ${canvas.height}, content: ${entry.contentRect.width}, ${entry.contentRect.height}`)
+          // console.log(visualViewport?.scale)
+          // console.log(`inner: ${window.innerWidth}, ${window.innerHeight}, canvas ${canvas.width}, ${canvas.height}, content: ${entry.contentRect.width}, ${entry.contentRect.height}`)
           game?.renderer.canvasResize(canvas.width, canvas.height, scaleX, scaleY)
         }
       })
