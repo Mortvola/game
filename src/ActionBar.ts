@@ -141,14 +141,17 @@ const actionItems = (actor: CreatureActorInterface) => {
   return flex;
 }
 
+let actionBar: ElementNode | null = null
+
 export const addActionBar = async (actor: CreatureActorInterface, scene2d: SceneGraph2D) => {
   const status = statusBar(actor)
   const actions = actionItems(actor)
 
-  const flex = new FlexBox({ flexDirection: 'column' })
+  const newActionBar = new FlexBox({ flexDirection: 'column' })
 
-  flex.nodes.push(status, actions)
-  
-  scene2d.scene2d = new ElementNode()
-  scene2d.addNode(flex)
+  newActionBar.nodes.push(status, actions)
+
+  scene2d.replaceNode(actionBar, newActionBar)
+
+  actionBar = newActionBar
 }
