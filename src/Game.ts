@@ -370,8 +370,8 @@ class Game implements WorldInterface {
 
       const screen = this.renderer.scene2d.ndcToScreen(this.reticlePosition[0], this.reticlePosition[1])
 
-      this.reticle.style.x = screen[0];
-      this.reticle.style.y = screen[1];
+      this.reticle.style.left = screen[0];
+      this.reticle.style.top = screen[1];
       this.renderer.scene2d.needsUpdate = true
 
       const { origin, ray } = this.renderer.camera.computeHitTestRay(this.reticlePosition[0], this.reticlePosition[1]);

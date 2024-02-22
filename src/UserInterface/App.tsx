@@ -179,7 +179,7 @@ function App() {
 
           // console.log(visualViewport?.scale)
           // console.log(`inner: ${window.innerWidth}, ${window.innerHeight}, canvas ${canvas.width}, ${canvas.height}, content: ${entry.contentRect.width}, ${entry.contentRect.height}`)
-          game?.renderer.canvasResize(canvas.width, canvas.height, scaleX, scaleY)
+          game?.renderer.canvasResize(canvas.width, canvas.height, scaleX, scaleY, entry.contentRect.width, entry.contentRect.height)
         }
       })
 

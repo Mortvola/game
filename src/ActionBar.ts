@@ -147,7 +147,7 @@ export const addActionBar = async (actor: CreatureActorInterface, scene2d: Scene
   const status = statusBar(actor)
   const actions = actionItems(actor)
 
-  const newActionBar = new FlexBox({ flexDirection: 'column' })
+  const newActionBar = new FlexBox({ flexDirection: 'column', position: 'absolute', bottom: 0 })
 
   newActionBar.nodes.push(status, actions)
 
