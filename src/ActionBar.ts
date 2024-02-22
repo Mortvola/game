@@ -90,6 +90,7 @@ const actionItems = (actor: CreatureActorInterface) => {
     flex.nodes.push(action)
   }
 
+  // Actions for spells
   for (const spell of actor.character.spells) {
     let style = actionStyle
     if (spell.time === 'Bonus') {
@@ -98,32 +99,43 @@ const actionItems = (actor: CreatureActorInterface) => {
 
     const action = new ElementNode(style)
     action.nodes.push(new TextBox(spell.name));
+    action.onClick = () => {
+      actor.setAction(new spell.spell(actor));
+    }
 
     flex.nodes.push(action)
   }
 
+  // Actions for cantrips
   for (const spell of actor.character.cantrips) {
     let style = actionStyle
     if (spell.time === 'Bonus') {
       style = bonusStyle
     }
     
-    const green = new ElementNode(style)
-    green.nodes.push(new TextBox(spell.name));
+    const action = new ElementNode(style)
+    action.nodes.push(new TextBox(spell.name));
+    action.onClick = () => {
+      actor.setAction(new spell.spell(actor));
+    }
 
-    flex.nodes.push(green)
+    flex.nodes.push(action)
   }
 
-  for (const action of actor.character.charClass.actions) {
+  // Actions for class actions
+  for (const classAction of actor.character.charClass.actions) {
     let style = actionStyle
-    if (action.time === 'Bonus') {
+    if (classAction.time === 'Bonus') {
       style = bonusStyle
     }
     
-    const green = new ElementNode(style)
-    green.nodes.push(new TextBox(action.name));
+    const action = new ElementNode(style)
+    action.nodes.push(new TextBox(action.name));
+    action.onClick = () => {
+      actor.setAction(new classAction.action(actor));
+    }
 
-    flex.nodes.push(green)
+    flex.nodes.push(action)
   }
   
   return flex;
