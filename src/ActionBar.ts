@@ -6,13 +6,33 @@ import TextBox from "./Renderer/Drawables/SceneNodes/TextBox"
 import SceneGraph2D from "./Renderer/SceneGraph2d"
 import { CreatureActorInterface } from "./types"
 
-export const statusBar = (actor: CreatureActorInterface) => {
-  const flex = new FlexBox()
+const spellSlots = (actor: CreatureActorInterface) => {
+  const slots = new FlexBox()
+
+  const available = actor.character.spellSlots[0]
+
+  for (let i = 0; i < actor.character.getMaxSpellSlots(1)!; i += 1) {
+    slots.nodes.push(new ElementNode({
+      width: 16,
+      height: 32,
+      margin: { left: 0.5, right: 0.5 },
+      backgroundColor: [0.75, 0.75, 0, 1],
+    }))
+
+    // slots.push(<div key={i} className={i < available ? '' : styles.unavailable}></div>)
+  }
+
+  return slots;
+}
+
+const statusBar = (actor: CreatureActorInterface) => {
+  const flex = new FlexBox({ columnGap: 8 })
 
   const actionStyle = {
     width: 32,
     height: 32,
     backgroundColor: [0, 0.5, 0, 1],
+    border: { color: [1, 1, 1, 1], width: 1 },
   }
 
   const bonusStyle = {
@@ -23,7 +43,7 @@ export const statusBar = (actor: CreatureActorInterface) => {
   const action = new ElementNode(actionStyle);
   const bonus  = new ElementNode(bonusStyle);
 
-  flex.nodes.push(action, bonus)
+  flex.nodes.push(action, bonus, spellSlots(actor))
 
   return flex;
 }
@@ -31,15 +51,16 @@ export const statusBar = (actor: CreatureActorInterface) => {
 const actionItems = (actor: CreatureActorInterface) => {
   const flex = new FlexBox({
     backgroundColor: [0.25, 0, 0, 1],
+    columnGap: 8,
+    margin: { left: 4, right: 4, top: 4, bottom : 4 },
     border: { color: [1, 1, 1, 1], width: 1 },
-    padding: { left: 4, right: 4 },
+    padding: { left: 8, right: 8, top: 8, bottom: 8 },
   })
 
   const actionStyle: Style = {
     width: 48,
     height: 48,
     backgroundColor: [0, 0.5, 0, 1],
-    margin: { left: 4, top: 8, right: 4, bottom: 8 },
     border: { color: [1, 1, 1, 1], width: 1 },
   }
 
