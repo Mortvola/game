@@ -4,7 +4,6 @@ import { game } from '../Main';
 import { vec4 } from 'wgpu-matrix';
 import DefineParties from './DefineParty';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
-import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
 import Messages from './Messages';
 import ActionBar from './Actions/ActionBar';
 import StatusBar from './StatusBar/StatusBar';
@@ -53,8 +52,6 @@ function App() {
     }
   }, [])
 
-  const [rewards, setRewards] = React.useState<unknown[]>([["episode", "max", "mean", "min"]]);
-
   const [messages, setMessages] = React.useState<{ id: number, message: string }[]>([]);
 
   const loggerCallback = React.useCallback((message: string) => {
@@ -76,73 +73,11 @@ function App() {
     setFocus(focusInfo);
   }, [])
 
-  const [actionInfoStyle, setActionInfoStyle] = React.useState<React.CSSProperties>({});
-  const [actionInfo, setActionInfo] = React.useState<ActionInfo | null>(null);
-
-  const actionInfoCallback = React.useCallback((actionInfo: ActionInfo | null) => {
-    setActionInfo(actionInfo);
-  }, [])
-
   const [actor, setActor] = React.useState<CreatureActorInterface | null>(null);
 
   const characterChangeCallback = React.useCallback((actor: CreatureActorInterface | null) => {
     setActor(actor)
   }, [])
-
-  React.useEffect(() => {
-    const listener = (evt: MessageEvent<WorkerMessage>) => {
-      if (evt.data.type === 'Rewards' && evt.data.rewards) {
-        const newRewards = evt.data.rewards;
-
-        type Stats = {
-          min: number | null,
-          max: number | null,
-          sum: number,
-        }
-
-        const stats = newRewards.reduce<Stats>((stats, value) => {
-          if (stats.max === null || stats.max < value[1]) {
-            stats.max = value[1];
-          }
-
-          if (stats.min === null || stats.min > value[1]) {
-            stats.min = value[1];
-          }
-
-          stats.sum += value[1];
-
-          return stats;
-        }, { min: null, max: null, sum: 0});
-
-        setRewards((prev) => {
-          let rewards = [
-            ...prev,
-            [newRewards[0][0], stats.max, stats.sum / newRewards.length, stats.min],
-          ];
-
-          const maxLength = 1001; // Number of entries plus one for titles.
-
-          if (rewards.length > maxLength) {
-            rewards = [
-              rewards[0],
-              ...rewards.slice(rewards.length - maxLength + 2)
-            ]
-          }
-
-          return rewards;
-        })
-      }
-      else if (evt.data.type === 'Finished') {
-        workerQueue.finished();
-      }
-    }
-
-    worker.addEventListener("message", listener);
-    
-    return (() => {
-      worker.removeEventListener('message', listener);
-    })
-  }, []);
 
   React.useEffect(() => {
     const element = canvasRef.current;
@@ -152,11 +87,10 @@ function App() {
       (async () => {
         game.setLoggerCallback(loggerCallback);
         game.setFocusCallback(focusCallback);
-        game.setActionInfoCallback(actionInfoCallback)
         game.setCharacterChangeCallback(characterChangeCallback)
       })()  
     }
-  }, [loggerCallback, focusCallback, characterChangeCallback, actionInfoCallback])
+  }, [loggerCallback, focusCallback, characterChangeCallback])
 
   const handlePointerDown: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -188,8 +122,6 @@ function App() {
 
     if (element) {
       const rect = element.getBoundingClientRect();
-
-      setActionInfoStyle({ left: event.clientX + 10, top: event.clientY + 10 })
 
       if (!pointerLocked) {
         const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
@@ -410,29 +342,6 @@ function App() {
         onPointerLeave={handlePointerLeave}
         onWheel={handleWheel}
       />
-      <div className={`action`} style={actionInfoStyle}>
-        <div>
-          <div>
-            {
-              actionInfo
-                ? actionInfo.action
-                : null
-            }
-          </div>
-          <div>
-            {
-              (actionInfo?.percentSuccess ?? null) !== null
-                ? `${actionInfo?.percentSuccess ?? 0}%`
-                : null
-            }
-          </div>
-        </div>
-        {
-          actionInfo?.description
-            ? actionInfo.description
-            : null
-        }
-      </div>
       <div className="lower-left">
         {
           actor

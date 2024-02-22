@@ -7,11 +7,11 @@ import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
 import Script from './Script/Script';
 import { Occupant } from './Workers/PathPlannerTypes';
-import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, EpisodeInfo, Party } from './types';
+import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, Party } from './types';
 import Renderer from './Renderer/Renderer';
-import { sceneObjectlManager } from './SceneObjectManager';
 import { addActionBar } from './ActionBar';
 import ElementNode from './Renderer/Drawables/SceneNodes/ElementNode';
+import TextBox from './Renderer/Drawables/SceneNodes/TextBox';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -68,13 +68,9 @@ class Game implements WorldInterface {
 
   collidees = new Collidees();
 
-  scoreCallback: ((episode: EpisodeInfo) => void) | null = null;
-
   loggerCallback: ((message: string) => void) | null = null;
   
   focusCallback: ((focusInfo: FocusInfo | null) => void) | null = null;
-
-  actionInfoCallback: ((actionInfo: ActionInfo | null) => void) | null = null;
 
   characterChangeCallback: ((character: CreatureActorInterface | null) => void) | null = null;
 
@@ -102,12 +98,17 @@ class Game implements WorldInterface {
     // const reticle = await DrawableNode.create(await Reticle.create(-reticleWidth / 2, reticleHeight / 2, reticleWidth, reticleHeight))
     // const r = await sceneObjectlManager.getSceneObject2d('Reticle')
 
-    const reticle = new ElementNode({
-      position: 'absolute',
+    const reticle = new ElementNode({ position: 'absolute' })
+
+    const cursor = new ElementNode({
+      // position: 'absolute',
       width: 16,
       height: 16,
       backgroundColor: [1, 0, 0, 1] },
     )
+
+    reticle.nodes.push(cursor)
+
     // reticle.style.x = r.x;
     // reticle.style.y = r.y;
     // reticle.style.width = r.width
@@ -324,16 +325,6 @@ class Game implements WorldInterface {
               }
             }
 
-            if (winningTeam !== null) {
-              const episode: EpisodeInfo = {
-                winningTeam,
-              }  
-
-              if (this.scoreCallback) {
-                this.scoreCallback(episode);
-              }  
-            }
-
             this.participants.state = ParticipantsState.needsPrep;
             this.endOfRound = false;
           }  
@@ -542,6 +533,29 @@ class Game implements WorldInterface {
     this.renderer.camera.moveDirection = direction;
   }
 
+  actionInfoCallback(actionInfo: ActionInfo | null) {
+    if (actionInfo === null) {
+      this.reticle.nodes = this.reticle.nodes.slice(0, 1)
+    }
+    else {
+      const element = new ElementNode({ margin: { top: 16 }, flexDirection: 'column' })
+
+      element.nodes.push(new TextBox(actionInfo.action))
+
+      if (actionInfo.percentSuccess) {
+        element.nodes.push(new TextBox(`${actionInfo?.percentSuccess ?? 0}%`))
+      }
+
+      if (actionInfo.description) {
+        element.nodes.push(new TextBox(actionInfo.description))
+      }
+  
+      this.reticle.nodes[1] = element  
+    }
+
+    this.renderer.scene2d.needsUpdate = true;
+  }
+
   async interact() {
     if (this.renderer.scene2d.click(this.reticlePosition[0], this.reticlePosition[1])) {
       return
@@ -639,20 +653,12 @@ class Game implements WorldInterface {
     this.renderer.camera.rotateX += 1;
   }
 
-  setScoreCallback(callback: (episode: EpisodeInfo) => void) {
-    this.scoreCallback = callback;
-  }
-
   setLoggerCallback(callback: (message: string) => void) {
     this.loggerCallback = callback;
   }
 
   setFocusCallback(callback: (focusInfo: FocusInfo | null) => void) {
     this.focusCallback = callback;
-  }
-
-  setActionInfoCallback(callback: (actionInfo: ActionInfo | null) => void) {
-    this.actionInfoCallback = callback;
   }
 
   setCharacterChangeCallback(callback: (actor: CreatureActorInterface | null) => void) {
