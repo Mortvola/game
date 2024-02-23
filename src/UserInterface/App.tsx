@@ -5,10 +5,8 @@ import { vec4 } from 'wgpu-matrix';
 import DefineParties from './DefineParty';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
 import Messages from './Messages';
-import ActionBar from './Actions/ActionBar';
-import StatusBar from './StatusBar/StatusBar';
 import Focused from './Focused';
-import { ActionInfo, CreatureActorInterface, FocusInfo, Party } from '../types';
+import { CreatureActorInterface, FocusInfo, Party } from '../types';
 import { gpu } from "../Renderer/Gpu";
 
 type DiretionKeys = {
@@ -19,7 +17,6 @@ type DiretionKeys = {
 }
 
 function App() {
-  const [hasFocus, setHasFocus] = React.useState<boolean>(false); 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const movement = React.useRef<DiretionKeys>({
     left: 0,
@@ -101,14 +98,14 @@ function App() {
         element.requestPointerLock()
       }
       else {
-        const rect = element.getBoundingClientRect();
+        // const rect = element.getBoundingClientRect();
 
-        const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
-        const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
+        // const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
+        // const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
         // game?.pointerDown(clipX, clipY);
 
         if (event.metaKey) {
-          game?.centerOn(clipX, clipY)
+          // game?.centerOn(clipX, clipY)
         }
         else if (!event.ctrlKey) {
           game?.interact()

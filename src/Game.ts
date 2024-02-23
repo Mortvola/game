@@ -358,10 +358,6 @@ class Game implements WorldInterface {
   pointerDown(x: number, y: number) {
   }
 
-  pointerDeltaMove(xDelta: number, yDelta: number) {
-    this.pointerMove(this.reticlePosition[0] + xDelta, this.reticlePosition[1] + yDelta)
-  }
-
   pointerMove(x: number, y: number) {
     // Pan the view if the mouse is near the edge of the window.
     if (this.inputMode === 'Mouse') {
@@ -609,22 +605,6 @@ class Game implements WorldInterface {
         this.actors.push(script);
         activeActor.state = States.scripting;
       }
-    }
-  }
-
-  centerOn(x: number, y: number) {
-    this.reticlePosition[0] = x;
-    this.reticlePosition[1] = y;
-
-    let { actor, point } = this.cameraHitTest();
-
-    if (actor) {
-      point = actor.getWorldPosition();
-    }
-
-    if (point) {
-      this.renderer.camera.moveCameraTo = point;
-      this.renderer.camera.moveCameraStartTime = null;
     }
   }
 
