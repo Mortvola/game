@@ -117,6 +117,8 @@ function App() {
     }
   }
 
+  const [pointPosition, setPointerPosition] = React.useState<{ x: number, y: number }>({ x: 0, y: 0})
+
   const handlePointerMove: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
 
@@ -124,12 +126,23 @@ function App() {
       const rect = element.getBoundingClientRect();
 
       if (!pointerLocked) {
+        setPointerPosition({ x: event.clientX, y: event.clientY })
+
         const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
         const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
         game?.pointerMove(clipX, clipY);  
       }
       else {
-        game?.pointerDeltaMove(event.movementX * 2 / element.clientWidth, -event.movementY / element.clientHeight)
+        setPointerPosition((prev) => {
+          const newPoint = { x: prev.x + event.movementX, y: prev.y + event.movementY}
+
+          const clipX = ((newPoint.x - rect.left) / element.clientWidth) * 2 - 1;
+          const clipY = 1 - ((newPoint.y - rect.top) / element.clientHeight) * 2;  
+
+          game?.pointerMove(clipX, clipY);  
+  
+          return newPoint
+        })
       }
     }
   }
@@ -381,16 +394,6 @@ function App() {
       <div
         className="lower-center"
       >
-        {
-          actor
-            ? (
-              <div>
-                <StatusBar character={actor.character} />
-                <ActionBar actor={actor} />
-              </div>
-            )
-            : null
-        }
       </div>
       <div className="lower-right">
         <Messages messages={messages} />
