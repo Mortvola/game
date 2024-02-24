@@ -51,10 +51,10 @@ const statusBar = (actor: CreatureActorInterface) => {
 const actionItems = (actor: CreatureActorInterface) => {
   const flex = new FlexBox({
     backgroundColor: [0.25, 0, 0, 1],
-    columnGap: 8,
+    columnGap: 4,
     margin: { left: 4, right: 4, top: 4, bottom : 4 },
     border: { color: [1, 1, 1, 1], width: 1 },
-    padding: { left: 8, right: 8, top: 8, bottom: 8 },
+    padding: { left: 4, right: 4, top: 4, bottom: 4 },
   })
 
   const actionStyle: Style = {
@@ -62,6 +62,7 @@ const actionItems = (actor: CreatureActorInterface) => {
     height: 48,
     backgroundColor: [0, 0.5, 0, 1],
     border: { color: [1, 1, 1, 1], width: 1 },
+    margin: { top: 2, left: 2, bottom: 2, right: 2 },
   }
 
   const bonusStyle: Style = {
@@ -75,7 +76,8 @@ const actionItems = (actor: CreatureActorInterface) => {
   if (actor.character.equipped.meleeWeapon) {
     const action = new ElementNode({
       ...actionStyle,
-      border: currentAction === meleeAttack ? { color: [1, 1, 0, 1], width: 1 } : { color: [1, 1, 1, 1], width: 1 },
+      border: currentAction === meleeAttack ? { color: [1, 1, 0, 1], width: 3 } : { color: [1, 1, 1, 1], width: 1 },
+      margin: currentAction === meleeAttack ? undefined : { top: 2, left: 2, bottom: 2, right: 2 },
     })
     action.nodes.push(new TextBox('Melee'));
     action.onClick = () => {
@@ -88,7 +90,8 @@ const actionItems = (actor: CreatureActorInterface) => {
   if (actor.character.equipped.rangeWeapon) {
     const action = new ElementNode({
       ...actionStyle,
-      border: currentAction === rangeAttack ? { color: [1, 1, 0, 1], width: 1 } : { color: [1, 1, 1, 1], width: 1 },
+      border: currentAction === rangeAttack ? { color: [1, 1, 0, 1], width: 3 } : { color: [1, 1, 1, 1], width: 1 },
+      margin: currentAction === rangeAttack ? undefined : { top: 2, left: 2, bottom: 2, right: 2 },
     })
     action.nodes.push(new TextBox('Range'));
     action.onClick = () => {
@@ -107,7 +110,8 @@ const actionItems = (actor: CreatureActorInterface) => {
 
     const action = new ElementNode({
       ...style,
-      border: currentAction === spell ? { color: [1, 1, 0, 1], width: 1 } : { color: [1, 1, 1, 1], width: 1 },
+      border: currentAction === spell ? { color: [1, 1, 0, 1], width: 3 } : { color: [1, 1, 1, 1], width: 1 },
+      margin: currentAction === spell ? undefined : { top: 2, left: 2, bottom: 2, right: 2 },
     })
     
     action.nodes.push(new TextBox(spell.name));
@@ -127,7 +131,8 @@ const actionItems = (actor: CreatureActorInterface) => {
     
     const action = new ElementNode({
       ...style,
-      border: currentAction === spell ? { color: [1, 1, 0, 1], width: 1 } : { color: [1, 1, 1, 1], width: 1 },
+      border: currentAction === spell ? { color: [1, 1, 0, 1], width: 3 } : { color: [1, 1, 1, 1], width: 1 },
+      margin: currentAction === spell ? undefined : { top: 2, left: 2, bottom: 2, right: 2 },
     })
     
     action.nodes.push(new TextBox(spell.name));
@@ -147,7 +152,8 @@ const actionItems = (actor: CreatureActorInterface) => {
     
     const action = new ElementNode({
       ...style,
-      border: currentAction === classAction ? { color: [1, 1, 0, 1], width: 1 } : { color: [1, 1, 1, 1], width: 1 },
+      border: currentAction === classAction ? { color: [1, 1, 0, 1], width: 3 } : { color: [1, 1, 1, 1], width: 1 },
+      margin: currentAction === classAction ? undefined : { top: 2, left: 2, bottom: 2, right: 2 },
     })
     
     action.nodes.push(new TextBox(action.name));
