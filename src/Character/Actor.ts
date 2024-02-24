@@ -12,15 +12,16 @@ import FollowPath from "../Script/FollowPath";
 import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
 import { findPath2, getOccupants, populateGrid } from "../Workers/PathPlannerQueue";
-import MeleeAttack from "./Actions/MeleeAttack";
-import RangeAttack from "./Actions/RangeAttack";
+import { meleeAttack } from "./Actions/MeleeAttack";
+import { rangeAttack } from "./Actions/RangeAttack";
 import { sceneObjectlManager } from "../SceneObjectManager";
 import { PathPoint } from "../Workers/PathPlannerTypes";
 import DrawableNode from "../Renderer/Drawables/SceneNodes/DrawableNode";
-import { ActionInterface, CharacterInterface, CreatureActorInterface, SceneObjectInterface, ShotData, States, WorldInterface } from "../types";
+import { ActionFactory, ActionInterface, CharacterInterface, CreatureActorInterface, SceneObjectInterface, ShotData, States, WorldInterface } from "../types";
 import { DamageType, Weapon, WeaponType } from "./Equipment/Types";
 import MoveAction from "./Actions/MoveAction";
 import RenderPass from "../Renderer/RenderPasses/RenderPass";
+import { makeObservable, observable, runInAction } from "mobx";
 
 // let findPathPromise: {
 //   resolve: ((value: [Vec2[], number, number[][]]) => void),
@@ -77,7 +78,7 @@ class Actor implements CreatureActorInterface {
 
   world: WorldInterface;
 
-  private action: ActionInterface | null = null;
+  action: ActionFactory<ActionInterface> | null = null;
 
   private useQLearning = false;
 
@@ -120,6 +121,10 @@ class Actor implements CreatureActorInterface {
 
     this.sceneObject.sceneNode.addNode(this.circle)
     this.sceneObject.sceneNode.addNode(this.outerCircle)
+
+    makeObservable(this, {
+      action: observable,
+    })
   }
 
   static async create(
@@ -146,8 +151,10 @@ class Actor implements CreatureActorInterface {
   }
 
   startTurn() {
-    this.character.actionsLeft = 1;
-    this.character.bonusActionsLeft = 1;
+    runInAction(() => {
+      this.character.actionsLeft = 1;
+      this.character.bonusActionsLeft = 1;  
+    })
 
     this.distanceLeft = this.character.race.speed;
 
@@ -178,15 +185,15 @@ class Actor implements CreatureActorInterface {
 
   setDefaultAction() {
     if (this.character.primaryWeapon === 'Melee') {
-      this.setAction(new MeleeAttack(this));
+      this.setAction(meleeAttack);
     }
     else {
-      this.setAction(new RangeAttack(this));
+      this.setAction(rangeAttack);
     }
   }
 
   setMoveAction(): void {
-    this.setAction(new MoveAction(this));
+    this.setAction(new ActionFactory(MoveAction, 'Move', 'Move'));
   }
 
   endTurn() {
@@ -305,9 +312,11 @@ class Actor implements CreatureActorInterface {
       script,
     );
 
-    if (this.character.actionsLeft > 0) {
-      this.character.actionsLeft -= 1;
-    }
+    runInAction(() => {
+      if (this.character.actionsLeft > 0) {
+        this.character.actionsLeft -= 1;
+      }  
+    })
   }
 
   async chooseAction(timestamp: number) {
@@ -383,9 +392,11 @@ class Actor implements CreatureActorInterface {
                 script,
               );
 
-              if (this.character.actionsLeft > 0) {
-                this.character.actionsLeft -= 1;
-              }
+              runInAction(() => {
+                if (this.character.actionsLeft > 0) {
+                  this.character.actionsLeft -= 1;
+                }  
+              })
 
               if (target.character.hitPoints === 0) {
                 targets = targets.filter((t) => t !== closest);
@@ -434,9 +445,11 @@ class Actor implements CreatureActorInterface {
                     script,
                   );  
 
-                  if (this.character.actionsLeft > 0) {
-                    this.character.actionsLeft -= 1;
-                  }
+                  runInAction(() => {
+                    if (this.character.actionsLeft > 0) {
+                      this.character.actionsLeft -= 1;
+                    }  
+                  })
     
                   if (target.character.hitPoints === 0) {
                     targets = targets.filter((t) => t !== closest);
@@ -724,20 +737,28 @@ class Actor implements CreatureActorInterface {
     });
   }
 
-
-  setAction(action: ActionInterface | null): void {
-    if (this.action) {
-      this.action.clear();
+  setAction(action: ActionFactory<ActionInterface> | null): void {
+    if (this.action?.action) {
+      this.action.action.clear();
     }
 
-    this.action = action;
+    runInAction(() => {
+      this.action = action;
 
-    if (this.action && this) {
-      this.action.initialize();
-    }
+      if (this.action) {
+        if (this.action === meleeAttack) {
+          this.character.primaryWeapon = 'Melee'
+        }
+        else if (this.action === rangeAttack) {
+          this.character.primaryWeapon = 'Range'
+        }
+
+        this.action.initialize(this);
+      }  
+    })
   }
 
-  getAction(): ActionInterface | null {
+  getAction(): ActionFactory<ActionInterface> | null {
     return this.action;
   }
 

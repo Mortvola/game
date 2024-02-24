@@ -1,5 +1,6 @@
-import MeleeAttack from "./Character/Actions/MeleeAttack"
-import RangeAttack from "./Character/Actions/RangeAttack"
+import { IReactionDisposer, autorun } from "mobx"
+import { meleeAttack } from "./Character/Actions/MeleeAttack"
+import { rangeAttack } from "./Character/Actions/RangeAttack"
 import ElementNode, { Style } from "./Renderer/Drawables/SceneNodes/ElementNode"
 import FlexBox from "./Renderer/Drawables/SceneNodes/FlexBox"
 import TextBox from "./Renderer/Drawables/SceneNodes/TextBox"
@@ -16,10 +17,9 @@ const spellSlots = (actor: CreatureActorInterface) => {
       width: 16,
       height: 32,
       margin: { left: 0.5, right: 0.5 },
-      backgroundColor: [0.75, 0.75, 0, 1],
+      border: { color: [0.75, 0.75, 0, 1], width: 1 },
+      backgroundColor: i < available ? [0.75, 0.75, 0, 1] : [0, 0, 0, 1],
     }))
-
-    // slots.push(<div key={i} className={i < available ? '' : styles.unavailable}></div>)
   }
 
   return slots;
@@ -31,13 +31,13 @@ const statusBar = (actor: CreatureActorInterface) => {
   const actionStyle = {
     width: 32,
     height: 32,
-    backgroundColor: [0, 0.5, 0, 1],
+    backgroundColor: actor.character.actionsLeft > 0 ? [0, 0.5, 0, 1] : [0, 0, 0, 1],
     border: { color: [1, 1, 1, 1], width: 1 },
   }
 
   const bonusStyle = {
     ...actionStyle,
-    backgroundColor: [1, 0.65, 0, 1],
+    backgroundColor: actor.character.bonusActionsLeft > 0 ? [1, 0.65, 0, 1] : [0, 0, 0, 1],
   }
 
   const action = new ElementNode(actionStyle);
@@ -70,21 +70,29 @@ const actionItems = (actor: CreatureActorInterface) => {
     backgroundColor: [1, 0.65, 0, 1],
   }
 
+  const currentAction = actor.getAction()
+
   if (actor.character.equipped.meleeWeapon) {
-    const action = new ElementNode(actionStyle)
+    const action = new ElementNode({
+      ...actionStyle,
+      border: currentAction === meleeAttack ? { color: [1, 1, 0, 1], width: 1 } : { color: [1, 1, 1, 1], width: 1 },
+    })
     action.nodes.push(new TextBox('Melee'));
     action.onClick = () => {
-      actor.setAction(new MeleeAttack(actor));
+      actor.setAction(meleeAttack);
     }
 
     flex.nodes.push(action)
   }
 
   if (actor.character.equipped.rangeWeapon) {
-    const action = new ElementNode(actionStyle)
+    const action = new ElementNode({
+      ...actionStyle,
+      border: currentAction === rangeAttack ? { color: [1, 1, 0, 1], width: 1 } : { color: [1, 1, 1, 1], width: 1 },
+    })
     action.nodes.push(new TextBox('Range'));
     action.onClick = () => {
-      actor.setAction(new RangeAttack(actor));
+      actor.setAction(rangeAttack);
     }
 
     flex.nodes.push(action)
@@ -97,10 +105,14 @@ const actionItems = (actor: CreatureActorInterface) => {
       style = bonusStyle
     }
 
-    const action = new ElementNode(style)
+    const action = new ElementNode({
+      ...style,
+      border: currentAction === spell ? { color: [1, 1, 0, 1], width: 1 } : { color: [1, 1, 1, 1], width: 1 },
+    })
+    
     action.nodes.push(new TextBox(spell.name));
     action.onClick = () => {
-      actor.setAction(new spell.spell(actor));
+      actor.setAction(spell);
     }
 
     flex.nodes.push(action)
@@ -113,10 +125,14 @@ const actionItems = (actor: CreatureActorInterface) => {
       style = bonusStyle
     }
     
-    const action = new ElementNode(style)
+    const action = new ElementNode({
+      ...style,
+      border: currentAction === spell ? { color: [1, 1, 0, 1], width: 1 } : { color: [1, 1, 1, 1], width: 1 },
+    })
+    
     action.nodes.push(new TextBox(spell.name));
     action.onClick = () => {
-      actor.setAction(new spell.spell(actor));
+      actor.setAction(spell);
     }
 
     flex.nodes.push(action)
@@ -129,10 +145,14 @@ const actionItems = (actor: CreatureActorInterface) => {
       style = bonusStyle
     }
     
-    const action = new ElementNode(style)
+    const action = new ElementNode({
+      ...style,
+      border: currentAction === classAction ? { color: [1, 1, 0, 1], width: 1 } : { color: [1, 1, 1, 1], width: 1 },
+    })
+    
     action.nodes.push(new TextBox(action.name));
     action.onClick = () => {
-      actor.setAction(new classAction.action(actor));
+      actor.setAction(classAction);
     }
 
     flex.nodes.push(action)
@@ -142,26 +162,35 @@ const actionItems = (actor: CreatureActorInterface) => {
 }
 
 let actionBar: ElementNode | null = null
+let disposer: IReactionDisposer | null = null
 
 export const addActionBar = async (actor: CreatureActorInterface, scene2d: SceneGraph2D) => {
-  const status = statusBar(actor)
-  const actions = actionItems(actor)
+  const createActionBar = () => {
+    const status = statusBar(actor)
+    const actions = actionItems(actor)
 
-  const newActionBar = new FlexBox({ flexDirection: 'column' })
-  newActionBar.nodes.push(status, actions)
+    const newActionBar = new FlexBox({ flexDirection: 'column' })
+    newActionBar.nodes.push(status, actions)
 
-  const wrapper = new FlexBox({
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    // backgroundColor: [0, 1, 1, 1],
-    justifyContent: 'center',
-  })
+    const wrapper = new FlexBox({
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+    })
 
-  wrapper.nodes.push(newActionBar)
+    wrapper.nodes.push(newActionBar)
 
-  scene2d.replaceNode(actionBar, wrapper)
+    scene2d.replaceNode(actionBar, wrapper)
 
-  actionBar = wrapper
+    actionBar = wrapper
+  }
+
+  if (disposer !== null) {
+    disposer()
+    disposer = null
+  }
+
+  disposer = autorun(createActionBar)
 }

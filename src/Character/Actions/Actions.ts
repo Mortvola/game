@@ -1,11 +1,11 @@
-import { A, ActionInterface } from "../../types";
+import { A, ActionFactory, ActionInterface } from "../../types";
 import Rage from "./Rage";
 
-export const actions: A<ActionInterface>[] = [
-  { action: Rage, name: 'Rage', time: 'Bonus' }
+export const actions: ActionFactory<ActionInterface>[] = [
+  new ActionFactory(Rage,'Rage', 'Bonus'),
 ]
 
-export const getAction = (name: string): A<ActionInterface> | null => {
+export const getAction = (name: string): ActionFactory<ActionInterface> | null => {
   const action = actions.find((a) => a.name === name);
 
   if (action) {

@@ -1,4 +1,4 @@
-import { R } from "../../../types";
+import { SpellFactory } from "../../../types";
 import AcidSplash from "./AcidSplash";
 import Bane from "./Bane";
 import BladeWard from "./BladeWard";
@@ -44,82 +44,82 @@ import Thunderwave from "./Thunderwave";
 import TrueStrike from "./TrueStrike";
 import WitchBolt from "./WitchBolt";
 
-export const wizardSpells: R<Spell>[][] = [
+export const wizardSpells: SpellFactory<Spell>[][] = [
   [
-    { spell: AcidSplash, name: 'Acid Splash', time: 'Action', level: 0 },
-    { spell: BladeWard, name: 'Blade Ward', time: 'Action', level: 0 },
-    { spell: ChillTouch, name: 'Chill Touch', time: 'Action', level: 0 },
-    { spell: FireBolt, name: 'Fire Bolt', time: 'Action', level: 0 },
-    { spell: Light, name: 'Light', time: 'Action', level: 0 },
-    { spell: PoisonSpray, name: 'Poison Spray', time: 'Action', level: 0 },
-    { spell: RayOfFrost, name: 'Ray of Frost', time: 'Action', level: 0 },
-    { spell: ShockingGrasp, name: 'Shocking Grasp', time: 'Action', level: 0 },
-    { spell: TrueStrike, name: 'True Strike', time: 'Action', level: 0 },
+    new SpellFactory(AcidSplash, 'Acid Splash', 'Action', 0),
+    new SpellFactory(BladeWard, 'Blade Ward', 'Action', 0),
+    new SpellFactory(ChillTouch, 'Chill Touch', 'Action', 0),
+    new SpellFactory(FireBolt, 'Fire Bolt', 'Action', 0),
+    new SpellFactory(Light, 'Light', 'Action', 0),
+    new SpellFactory(PoisonSpray, 'Poison Spray', 'Action', 0),
+    new SpellFactory(RayOfFrost, 'Ray of Frost', 'Action', 0),
+    new SpellFactory(ShockingGrasp, 'Shocking Grasp', 'Action', 0),
+    new SpellFactory(TrueStrike, 'True Strike', 'Action', 0),
   ],
   [
-    { spell: BurningHands, name: 'Burning Hands', time: 'Action', level: 1 },
-    { spell: ChromaticOrb, name: 'Chromatic Orb', time: 'Action', level: 1 },
-    { spell: ColorSpray, name: 'Color Spray', time: 'Action', level: 1 },
-    { spell: ExpeditiousRetreat, name: 'Expedititous Retreat', time: 'Bonus', level: 1 },
-    { spell: FalseLife, name: 'False Life', time: 'Action', level: 1 },
-    { spell: FogCloud, name: 'Fog Cloud', time: 'Action', level: 1 },
-    { spell: Grease, name: 'Grease', time: 'Action', level: 1 },
-    { spell: Jump, name: 'Jump', time: 'Action', level: 1 },
-    { spell: Longstrider, name: 'Longstrider', time: 'Action', level: 1 },
-    { spell: MageArmor, name: 'Mage Armor', time: 'Action', level: 1 },
-    { spell: MagicMissile, name: 'Magic Missile', time: 'Action', level: 1 },
-    { spell: ProtectionFromGoodAndEvil, name: 'Protection from Good and Evil', time: 'Action', level: 1 },
-    { spell: RayOfSickness, name: 'Ray of Sickness', time: 'Action', level: 1 },
-    { spell: TashasHideosLaughter, name: 'Tasha\'s Hideous Laughter', time: 'Action', level: 1 },
-    { spell: Thunderwave, name: 'Thunderwave', time: 'Action', level: 1 },
-    { spell: WitchBolt, name: 'Witch Bolt', time: 'Action', level: 1 },
-  ],
-]
-
-export const clericSpells: R<Spell>[][] = [
-  [
-    { spell: Guidance, name: 'Guidance', time: 'Action', level: 0 },
-    { spell: Light, name: 'LIght', time: 'Action', level: 0 },
-    { spell: Resistance, name: 'Resistance', time: 'Action', level: 0 },
-    { spell: SacredFlame, name: 'Sacred Flame', time: 'Action', level: 0 },
-  ],
-  [
-    { spell: Bane, name: 'Bane', time: 'Action', level: 1 },
-    { spell: Bless, name: 'Bless', time: 'Action', level: 1 },
-    { spell: CureWounds, name: 'Cure Wounds', time: 'Action', level: 1 },
-    { spell: GuidingBolt, name: 'Guiding Bolt', time: 'Action', level: 1 },
-    { spell: HealingWord, name: 'Healing Word', time: 'Bonus', level: 1 },
-    { spell: InflictWounds, name: 'Inflict Wounds', time: 'Action', level: 1 },
-    { spell: ProtectionFromGoodAndEvil, name: 'Protection from Good and Evil', time: 'Action', level: 1 },
-    { spell: Sanctuary, name: 'Sanctuary', time: 'Bonus', level: 1 },
-    { spell: ShieldOfFaith, name: 'Shield of Faith', time: 'Bonus', level: 1 },
+    new SpellFactory(BurningHands, 'Burning Hands', 'Action', 1),
+    new SpellFactory(ChromaticOrb, 'Chromatic Orb', 'Action', 1),
+    new SpellFactory(ColorSpray, 'Color Spray', 'Action', 1),
+    new SpellFactory(ExpeditiousRetreat, 'Expedititous Retreat', 'Bonus', 1),
+    new SpellFactory(FalseLife, 'False Life', 'Action', 1),
+    new SpellFactory(FogCloud, 'Fog Cloud', 'Action', 1),
+    new SpellFactory(Grease, 'Grease', 'Action', 1),
+    new SpellFactory(Jump, 'Jump', 'Action', 1),
+    new SpellFactory(Longstrider, 'Longstrider', 'Action', 1),
+    new SpellFactory(MageArmor, 'Mage Armor', 'Action', 1),
+    new SpellFactory(MagicMissile, 'Magic Missile', 'Action', 1),
+    new SpellFactory(ProtectionFromGoodAndEvil, 'Protection from Good and Evil', 'Action', 1),
+    new SpellFactory(RayOfSickness, 'Ray of Sickness', 'Action', 1),
+    new SpellFactory(TashasHideosLaughter, 'Tasha\'s Hideous Laughter', 'Action', 1),
+    new SpellFactory(Thunderwave, 'Thunderwave', 'Action', 1),
+    new SpellFactory(WitchBolt, 'Witch Bolt', 'Action', 1),
   ],
 ]
 
-export const druidSpells: R<Spell>[][] = [
+export const clericSpells: SpellFactory<Spell>[][] = [
   [
-    { spell: Guidance, name: 'Guidance', time: 'Action', level: 0 },
-    { spell: PoisonSpray, name: 'Poison Spay', time: 'Action', level: 0 },
-    { spell: ProduceFlame, name: 'Produce Flame', time: 'Action', level: 0 },
-    { spell: Resistance, name: 'Resistance', time: 'Action', level: 0 },
-    { spell: Shillelagh, name: 'Shillelagh', time: 'Bonus', level: 0 },
-    { spell: ThornWhip, name: 'Thorn Whip', time: 'Action', level: 0 },
+    new SpellFactory(Guidance, 'Guidance', 'Action', 0),
+    new SpellFactory(Light, 'LIght', 'Action', 0),
+    new SpellFactory(Resistance, 'Resistance', 'Action', 0),
+    new SpellFactory(SacredFlame, 'Sacred Flame', 'Action', 0),
   ],
   [
-    { spell: CharmPerson, name: 'Charm Person', time: 'Action', level: 1 },
-    { spell: CureWounds, name: 'Cure Wounds', time: 'Action', level: 1 },
-    { spell: Entangle, name: 'Entangle', time: 'Action', level: 1 },
-    { spell: FaerieFire, name: 'Faerie Fire', time: 'Action', level: 1 },
-    { spell: FogCloud, name: 'Fog Cloud', time: 'Action', level: 1 },
-    { spell: Goodberry, name: 'Goodberry', time: 'Action', level: 1 },
-    { spell: HealingWord, name: 'Healing Word', time: 'Bonus', level: 1 },
-    { spell: Jump, name: 'Jump', time: 'Action', level: 1 },
-    { spell: Longstrider, name: 'Longstrider', time: 'Action', level: 1 },
-    { spell: Thunderwave, name: 'Thunderwave', time: 'Action', level: 1 },
+    new SpellFactory(Bane, 'Bane', 'Action', 1),
+    new SpellFactory(Bless, 'Bless', 'Action', 1),
+    new SpellFactory(CureWounds, 'Cure Wounds', 'Action', 1),
+    new SpellFactory(GuidingBolt, 'Guiding Bolt', 'Action', 1),
+    new SpellFactory(HealingWord, 'Healing Word', 'Bonus', 1),
+    new SpellFactory(InflictWounds, 'Inflict Wounds', 'Action', 1),
+    new SpellFactory(ProtectionFromGoodAndEvil, 'Protection from Good and Evil', 'Action', 1),
+    new SpellFactory(Sanctuary, 'Sanctuary', 'Bonus', 1),
+    new SpellFactory(ShieldOfFaith, 'Shield of Faith', 'Bonus', 1),
   ],
 ]
 
-export const getSpell = (spells: R<Spell>[][], name: string): R<Spell> | null => {
+export const druidSpells: SpellFactory<Spell>[][] = [
+  [
+    new SpellFactory(Guidance, 'Guidance', 'Action', 0),
+    new SpellFactory(PoisonSpray, 'Poison Spay', 'Action', 0),
+    new SpellFactory(ProduceFlame, 'Produce Flame', 'Action', 0),
+    new SpellFactory(Resistance, 'Resistance', 'Action', 0),
+    new SpellFactory(Shillelagh, 'Shillelagh', 'Bonus', 0),
+    new SpellFactory(ThornWhip, 'Thorn Whip', 'Action', 0),
+  ],
+  [
+    new SpellFactory(CharmPerson, 'Charm Person', 'Action', 1),
+    new SpellFactory(CureWounds, 'Cure Wounds', 'Action', 1),
+    new SpellFactory(Entangle, 'Entangle', 'Action', 1),
+    new SpellFactory(FaerieFire, 'Faerie Fire', 'Action', 1),
+    new SpellFactory(FogCloud, 'Fog Cloud', 'Action', 1),
+    new SpellFactory(Goodberry, 'Goodberry', 'Action', 1),
+    new SpellFactory(HealingWord, 'Healing Word', 'Bonus', 1),
+    new SpellFactory(Jump, 'Jump', 'Action', 1),
+    new SpellFactory(Longstrider, 'Longstrider', 'Action', 1),
+    new SpellFactory(Thunderwave, 'Thunderwave', 'Action', 1),
+  ],
+]
+
+export const getSpell = (spells: SpellFactory<Spell>[][], name: string): SpellFactory<Spell> | null => {
   for (const level of spells) {
     const spell = level.find((s) => s.name === name);
 

@@ -12,6 +12,7 @@ import Renderer from './Renderer/Renderer';
 import { addActionBar } from './ActionBar';
 import ElementNode from './Renderer/Drawables/SceneNodes/ElementNode';
 import TextBox from './Renderer/Drawables/SceneNodes/TextBox';
+import { runInAction } from 'mobx';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -506,8 +507,8 @@ class Game implements WorldInterface {
     
           const action = activeActor.getAction();
 
-          if (action) {
-            await action.prepareInteraction(actor ?? null, point ?? null)            
+          if (action?.action) {
+            await action.action.prepareInteraction(actor ?? null, point ?? null)            
           }
         }
       }
@@ -567,17 +568,21 @@ class Game implements WorldInterface {
 
       const action = activeActor.getAction();
 
-      if (action) {
-        if (await action.interact(script)) {
+      if (action?.action) {
+        if (await action.action.interact(script)) {
           if (action.time === 'Action') {
-            if (activeActor.character.actionsLeft > 0) {
-              activeActor.character.actionsLeft -= 1;
-            }
+            runInAction(() => {
+              if (activeActor.character.actionsLeft > 0) {
+                activeActor.character.actionsLeft -= 1;
+              }
+            })
           }
           else if (action.time === 'Bonus') {
-            if (activeActor.character.bonusActionsLeft > 0) {
-              activeActor.character.bonusActionsLeft -= 1;
-            }
+            runInAction(() => {
+              if (activeActor.character.bonusActionsLeft > 0) {
+                activeActor.character.bonusActionsLeft -= 1;
+              }  
+            })
           }
 
           activeActor.setAction(null);

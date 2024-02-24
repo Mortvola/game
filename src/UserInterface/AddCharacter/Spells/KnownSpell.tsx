@@ -1,11 +1,11 @@
 import React from 'react';
 import SpellComponent, { ItemTypes } from './Spell';
 import Spell from '../../../Character/Actions/Spells/Spell';
-import { R } from '../../../types';
+import { SpellFactory } from '../../../types';
 
 export type KnownSpell = {
   prepared: boolean,
-  spell: R<Spell>,
+  spell: SpellFactory<Spell>,
 }
 
 type PropsType = {
