@@ -175,22 +175,12 @@ export const addActionBar = async (actor: CreatureActorInterface, scene2d: Scene
     const status = statusBar(actor)
     const actions = actionItems(actor)
 
-    const newActionBar = new FlexBox({ flexDirection: 'column' })
+    const newActionBar = new FlexBox({ flexDirection: 'column', position: 'absolute', left: '50%', transform: 'translate(-50%, 0)', bottom: 0 })
     newActionBar.nodes.push(status, actions)
 
-    const wrapper = new FlexBox({
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      bottom: 0,
-      justifyContent: 'center',
-    })
+    scene2d.replaceNode(actionBar, newActionBar)
 
-    wrapper.nodes.push(newActionBar)
-
-    scene2d.replaceNode(actionBar, wrapper)
-
-    actionBar = wrapper
+    actionBar = newActionBar
   }
 
   if (disposer !== null) {
