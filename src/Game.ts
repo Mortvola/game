@@ -493,18 +493,19 @@ class Game implements WorldInterface {
                 ...this.focused.character.influencingActions.map((c) => ({ name: c.name, duration: c.duration })),
                 ...this.focused.character.conditions.map((c) => ({ name: c, duration: 0 })),
               ]
-            })  
+            })
           }
           else {
             this.focusCallback(null);
           }
         }  
 
+        this.renderer.setOutlineMesh(this.focused?.sceneObject.sceneNode ?? null)
+
         if (
           !activeActor.automated
           && activeActor.state !== States.scripting
         ) {
-    
           const action = activeActor.getAction();
 
           if (action?.action) {
@@ -515,6 +516,7 @@ class Game implements WorldInterface {
     } else if (this.focused) {
       // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
       this.focused = null;
+      this.renderer.setOutlineMesh(null)
 
       if (this.focusCallback) {
         this.focusCallback(null);
