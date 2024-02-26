@@ -11,7 +11,8 @@ const getStatus = (actor: CreatureActorInterface) => {
     position: 'absolute',
     left: 0,
     bottom: 0,
-})
+    padding: { left: 16, bottom: 16 },
+  })
   
   const influencingActions = actor.character.influencingActions.map((c) => (
     new TextBox(`${c.name} (${c.duration / 6})`)
