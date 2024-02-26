@@ -194,12 +194,14 @@ const actionItems = (actor: CreatureActorInterface) => {
       backgroundColor: classAction.available(actor) ?  style.backgroundColor : disabledBackgroundColor,
     })
     
-    action.nodes.push(new TextBox(action.name));
+    action.nodes.push(new TextBox(classAction.name));
     action.onClick = () => {
       if (classAction.available(actor)) {
         actor.setAction(classAction);
       }
     }
+
+    actionTray.nodes.push(action)
   }
   
   return wrapper;
