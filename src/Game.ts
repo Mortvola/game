@@ -128,10 +128,8 @@ class Game implements WorldInterface {
   }
 
   characterChangeCallback(character: CreatureActorInterface | null) {
-    if (character !== null) {
-      addActionBar(character, this.renderer.scene2d)
-      addPlayerStatus(character, this.renderer.scene2d)
-    }
+    addActionBar(character, this.renderer.scene2d)
+    addPlayerStatus(character, this.renderer.scene2d)
   }
 
   async startTurn() {

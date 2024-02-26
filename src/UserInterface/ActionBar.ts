@@ -210,20 +210,24 @@ const actionItems = (actor: CreatureActorInterface) => {
 let actionBar: ElementNode | null = null
 let disposer: IReactionDisposer | null = null
 
-export const addActionBar = (actor: CreatureActorInterface, scene2d: SceneGraph2D) => {
+export const addActionBar = (actor: CreatureActorInterface | null, scene2d: SceneGraph2D) => {
   const createActionBar = () => {
-    const status = statusBar(actor)
-    const actions = actionItems(actor)
+    let newActionBar: ElementNode | null = null;
 
-    const newActionBar = new FlexBox({
-      flexDirection: 'column',
-      position: 'absolute',
-      left: '50%',
-      transform: 'translate(-50%, 0)',
-      bottom: 0,
-    })
-
-    newActionBar.nodes.push(status, actions)
+    if (actor) {
+      const status = statusBar(actor)
+      const actions = actionItems(actor)
+  
+      newActionBar = new FlexBox({
+        flexDirection: 'column',
+        position: 'absolute',
+        left: '50%',
+        transform: 'translate(-50%, 0)',
+        bottom: 0,
+      })
+  
+      newActionBar.nodes.push(status, actions)  
+    }
 
     scene2d.replaceNode(actionBar, newActionBar)
 

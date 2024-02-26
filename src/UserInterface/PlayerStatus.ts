@@ -45,9 +45,13 @@ const getStatus = (actor: CreatureActorInterface) => {
 let playerStatus: ElementNode | null = null
 let disposer: IReactionDisposer | null = null
 
-export const addPlayerStatus = async (actor: CreatureActorInterface, scene2d: SceneGraph2D) => {
+export const addPlayerStatus = async (actor: CreatureActorInterface | null, scene2d: SceneGraph2D) => {
   const createActionBar = () => {
-    const status = getStatus(actor)
+    let status: ElementNode | null = null
+
+    if (actor) {
+      status = getStatus(actor)
+    }
 
     scene2d.replaceNode(playerStatus, status)
     playerStatus = status
