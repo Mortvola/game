@@ -1,9 +1,9 @@
 import { IReactionDisposer, autorun } from "mobx"
-import ElementNode from "./Renderer/Drawables/SceneNodes/ElementNode"
-import { CreatureActorInterface } from "./types"
-import SceneGraph2D from "./Renderer/SceneGraph2d"
-import FlexBox from "./Renderer/Drawables/SceneNodes/FlexBox"
-import TextBox from "./Renderer/Drawables/SceneNodes/TextBox"
+import ElementNode from "../Renderer/Drawables/SceneNodes/ElementNode"
+import { CreatureActorInterface } from "../types"
+import SceneGraph2D from "../Renderer/SceneGraph2d"
+import FlexBox from "../Renderer/Drawables/SceneNodes/FlexBox"
+import TextBox from "../Renderer/Drawables/SceneNodes/TextBox"
 
 const getStatus = (actor: CreatureActorInterface) => {
   const flexBox = new FlexBox({

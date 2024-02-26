@@ -9,11 +9,12 @@ import Script from './Script/Script';
 import { Occupant } from './Workers/PathPlannerTypes';
 import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, Party } from './types';
 import Renderer from './Renderer/Renderer';
-import { addActionBar } from './ActionBar';
+import { addActionBar } from './UserInterface/ActionBar';
 import ElementNode from './Renderer/Drawables/SceneNodes/ElementNode';
 import TextBox from './Renderer/Drawables/SceneNodes/TextBox';
 import { runInAction } from 'mobx';
-import { addPlayerStatus } from './PlayerStatus';
+import { addPlayerStatus } from './UserInterface/PlayerStatus';
+import { addFocusedStatus } from './UserInterface/FocusedStatus';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -72,8 +73,6 @@ class Game implements WorldInterface {
 
   loggerCallback: ((message: string) => void) | null = null;
   
-  focusCallback: ((focusInfo: FocusInfo | null) => void) | null = null;
-
   animate = true;
 
   followActiveCharacter = false;
@@ -230,6 +229,10 @@ class Game implements WorldInterface {
     }
 
     this.removeActors = [];
+  }
+
+  focusCallback(focusInfo: FocusInfo | null) {
+    addFocusedStatus(focusInfo, this.renderer.scene2d)
   }
 
   async prepareTeams() {
@@ -643,10 +646,6 @@ class Game implements WorldInterface {
 
   setLoggerCallback(callback: (message: string) => void) {
     this.loggerCallback = callback;
-  }
-
-  setFocusCallback(callback: (focusInfo: FocusInfo | null) => void) {
-    this.focusCallback = callback;
   }
 
   setParties(parties: Party[]) {

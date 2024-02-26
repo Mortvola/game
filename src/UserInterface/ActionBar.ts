@@ -1,11 +1,11 @@
 import { IReactionDisposer, autorun } from "mobx"
-import { meleeAttack } from "./Character/Actions/MeleeAttack"
-import { rangeAttack } from "./Character/Actions/RangeAttack"
-import ElementNode, { Style } from "./Renderer/Drawables/SceneNodes/ElementNode"
-import FlexBox from "./Renderer/Drawables/SceneNodes/FlexBox"
-import TextBox from "./Renderer/Drawables/SceneNodes/TextBox"
-import SceneGraph2D from "./Renderer/SceneGraph2d"
-import { CreatureActorInterface } from "./types"
+import { meleeAttack } from "../Character/Actions/MeleeAttack"
+import { rangeAttack } from "../Character/Actions/RangeAttack"
+import ElementNode, { Style } from "../Renderer/Drawables/SceneNodes/ElementNode"
+import FlexBox from "../Renderer/Drawables/SceneNodes/FlexBox"
+import TextBox from "../Renderer/Drawables/SceneNodes/TextBox"
+import SceneGraph2D from "../Renderer/SceneGraph2d"
+import { CreatureActorInterface } from "../types"
 
 const spellSlots = (actor: CreatureActorInterface) => {
   const levels = new FlexBox({ columnGap: 8 })

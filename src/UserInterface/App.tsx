@@ -64,12 +64,6 @@ function App() {
     ));  
   }, [])
 
-  const [focus, setFocus] = React.useState<FocusInfo | null>(null);
-
-  const focusCallback = React.useCallback((focusInfo: FocusInfo | null) => {
-    setFocus(focusInfo);
-  }, [])
-
   React.useEffect(() => {
     const element = canvasRef.current;
 
@@ -77,10 +71,9 @@ function App() {
       element.focus();
       (async () => {
         game.setLoggerCallback(loggerCallback);
-        game.setFocusCallback(focusCallback);
       })()  
     }
-  }, [loggerCallback, focusCallback])
+  }, [loggerCallback])
 
   const handlePointerDown: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -323,11 +316,8 @@ function App() {
           </button>
         </div>
       </div>
-      <div className="upper-center">
-        <Focused focused={focus} />
-      </div>
-      <div className="upper-right">
-      </div>
+      <div className="upper-center" />
+      <div className="upper-right" />
       {
         showPartyDefs
           ? (
