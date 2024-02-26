@@ -1,8 +1,10 @@
 import { A, ActionFactory, ActionInterface } from "../../types";
+import LayOnHands from "./LayOnHands";
 import Rage from "./Rage";
 
 export const actions: ActionFactory<ActionInterface>[] = [
-  new ActionFactory(Rage,'Rage', 'Bonus'),
+  new ActionFactory(LayOnHands, 'Lay on Hands', 'Action'),
+  new ActionFactory(Rage, 'Rage', 'Bonus'),
 ]
 
 export const getAction = (name: string): ActionFactory<ActionInterface> | null => {
