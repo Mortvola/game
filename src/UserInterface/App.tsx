@@ -70,12 +70,6 @@ function App() {
     setFocus(focusInfo);
   }, [])
 
-  const [actor, setActor] = React.useState<CreatureActorInterface | null>(null);
-
-  const characterChangeCallback = React.useCallback((actor: CreatureActorInterface | null) => {
-    setActor(actor)
-  }, [])
-
   React.useEffect(() => {
     const element = canvasRef.current;
 
@@ -84,10 +78,9 @@ function App() {
       (async () => {
         game.setLoggerCallback(loggerCallback);
         game.setFocusCallback(focusCallback);
-        game.setCharacterChangeCallback(characterChangeCallback)
       })()  
     }
-  }, [loggerCallback, focusCallback, characterChangeCallback])
+  }, [loggerCallback, focusCallback])
 
   const handlePointerDown: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -352,46 +345,8 @@ function App() {
         onPointerLeave={handlePointerLeave}
         onWheel={handleWheel}
       />
-      <div className="lower-left">
-        {
-          actor
-            ? actor.character.influencingActions.map((c) => (
-              <div>{`${c.name} (${c.duration / 6})`}</div>
-            ))
-            : null
-        }
-        {
-          actor
-            ? actor.character.conditions.map((c) => (
-              <div>{c}</div>
-            ))
-            : null
-        }
-        {
-          actor?.character.concentration
-            ? <div>{`Concetrating: ${actor.character.concentration.name} (${actor.character.concentration.duration / 6})`}</div>
-            : null
-        }
-        {
-          actor?.character
-            ? (
-              <div>
-                <div>{actor.character.name}</div>
-                {`${actor.character.hitPoints}/${actor.character.maxHitPoints}`}
-                {
-                  actor.character.temporaryHitPoints
-                    ? ` + ${actor.character.temporaryHitPoints}`
-                    : ''
-                }
-              </div>
-            )
-            : null
-        }
-      </div>
-      <div
-        className="lower-center"
-      >
-      </div>
+      <div className="lower-left" />
+      <div className="lower-center" />
       <div className="lower-right">
         <Messages messages={messages} />
       </div>

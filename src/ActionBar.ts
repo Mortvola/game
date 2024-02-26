@@ -210,7 +210,7 @@ const actionItems = (actor: CreatureActorInterface) => {
 let actionBar: ElementNode | null = null
 let disposer: IReactionDisposer | null = null
 
-export const addActionBar = async (actor: CreatureActorInterface, scene2d: SceneGraph2D) => {
+export const addActionBar = (actor: CreatureActorInterface, scene2d: SceneGraph2D) => {
   const createActionBar = () => {
     const status = statusBar(actor)
     const actions = actionItems(actor)

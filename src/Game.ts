@@ -13,6 +13,7 @@ import { addActionBar } from './ActionBar';
 import ElementNode from './Renderer/Drawables/SceneNodes/ElementNode';
 import TextBox from './Renderer/Drawables/SceneNodes/TextBox';
 import { runInAction } from 'mobx';
+import { addPlayerStatus } from './PlayerStatus';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -73,8 +74,6 @@ class Game implements WorldInterface {
   
   focusCallback: ((focusInfo: FocusInfo | null) => void) | null = null;
 
-  characterChangeCallback: ((character: CreatureActorInterface | null) => void) | null = null;
-
   animate = true;
 
   followActiveCharacter = false;
@@ -129,23 +128,25 @@ class Game implements WorldInterface {
     this.initialized = true;
   }
 
+  characterChangeCallback(character: CreatureActorInterface | null) {
+    if (character !== null) {
+      addActionBar(character, this.renderer.scene2d)
+      addPlayerStatus(character, this.renderer.scene2d)
+    }
+  }
+
   async startTurn() {
     if (this.participants.activeActor) {
       if (this.participants.activeActor.automated) {
         // this.renderer.scene.removeNode(this.reticle);
 
-        if (this.characterChangeCallback) {
-          this.characterChangeCallback(null);
-        }
+        this.characterChangeCallback(null);
       } else {
         // if (this.inputMode === 'Controller') {
           // this.renderer.scene.addNode(this.reticle);
         // }
 
-        if (this.characterChangeCallback) {
-          this.characterChangeCallback(this.participants.activeActor);
-          await addActionBar(this.participants.activeActor, this.renderer.scene2d)
-        }
+        this.characterChangeCallback(this.participants.activeActor);
       }
 
       this.participants.activeActor.startTurn();
@@ -646,10 +647,6 @@ class Game implements WorldInterface {
 
   setFocusCallback(callback: (focusInfo: FocusInfo | null) => void) {
     this.focusCallback = callback;
-  }
-
-  setCharacterChangeCallback(callback: (actor: CreatureActorInterface | null) => void) {
-    this.characterChangeCallback = callback;
   }
 
   setParties(parties: Party[]) {
