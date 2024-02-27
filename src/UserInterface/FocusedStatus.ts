@@ -2,36 +2,32 @@ import { IReactionDisposer, autorun } from "mobx"
 import ElementNode from "../Renderer/Drawables/SceneNodes/ElementNode"
 import { FocusInfo } from "../types"
 import SceneGraph2D from "../Renderer/SceneGraph2d"
-import FlexBox from "../Renderer/Drawables/SceneNodes/FlexBox"
-import TextBox from "../Renderer/Drawables/SceneNodes/TextBox"
-import SceneNode2d from "../Renderer/Drawables/SceneNodes/SceneNode2d"
+import { createElement } from "./CreateElement"
 
 const getStatus = (focused: FocusInfo) => {
-  const flexBox = new FlexBox({
+  const style = {
     flexDirection: 'row',
     columnGap: 32,
     position: 'absolute',
     top: 0,
     left: '50%',
     transform: 'translate(-50%, 0)',
-  })
+  }
   
-  flexBox.nodes.push(new TextBox(focused.name));
-  flexBox.nodes.push(new TextBox(
-    `HP: ${focused.hitpoints}/${focused.maxHitpoints} ${focused.temporaryHitpoints ? ` + ${focused.temporaryHitpoints}` : ''}`
-  ));
-  flexBox.nodes.push(new TextBox(`AC: ${focused.armorClass}`))
-
-  const conditions = focused.conditions.map((c) => (
-    new TextBox(`${c.name} (${c.duration / 6})`)
-  ))
-
-  const conditionsWrapper = new ElementNode()
-  conditionsWrapper.nodes.push(...conditions)
-
-  flexBox.nodes.push(conditionsWrapper)
-
-  return flexBox
+  return createElement(
+    '',
+    { style },
+    focused.name,
+    `HP: ${focused.hitpoints}/${focused.maxHitpoints} ${focused.temporaryHitpoints ? ` + ${focused.temporaryHitpoints}` : ''}`,
+    `AC: ${focused.armorClass}`,
+    createElement(
+      '',
+      {},
+      ...focused.conditions.map((c) => (
+        `${c.name} (${c.duration / 6})`
+      )),
+    )
+  )
 }
 
 let focusedStatus: ElementNode | null = null

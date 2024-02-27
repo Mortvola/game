@@ -16,6 +16,7 @@ import { runInAction } from 'mobx';
 import { addPlayerStatus } from './UserInterface/PlayerStatus';
 import { addFocusedStatus } from './UserInterface/FocusedStatus';
 import { addMessages } from './UserInterface/Messages';
+import { createElement } from './UserInterface/CreateElement';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -94,25 +95,20 @@ class Game implements WorldInterface {
   static async create() {
     const renderer = await Renderer.create();
     
-    // const reticle = await DrawableNode.create(await Reticle.create(-reticleWidth / 2, reticleHeight / 2, reticleWidth, reticleHeight))
-    // const r = await sceneObjectlManager.getSceneObject2d('Reticle')
-
-    const reticle = new ElementNode({ position: 'absolute' })
-
-    const cursor = new ElementNode({
-      // position: 'absolute',
-      width: 16,
-      height: 16,
-      backgroundColor: [1, 0, 0, 1] },
+    const reticle = createElement(
+      '',
+      { style: { position: 'absolute' }},
+      createElement(
+        '',
+        {
+          style: {
+            width: 16,
+            height: 16,
+            backgroundColor: [1, 0, 0, 1],
+          },
+        },
+      )
     )
-
-    reticle.nodes.push(cursor)
-
-    // reticle.style.x = r.x;
-    // reticle.style.y = r.y;
-    // reticle.style.width = r.width
-    // reticle.style.height = r.height
-    // reticle.material = r.material
 
     const game = new Game(renderer, reticle);
 
@@ -554,18 +550,14 @@ class Game implements WorldInterface {
       this.reticle.nodes = this.reticle.nodes.slice(0, 1)
     }
     else {
-      const element = new ElementNode({ margin: { top: 16 }, flexDirection: 'column' })
+      const element = createElement(
+        '',
+        { style: { margin: { top: 16 }, flexDirection: 'column' } },
+        actionInfo.action,
+        actionInfo.percentSuccess ? `${actionInfo?.percentSuccess ?? 0}%` : null,
+        actionInfo.description ? actionInfo.description : null,
+      )
 
-      element.nodes.push(new TextBox(actionInfo.action))
-
-      if (actionInfo.percentSuccess) {
-        element.nodes.push(new TextBox(`${actionInfo?.percentSuccess ?? 0}%`))
-      }
-
-      if (actionInfo.description) {
-        element.nodes.push(new TextBox(actionInfo.description))
-      }
-  
       this.reticle.nodes[1] = element  
     }
 
