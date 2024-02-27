@@ -32,7 +32,7 @@ const spellSlots = (actor: CreatureActorInterface) => {
 }
 
 const statusBar = (actor: CreatureActorInterface) => {
-  const flex = new FlexBox({ columnGap: 8 })
+  const flex = new FlexBox({ columnGap: 8, margin: { top: 4, bottom: 4 } })
 
   const actionStyle = {
     width: 32,
@@ -224,6 +224,9 @@ export const addActionBar = (actor: CreatureActorInterface | null, scene2d: Scen
         left: '50%',
         transform: 'translate(-50%, 0)',
         bottom: 0,
+        backgroundColor: [0.2, 0.2, 0.25, 1],
+        padding: { left: 16, top: 4, right: 16 },
+        border: { color: [0.4, 0.4, 0.4, 1],  width: 1 }
       })
   
       newActionBar.nodes.push(status, actions)  
