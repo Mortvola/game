@@ -83,8 +83,9 @@ class Game implements WorldInterface {
   constructor(renderer: Renderer, reticle: ElementNode) {
     this.renderer = renderer;
 
-    this.renderer.camera.offset = 18;
-    this.renderer.camera.position = vec4.create(0, 0, 20, 1);
+    this.renderer.camera.offset = 40;
+    this.renderer.camera.position = vec4.create(0, 0, 7, 1);
+    this.renderer.camera.rotateX = -45;
 
     this.reticle = reticle;
     this.renderer.scene2d.addNode(this.reticle)
