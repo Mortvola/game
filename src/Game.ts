@@ -15,6 +15,7 @@ import TextBox from './Renderer/Drawables/SceneNodes/TextBox';
 import { runInAction } from 'mobx';
 import { addPlayerStatus } from './UserInterface/PlayerStatus';
 import { addFocusedStatus } from './UserInterface/FocusedStatus';
+import { addMessages } from './UserInterface/Messages';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -70,8 +71,6 @@ class Game implements WorldInterface {
   inputMode: 'Mouse' | 'Controller' = 'Mouse';
 
   collidees = new Collidees();
-
-  loggerCallback: ((message: string) => void) | null = null;
   
   animate = true;
 
@@ -231,6 +230,21 @@ class Game implements WorldInterface {
 
   focusCallback(focusInfo: FocusInfo | null) {
     addFocusedStatus(focusInfo, this.renderer.scene2d)
+  }
+
+  messages: { id: number, message: string }[] = []
+
+  loggerCallback(message: string) {
+    this.messages = [
+      ...this.messages,
+      {
+        id: this.messages.length === 0 ? 0 : this.messages[this.messages.length - 1].id + 1,
+        message,
+      }
+    ]
+    .slice(-4)
+
+    addMessages(this.messages, this.renderer.scene2d)
   }
 
   async prepareTeams() {
@@ -640,10 +654,6 @@ class Game implements WorldInterface {
   zoomIn() {
     this.renderer.camera.offset -= 1;
     this.renderer.camera.rotateX += 1;
-  }
-
-  setLoggerCallback(callback: (message: string) => void) {
-    this.loggerCallback = callback;
   }
 
   setParties(parties: Party[]) {

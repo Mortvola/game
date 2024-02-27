@@ -4,9 +4,7 @@ import { game } from '../Main';
 import { vec4 } from 'wgpu-matrix';
 import DefineParties from './DefineParty';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
-import Messages from './Messages';
-import Focused from './Focused';
-import { CreatureActorInterface, FocusInfo, Party } from '../types';
+import { Party } from '../types';
 import { gpu } from "../Renderer/Gpu";
 
 type DiretionKeys = {
@@ -49,31 +47,13 @@ function App() {
     }
   }, [])
 
-  const [messages, setMessages] = React.useState<{ id: number, message: string }[]>([]);
-
-  const loggerCallback = React.useCallback((message: string) => {
-    setMessages((prev) => (
-      [
-        ...prev,
-        {
-          id: prev.length === 0 ? 0 : prev[prev.length - 1].id + 1,
-          message,
-        }
-      ]
-      .slice(-4)
-    ));  
-  }, [])
-
   React.useEffect(() => {
     const element = canvasRef.current;
 
     if (element) {
       element.focus();
-      (async () => {
-        game.setLoggerCallback(loggerCallback);
-      })()  
     }
-  }, [loggerCallback])
+  }, [])
 
   const handlePointerDown: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -100,7 +80,7 @@ function App() {
     }
   }
 
-  const [pointPosition, setPointerPosition] = React.useState<{ x: number, y: number }>({ x: 0, y: 0})
+  const [pointerPosition, setPointerPosition] = React.useState<{ x: number, y: number }>({ x: 0, y: 0})
 
   const handlePointerMove: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -337,9 +317,7 @@ function App() {
       />
       <div className="lower-left" />
       <div className="lower-center" />
-      <div className="lower-right">
-        <Messages messages={messages} />
-      </div>
+      <div className="lower-right" />
     </div>
   );
 }
