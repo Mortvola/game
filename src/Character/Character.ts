@@ -16,16 +16,16 @@ class Character extends Creature implements CharacterInterface {
     super(abilityScores, maxHitPoints, race, charClass, weapons, armor, 0);
 
     this.equipped.meleeWeapon = this.weapons
-      .filter((w) => [WeaponType.Simple, WeaponType.Martial].includes(w.type))[0];
+      .filter((w) => [WeaponType.Simple, WeaponType.Martial].includes(w.type))[0] ?? null;
 
     this.equipped.rangeWeapon = this.weapons
-      .filter((w) => [WeaponType.SimpleRange, WeaponType.MartialRange].includes(w.type))[0];
+      .filter((w) => [WeaponType.SimpleRange, WeaponType.MartialRange].includes(w.type))[0] ?? null;
 
     this.equipped.armor = this.armor
-      .filter((a) => a.type !== ArmorType.Shield)[0];
+      .filter((a) => a.type !== ArmorType.Shield)[0] ?? null;
 
     this.equipped.shield = this.armor
-      .filter((a) => a.type === ArmorType.Shield)[0];
+      .filter((a) => a.type === ArmorType.Shield)[0] ?? null;
 
     this.name = race.generateName()
   }

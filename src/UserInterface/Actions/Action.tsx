@@ -1,13 +1,14 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
 import { A, ActionFactory, ActionInterface, CreatureActorInterface } from '../../types';
+import { observer } from 'mobx-react-lite';
 
 type PropsType = {
   actor: CreatureActorInterface,
   action: ActionFactory<ActionInterface>,
 }
 
-const Action: React.FC<PropsType> = ({
+const Action: React.FC<PropsType> = observer(({
   actor,
   action,
 }) => {
@@ -32,6 +33,9 @@ const Action: React.FC<PropsType> = ({
   if (!isAvailable()) {
     className = `${className} ${styles.disabled}`
   }
+  else if (actor.getAction() === action) {
+    className = `${className} ${styles.selected}`
+  }
 
   return (
     <div
@@ -41,6 +45,6 @@ const Action: React.FC<PropsType> = ({
       {action.name}
     </div>
   )
-}
+})
 
 export default Action;

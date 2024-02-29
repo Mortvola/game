@@ -6,11 +6,12 @@ import DefineParties from './DefineParty';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
 import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
 import Messages from './Messages';
-import ActionBar from './Actions/ActionBar';
+import Actions from './Actions/Actions';
 import StatusBar from './StatusBar/StatusBar';
 import Focused from './Focused';
 import { ActionInfo, CreatureActorInterface, FocusInfo, Party } from '../types';
 import { gpu } from "../Renderer/Gpu";
+import ActionBar from './Actions/ActionBar';
 
 type DiretionKeys = {
   left: number,
@@ -501,12 +502,7 @@ function App() {
       >
         {
           actor
-            ? (
-              <div>
-                <StatusBar character={actor.character} />
-                <ActionBar actor={actor} />
-              </div>
-            )
+            ? <ActionBar actor={actor} />
             : null
         }
       </div>

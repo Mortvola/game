@@ -1,13 +1,14 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
 import { CreatureActorInterface, SpellFactory, SpellInterface } from '../../types';
+import { observer } from 'mobx-react-lite';
 
 type PropsType = {
   actor: CreatureActorInterface,
   spell: SpellFactory<SpellInterface>,
 }
 
-const SpellAction: React.FC<PropsType> = ({
+const SpellAction: React.FC<PropsType> = observer(({
   actor,
   spell,
 }) => {
@@ -33,6 +34,9 @@ const SpellAction: React.FC<PropsType> = ({
   if (!isAvailable()) {
     className = `${className} ${styles.disabled}`
   }
+  else if (actor.getAction() === spell) {
+    className = `${className} ${styles.selected}`
+  }
 
   return (
     <div
@@ -42,6 +46,6 @@ const SpellAction: React.FC<PropsType> = ({
       {spell.name}
     </div>
   )
-}
+})
 
 export default SpellAction;

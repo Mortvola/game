@@ -84,6 +84,12 @@ class Creature implements CreatureInterface {
       spellSlots: observable,
       actionsLeft: observable,
       bonusActionsLeft: observable,
+      // equipped: observable,
+    })
+
+    makeObservable(this.equipped, {
+      meleeWeapon: observable,
+      rangeWeapon: observable,
     })
   }
 
