@@ -1,5 +1,5 @@
 import { ActionFactory, ActionInterface, CreatureActorInterface } from "../types";
-import { createElement } from "./CreateElement";
+import UI from "./CreateElement";
 import { actionStyle, bonusStyle, disabledBackgroundColor, selectedBorder, unselectdBorder } from "./Styles";
 
 type PropsType = {
@@ -7,27 +7,27 @@ type PropsType = {
   currentAction: ActionFactory<ActionInterface> | null,
 }
 
-export const spellActionList = (props: PropsType) => {
-  return props.actor.character.spells.map((spell) => {
+export const spellActionList = ({ actor, currentAction }: PropsType) => {
+  return actor.character.spells.map((spell) => {
     let style = actionStyle
     if (spell.time === 'Bonus') {
       style = bonusStyle
     }
 
     const handleClick = () => {
-      if (spell.available(props.actor)) {
-        props.actor.setAction(spell);
+      if (spell.available(actor)) {
+        actor.setAction(spell);
       }
     }
     
-    return createElement(
+    return UI.createElement(
       '',
       {
         style: {
           ...style,
-          border: props.currentAction === spell ? selectedBorder : unselectdBorder,
-          margin: props.currentAction === spell ? undefined : { top: 2, left: 2, bottom: 2, right: 2 },
-          backgroundColor: spell.available(props.actor) ?  style.backgroundColor : disabledBackgroundColor,
+          border: currentAction === spell ? selectedBorder : unselectdBorder,
+          margin: currentAction === spell ? undefined : { top: 2, left: 2, bottom: 2, right: 2 },
+          backgroundColor: spell.available(actor) ?  style.backgroundColor : disabledBackgroundColor,
         },
         onClick: handleClick,
       },

@@ -11,12 +11,11 @@ import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, 
 import Renderer from './Renderer/Renderer';
 import { addActionBar } from './UserInterface/ActionBar';
 import ElementNode from './Renderer/Drawables/SceneNodes/ElementNode';
-import TextBox from './Renderer/Drawables/SceneNodes/TextBox';
 import { runInAction } from 'mobx';
 import { addPlayerStatus } from './UserInterface/PlayerStatus';
 import { addFocusedStatus } from './UserInterface/FocusedStatus';
 import { addMessages } from './UserInterface/Messages';
-import { createElement } from './UserInterface/CreateElement';
+import UI from './UserInterface/CreateElement';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -81,24 +80,26 @@ class Game implements WorldInterface {
 
   occupants: Occupant[] = [];
 
-  constructor(renderer: Renderer, reticle: ElementNode) {
+  constructor(renderer: Renderer, reticle: UI.UIElement) {
     this.renderer = renderer;
 
     this.renderer.camera.offset = 40;
     this.renderer.camera.position = vec4.create(0, 0, 7, 1);
     this.renderer.camera.rotateX = -45;
 
-    this.reticle = reticle;
-    this.renderer.scene2d.addNode(this.reticle)
+    const r = UI.render(reticle, this.renderer.scene2d);
+
+    this.renderer.scene2d.addNode(r!)
+    this.reticle = r!
   }
 
   static async create() {
     const renderer = await Renderer.create();
     
-    const reticle = createElement(
+    const reticle = UI.createElement(
       '',
       { style: { position: 'absolute' }},
-      createElement(
+      UI.createElement(
         '',
         {
           style: {
@@ -109,6 +110,10 @@ class Game implements WorldInterface {
         },
       )
     )
+
+    if (!reticle) {
+      throw new Error('retiticle is null')
+    }
 
     const game = new Game(renderer, reticle);
 
@@ -550,15 +555,17 @@ class Game implements WorldInterface {
       this.reticle.nodes = this.reticle.nodes.slice(0, 1)
     }
     else {
-      const element = createElement(
+      const element = UI.render(UI.createElement(
         '',
         { style: { margin: { top: 16 }, flexDirection: 'column' } },
         actionInfo.action,
         actionInfo.percentSuccess ? `${actionInfo?.percentSuccess ?? 0}%` : null,
         actionInfo.description ? actionInfo.description : null,
-      )
+      ), this.renderer.scene2d)
 
-      this.reticle.nodes[1] = element  
+      if (element) {
+        this.reticle.nodes[1] = element
+      }
     }
 
     this.renderer.scene2d.needsUpdate = true;

@@ -1,5 +1,5 @@
-import { IReactionDisposer, autorun } from "mobx"
-import ElementNode from "../Renderer/Drawables/SceneNodes/ElementNode"
+import { IReactionDisposer, IReactionPublic, autorun } from "mobx"
+import ElementNode, { Style } from "../Renderer/Drawables/SceneNodes/ElementNode"
 import SceneGraph2D from "../Renderer/SceneGraph2d"
 import { CreatureActorInterface } from "../types"
 import { classActionList } from "./ClassActionList"
@@ -7,24 +7,24 @@ import { cantripActionList } from "./CantripActionList"
 import { spellActionList } from "./SpellActionList"
 import { rangeAction } from "./RangeAction"
 import { meleeAction } from "./MeleeAction"
-import { createElement } from "./CreateElement"
+import UI from "./CreateElement"
 import { statusBar } from "./StatusBar"
 
 type PropsType = {
   actor: CreatureActorInterface,
 }
 
-const actionItems = ({ actor }: PropsType) => {
+const actionItems: UI.FC<PropsType> = ({ actor }) => {
   const currentAction = actor.getAction()
 
-  const commonActionStyle = {
+  const commonActionStyle: Style = {
     flexDirection: 'column',
     justifyContent: 'center',
     height: 2 * 54 + 1 * 4 + 8,
     margin: { top: 4 },
   }
 
-  const actionTrayStyle = {
+  const actionTrayStyle: Style = {
     backgroundColor: [0.25, 0, 0, 1],
     columnGap: 4,
     width: 6 * 54 + 5 * 4,
@@ -34,16 +34,16 @@ const actionItems = ({ actor }: PropsType) => {
     padding: { left: 4, right: 4, top: 4, bottom: 4 },
   }
 
-  return createElement(
+  return UI.createElement(
     '',
     {},
-    createElement(
+    UI.createElement(
       '',
       { style: commonActionStyle },
-      createElement(meleeAction, { actor, currentAction }),
-      createElement(rangeAction, { actor, currentAction }),
+      UI.createElement(meleeAction, { actor, currentAction }),
+      UI.createElement(rangeAction, { actor, currentAction }),
     ),
-    createElement(
+    UI.createElement(
       '',
       { style: actionTrayStyle },
       spellActionList({ actor, currentAction }),
@@ -53,36 +53,60 @@ const actionItems = ({ actor }: PropsType) => {
   );
 }
 
-let actionBar: ElementNode | null = null
+const actionBar = ({ actor }: { actor: CreatureActorInterface }) => {
+  const actionBarStyle: Style = {
+    flexDirection: 'column',
+    position: 'absolute',
+    left: '50%',
+    transform: 'translate(-50%, 0)',
+    bottom: 0,
+    backgroundColor: [0.2, 0.2, 0.25, 1],
+    padding: { left: 16, top: 4, right: 16 },
+    border: { color: [0.4, 0.4, 0.4, 1],  width: 1 }
+  }
+
+  return UI.createElement(
+    '',
+    { style: actionBarStyle },
+    UI.createElement(statusBar, { actor }),
+    UI.createElement(actionItems, { actor }),
+  )
+}
+
+let currentActionBar: ElementNode | null = null
 let disposer: IReactionDisposer | null = null
 
 export const addActionBar = (actor: CreatureActorInterface | null, scene2d: SceneGraph2D) => {
-  const createActionBar = () => {
+  const createActionBar = (r: IReactionPublic) => {
     let newActionBar: ElementNode | null = null;
 
     if (actor) {
-      const actionBarStyle = {
-        flexDirection: 'column',
-        position: 'absolute',
-        left: '50%',
-        transform: 'translate(-50%, 0)',
-        bottom: 0,
-        backgroundColor: [0.2, 0.2, 0.25, 1],
-        padding: { left: 16, top: 4, right: 16 },
-        border: { color: [0.4, 0.4, 0.4, 1],  width: 1 }
-      }
+      // const actionBarStyle: Style = {
+      //   flexDirection: 'column',
+      //   position: 'absolute',
+      //   left: '50%',
+      //   transform: 'translate(-50%, 0)',
+      //   bottom: 0,
+      //   backgroundColor: [0.2, 0.2, 0.25, 1],
+      //   padding: { left: 16, top: 4, right: 16 },
+      //   border: { color: [0.4, 0.4, 0.4, 1],  width: 1 }
+      // }
 
-      newActionBar = createElement(
-        '',
-        { style: actionBarStyle },
-        createElement(statusBar, { actor }),
-        createElement(actionItems, { actor }),
-      )  
+      // const temp = UI.createElement(
+      //   '',
+      //   { style: actionBarStyle },
+      //   UI.createElement(statusBar, { actor }),
+      //   UI.createElement(actionItems, { actor }),
+      // )
+
+      newActionBar = UI.render(
+        UI.createElement(actionBar, { actor }),
+        scene2d,
+      )
     }
 
-    scene2d.replaceNode(actionBar, newActionBar)
-
-    actionBar = newActionBar
+    scene2d.replaceNode(currentActionBar, newActionBar)
+    currentActionBar = newActionBar
   }
 
   if (disposer !== null) {

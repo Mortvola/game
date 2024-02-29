@@ -1,6 +1,6 @@
 import { rangeAttack } from "../Character/Actions/RangeAttack";
 import { ActionFactory, ActionInterface, CreatureActorInterface } from "../types";
-import { createElement } from "./CreateElement";
+import UI from "./CreateElement";
 import { actionStyle, disabledBackgroundColor, selectedBorder, unselectdBorder } from "./Styles";
 
 type PropsType = {
@@ -8,21 +8,21 @@ type PropsType = {
   currentAction: ActionFactory<ActionInterface> | null,
 }
 
-export const rangeAction = (props: PropsType) => {
+export const rangeAction: UI.FC<PropsType> = ({ actor, currentAction}) => {
   const handleClick = () => {
-    if (props.actor.character.equipped.rangeWeapon) {
-      props.actor.setAction(rangeAttack);
+    if (actor.character.equipped.rangeWeapon) {
+      actor.setAction(rangeAttack);
     }
   }
 
-  return createElement(
+  return UI.createElement(
     '',
     {
       style: {
         ...actionStyle,
-        border: props.currentAction === rangeAttack ? selectedBorder : unselectdBorder,
-        margin: props.currentAction === rangeAttack ? undefined : { top: 2, left: 2, bottom: 2, right: 2 },
-        backgroundColor: props.actor.character.equipped.rangeWeapon && props.actor.character.actionsLeft > 0 ?  actionStyle.backgroundColor : disabledBackgroundColor,
+        border: currentAction === rangeAttack ? selectedBorder : unselectdBorder,
+        margin: currentAction === rangeAttack ? undefined : { top: 2, left: 2, bottom: 2, right: 2 },
+        backgroundColor: actor.character.equipped.rangeWeapon && actor.character.actionsLeft > 0 ?  actionStyle.backgroundColor : disabledBackgroundColor,
       },
       onClick: handleClick,
     },

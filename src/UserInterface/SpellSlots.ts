@@ -1,18 +1,17 @@
-import ElementNode from "../Renderer/Drawables/SceneNodes/ElementNode"
 import { CreatureActorInterface } from "../types"
-import { createElement } from "./CreateElement"
 import { spellLevelSlots } from "./SpellLevelSlots"
+import UI from './CreateElement'
 
 type PropsType = {
   actor: CreatureActorInterface
 }
 
-export const spellSlots = ({ actor }: PropsType) => {
-  const levels: ElementNode[] = []
+export const spellSlots: UI.FC<PropsType> = ({ actor }) => {
+  const levels: UI.UIElement [] = []
 
   for (let level = 0; level < actor.character.getMaxSpellLevel()!; level += 1) {
     levels.push(
-      createElement(
+      UI.createElement(
         spellLevelSlots,
         {
           maxSpellSlots: actor.character.getMaxSpellSlots(level + 1)!,
@@ -22,7 +21,7 @@ export const spellSlots = ({ actor }: PropsType) => {
     )
   }
 
-  return createElement(
+  return UI.createElement(
     '',
     { style: { columnGap: 8 }},
     ...levels,

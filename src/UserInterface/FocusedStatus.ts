@@ -1,11 +1,11 @@
 import { IReactionDisposer, autorun } from "mobx"
-import ElementNode from "../Renderer/Drawables/SceneNodes/ElementNode"
+import ElementNode, { Style } from "../Renderer/Drawables/SceneNodes/ElementNode"
 import { FocusInfo } from "../types"
 import SceneGraph2D from "../Renderer/SceneGraph2d"
-import { createElement } from "./CreateElement"
+import UI from "./CreateElement"
 
 const getStatus = (focused: FocusInfo) => {
-  const style = {
+  const style: Style = {
     flexDirection: 'row',
     columnGap: 32,
     position: 'absolute',
@@ -14,13 +14,13 @@ const getStatus = (focused: FocusInfo) => {
     transform: 'translate(-50%, 0)',
   }
   
-  return createElement(
+  return UI.createElement(
     '',
     { style },
     focused.name,
     `HP: ${focused.hitpoints}/${focused.maxHitpoints} ${focused.temporaryHitpoints ? ` + ${focused.temporaryHitpoints}` : ''}`,
     `AC: ${focused.armorClass}`,
-    createElement(
+    UI.createElement(
       '',
       {},
       ...focused.conditions.map((c) => (
@@ -38,7 +38,9 @@ export const addFocusedStatus = async (focused: FocusInfo | null, scene2d: Scene
     let status: ElementNode | null = null
 
     if (focused) {
-      status = getStatus(focused)
+      const temp = getStatus(focused)
+
+      status = UI.render(temp, scene2d)
     }
 
     scene2d.replaceNode(focusedStatus, status)

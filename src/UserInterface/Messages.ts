@@ -1,14 +1,14 @@
 import { IReactionDisposer, autorun } from "mobx"
-import ElementNode from "../Renderer/Drawables/SceneNodes/ElementNode"
+import ElementNode, { Style } from "../Renderer/Drawables/SceneNodes/ElementNode"
 import SceneGraph2D from "../Renderer/SceneGraph2d"
-import { createElement } from "./CreateElement"
+import UI from "./CreateElement"
 
 type PropsType = {
   messages: { id: number, message: string }[],
 }
 
-const getMessages = ({ messages }: PropsType) => {
-  const style = {
+const getMessages: UI.FC<PropsType> = ({ messages }) => {
+  const style: Style = {
     flexDirection: 'column',
     position: 'absolute',
     right: 0,
@@ -16,7 +16,7 @@ const getMessages = ({ messages }: PropsType) => {
     padding: { bottom: 16, right: 16 },
   }
 
-  return createElement(
+  return UI.createElement(
     '',
     { style },
     ...messages.map((m) => (
@@ -32,7 +32,7 @@ export const addMessages = async (messages: { id: number, message: string }[], s
   const createMessages = () => {
     let log: ElementNode | null = null
 
-    log = getMessages({ messages })
+    log = UI.render(getMessages({ messages }), scene2d)
 
     scene2d.replaceNode(messageLog, log)
     messageLog = log

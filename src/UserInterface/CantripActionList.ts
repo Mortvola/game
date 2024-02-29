@@ -1,5 +1,5 @@
 import { ActionFactory, ActionInterface, CreatureActorInterface } from "../types";
-import { createElement } from "./CreateElement";
+import UI from "./CreateElement";
 import { actionStyle, bonusStyle, disabledBackgroundColor, selectedBorder, unselectdBorder } from "./Styles";
 
 type PropsType = {
@@ -20,7 +20,7 @@ export const cantripActionList = (props: PropsType) => {
       }
     }
 
-    return createElement(
+    return UI.createElement(
       '',
       {
         style: {

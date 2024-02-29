@@ -1,13 +1,12 @@
-import ElementNode from "../Renderer/Drawables/SceneNodes/ElementNode"
-import { createElement } from "./CreateElement"
+import UI from "./CreateElement"
 
 type PropsType = {
   maxSpellSlots: number,
   available: number,
 }
 
-export const spellLevelSlots = ({ maxSpellSlots, available }: PropsType) => {
-  const elements: ElementNode[] = []
+export const spellLevelSlots: UI.FC<PropsType> = ({ maxSpellSlots, available }) => {
+  const elements: UI.UIElement[] = []
 
   for (let i = 0; i < maxSpellSlots; i += 1) {
     const style = {
@@ -19,9 +18,9 @@ export const spellLevelSlots = ({ maxSpellSlots, available }: PropsType) => {
     }
 
     elements.push(
-      createElement('', { style })
+      UI.createElement('', { style })
     )
   }
 
-  return createElement('', {}, ...elements)
+  return UI.createElement('', {}, ...elements)
 }

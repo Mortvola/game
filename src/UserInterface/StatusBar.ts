@@ -1,12 +1,12 @@
 import { CreatureActorInterface } from "../types"
-import { createElement } from "./CreateElement"
+import UI from "./CreateElement"
 import { spellSlots } from "./SpellSlots"
 
 type PropsType = {
   actor: CreatureActorInterface,
 }
 
-export const statusBar = ({ actor }: PropsType) => {
+export const statusBar: UI.FC<PropsType> = ({ actor }) => {
   const actionStyle = {
     width: 32,
     height: 32,
@@ -19,11 +19,11 @@ export const statusBar = ({ actor }: PropsType) => {
     backgroundColor: actor.character.bonusActionsLeft > 0 ? [1, 0.65, 0, 1] : [0, 0, 0, 1],
   }
 
-  return createElement(
+  return UI.createElement(
     '',
     { style: { columnGap: 8, margin: { top: 4, bottom: 4 } }},
-    createElement('', { style: actionStyle }),
-    createElement('', { style: bonusStyle }),
-    createElement(spellSlots, { actor }),
+    UI.createElement('', { style: actionStyle }),
+    UI.createElement('', { style: bonusStyle }),
+    UI.createElement(spellSlots, { actor }),
   )
 }

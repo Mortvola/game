@@ -1,15 +1,15 @@
 import { IReactionDisposer, autorun } from "mobx"
-import ElementNode from "../Renderer/Drawables/SceneNodes/ElementNode"
+import ElementNode, { Style } from "../Renderer/Drawables/SceneNodes/ElementNode"
 import { CreatureActorInterface } from "../types"
 import SceneGraph2D from "../Renderer/SceneGraph2d"
-import { createElement } from "./CreateElement"
+import UI from "./CreateElement"
 
 type PropsType = {
   actor: CreatureActorInterface
 }
 
-const getStatus = ({ actor }: PropsType) => {
-  const style = {
+const getStatus: UI.FC<PropsType> = ({ actor }) => {
+  const style: Style = {
     flexDirection: 'column',
     position: 'absolute',
     left: 0,
@@ -17,7 +17,7 @@ const getStatus = ({ actor }: PropsType) => {
     padding: { left: 16, bottom: 16 },
   }
   
-  return createElement(
+  return UI.createElement(
     '',
     { style },
     ...actor.character.influencingActions.map((c) => (
@@ -29,7 +29,7 @@ const getStatus = ({ actor }: PropsType) => {
     actor.character.concentration
       ? `Concetrating: ${actor.character.concentration.name} (${actor.character.concentration.duration / 6})`
       : null,
-    createElement(
+    UI.createElement(
       '',
       { style: { flexDirection: 'column' } },
       actor.character.name,
@@ -46,7 +46,7 @@ export const addPlayerStatus = async (actor: CreatureActorInterface | null, scen
     let status: ElementNode | null = null
 
     if (actor) {
-      status = getStatus({ actor })
+      status = UI.render(getStatus({ actor }), scene2d)
     }
 
     scene2d.replaceNode(playerStatus, status)

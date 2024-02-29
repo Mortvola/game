@@ -5,7 +5,7 @@ import Goblin from "./Character/Monsters/Goblin";
 import { XPThreshold, xpThresholds } from "./Tables";
 import Kobold from "./Character/Monsters/Kobold";
 import { CharacterInterface, CreatureActorInterface, ParticipantsInterface, Party, WorldInterface } from "./types";
-import { runInAction } from "mobx";
+import { computed, makeObservable, observable, observe, runInAction } from "mobx";
 
 function createParty<Type extends CharacterInterface>(thresholds: XPThreshold, c: new (name: string) => Type, name: string): Party {
   const party: Party = {
@@ -74,6 +74,12 @@ class Participants implements ParticipantsInterface {
 
   get activeActor(): CreatureActorInterface {
     return this.turns[this.turn]
+  }
+
+  constructor() {
+    makeObservable(this, {
+      activeActor: computed,
+    })
   }
 
   remove(actor: CreatureActorInterface) {
