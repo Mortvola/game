@@ -3,32 +3,26 @@ import InputPort from "../Ports/InputPort";
 import OutputPort from "../Ports/OutputPort";
 import { DataType } from "../Types";
 
-class Lerp extends OperationNode {
+class Clamp extends OperationNode {
   constructor(id?: number) {
-    super('Lerp', 'Lerp', id)
+    super('Clamp', 'Clamp', id)
 
     this.inputPorts = [
       new InputPort(this, 'vec4f', 'A'),
       new InputPort(this, 'vec4f', 'B'),
-      new InputPort(this, 'vec4f', 'T'),
+      new InputPort(this, 'vec4f', 'C'),
     ];
 
     this.outputPort = [new OutputPort(this, 'vec4f', 'result')]
   }
 
-  getDataType(): DataType {
-    const typeA = this.inputPorts[0].getDataType()
-
-    return typeA;
-  }
-
   getExpression(): [string, DataType] {
     const [varA, dataTypeA] = this.inputPorts[0].getValue();
     const [varB] = this.inputPorts[1].getValue();
-    const [varT] = this.inputPorts[2].getValue();
+    const [varC] = this.inputPorts[2].getValue();
 
-    return [`mix(${varA}, ${varB}, ${varT})`, dataTypeA];
+    return [`clamp(${varA}, ${varB}, ${varC})`, dataTypeA];
   }
 }
 
-export default Lerp;
+export default Clamp;

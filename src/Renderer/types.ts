@@ -8,6 +8,8 @@ import SceneNode2d from './Drawables/SceneNodes/SceneNode2d';
 export const maxInstances = 1000;
 
 export interface ContainerNodeInterface extends SceneNodeInterface {
+  nodes: SceneNodeInterface[];
+
   addNode(node: SceneNodeInterface): void;
 
   removeNode(node: SceneNodeInterface): void;
@@ -15,6 +17,9 @@ export interface ContainerNodeInterface extends SceneNodeInterface {
 
 export interface RenderPassInterface {
   addDrawable(drawable: DrawableNodeInterface | SceneNode2d): void;
+}
+
+export interface RenderPass2DInterface {
 }
 
 export interface RendererInterface {
@@ -45,7 +50,7 @@ export interface SceneNodeInterface {
   setFromAngles(x: number, y: number, z: number): void;
 }
 
-export type DrawableType = 'Mesh' | 'Billboard' | 'Circle' | 'Line' | '2D'
+export type DrawableType = 'Mesh' | 'Billboard' | 'Circle' | 'Line' | '2D' | 'Mesh2D'
 
 export interface MaterialInterface {
   pipeline: PipelineInterface | null;
@@ -67,6 +72,8 @@ export interface DrawableNodeInterface extends SceneNodeInterface {
   material: MaterialInterface;
   
   color: Float32Array;
+
+  instanceIndex: number;
 
   hitTest(origin: Vec4, vector: Vec4): { point: Vec4, t: number, drawable: DrawableInterface} | null;
 }
