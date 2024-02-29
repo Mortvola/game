@@ -1,10 +1,10 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import { CreatureActorInterface, R, SpellInterface } from '../../types';
+import { CreatureActorInterface, SpellFactory, SpellInterface } from '../../types';
 
 type PropsType = {
   actor: CreatureActorInterface,
-  spell: R<SpellInterface>,
+  spell: SpellFactory<SpellInterface>,
 }
 
 const SpellAction: React.FC<PropsType> = ({
@@ -21,7 +21,7 @@ const SpellAction: React.FC<PropsType> = ({
 
   const handleClick = () => {
     if (isAvailable()) {
-      actor.setAction(new spell.spell(actor));
+      actor.setAction(spell);
     }
   }
 

@@ -1,7 +1,7 @@
 import { Vec4 } from "wgpu-matrix";
 import Script from "../../Script/Script";
 import Action from "./Action";
-import { CreatureActorInterface } from "../../types";
+import { ActionFactory, CreatureActorInterface } from "../../types";
 
 class MeleeAttack extends Action {
   constructor(actor: CreatureActorInterface) {
@@ -36,4 +36,4 @@ class MeleeAttack extends Action {
   }
 }
 
-export default MeleeAttack;
+export const meleeAttack = new ActionFactory(MeleeAttack, 'Melee Attack', 'Action')

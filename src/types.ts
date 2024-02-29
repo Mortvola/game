@@ -6,7 +6,7 @@ import { Abilities } from './Character/Classes/Abilities';
 import DrawableInterface from './Renderer/Drawables/DrawableInterface';
 import { Weapon } from './Character/Equipment/Types';
 import { feetToMeters } from './Renderer/Math';
-import { ContainerNodeInterface, SceneNodeInterface } from './Renderer/types';
+import { ContainerNodeInterface } from './Renderer/types';
 import { RendererInterface } from './Renderer/types';
 
 export const maxInstances = 16;
@@ -123,7 +123,7 @@ export interface CreatureInterface {
 
   armor: Armor[];
 
-  knownSpells: R<SpellInterface>[] | null;
+  knownSpells: SpellFactory<SpellInterface>[] | null;
 
   hasInfluencingAction(name: string): boolean;
 
@@ -139,7 +139,7 @@ export interface CreatureInterface {
 
   removeCondition(name: ConditionType): void;
 
-  getKnownSpells(): { spell: R<SpellInterface>, prepared: boolean }[];
+  getKnownSpells(): { spell: SpellFactory<SpellInterface>, prepared: boolean }[];
 
   getMaxPreparedSpells(): number;
 }
@@ -215,18 +215,39 @@ export interface CharacterClassInterface {
 
   primaryAbilities: Abilities[];
 
-  actions: A<ActionInterface>[];
+  actions: ActionFactory<ActionInterface>[];
 }
 
 export interface SpellInterface extends ActionInterface {
 
 }
 
-export type R<T> = {
-  spell: new (actor: CreatureActorInterface) => T;
+export class ActionFactory<T extends ActionInterface> {
+  actionConstructor: new (actor: CreatureActorInterface) => T;
   name: string;
-  time: TimeType,
-  level: number,
+  time: TimeType
+
+  action: ActionInterface | null = null
+
+  constructor(actionConstructor: new (actor: CreatureActorInterface) => T, name: string, time: TimeType) {
+    this.actionConstructor = actionConstructor
+    this.name = name
+    this.time = time
+  }
+
+  initialize(actor: CreatureActorInterface) {
+    this.action = new this.actionConstructor(actor)
+    this.action.initialize()
+  }
+}
+
+export class SpellFactory<T extends ActionInterface> extends ActionFactory<T> {
+  level: number
+
+  constructor(action: new (actor: CreatureActorInterface) => T, name: string, time: TimeType, level: number) {
+    super(action, name, time)
+    this.level = level
+  }
 }
 
 export type PrimaryWeapon = 'Melee' | 'Range';
@@ -244,9 +265,9 @@ export interface CharacterInterface extends CreatureInterface {
 
   get spellcastingAbilityScore(): number;
 
-  spells: R<SpellInterface>[];
+  spells: SpellFactory<SpellInterface>[];
 
-  cantrips: R<SpellInterface>[]
+  cantrips: SpellFactory<SpellInterface>[]
 
   hitPoints: number;
 
@@ -323,13 +344,13 @@ export interface CreatureActorInterface extends ActorInterface {
 
   endTurn(): void;
 
-  setAction(action: ActionInterface | null): void;
+  setAction(action: ActionFactory<ActionInterface> | null): void;
 
   setDefaultAction(): void;
 
   setMoveAction(): void;
 
-  getAction(): ActionInterface | null;
+  getAction(): ActionFactory<ActionInterface> | null;
 
   getWorldPosition(): Vec4;
 

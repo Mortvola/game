@@ -6,7 +6,7 @@ import { findPath2 } from "../../Workers/PathPlannerQueue";
 import Shot from "../../Script/Shot";
 import FollowPath from "../../Script/FollowPath";
 import DrawableNode from "../../Renderer/Drawables/SceneNodes/DrawableNode";
-import { CreatureActorInterface, ShotData } from "../../types";
+import { ActionFactory, CreatureActorInterface, ShotData } from "../../types";
 import { trajectoryMaterial } from "../../Renderer/Materials/Trajectory";
 import { sceneObjectlManager } from "../../SceneObjectManager";
 
@@ -136,4 +136,4 @@ class RangeAttack extends Action {
   }
 }
 
-export default RangeAttack;
+export const rangeAttack = new ActionFactory(RangeAttack, 'Range Attack', 'Action')
