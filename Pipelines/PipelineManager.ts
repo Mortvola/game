@@ -169,6 +169,32 @@ class PipelineManager implements PipelineManagerInterface {
           }
         ];
       }
+      else if (drawableType === 'Mesh2D') {
+        vertexBufferLayout = [
+          {
+            attributes: [
+              {
+                shaderLocation: 0, // position
+                offset: 0,
+                format: "float32x2",
+              },
+            ],
+            arrayStride: 8,
+            stepMode: "vertex",
+          },
+          {
+            attributes: [
+              {
+                shaderLocation: 1, // texcoord
+                offset: 0,
+                format: "float32x2",
+              }
+            ],
+            arrayStride: 8,
+            stepMode: "vertex",
+          }
+        ];
+      }
 
       const targets: GPUColorTargetState[] = [];
 
@@ -193,7 +219,7 @@ class PipelineManager implements PipelineManagerInterface {
         })
       }
 
-      if (bloom) {
+      if (bloom && drawableType !== 'Mesh2D') {
         targets.push({
           format: outputFormat,
         })
@@ -247,7 +273,7 @@ class PipelineManager implements PipelineManagerInterface {
       });
 
       const pipelineDescriptor: GPURenderPipelineDescriptor = {
-        label: 'base pipeline',
+        label: `${drawableType} pipeline`,
         vertex: {
           module: shaderModule,
           entryPoint: "vs",
@@ -265,7 +291,7 @@ class PipelineManager implements PipelineManagerInterface {
         },
         depthStencil: {
           depthWriteEnabled: shaderDescriptor?.depthWriteEnabled ?? true,
-          depthCompare: "less",
+          depthCompare: (shaderDescriptor?.transparent ?? false) ? 'less-equal' : 'less',
           format: "depth24plus"
         },
         layout: pipelineLayout,
