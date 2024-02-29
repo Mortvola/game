@@ -245,7 +245,7 @@ class Game implements WorldInterface {
       this.actors.push(actor);
     }
 
-    // this.renderer.scene.updateTransforms(undefined, this);
+    this.renderer.scene.updateTransforms(undefined, this.renderer);
 
     this.startTurn();
   }
