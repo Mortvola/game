@@ -206,7 +206,10 @@ class Action implements ActionInterface {
             })
           }              
         }
-      }  
+      }
+      else {
+        await this.showPathLines(null)
+      }
     }
   }
 

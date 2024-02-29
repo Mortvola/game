@@ -34,12 +34,17 @@ class AreaSpell extends RangeSpell {
   }
 
   async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null): Promise<void> {
-    await this.showAreaOfEffect();
+    if (point !== null) {
+      await this.showAreaOfEffect();
 
-    if (point && this.areaOfEffect) {
-      this.areaOfEffect.translate = vec3.create(point[0], 0, point[2])
-
-      this.center = vec2.create(point[0], point[2]);
+      if (this.areaOfEffect) {
+        this.areaOfEffect.translate = vec3.create(point[0], 0, point[2])
+  
+        this.center = vec2.create(point[0], point[2]);
+      }  
+    }
+    else {
+      this.hideAreaOfEffect();
     }
   }
 

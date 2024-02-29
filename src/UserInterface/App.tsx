@@ -204,7 +204,7 @@ function App() {
         const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
         const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
 
-        game?.pointerMove(clipX, clipY, overCanvas);  
+        game?.pointerMove(clipX, clipY, false);  
 
         setActionInfoStyle({ left: newPoint.x + 10, top: newPoint.y + 10 })
       }
@@ -432,7 +432,7 @@ function App() {
           : null
       }
       {
-        overCanvas
+        overCanvas && pointerLocked
           ? (
               <div className="action" style={actionInfoStyle}>
               <div>

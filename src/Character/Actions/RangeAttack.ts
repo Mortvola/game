@@ -82,7 +82,10 @@ class RangeAttack extends Action {
             })
           }              
         }
-      }  
+      }
+      else {
+        await this.showPathLines(null);
+      }
     }
   }
 

@@ -509,20 +509,20 @@ class Game implements WorldInterface {
         }
       }
     }
-    // else if (this.participants.activeActor) {
-    //   let activeActor = this.participants.activeActor;
+    else if (this.participants.activeActor) {
+      let activeActor = this.participants.activeActor;
 
-    //   if (
-    //     !activeActor.automated
-    //     && activeActor.state !== States.scripting
-    //   ) {
-    //     const action = activeActor.getAction();
+      if (
+        !activeActor.automated
+        && activeActor.state !== States.scripting
+      ) {
+        const action = activeActor.getAction();
 
-    //     if (action) {
-    //       action.clear()
-    //     }
-    //   }
-    // }
+        if (action) {
+          await action.prepareInteraction(null, null)            
+        }
+      }
+    }
   }
 
   mouseWheel(deltaX: number, deltaY: number, x: number, y: number) {
