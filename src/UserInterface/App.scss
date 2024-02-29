@@ -115,6 +115,18 @@ canvas {
   width: max-content;
 }
 
+.cursor {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  user-select: none;
+  pointer-events: none;
+  background-color: red;
+}
+
 .action {
   position: absolute;
   z-index: 1;

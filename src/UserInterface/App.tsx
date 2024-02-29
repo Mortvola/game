@@ -162,22 +162,26 @@ function App() {
     const element = canvasRef.current;
 
     if (element) {
-      // element.setPointerCapture(event.pointerId);
-      element.requestPointerLock()
-      const rect = element.getBoundingClientRect();
-
-      const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
-      const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-      // game?.pointerDown(clipX, clipY);
-
-      if (event.metaKey) {
-        game?.centerOn(clipX, clipY)
+      if (!pointerLocked) {
+        element.requestPointerLock()
       }
-      else if (!event.ctrlKey) {
-        game?.interact()
+      else {
+        const e = document.elementFromPoint(pointerPosition.x, pointerPosition.y)
+
+        if (e === element) {
+          if (!event.ctrlKey) {
+            game?.interact()
+          }
+        }
+        else if (e) {
+          (e as HTMLElement).click()
+        }
       }
     }
   }
+
+  const [pointerPosition, setPointerPosition] = React.useState<{ x: number, y: number }>({ x: 0, y: 0})
+  const [overCanvas, setOverCanvas] = React.useState<boolean>(false);
 
   const handlePointerMove: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -185,15 +189,38 @@ function App() {
     if (element) {
       const rect = element.getBoundingClientRect();
 
-      setActionInfoStyle({ left: event.clientX + 10, top: event.clientY + 10 })
+      let overCanvas = true;
+      if (element !== document.elementFromPoint(pointerPosition.x, pointerPosition.y)) {
+        overCanvas = false;
+      }
+
+      setOverCanvas(overCanvas)
 
       if (!pointerLocked) {
+        const newPoint = { x: event.clientX, y: event.clientY }
+
+        setPointerPosition(newPoint)
+
         const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
         const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-        game?.pointerMove(clipX, clipY);  
+
+        game?.pointerMove(clipX, clipY, overCanvas);  
+
+        setActionInfoStyle({ left: newPoint.x + 10, top: newPoint.y + 10 })
       }
       else {
-        game?.pointerDeltaMove(event.movementX * 2 / element.clientWidth, -event.movementY / element.clientHeight)
+        setPointerPosition((prev) => {
+          const newPoint = { x: prev.x + event.movementX, y: prev.y + event.movementY}
+
+          const clipX = ((newPoint.x - rect.left) / element.clientWidth) * 2 - 1;
+          const clipY = 1 - ((newPoint.y - rect.top) / element.clientHeight) * 2;  
+
+          game?.pointerMove(clipX, clipY, overCanvas);  
+
+          setActionInfoStyle({ left: newPoint.x + 10, top: newPoint.y + 10 })
+
+          return newPoint
+        })
       }
     }
   }
@@ -399,29 +426,40 @@ function App() {
         onPointerLeave={handlePointerLeave}
         onWheel={handleWheel}
       />
-      <div className={`action`} style={actionInfoStyle}>
-        <div>
-          <div>
-            {
-              actionInfo
-                ? actionInfo.action
-                : null
-            }
-          </div>
-          <div>
-            {
-              (actionInfo?.percentSuccess ?? null) !== null
-                ? `${actionInfo?.percentSuccess ?? 0}%`
-                : null
-            }
-          </div>
-        </div>
-        {
-          actionInfo?.description
-            ? actionInfo.description
-            : null
-        }
-      </div>
+      {
+        pointerLocked
+          ? <div className="cursor" style={{ left: pointerPosition.x, top: pointerPosition.y }}></div>
+          : null
+      }
+      {
+        overCanvas
+          ? (
+              <div className="action" style={actionInfoStyle}>
+              <div>
+                <div>
+                  {
+                    actionInfo
+                      ? actionInfo.action
+                      : null
+                  }
+                </div>
+                <div>
+                  {
+                    (actionInfo?.percentSuccess ?? null) !== null
+                      ? `${actionInfo?.percentSuccess ?? 0}%`
+                      : null
+                  }
+                </div>
+              </div>
+              {
+                actionInfo?.description
+                  ? actionInfo.description
+                  : null
+              }
+            </div>
+          )
+          : null
+      }
       <div className="lower-left">
         {
           actor
