@@ -241,7 +241,7 @@ export class ActionFactory<T extends ActionInterface> {
   }
 }
 
-export class SpellFactory<T extends ActionInterface> extends ActionFactory<T> {
+export class SpellFactory<T extends ActionInterface = any> extends ActionFactory<T> {
   level: number
 
   constructor(action: new (actor: CreatureActorInterface) => T, name: string, time: TimeType, level: number) {

@@ -13,29 +13,27 @@ type PropsType = {
 const Actions: React.FC<PropsType> = ({
   actor,
 }) => (
-  <div>
-    <div className={styles.actions}>
-      <div className={styles.common}>
-        <MeleeAction actor={actor} />
-        <RangeAction actor={actor} />
-      </div>
-      <div className={styles.actionList}>
-        {
-          actor.character.spells.map((s) => (
-            <SpellAction actor={actor} spell={s} />
-          ))
-        }
-        {
-          actor.character.cantrips.map((s) => (
-            <SpellAction actor={actor} spell={s} />
-          ))
-        }
-        {
-          actor.character.charClass.actions.map((a) => (
-            <Action actor={actor} action={a} />
-          ))
-        }
-      </div>
+  <div className={styles.actions}>
+    <div className={styles.common}>
+      <MeleeAction actor={actor} />
+      <RangeAction actor={actor} />
+    </div>
+    <div className={styles.actionList}>
+      {
+        actor.character.spells.map((s) => (
+          <SpellAction actor={actor} spell={s} />
+        ))
+      }
+      {
+        actor.character.cantrips.map((s) => (
+          <SpellAction actor={actor} spell={s} />
+        ))
+      }
+      {
+        actor.character.charClass.actions.map((a) => (
+          <Action actor={actor} action={a} />
+        ))
+      }
     </div>
   </div>
 )

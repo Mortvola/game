@@ -1,39 +1,41 @@
 import React from 'react';
 import styles from './StatusBar.module.scss';
 import { CharacterInterface } from '../../types';
+import SpellSlots from './SpellSlots';
+import { observer } from 'mobx-react-lite';
 
 type PropsType = {
   character: CharacterInterface,
 }
 
-const StatusBar: React.FC<PropsType> = ({
+const StatusBar: React.FC<PropsType> = observer(({
   character,
 }) => {
-  const spellSlots = () => {
-    const slots: React.ReactNode[] = [];
+  let actionClass = styles.action;
+  if (character.actionsLeft <= 0) {
+    actionClass = `${actionClass} ${styles.unavailable}`
+  }
+  else if (character.actor?.getAction()?.time === 'Action') {
+    actionClass = `${actionClass} ${styles.pulse}`
+  }
 
-    const available = character.spellSlots[0]
-
-    for (let i = 0; i < character.getMaxSpellSlots(1)!; i += 1) {
-      slots.push(<div key={i} className={i < available ? '' : styles.unavailable}></div>)
-    }
-
-    return slots;
+  let bonusClass = styles.bonus;
+  if (character.bonusActionsLeft <= 0) {
+    bonusClass = `${bonusClass} ${styles.unavailable}`
+  }
+  else if (character.actor?.getAction()?.time === 'Bonus') {
+    bonusClass = `${bonusClass} ${styles.pulse}`
   }
 
   return (
     <div className={styles.statusbar}>
-      <div className={`${styles.action} ${character.actionsLeft <= 0 ? styles.unavailable : ''}`}></div>
-      <div className={`${styles.bonus} ${character.bonusActionsLeft <= 0 ? styles.unavailable : ''}`}></div>
+      <div className={actionClass}></div>
+      <div className={bonusClass}></div>
       <div>
-        <div className={styles.slots}>
-          {
-            spellSlots()
-          }
-        </div>
+        <SpellSlots character={character} />
       </div>
     </div>
   )
-}
+})
 
 export default StatusBar;
