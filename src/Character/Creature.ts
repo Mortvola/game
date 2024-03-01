@@ -1,6 +1,6 @@
 import { Vec4 } from "wgpu-matrix";
 import { abilityModifier, getProficiencyBonus } from "../Dice";
-import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from "../Tables";
+import { spellSlots } from "../Tables";
 import { ConditionType } from "./Actions/Conditions/Condition";
 import Spell from "./Actions/Spells/Spell";
 import { clericSpells, druidSpells } from "./Actions/Spells/Spells";
@@ -181,34 +181,12 @@ class Creature implements CreatureInterface {
       * 5, 5), 95)
   }
 
-  getMaxSpellSlots(spellLevel: number): number | undefined {
-    switch (this.charClass.name) {
-      case 'Cleric':
-        return clericSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
-
-      case 'Wizard':
-        return wizardSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
-
-      case 'Druid':
-        return druidSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
-    }
-
-    return undefined;
+  getMaxSpellSlots(spellLevel: number): number {
+    return spellSlots[this.charClass.level - 1][spellLevel - 1];
   }
 
-  getMaxSpellLevel(): number | undefined {
-    switch (this.charClass.name) {
-      case 'Cleric':
-        return clericSpellSlots[this.charClass.level - 1].spells.length;
-
-      case 'Wizard':
-        return wizardSpellSlots[this.charClass.level - 1].spells.length;
-
-      case 'Druid':
-        return druidSpellSlots[this.charClass.level - 1].spells.length;
-    }
-
-    return undefined;
+  getMaxSpellLevel(): number {
+    return spellSlots[this.charClass.level - 1].length
   }
 
   getKnownSpells() {

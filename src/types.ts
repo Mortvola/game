@@ -298,9 +298,9 @@ export interface CharacterInterface extends CreatureInterface {
 
   actor: CreatureActorInterface | null;
 
-  getMaxSpellSlots(spellLevel: number): number | undefined;
+  getMaxSpellSlots(spellLevel: number): number;
 
-  getMaxSpellLevel(): number | undefined;
+  getMaxSpellLevel(): number;
 
   removeInfluencingAction(name: string): void;
 
