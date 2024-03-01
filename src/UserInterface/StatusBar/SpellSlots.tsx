@@ -1,39 +1,30 @@
 import React from 'react';
 import { CharacterInterface, SpellFactory } from '../../types';
 import styles from './StatusBar.module.scss';
+import SpellLevelSlots from './SpellLevelSlots';
 
 type PropsType = {
   character: CharacterInterface,
 }
 
 const SpellSlots: React.FC<PropsType> = ({ character }) => {
-  const spellSlots = () => {
-    const slots: React.ReactNode[] = [];
+  const actionSpellLevel = (character.actor?.getAction() as SpellFactory)?.level
 
-    const level = (character.actor?.getAction() as SpellFactory)?.level
+  const levels: React.ReactNode[] = []
 
-    const available = character.spellSlots[0]
-    const maxSlots = character.getMaxSpellSlots(1)!
+  for (let level = 0; level < character.getMaxSpellLevel()!; level += 1) {
+    const available = character.spellSlots[level]
+    const maxSlots = character.getMaxSpellSlots(level + 1)!
 
-    for (let i = 0; i < maxSlots; i += 1) {
-      let className = '';
-      if (i > available - 1) {
-        className += ` ${styles.unavailable}`
-      }
-      else if (level === 1 && i === available - 1) {
-        className += ` ${styles.pulse}`
-      }
-
-      slots.push(<div key={i} className={className} />)
-    }
-
-    return slots;
+    levels.push(
+      <SpellLevelSlots level={actionSpellLevel} maxSpellSlots={maxSlots} available={available} />
+    )
   }
 
   return (
-    <div className={styles.slots}>
+    <div className={styles.slotsWrapper}>
       {
-        spellSlots()
+        levels
       }
     </div>
   )

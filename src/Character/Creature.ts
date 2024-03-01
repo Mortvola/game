@@ -192,6 +192,23 @@ class Creature implements CreatureInterface {
       case 'Druid':
         return druidSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
     }
+
+    return undefined;
+  }
+
+  getMaxSpellLevel(): number | undefined {
+    switch (this.charClass.name) {
+      case 'Cleric':
+        return clericSpellSlots[this.charClass.level - 1].spells.length;
+
+      case 'Wizard':
+        return wizardSpellSlots[this.charClass.level - 1].spells.length;
+
+      case 'Druid':
+        return druidSpellSlots[this.charClass.level - 1].spells.length;
+    }
+
+    return undefined;
   }
 
   getKnownSpells() {

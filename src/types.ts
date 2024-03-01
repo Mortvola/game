@@ -239,6 +239,11 @@ export class ActionFactory<T extends ActionInterface> {
     this.action = new this.actionConstructor(actor)
     this.action.initialize()
   }
+
+  available(actor: CreatureActorInterface) {
+    return (((this.time === 'Action' && actor.character.actionsLeft > 0)
+    || (this.time === 'Bonus' && actor.character.bonusActionsLeft > 0)))
+  }
 }
 
 export class SpellFactory<T extends ActionInterface = any> extends ActionFactory<T> {
@@ -247,6 +252,12 @@ export class SpellFactory<T extends ActionInterface = any> extends ActionFactory
   constructor(action: new (actor: CreatureActorInterface) => T, name: string, time: TimeType, level: number) {
     super(action, name, time)
     this.level = level
+  }
+
+  available(actor: CreatureActorInterface) {
+    return (((this.time === 'Action' && actor.character.actionsLeft > 0)
+    || (this.time === 'Bonus' && actor.character.bonusActionsLeft > 0))
+    && (this.level === 0 || actor.character.spellSlots[this.level - 1] > 0))
   }
 }
 
@@ -288,6 +299,8 @@ export interface CharacterInterface extends CreatureInterface {
   actor: CreatureActorInterface | null;
 
   getMaxSpellSlots(spellLevel: number): number | undefined;
+
+  getMaxSpellLevel(): number | undefined;
 
   removeInfluencingAction(name: string): void;
 

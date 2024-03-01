@@ -4,6 +4,7 @@ $bonus-color: orange;
 $dimmed-bonus-color: rgb(127, 32, 0);
 $spell-slot-color: #c0c000;
 $dimmed-spell-slot-color: rgb(96, 96, 0);
+$pulse-duration: 1.5s;
 
 .statusbar {
   display: flex;
@@ -23,7 +24,7 @@ $dimmed-spell-slot-color: rgb(96, 96, 0);
   }
 
   &.pulse {
-    animation: pulse 1.5s infinite;
+    animation: pulse $pulse-duration infinite;
   }
 }
 
@@ -39,8 +40,13 @@ $dimmed-spell-slot-color: rgb(96, 96, 0);
   }
 
   &.pulse {
-    animation: pulse-bonus 1.5s infinite;
+    animation: pulse-bonus $pulse-duration infinite;
   }
+}
+
+.slotsWrapper {
+  display: flex;
+  column-gap: 8px;
 }
 
 .slots {
@@ -60,7 +66,7 @@ $dimmed-spell-slot-color: rgb(96, 96, 0);
     }
 
     &.pulse {
-      animation: pulse-slots 1.5s infinite;
+      animation: pulse-slots $pulse-duration infinite;
     }
   }
 }
