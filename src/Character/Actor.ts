@@ -20,7 +20,6 @@ import DrawableNode from "../Renderer/Drawables/SceneNodes/DrawableNode";
 import { ActionFactory, ActionInterface, CharacterInterface, CreatureActorInterface, SceneObjectInterface, ShotData, States, WorldInterface } from "../types";
 import { DamageType, Weapon, WeaponType } from "./Equipment/Types";
 import MoveAction from "./Actions/MoveAction";
-import RenderPass from "../Renderer/RenderPasses/RenderPass";
 import { makeObservable, observable, runInAction } from "mobx";
 
 // let findPathPromise: {
@@ -71,8 +70,6 @@ class Actor implements CreatureActorInterface {
   teamColor: Vec4;
 
   initiativeRoll = 0;
-
-  renderPass: RenderPass | null = null;
 
   state = States.idle;
 
