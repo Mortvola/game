@@ -7,11 +7,10 @@ import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
 import Script from './Script/Script';
 import { Occupant } from './Workers/PathPlannerTypes';
-import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, EpisodeInfo, Party } from './types';
+import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, Party } from './types';
 import Renderer from './Renderer/Renderer';
 import DrawableNode from './Renderer/Drawables/SceneNodes/DrawableNode';
 import Reticle from './Renderer/Drawables/Reticle';
-import Property from './Renderer/ShaderBuilder/Property';
 import { runInAction } from 'mobx';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
@@ -245,7 +244,7 @@ class Game implements WorldInterface {
       this.actors.push(actor);
     }
 
-    this.renderer.scene.updateTransforms(undefined, this.renderer);
+    this.renderer.scene.updateTransforms(this.renderer);
 
     this.startTurn();
   }
@@ -281,7 +280,7 @@ class Game implements WorldInterface {
           }
 
           for (const particleSystem of this.renderer.particleSystems) {
-            particleSystem.update(timestamp, elapsedTime, this.renderer.scene)
+            particleSystem.update(timestamp, elapsedTime, this.renderer.scene.scene)
           }
 
           this.renderer.camera.updatePosition(elapsedTime, timestamp);

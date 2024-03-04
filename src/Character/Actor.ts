@@ -1,6 +1,5 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, pointWithinCircle, timeToTarget } from "../Renderer/Math";
-import Circle from "../Renderer/Drawables/Circle";
 import Shot from "../Script/Shot";
 import { Advantage, attackRoll, savingThrow } from "../Dice";
 import Mover from "../Script/Mover";
@@ -16,15 +15,11 @@ import { meleeAttack } from "./Actions/MeleeAttack";
 import { rangeAttack } from "./Actions/RangeAttack";
 import { sceneObjectlManager } from "../SceneObjectManager";
 import { PathPoint } from "../Workers/PathPlannerTypes";
-import DrawableNode from "../Renderer/Drawables/SceneNodes/DrawableNode";
 import { ActionFactory, ActionInterface, CharacterInterface, CreatureActorInterface, SceneObjectInterface, ShotData, States, WorldInterface } from "../types";
 import { DamageType, Weapon, WeaponType } from "./Equipment/Types";
 import MoveAction from "./Actions/MoveAction";
 import { makeObservable, observable, runInAction } from "mobx";
-
-// let findPathPromise: {
-//   resolve: ((value: [Vec2[], number, number[][]]) => void),
-// } | null = null
+import RangeCircle from "../Renderer/Drawables/RangeCircle";
 
 export const pathFinder: UniformGridSearch = new JumpPointSearch(512, 512, 16);
 
@@ -61,11 +56,7 @@ class Actor implements CreatureActorInterface {
 
   sceneObject: SceneObjectInterface
 
-  circleDrawable: Circle;
-
-  circle: DrawableNode;
-
-  outerCircle: DrawableNode;
+  circle: RangeCircle;
 
   teamColor: Vec4;
 
@@ -86,9 +77,6 @@ class Actor implements CreatureActorInterface {
     color: Vec4,
     team: number,
     automated: boolean,
-    circleDrawable: Circle,
-    circle: DrawableNode,
-    outerCircle: DrawableNode,
     world: WorldInterface,
   ) {
     this.world = world;
@@ -105,19 +93,22 @@ class Actor implements CreatureActorInterface {
     this.chestHeight = height - 0.5;
     this.teamColor = color;
 
-    // this.sceneObject.sceneNode.name = character.name;
+    this.circle = new RangeCircle(
+      vec3.create(0, 0, 0),
+      0.75,
+      0.025,
+      this.teamColor.slice(),
+    );
 
-    const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
-
-    this.circleDrawable = circleDrawable;
-    this.circle = circle;
-    this.circle.postTransforms.push(mat4.fromQuat(q));
-
-    this.outerCircle = outerCircle;
-    this.outerCircle.postTransforms.push(mat4.fromQuat(q));
+    const outerCircle = new RangeCircle(
+      vec3.create(0, 0, 0),
+      0.75 + feetToMeters(5),
+      0.01,
+      vec4.create(0.5, 0.5, 0.5, 1)
+    );
 
     this.sceneObject.sceneNode.addNode(this.circle)
-    this.sceneObject.sceneNode.addNode(this.outerCircle)
+    this.sceneObject.sceneNode.addNode(outerCircle)
 
     makeObservable(this, {
       action: observable,
@@ -131,12 +122,7 @@ class Actor implements CreatureActorInterface {
 
     const sceneObject = await sceneObjectlManager.getSceneObject(character.race.name, world)
 
-    const circleDrawable = new Circle(0.75, 0.025, color);
-    const circle = await DrawableNode.create(circleDrawable);
-
-    const outerCircle = await DrawableNode.create(new Circle(0.75 + feetToMeters(5), 0.01, color));
-
-    return new Actor(character, sceneObject, playerHeight, teamColor, team, automated, circleDrawable, circle, outerCircle, world);
+    return new Actor(character, sceneObject, playerHeight, teamColor, team, automated, world);
   }
 
   getWorldPosition(): Vec4 {
@@ -155,10 +141,10 @@ class Actor implements CreatureActorInterface {
 
     this.distanceLeft = this.character.race.speed;
 
-    // this.circleDrawable.color[0] = 1;
-    // this.circleDrawable.color[1] = 1;
-    // this.circleDrawable.color[2] = 1;
-    // this.circleDrawable.color[3] = 1;
+    this.circle.color[0] = 1;
+    this.circle.color[1] = 1;
+    this.circle.color[2] = 1;
+    this.circle.color[3] = 1;
 
     this.state = States.idle;
 
@@ -218,10 +204,10 @@ class Actor implements CreatureActorInterface {
       }
     }
 
-    // this.circleDrawable.color[0] = this.teamColor[0];
-    // this.circleDrawable.color[1] = this.teamColor[1];
-    // this.circleDrawable.color[2] = this.teamColor[2];
-    // this.circleDrawable.color[3] = this.teamColor[3];
+    this.circle.color[0] = this.teamColor[0];
+    this.circle.color[1] = this.teamColor[1];
+    this.circle.color[2] = this.teamColor[2];
+    this.circle.color[3] = this.teamColor[3];
 
     this.setAction(null);
     
