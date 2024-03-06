@@ -1,13 +1,14 @@
 import { Vec4 } from "wgpu-matrix";
 import { abilityModifier, getProficiencyBonus } from "../Dice";
-import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from "../Tables";
+import { spellSlots } from "../Tables";
 import { ConditionType } from "./Actions/Conditions/Condition";
 import Spell from "./Actions/Spells/Spell";
 import { clericSpells, druidSpells } from "./Actions/Spells/Spells";
 import CharacterClass from "./Classes/CharacterClass";
 import { Armor } from "./Equipment/Armor";
-import { AbilityScores, ActionInterface, CreatureActorInterface, CreatureInterface, Equipped, PrimaryWeapon, R, RaceInterface } from "../types";
+import { AbilityScores, ActionInterface, CreatureActorInterface, CreatureInterface, Equipped, PrimaryWeapon, SpellFactory, RaceInterface } from "../types";
 import { Weapon, WeaponProperties, WeaponType } from "./Equipment/Types";
+import { makeObservable, observable } from "mobx";
 
 class Creature implements CreatureInterface {
   name = '';
@@ -28,11 +29,11 @@ class Creature implements CreatureInterface {
 
   armor: Armor[];
 
-  cantrips: R<Spell>[] = [];
+  cantrips: SpellFactory<Spell>[] = [];
 
-  spells: R<Spell>[] = [];
+  spells: SpellFactory<Spell>[] = [];
 
-  knownSpells: R<Spell>[] | null = null;
+  knownSpells: SpellFactory<Spell>[] | null = null;
 
   actionsLeft = 0;
 
@@ -78,6 +79,18 @@ class Creature implements CreatureInterface {
     this.weapons = weapons;
     this.armor = armor;
     this.experiencePoints = experiencePoints;
+
+    makeObservable(this, {
+      spellSlots: observable,
+      actionsLeft: observable,
+      bonusActionsLeft: observable,
+      // equipped: observable,
+    })
+
+    makeObservable(this.equipped, {
+      meleeWeapon: observable,
+      rangeWeapon: observable,
+    })
   }
 
   clone(): Creature {
@@ -168,17 +181,12 @@ class Creature implements CreatureInterface {
       * 5, 5), 95)
   }
 
-  getMaxSpellSlots(spellLevel: number): number | undefined {
-    switch (this.charClass.name) {
-      case 'Cleric':
-        return clericSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
+  getMaxSpellSlots(spellLevel: number): number {
+    return spellSlots[this.charClass.level - 1][spellLevel - 1];
+  }
 
-      case 'Wizard':
-        return wizardSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
-
-      case 'Druid':
-        return druidSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
-    }
+  getMaxSpellLevel(): number {
+    return spellSlots[this.charClass.level - 1].length
   }
 
   getKnownSpells() {

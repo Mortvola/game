@@ -1,4 +1,3 @@
-import { debug } from "console";
 import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import { Occupant } from "../Workers/PathPlannerTypes";
 import { GridNode } from "./GridNode";
@@ -113,74 +112,73 @@ class UniformGridSearch {
   LineOfSight(p1: Vec2, p2: Vec2) {
     let x0 = p1[0]
     let y0 = p1[1];
-    const x1 = p2[0]
-    const y1 = p2[1];
+    let x1 = p2[0]
+    let y1 = p2[1];
 
-    let dy = y1 - y0
-    let dx = x1 - x0;
-
-    let f = 0
-
-    const s: number[] = [1, 1];
-    const s2: number[] = [0, 0];
-
-    if (dy < 0) {
-        dy = -dy
-        s[1] = -1
-        s2[1] = -1
-    }
-
-    if (dx < 0) {
-        dx = -dx
-        s[0] = -1
-        s2[0] = -1
-    }
+    let dx = Math.abs(x1 - x0);
+    let dy = Math.abs(y1 - y0);
 
     if (dx >= dy) {
-      while (x0 !== x1) {
-        f = f + dy;
-
-        if (f >= dx ) {
-          if (this.nodeBlocked(x0 + s2[0], y0 + s2[1])) { 
-              return false
-          }
-
-          y0 = y0 + s[1]
-          f = f - dx
-        }
-
-        if (f !== 0 && this.nodeBlocked(x0 + s2[0], y0 + s2[1])) {
-          return false
-        }
-
-        if (dy === 0 && this.nodeBlocked(x0 + s2[0], y0) && this.nodeBlocked(x0 + s2[0], y0 - 1)) {
-          return false
-        }
-
-        x0 = x0 + s[0];
+      if (x0 > x1) {
+        [x0, y0, x1, y1] = [x1, y1, x0, y0]
       }
-    } else {
-      while (y0 !== y1) {
-        f = f + dx
-        if (f >= dy) {
-          if (this.nodeBlocked(x0 + s2[0], y0 + s2[1])) {
-              return false;
-          }
 
-          x0 = x0 + s[0]
-          f = f - dy
-        }
+      dy = y1 - y0;
+      let s = 1;
 
-        if (f !== 0 && this.nodeBlocked(x0 + s2[0], y0 + s2[1])) {
-          return false;
-        }
-
-        if (dx === 0 && this.nodeBlocked(x0, y0 + s2[1]) && this.nodeBlocked(x0 - 1, y0 + s2[1])) {
+      if (y0 > y1) {
+        dy = -dy
+        s = -1
+      }
+  
+      let mNew = 2 * dy
+      let slopeError = mNew - dx
+  
+      let y = y0;
+  
+      for (let x = x0; x < x1; x += 1) {
+        if (this.nodeBlocked(x, y)) {
           return false
         }
-
-        y0 = y0 + s[1];
+  
+        if (slopeError > 0) {
+          y += s;
+          slopeError -= 2 * dx
+        }
+  
+        slopeError += mNew
+      }  
+    }
+    else {
+      if (y0 > y1) {
+        [x0, y0, x1, y1] = [x1, y1, x0, y0]
       }
+
+      dx = x1 - x0;
+      let s = 1;
+
+      if (x0 > x1) {
+        dx = -dx
+        s = -1
+      }
+
+      let mNew = 2 * dx
+      let slopeError = mNew - dy
+  
+      let x = x0;
+
+      for (let y = y0; y < y1; y += 1) {
+        if (this.nodeBlocked(x, y)) {
+          return false
+        }
+  
+        if (slopeError > 0) {
+          x += s;
+          slopeError -= 2 * dy
+        }
+  
+        slopeError += mNew
+      }  
     }
 
     return true
@@ -280,6 +278,7 @@ class UniformGridSearch {
     const smoothedPath: Vec2[] = [];
 
     if (path.length > 0) {
+      // Push on first point of the path
       smoothedPath.push(path[0]);
 
       if (path.length > 2) {
@@ -295,6 +294,7 @@ class UniformGridSearch {
         }  
       }
 
+      // Push on the last point of the path.
       smoothedPath.push(path[path.length - 1]);
 
       // path = path.slice(0, -1);

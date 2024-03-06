@@ -28,73 +28,40 @@ export const xpThresholds: XPThreshold[] = [
   { easy: 2800, medium: 5700, hard: 8500, deadly: 12700 },
 ]
 
-export const wizardSpellSlots: { cantrips: number, spells: number[] }[] = [
-  { cantrips: 3, spells: [2, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 3, spells: [3, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 3, spells: [4, 2, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 2, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 1, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 2, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 1, 0, 0, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 0, 0, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 0, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 0, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 1, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 1, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 1, 1, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 1, 1, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 1, 1, 1] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 3, 1, 1, 1, 1] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 3, 2, 1, 1, 1] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 3, 2, 2, 1, 1] },
+export const spellSlots: number[][] = 
+[
+  [2],
+  [3],
+  [4, 2],
+  [4, 3],
+  [4, 3, 2],
+  [4, 3, 3],
+  [4, 3, 3, 1],
+  [4, 3, 3, 2],
+  [4, 3, 3, 3, 1],
+  [4, 3, 3, 3, 2],
+  [4, 3, 3, 3, 2, 1],
+  [4, 3, 3, 3, 2, 1],
+  [4, 3, 3, 3, 2, 1, 1],
+  [4, 3, 3, 3, 2, 1, 1],
+  [4, 3, 3, 3, 2, 1, 1, 1],
+  [4, 3, 3, 3, 2, 1, 1, 1],
+  [4, 3, 3, 3, 2, 1, 1, 1, 1],
+  [4, 3, 3, 3, 3, 1, 1, 1, 1],
+  [4, 3, 3, 3, 3, 2, 1, 1, 1],
+  [4, 3, 3, 3, 3, 2, 2, 1, 1],
 ]
 
-export const clericSpellSlots: { cantrips: number, spells: number[] }[] = [
-  { cantrips: 3, spells: [2, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 3, spells: [3, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 3, spells: [4, 2, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 2, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 1, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 2, 0, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 1, 0, 0, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 0, 0, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 0, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 0, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 1, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 1, 0, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 1, 1, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 1, 1, 0] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 2, 1, 1, 1, 1] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 3, 1, 1, 1, 1] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 3, 2, 1, 1, 1] },
-  { cantrips: 5, spells: [4, 3, 3, 3, 3, 2, 2, 1, 1] },
+export const wizardCantrips: number[] = [
+  3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 ]
 
-export const druidSpellSlots: { cantrips: number, spells: number[] }[] = [
-  { cantrips: 2, spells: [2, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 2, spells: [3, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 2, spells: [4, 2, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 3, spells: [4, 3, 0, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 3, spells: [4, 3, 2, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 3, spells: [4, 3, 3, 0, 0, 0, 0, 0, 0] },
-  { cantrips: 3, spells: [4, 3, 3, 1, 0, 0, 0, 0, 0] },
-  { cantrips: 3, spells: [4, 3, 3, 2, 0, 0, 0, 0, 0] },
-  { cantrips: 3, spells: [4, 3, 3, 3, 1, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 2, 0, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 2, 1, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 2, 1, 0, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 2, 1, 1, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 2, 1, 1, 0, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 2, 1, 1, 1, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 2, 1, 1, 1, 0] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 2, 1, 1, 1, 1] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 3, 1, 1, 1, 1] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 3, 2, 1, 1, 1] },
-  { cantrips: 4, spells: [4, 3, 3, 3, 3, 2, 2, 1, 1] },
+export const clericCantrips: number[] = [
+  3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+]
+
+export const druidCantrips: number[] = [
+  2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
 ]
 
 export const rageDamageBonus = [

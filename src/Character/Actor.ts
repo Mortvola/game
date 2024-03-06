@@ -1,6 +1,5 @@
 import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
 import { anglesOfLaunch, degToRad, feetToMeters, minimumVelocity, pointWithinCircle, timeToTarget } from "../Renderer/Math";
-import Circle from "../Renderer/Drawables/Circle";
 import Shot from "../Script/Shot";
 import { Advantage, attackRoll, savingThrow } from "../Dice";
 import Mover from "../Script/Mover";
@@ -12,19 +11,15 @@ import FollowPath from "../Script/FollowPath";
 import JumpPointSearch from "../Search/JumpPointSearch";
 import UniformGridSearch from "../Search/UniformGridSearch";
 import { findPath2, getOccupants, populateGrid } from "../Workers/PathPlannerQueue";
-import MeleeAttack from "./Actions/MeleeAttack";
-import RangeAttack from "./Actions/RangeAttack";
+import { meleeAttack } from "./Actions/MeleeAttack";
+import { rangeAttack } from "./Actions/RangeAttack";
 import { sceneObjectlManager } from "../SceneObjectManager";
 import { PathPoint } from "../Workers/PathPlannerTypes";
-import DrawableNode from "../Renderer/Drawables/SceneNodes/DrawableNode";
-import { ActionInterface, CharacterInterface, CreatureActorInterface, SceneObjectInterface, ShotData, States, WorldInterface } from "../types";
+import { ActionFactory, ActionInterface, CharacterInterface, CreatureActorInterface, SceneObjectInterface, ShotData, States, WorldInterface } from "../types";
 import { DamageType, Weapon, WeaponType } from "./Equipment/Types";
 import MoveAction from "./Actions/MoveAction";
-import RenderPass from "../Renderer/RenderPasses/RenderPass";
-
-// let findPathPromise: {
-//   resolve: ((value: [Vec2[], number, number[][]]) => void),
-// } | null = null
+import { makeObservable, observable, runInAction } from "mobx";
+import RangeCircle from "../Renderer/Drawables/RangeCircle";
 
 export const pathFinder: UniformGridSearch = new JumpPointSearch(512, 512, 16);
 
@@ -61,23 +56,17 @@ class Actor implements CreatureActorInterface {
 
   sceneObject: SceneObjectInterface
 
-  circleDrawable: Circle;
-
-  circle: DrawableNode;
-
-  outerCircle: DrawableNode;
+  circle: RangeCircle;
 
   teamColor: Vec4;
 
   initiativeRoll = 0;
 
-  renderPass: RenderPass | null = null;
-
   state = States.idle;
 
   world: WorldInterface;
 
-  private action: ActionInterface | null = null;
+  action: ActionFactory<ActionInterface> | null = null;
 
   private useQLearning = false;
 
@@ -88,9 +77,6 @@ class Actor implements CreatureActorInterface {
     color: Vec4,
     team: number,
     automated: boolean,
-    circleDrawable: Circle,
-    circle: DrawableNode,
-    outerCircle: DrawableNode,
     world: WorldInterface,
   ) {
     this.world = world;
@@ -107,19 +93,26 @@ class Actor implements CreatureActorInterface {
     this.chestHeight = height - 0.5;
     this.teamColor = color;
 
-    // this.sceneObject.sceneNode.name = character.name;
+    this.circle = new RangeCircle(
+      vec3.create(0, 0, 0),
+      0.75,
+      0.025,
+      this.teamColor.slice(),
+    );
 
-    const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
-
-    this.circleDrawable = circleDrawable;
-    this.circle = circle;
-    this.circle.postTransforms.push(mat4.fromQuat(q));
-
-    this.outerCircle = outerCircle;
-    this.outerCircle.postTransforms.push(mat4.fromQuat(q));
+    const outerCircle = new RangeCircle(
+      vec3.create(0, 0, 0),
+      0.75 + feetToMeters(5),
+      0.01,
+      vec4.create(0.5, 0.5, 0.5, 1)
+    );
 
     this.sceneObject.sceneNode.addNode(this.circle)
-    this.sceneObject.sceneNode.addNode(this.outerCircle)
+    this.sceneObject.sceneNode.addNode(outerCircle)
+
+    makeObservable(this, {
+      action: observable,
+    })
   }
 
   static async create(
@@ -129,12 +122,7 @@ class Actor implements CreatureActorInterface {
 
     const sceneObject = await sceneObjectlManager.getSceneObject(character.race.name, world)
 
-    const circleDrawable = new Circle(0.75, 0.025, color);
-    const circle = await DrawableNode.create(circleDrawable);
-
-    const outerCircle = await DrawableNode.create(new Circle(0.75 + feetToMeters(5), 0.01, color));
-
-    return new Actor(character, sceneObject, playerHeight, teamColor, team, automated, circleDrawable, circle, outerCircle, world);
+    return new Actor(character, sceneObject, playerHeight, teamColor, team, automated, world);
   }
 
   getWorldPosition(): Vec4 {
@@ -146,15 +134,17 @@ class Actor implements CreatureActorInterface {
   }
 
   startTurn() {
-    this.character.actionsLeft = 1;
-    this.character.bonusActionsLeft = 1;
+    runInAction(() => {
+      this.character.actionsLeft = 1;
+      this.character.bonusActionsLeft = 1;  
+    })
 
     this.distanceLeft = this.character.race.speed;
 
-    // this.circleDrawable.color[0] = 1;
-    // this.circleDrawable.color[1] = 1;
-    // this.circleDrawable.color[2] = 1;
-    // this.circleDrawable.color[3] = 1;
+    this.circle.color[0] = 1;
+    this.circle.color[1] = 1;
+    this.circle.color[2] = 1;
+    this.circle.color[3] = 1;
 
     this.state = States.idle;
 
@@ -178,15 +168,15 @@ class Actor implements CreatureActorInterface {
 
   setDefaultAction() {
     if (this.character.primaryWeapon === 'Melee') {
-      this.setAction(new MeleeAttack(this));
+      this.setAction(meleeAttack);
     }
     else {
-      this.setAction(new RangeAttack(this));
+      this.setAction(rangeAttack);
     }
   }
 
   setMoveAction(): void {
-    this.setAction(new MoveAction(this));
+    this.setAction(new ActionFactory(MoveAction, 'Move', 'Move'));
   }
 
   endTurn() {
@@ -214,10 +204,10 @@ class Actor implements CreatureActorInterface {
       }
     }
 
-    // this.circleDrawable.color[0] = this.teamColor[0];
-    // this.circleDrawable.color[1] = this.teamColor[1];
-    // this.circleDrawable.color[2] = this.teamColor[2];
-    // this.circleDrawable.color[3] = this.teamColor[3];
+    this.circle.color[0] = this.teamColor[0];
+    this.circle.color[1] = this.teamColor[1];
+    this.circle.color[2] = this.teamColor[2];
+    this.circle.color[3] = this.teamColor[3];
 
     this.setAction(null);
     
@@ -305,9 +295,11 @@ class Actor implements CreatureActorInterface {
       script,
     );
 
-    if (this.character.actionsLeft > 0) {
-      this.character.actionsLeft -= 1;
-    }
+    runInAction(() => {
+      if (this.character.actionsLeft > 0) {
+        this.character.actionsLeft -= 1;
+      }  
+    })
   }
 
   async chooseAction(timestamp: number) {
@@ -383,9 +375,11 @@ class Actor implements CreatureActorInterface {
                 script,
               );
 
-              if (this.character.actionsLeft > 0) {
-                this.character.actionsLeft -= 1;
-              }
+              runInAction(() => {
+                if (this.character.actionsLeft > 0) {
+                  this.character.actionsLeft -= 1;
+                }  
+              })
 
               if (target.character.hitPoints === 0) {
                 targets = targets.filter((t) => t !== closest);
@@ -434,9 +428,11 @@ class Actor implements CreatureActorInterface {
                     script,
                   );  
 
-                  if (this.character.actionsLeft > 0) {
-                    this.character.actionsLeft -= 1;
-                  }
+                  runInAction(() => {
+                    if (this.character.actionsLeft > 0) {
+                      this.character.actionsLeft -= 1;
+                    }  
+                  })
     
                   if (target.character.hitPoints === 0) {
                     targets = targets.filter((t) => t !== closest);
@@ -724,20 +720,28 @@ class Actor implements CreatureActorInterface {
     });
   }
 
-
-  setAction(action: ActionInterface | null): void {
-    if (this.action) {
-      this.action.clear();
+  setAction(action: ActionFactory<ActionInterface> | null): void {
+    if (this.action?.action) {
+      this.action.action.clear();
     }
 
-    this.action = action;
+    runInAction(() => {
+      this.action = action;
 
-    if (this.action && this) {
-      this.action.initialize();
-    }
+      if (this.action) {
+        if (this.action === meleeAttack) {
+          this.character.primaryWeapon = 'Melee'
+        }
+        else if (this.action === rangeAttack) {
+          this.character.primaryWeapon = 'Range'
+        }
+
+        this.action.initialize(this);
+      }  
+    })
   }
 
-  getAction(): ActionInterface | null {
+  getAction(): ActionFactory<ActionInterface> | null {
     return this.action;
   }
 

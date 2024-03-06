@@ -1,3 +1,11 @@
+$action-color: rgb(0, 127, 0);
+$dimmed-action-color: rgb(0, 64, 0);
+$bonus-color: orange;
+$dimmed-bonus-color: rgb(127, 32, 0);
+$spell-slot-color: #c0c000;
+$dimmed-spell-slot-color: rgb(96, 96, 0);
+$pulse-duration: 1.5s;
+
 .statusbar {
   display: flex;
   flex-direction: row;
@@ -9,10 +17,14 @@
   height: 32px;
   background-color: green;
   border: white thin solid;
-  border-radius: 16px;
+  border-radius: 50%;
 
   &.unavailable {
     background-color: black
+  }
+
+  &.pulse {
+    animation: pulse $pulse-duration infinite;
   }
 }
 
@@ -21,11 +33,20 @@
   height: 32px;
   background-color: orange;
   border: white thin solid;
-  border-radius: 16px;
+  border-radius: 50%;
 
   &.unavailable {
     background-color: black;
   }
+
+  &.pulse {
+    animation: pulse-bonus $pulse-duration infinite;
+  }
+}
+
+.slotsWrapper {
+  display: flex;
+  column-gap: 8px;
 }
 
 .slots {
@@ -36,12 +57,46 @@
   >div {
     width: 16px;
     height: 32px;
-    background-color: #c0c000;
+    background-color: $spell-slot-color;
     border: thin #c0c000 solid;
     border-radius: 4px;
 
     &.unavailable {
       background-color: black;
     }
+
+    &.pulse {
+      animation: pulse-slots $pulse-duration infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    background-color: $action-color;
+  }
+
+  50% {
+    background-color: $dimmed-action-color;
+  }
+}
+
+@keyframes pulse-bonus {
+  0%, 100% {
+    background-color: $bonus-color;
+  }
+
+  50% {
+    background-color: $dimmed-bonus-color;
+  }
+}
+
+@keyframes pulse-slots {
+  0%, 100% {
+    background-color: $spell-slot-color;
+  }
+
+  50% {
+    background-color: $dimmed-spell-slot-color;
   }
 }

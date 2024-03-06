@@ -34,8 +34,8 @@ import { clericSpells, druidSpells, wizardSpells } from '../../Character/Actions
 import Spell from '../../Character/Actions/Spells/Spell';
 import Creature from '../../Character/Creature';
 import Cantrips from './Spells/Cantrips';
-import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from '../../Tables';
-import { AbilityScores, R, RaceInterface } from '../../types';
+import { clericCantrips, druidCantrips, wizardCantrips } from '../../Tables';
+import { AbilityScores, SpellFactory, RaceInterface } from '../../types';
 import { Weapon } from '../../Character/Equipment/Types';
 
 type PropsType = {
@@ -58,7 +58,7 @@ const AddCharacter: React.FC<PropsType> = ({
   const [abilityScores, setAbilityScores] = React.useState<AbilityScores>(addAbilityIncreases(baseAbilityScores, race))
   const [knownSpells, setKnownSpells] = React.useState<KnownSpell[]>([]);
   const [cantrips, setCantrips] = React.useState<KnownSpell[]>([]);
-  const [availableSpells, setAvailableSpells] = React.useState<R<Spell>[] | null>(null)
+  const [availableSpells, setAvailableSpells] = React.useState<SpellFactory<Spell>[] | null>(null)
   const [maxPreparedSpells, setMaxPreparedSpells] = React.useState<number>(0)
   const [numCantrips, setNumCantrips] = React.useState<number>(0);
 
@@ -163,7 +163,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setKnownSpells(clericSpells[1].map((s) => ({ spell: s, prepared: false })))
         setCantrips(clericSpells[0].map((s) => ({ spell: s, prepared: false })))
         setMaxPreparedSpells(1 + abilityModifier(adjustedScores.wisdom))
-        setNumCantrips(clericSpellSlots[0].cantrips)
+        setNumCantrips(clericCantrips[0])
         setEquipment(Cleric.startingEquipment())
         break;
       }
@@ -176,7 +176,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setCharClass(cc)
         setKnownSpells(druidSpells[1].map((s) => ({ spell: s, prepared: false })))
         setCantrips(druidSpells[0].map((s) => ({ spell: s, prepared: false })))
-        setNumCantrips(druidSpellSlots[0].cantrips)
+        setNumCantrips(druidCantrips[0])
         setEquipment(Druid.startingEquipment())
         break;
       }
@@ -275,7 +275,7 @@ const AddCharacter: React.FC<PropsType> = ({
         setKnownSpells([])
         setCantrips(wizardSpells[0].map((s) => ({ spell: s, prepared: false })))
         setMaxPreparedSpells(1 + abilityModifier(abilityScores.intelligence))
-        setNumCantrips(wizardSpellSlots[0].cantrips)
+        setNumCantrips(wizardCantrips[0])
         setEquipment(Wizard.startingEquipment())
         break;
       }
@@ -301,7 +301,7 @@ const AddCharacter: React.FC<PropsType> = ({
     }
   }
 
-  const handleAvailableSpellsChange = (spells: R<Spell>[]) => {
+  const handleAvailableSpellsChange = (spells: SpellFactory<Spell>[]) => {
     setAvailableSpells(spells);
     setKnownSpells((prev) => (prev.filter((ks) => !spells.some((s) => ks.spell.name === s.name))))
   }

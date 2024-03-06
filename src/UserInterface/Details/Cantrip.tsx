@@ -1,8 +1,8 @@
 import React from 'react';
-import { R, SpellInterface } from '../../types';
+import { SpellFactory, SpellInterface } from '../../types';
 
 type PropsType = {
-  spell: R<SpellInterface>
+  spell: SpellFactory<SpellInterface>
 }
 
 const Cantrip: React.FC<PropsType> = ({

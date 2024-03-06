@@ -1,15 +1,13 @@
-import { Vec4, mat4, quat, vec3, vec4 } from "wgpu-matrix";
+import { Vec4, vec3, vec4 } from "wgpu-matrix";
 import Spell from "./Spell";
 import Script from "../../../Script/Script";
-import Circle from "../../../Renderer/Drawables/Circle";
-import { degToRad } from "../../../Renderer/Math";
-import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface, TimeType } from "../../../types";
+import RangeCircle from "../../../Renderer/Drawables/RangeCircle";
 
 class RangeSpell extends Spell {
   range: number;
 
-  rangeCircle: DrawableNode | null = null;
+  rangeCircle: RangeCircle | null = null;
 
   constructor(
     actor: CreatureActorInterface,
@@ -89,13 +87,9 @@ class RangeSpell extends Spell {
 
   async showRangeCircle() {
     if (this.range > 0) {
-      this.rangeCircle = await DrawableNode.create(new Circle(this.range, 0.05, vec4.create(0.5, 0.5, 0.5, 1)))
-      this.rangeCircle.translate = vec3.copy(this.actor.sceneObject.sceneNode.translate)
+      this.rangeCircle = new RangeCircle(vec3.copy(this.actor.sceneObject.sceneNode.translate), this.range, 0.05)
   
       this.world.renderer.scene.addNode(this.rangeCircle);
-  
-      const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
-      this.rangeCircle.postTransforms.push(mat4.fromQuat(q));  
     }
   }
 

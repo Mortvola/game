@@ -4,7 +4,7 @@ import { ItemTypes } from './Spell';
 import styles from '../AddCharacter.module.scss';
 import Spell from '../../../Character/Actions/Spells/Spell';
 import KnownSpellComponent, { KnownSpell } from './KnownSpell';
-import { R } from '../../../types';
+import { SpellFactory } from '../../../types';
 
 type PropsType = {
   knownSpells: KnownSpell[],
@@ -19,7 +19,7 @@ const KnownSpells: React.FC<PropsType> = ({
   maxPreparedSpells,
   onChange,
 }) => {  
-  const moveSpell = React.useCallback((spell: R<Spell>) => {
+  const moveSpell = React.useCallback((spell: SpellFactory<Spell>) => {
     onChange([
       ...knownSpells,
       {
@@ -29,7 +29,7 @@ const KnownSpells: React.FC<PropsType> = ({
     ]);
   }, [knownSpells, onChange])
 
-  const checkDrop = React.useCallback((spell: R<Spell>): boolean => (
+  const checkDrop = React.useCallback((spell: SpellFactory<Spell>): boolean => (
     knownSpells.length < maxKnownSpells
     && !knownSpells.some((s) => s.spell.name === spell.name)
   ), [knownSpells, maxKnownSpells])

@@ -1,17 +1,15 @@
-import { Vec2, Vec4, mat4, quat, vec2, vec3, vec4 } from "wgpu-matrix";
-import Circle from "../../../Renderer/Drawables/Circle";
-import { degToRad } from "../../../Renderer/Math";
+import { Vec2, Vec4, vec2, vec3 } from "wgpu-matrix";
 import Script from "../../../Script/Script";
 import RangeSpell from "./RangeSpell";
-import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface, TimeType } from "../../../types";
+import RangeCircle from "../../../Renderer/Drawables/RangeCircle";
 
 class AreaSpell extends RangeSpell {
   center: Vec2 | null = null;
 
   radius: number;
 
-  areaOfEffect: DrawableNode | null = null;
+  areaOfEffect: RangeCircle | null = null;
 
   constructor(
     actor: CreatureActorInterface,
@@ -34,12 +32,17 @@ class AreaSpell extends RangeSpell {
   }
 
   async prepareInteraction(target: CreatureActorInterface | null, point: Vec4 | null): Promise<void> {
-    await this.showAreaOfEffect();
+    if (point !== null) {
+      await this.showAreaOfEffect();
 
-    if (point && this.areaOfEffect) {
-      this.areaOfEffect.translate = vec3.create(point[0], 0, point[2])
-
-      this.center = vec2.create(point[0], point[2]);
+      if (this.areaOfEffect) {
+        this.areaOfEffect.translate = vec3.create(point[0], 0, point[2])
+  
+        this.center = vec2.create(point[0], point[2]);
+      }  
+    }
+    else {
+      this.hideAreaOfEffect();
     }
   }
 
@@ -53,13 +56,9 @@ class AreaSpell extends RangeSpell {
 
   async showAreaOfEffect() {
     if (this.areaOfEffect === null) {
-      this.areaOfEffect = await DrawableNode.create(new Circle(this.radius, 0.05, vec4.create(0.5, 0.5, 0.5, 1)))
-      this.areaOfEffect.translate = vec3.copy(this.actor.sceneObject.sceneNode.translate)
+      this.areaOfEffect = new RangeCircle(vec3.copy(this.actor.sceneObject.sceneNode.translate), this.radius, 0.05)
   
-      this.world.renderer.scene.addNode(this.areaOfEffect);
-  
-      const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
-      this.areaOfEffect.postTransforms.push(mat4.fromQuat(q));  
+      this.world.renderer.scene.addNode(this.areaOfEffect);  
     }
   }
 

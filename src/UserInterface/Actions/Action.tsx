@@ -1,13 +1,14 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import { A, ActionInterface, CreatureActorInterface } from '../../types';
+import { A, ActionFactory, ActionInterface, CreatureActorInterface } from '../../types';
+import { observer } from 'mobx-react-lite';
 
 type PropsType = {
   actor: CreatureActorInterface,
-  action: A<ActionInterface>,
+  action: ActionFactory<ActionInterface>,
 }
 
-const Action: React.FC<PropsType> = ({
+const Action: React.FC<PropsType> = observer(({
   actor,
   action,
 }) => {
@@ -20,7 +21,7 @@ const Action: React.FC<PropsType> = ({
 
   const handleClick = () => {
     if (isAvailable()) {
-      actor.setAction(new action.action(actor));
+      actor.setAction(action);
     }
   }
 
@@ -32,6 +33,9 @@ const Action: React.FC<PropsType> = ({
   if (!isAvailable()) {
     className = `${className} ${styles.disabled}`
   }
+  else if (actor.getAction() === action) {
+    className = `${className} ${styles.selected}`
+  }
 
   return (
     <div
@@ -41,6 +45,6 @@ const Action: React.FC<PropsType> = ({
       {action.name}
     </div>
   )
-}
+})
 
 export default Action;

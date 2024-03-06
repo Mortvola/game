@@ -27,35 +27,41 @@ class MoveAction extends Action {
     // then use the target's location.
     let targetWp: Vec2;
 
-    if (point) {
-      targetWp = vec2.create(point[0], point[2])
+    if (target !== null || point !== null) {
+      if (point) {
+        targetWp = vec2.create(point[0], point[2])
+      }
+      else {
+        const tmp = target!.getWorldPosition();
+        targetWp = vec2.create(tmp[0], tmp[2])
+      }
+
+      const [path, distance, lines, cancelled] = await findPath2(
+        vec2.create(wp[0], wp[2]),
+        targetWp,
+        target ? target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75 : null,
+        target,
+        this.actor.distanceLeft,
+        true,
+      )
+
+      if (!cancelled) { // && !this.target) {
+        await this.showPathLines(lines);
+
+        this.path = path;
+        this.distance = distance;
+
+        if (this.world.actionInfoCallback) {
+          this.world.actionInfoCallback({
+            action: 'Move',
+            percentSuccess: null,
+          })
+        }              
+      }
     }
     else {
-      const tmp = target!.getWorldPosition();
-      targetWp = vec2.create(tmp[0], tmp[2])
-    }
-
-    const [path, distance, lines, cancelled] = await findPath2(
-      vec2.create(wp[0], wp[2]),
-      targetWp,
-      target ? target.occupiedRadius + (target.attackRadius - target.occupiedRadius) * 0.75 : null,
-      target,
-      this.actor.distanceLeft,
-      true,
-    )
-
-    if (!cancelled) { // && !this.target) {
-      await this.showPathLines(lines);
-
-      this.path = path;
-      this.distance = distance;
-
-      if (this.world.actionInfoCallback) {
-        this.world.actionInfoCallback({
-          action: 'Move',
-          percentSuccess: null,
-        })
-      }              
+      console.log('calling showPathLines(null)')
+      await this.showPathLines(null);
     }
   }
 

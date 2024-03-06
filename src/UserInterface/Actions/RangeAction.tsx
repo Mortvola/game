@@ -1,25 +1,25 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import RangeAttack from '../../Character/Actions/RangeAttack';
+import { rangeAttack } from '../../Character/Actions/RangeAttack';
 import { CreatureActorInterface } from '../../types';
+import { observer } from 'mobx-react-lite';
 
 type PropsType = {
   actor: CreatureActorInterface,
 }
 
-const RangeAction: React.FC<PropsType> = ({
+const RangeAction: React.FC<PropsType> = observer(({
   actor,
 }) => {
   const isAvailable = (): boolean => (
-    actor.character.actionsLeft > 0
+    actor.character.equipped.rangeWeapon !== null
+    && actor.character.actionsLeft > 0
   )
 
   const handleClick = () => {
     if (isAvailable()) {
-      actor.setAction(new RangeAttack(actor));
+      actor.setAction(rangeAttack);
     }
-
-    actor.character.primaryWeapon = 'Range';
   }
 
   let  className = styles.action;
@@ -27,10 +27,13 @@ const RangeAction: React.FC<PropsType> = ({
   if (!isAvailable()) {
     className = `${className} ${styles.disabled}`
   }
+  else if (actor.getAction() === rangeAttack) {
+    className = `${className} ${styles.selected}`
+  }
 
   return (
     <div className={className} onClick={handleClick}>Range</div>
   )
-}
+})
 
 export default RangeAction;
