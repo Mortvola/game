@@ -116,69 +116,71 @@ class UniformGridSearch {
     let x1 = p2[0]
     let y1 = p2[1];
 
-    let dy = y1 - y0
-    let dx = x1 - x0;
-
-    const s: number[] = [1, 1];
-
-    if (dy < 0) {
-        dy = -dy
-        s[1] = -1
-    }
-
-    if (dx < 0) {
-        dx = -dx
-        s[0] = -1
-    }
+    let dx = Math.abs(x1 - x0);
+    let dy = Math.abs(y1 - y0);
 
     if (dx >= dy) {
-      let d = dy - Math.trunc(dx / 2)
-
-      if (x0 < x1) {
-        [y0, y1, x0, x1] = [y1, y0, x1, x0]
-        s[0] = -s[0];
-        s[1] = -s[1];
+      if (x0 > x1) {
+        [x0, y0, x1, y1] = [x1, y1, x0, y0]
       }
 
-      while (x0 !== x1) {
-        x0 += s[0]
+      dy = y1 - y0;
+      let s = 1;
 
-        if (d < 0) {
-          d = d + dy;
-        }
-        else {
-          d += dy - dx
-          y0 += s[1]
-        }
-
-        if (this.nodeBlocked(x0, y0)) {
+      if (y0 > y1) {
+        dy = -dy
+        s = -1
+      }
+  
+      let mNew = 2 * dy
+      let slopeError = mNew - dx
+  
+      let y = y0;
+  
+      for (let x = x0; x < x1; x += 1) {
+        if (this.nodeBlocked(x, y)) {
           return false
         }
-      }
-    } else {
-      let d = dx - Math.trunc(dy / 2)
-
-      if (y0 < y1) {
-        [y0, y1, x0, x1] = [y1, y0, x1, x0]
-        s[0] = -s[0];
-        s[1] = -s[1];
-      }
-
-      while (y0 !== y1) {
-        y0 += s[1]
-
-        if (d < 0) {
-          d = d + dx;
+  
+        if (slopeError > 0) {
+          console.log(`slopeError: ${slopeError}, ${dx}, ${dy}`)
+          y += s;
+          slopeError -= 2 * dx
         }
-        else {
-          d += dx - dy
-          x0 += s[0]
-        }
+  
+        slopeError += mNew
+      }  
+    }
+    else {
+      if (y0 > y1) {
+        [x0, y0, x1, y1] = [x1, y1, x0, y0]
+      }
 
-        if (this.nodeBlocked(x0, y0)) {
+      dx = x1 - x0;
+      let s = 1;
+
+      if (x0 > x1) {
+        dx = -dx
+        s = -1
+      }
+
+      let mNew = 2 * dx
+      let slopeError = mNew - dy
+  
+      let x = x0;
+
+      for (let y = y0; y < y1; y += 1) {
+        if (this.nodeBlocked(x, y)) {
           return false
         }
-      }
+  
+        if (slopeError > 0) {
+          x += s;
+          slopeError -= 2 * dy
+        }
+  
+        slopeError += mNew
+      }  
     }
 
     return true
