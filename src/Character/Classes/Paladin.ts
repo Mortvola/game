@@ -3,21 +3,12 @@ import { getArmor } from "../Equipment/Armor";
 import { getWeapon } from "../Equipment/Weapon";
 import CharacterClass, { StartingEquipment } from "./CharacterClass";
 import { WeaponType } from "../Equipment/Types";
-import { ActionFactory, ActionInterface } from "../../types";
-import { getAction } from "../Actions/Actions";
 
 class Paladin extends CharacterClass {
   constructor(level = 1) {
-    const actions: ActionFactory<ActionInterface>[] = [];
-
-    const action = getAction('Lay on Hands');
-    if (action) {
-      actions.push(action);
-    }
-
     super(
       'Paladin', level, 10, [Abilities.strength, Abilities.charisma], [Abilities.wisdom, Abilities.charisma],
-      ['Simple Weapons', 'Martial Weapons'], actions,
+      ['Simple Weapons', 'Martial Weapons']
     )
   }
 

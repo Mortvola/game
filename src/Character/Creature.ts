@@ -6,9 +6,8 @@ import Spell from "./Actions/Spells/Spell";
 import { clericSpells, druidSpells } from "./Actions/Spells/Spells";
 import CharacterClass from "./Classes/CharacterClass";
 import { Armor } from "./Equipment/Armor";
-import { AbilityScores, ActionInterface, CreatureActorInterface, CreatureInterface, Equipped, PrimaryWeapon, SpellFactory, RaceInterface } from "../types";
+import { AbilityScores, ActionInterface, CreatureActorInterface, CreatureInterface, Equipped, PrimaryWeapon, R, RaceInterface } from "../types";
 import { Weapon, WeaponProperties, WeaponType } from "./Equipment/Types";
-import { makeObservable, observable } from "mobx";
 
 class Creature implements CreatureInterface {
   name = '';
@@ -29,11 +28,11 @@ class Creature implements CreatureInterface {
 
   armor: Armor[];
 
-  cantrips: SpellFactory<Spell>[] = [];
+  cantrips: R<Spell>[] = [];
 
-  spells: SpellFactory<Spell>[] = [];
+  spells: R<Spell>[] = [];
 
-  knownSpells: SpellFactory<Spell>[] | null = null;
+  knownSpells: R<Spell>[] | null = null;
 
   actionsLeft = 0;
 
@@ -79,12 +78,6 @@ class Creature implements CreatureInterface {
     this.weapons = weapons;
     this.armor = armor;
     this.experiencePoints = experiencePoints;
-
-    makeObservable(this, {
-      spellSlots: observable,
-      actionsLeft: observable,
-      bonusActionsLeft: observable,
-    })
   }
 
   clone(): Creature {
@@ -186,23 +179,6 @@ class Creature implements CreatureInterface {
       case 'Druid':
         return druidSpellSlots[this.charClass.level - 1].spells[spellLevel - 1];
     }
-
-    return undefined;
-  }
-
-  getMaxSpellLevel(): number | undefined {
-    switch (this.charClass.name) {
-      case 'Cleric':
-        return clericSpellSlots[this.charClass.level - 1].spells.length;
-
-      case 'Wizard':
-        return wizardSpellSlots[this.charClass.level - 1].spells.length;
-
-      case 'Druid':
-        return druidSpellSlots[this.charClass.level - 1].spells.length;
-    }
-
-    return undefined;
   }
 
   getKnownSpells() {

@@ -7,7 +7,7 @@ import { downloadFbx } from "./Fbx/LoadFbx";
 import ContainerNode from "./Renderer/Drawables/SceneNodes/ContainerNode";
 import { gpu } from "./Renderer/Gpu";
 import { FbxNodeInterface, isFbxContainerNode, isFbxGeometryNode } from "./Fbx/types";
-import { GameObject2DRecord, GameObjectRecord, ModelItem, SceneNodeInterface, isGameObject2DRecord } from "./Renderer/types";
+import { GameObjectRecord, ModelItem, SceneNodeInterface } from "./Renderer/types";
 import { MaterialDescriptor } from "./Renderer/Materials/MaterialDescriptor";
 import { MaterialRecord, NodeMaterials } from "./game-common/types";
 import Http from "./Http/src";
@@ -15,39 +15,27 @@ import { ShaderDescriptor } from "./Renderer/shaders/ShaderDescriptor";
 import { particleSystemManager } from "./Renderer/ParticleSystemManager";
 import SceneObject from "./SceneObject";
 import { WorldInterface } from "./types";
-import SceneObject2D from "./SceneObject2D";
 
 class SceneObjectManager {
   meshes: Map<string, Drawable> = new Map();
 
   gameObjects: Map<string, GameObjectRecord> = new Map()
 
-  gameObjects2d: Map<string, GameObject2DRecord> = new Map()
-
   async ready() {
     return gpu.ready();
   }
 
-  private async downloadList() {
-    const response = await Http.get<GameObjectRecord[]>('/game-objects-list');
+  async getSceneObject(name: string, world: WorldInterface): Promise<SceneObject> {
+    if (this.gameObjects.size === 0) {
+      const response = await Http.get<GameObjectRecord[]>('/game-objects-list');
 
-    if (response.ok) {
-      const gameObjects = await response.body();
+      if (response.ok) {
+        const gameObjects = await response.body();
 
-      for (const object of gameObjects) {
-        if (isGameObject2DRecord(object)) {
-          this.gameObjects2d.set(object.name, object)
-        }
-        else {
+        for (const object of gameObjects) {
           this.gameObjects.set(object.name, object)
         }
       }
-    }
-  }
-
-  async getSceneObject(name: string, world: WorldInterface): Promise<SceneObject> {
-    if (this.gameObjects.size === 0) {
-      await this.downloadList()
     }
 
     let sceneObject: SceneObject | null = null;
@@ -85,32 +73,6 @@ class SceneObjectManager {
     }
 
     return sceneObject;
-  }
-
-  async getSceneObject2d(name: string): Promise<SceneObject2D> {
-    if (this.gameObjects2d.size === 0) {
-      await this.downloadList()
-    }
-
-    let sceneObject: SceneObject2D | null = null;
-
-    const object = this.gameObjects2d.get(name);
-
-    if (object) {
-      sceneObject = await SceneObject2D.create(
-        object.object.x!,
-        object.object.y!,
-        object.object.width!,
-        object.object.height!,
-        object.object.material!,
-      )
-    }
-
-    if (!sceneObject) {
-      throw new Error(`object not found: ${name}`)
-    }
-
-    return sceneObject
   }
 
   async loadFbx(id: number): Promise<FbxNodeInterface | undefined> {

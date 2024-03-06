@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import { meleeAttack } from '../../Character/Actions/MeleeAttack';
+import MeleeAttack from '../../Character/Actions/MeleeAttack';
 import { CreatureActorInterface } from '../../types';
 
 type PropsType = {
@@ -16,7 +16,7 @@ const MeleeAction: React.FC<PropsType> = ({
 
   const handleClick = () => {
     if (isAvailable()) {
-      actor.setAction(meleeAttack);
+      actor.setAction(new MeleeAttack(actor));
     }
 
     actor.character.primaryWeapon = 'Melee';

@@ -35,7 +35,7 @@ import Spell from '../../Character/Actions/Spells/Spell';
 import Creature from '../../Character/Creature';
 import Cantrips from './Spells/Cantrips';
 import { clericSpellSlots, druidSpellSlots, wizardSpellSlots } from '../../Tables';
-import { AbilityScores, SpellFactory, RaceInterface } from '../../types';
+import { AbilityScores, R, RaceInterface } from '../../types';
 import { Weapon } from '../../Character/Equipment/Types';
 
 type PropsType = {
@@ -58,7 +58,7 @@ const AddCharacter: React.FC<PropsType> = ({
   const [abilityScores, setAbilityScores] = React.useState<AbilityScores>(addAbilityIncreases(baseAbilityScores, race))
   const [knownSpells, setKnownSpells] = React.useState<KnownSpell[]>([]);
   const [cantrips, setCantrips] = React.useState<KnownSpell[]>([]);
-  const [availableSpells, setAvailableSpells] = React.useState<SpellFactory<Spell>[] | null>(null)
+  const [availableSpells, setAvailableSpells] = React.useState<R<Spell>[] | null>(null)
   const [maxPreparedSpells, setMaxPreparedSpells] = React.useState<number>(0)
   const [numCantrips, setNumCantrips] = React.useState<number>(0);
 
@@ -301,7 +301,7 @@ const AddCharacter: React.FC<PropsType> = ({
     }
   }
 
-  const handleAvailableSpellsChange = (spells: SpellFactory<Spell>[]) => {
+  const handleAvailableSpellsChange = (spells: R<Spell>[]) => {
     setAvailableSpells(spells);
     setKnownSpells((prev) => (prev.filter((ks) => !spells.some((s) => ks.spell.name === s.name))))
   }

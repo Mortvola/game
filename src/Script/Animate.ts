@@ -28,6 +28,7 @@ class Animate implements ActorInterface {
       const node = this.findSceneNode(this.sceneObject.sceneNode, 'SoularCoaster');
 
       if (isDrawableNode(node)) {
+        console.log(`fade: ${this.initialFade}`)
         node.material.updateProperty(GPUShaderStage.FRAGMENT, 'fade', this.initialFade)
       }
     }
@@ -45,6 +46,7 @@ class Animate implements ActorInterface {
       const node = this.findSceneNode(this.sceneObject.sceneNode, 'SoularCoaster');
 
       if (isDrawableNode(node)) {
+        console.log(`fade: ${this.initialFade + f}`)
         node.material.updateProperty(GPUShaderStage.FRAGMENT, 'fade', this.initialFade + f)
       }
     }

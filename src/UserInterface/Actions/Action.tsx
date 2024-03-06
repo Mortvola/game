@@ -1,10 +1,10 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import { A, ActionFactory, ActionInterface, CreatureActorInterface } from '../../types';
+import { A, ActionInterface, CreatureActorInterface } from '../../types';
 
 type PropsType = {
   actor: CreatureActorInterface,
-  action: ActionFactory<ActionInterface>,
+  action: A<ActionInterface>,
 }
 
 const Action: React.FC<PropsType> = ({
@@ -20,7 +20,7 @@ const Action: React.FC<PropsType> = ({
 
   const handleClick = () => {
     if (isAvailable()) {
-      actor.setAction(action);
+      actor.setAction(new action.action(actor));
     }
   }
 

@@ -5,7 +5,6 @@ import Goblin from "./Character/Monsters/Goblin";
 import { XPThreshold, xpThresholds } from "./Tables";
 import Kobold from "./Character/Monsters/Kobold";
 import { CharacterInterface, CreatureActorInterface, ParticipantsInterface, Party, WorldInterface } from "./types";
-import { computed, makeObservable, observable, observe, runInAction } from "mobx";
 
 function createParty<Type extends CharacterInterface>(thresholds: XPThreshold, c: new (name: string) => Type, name: string): Party {
   const party: Party = {
@@ -76,12 +75,6 @@ class Participants implements ParticipantsInterface {
     return this.turns[this.turn]
   }
 
-  constructor() {
-    makeObservable(this, {
-      activeActor: computed,
-    })
-  }
-
   remove(actor: CreatureActorInterface) {
     const team = this.participants[actor.team];
     let index = team.findIndex((a) => a === actor);
@@ -134,19 +127,17 @@ class Participants implements ParticipantsInterface {
       actor.character.hitPoints = actor.character.maxHitPoints;
       actor.character.conditions = [];
       
-      runInAction(() => {
-        actor.character.spellSlots = [];
+      actor.character.spellSlots = [];
 
-        for (let spellLevel = 1;; spellLevel += 1) {
-          const slots = actor.character.getMaxSpellSlots(spellLevel);
+      for (let spellLevel = 1;; spellLevel += 1) {
+        const slots = actor.character.getMaxSpellSlots(spellLevel);
 
-          if (slots === undefined) {
-            break;
-          }
-
-          actor.character.spellSlots = actor.character.spellSlots.concat(slots)
+        if (slots === undefined) {
+          break;
         }
-      })
+
+        actor.character.spellSlots.push(slots)
+      }
 
       actor.sceneObject.sceneNode.translate[0] = (actors.length - ((numPlayers - 1) / 2))
         * spaceBetween + Math.random()

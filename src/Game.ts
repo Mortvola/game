@@ -7,15 +7,8 @@ import Collidees from './Collidees';
 import Participants, { ParticipantsState } from './Participants';
 import Script from './Script/Script';
 import { Occupant } from './Workers/PathPlannerTypes';
-import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, Party } from './types';
+import { ActionInfo, ActorInterface, CreatureActorInterface, FocusInfo, States, WorldInterface, EpisodeInfo, Party } from './types';
 import Renderer from './Renderer/Renderer';
-import { addActionBar } from './UserInterface/ActionBar';
-import ElementNode from './Renderer/Drawables/SceneNodes/ElementNode';
-import { runInAction } from 'mobx';
-import { addPlayerStatus } from './UserInterface/PlayerStatus';
-import { addFocusedStatus } from './UserInterface/FocusedStatus';
-import { addMessages } from './UserInterface/Messages';
-import UI from './UserInterface/CreateElement';
 
 const requestPostAnimationFrame = (task: (timestamp: number) => void) => {
   requestAnimationFrame((timestamp: number) => {
@@ -64,14 +57,24 @@ class Game implements WorldInterface {
 
   path4: Line | null = null;
 
-  reticle: ElementNode;
+  // reticle: DrawableNode;
 
   reticlePosition = vec2.create(0, 0);
 
   inputMode: 'Mouse' | 'Controller' = 'Mouse';
 
   collidees = new Collidees();
+
+  scoreCallback: ((episode: EpisodeInfo) => void) | null = null;
+
+  loggerCallback: ((message: string) => void) | null = null;
   
+  focusCallback: ((focusInfo: FocusInfo | null) => void) | null = null;
+
+  actionInfoCallback: ((actionInfo: ActionInfo | null) => void) | null = null;
+
+  characterChangeCallback: ((character: CreatureActorInterface | null) => void) | null = null;
+
   animate = true;
 
   followActiveCharacter = false;
@@ -80,44 +83,17 @@ class Game implements WorldInterface {
 
   occupants: Occupant[] = [];
 
-  constructor(renderer: Renderer, reticle: UI.UIElement) {
+  constructor(renderer: Renderer) {
     this.renderer = renderer;
 
-    this.renderer.camera.offset = 40;
-    this.renderer.camera.position = vec4.create(0, 0, 7, 1);
-    this.renderer.camera.rotateX = -45;
-
-    const r = UI.render(reticle, this.renderer.scene2d);
-
-    this.renderer.scene2d.addNode(r!)
-    this.reticle = r!
+    this.renderer.camera.offset = 18;
+    this.renderer.camera.position = vec4.create(0, 0, 20, 1);
   }
 
   static async create() {
     const renderer = await Renderer.create();
     
-    const reticle = UI.createElement(
-      '',
-      { style: { position: 'absolute' }},
-      UI.createElement(
-        '',
-        {
-          style: {
-            width: 16,
-            height: 16,
-            backgroundColor: [1, 0, 0, 1],
-          },
-        },
-      )
-    )
-
-    if (!reticle) {
-      throw new Error('retiticle is null')
-    }
-
-    const game = new Game(renderer, reticle);
-
-    return game;
+    return new Game(renderer);
   }
 
   async setCanvas(canvas: HTMLCanvasElement) {
@@ -128,23 +104,22 @@ class Game implements WorldInterface {
     this.initialized = true;
   }
 
-  characterChangeCallback(character: CreatureActorInterface | null) {
-    addActionBar(character, this.renderer.scene2d)
-    addPlayerStatus(character, this.renderer.scene2d)
-  }
-
-  async startTurn() {
+  startTurn() {
     if (this.participants.activeActor) {
       if (this.participants.activeActor.automated) {
-        // this.renderer.scene.removeNode(this.reticle);
+        // this.mainRenderPass.removeDrawable(this.reticle, 'reticle');
 
-        this.characterChangeCallback(null);
+        if (this.characterChangeCallback) {
+          this.characterChangeCallback(null);
+        }
       } else {
         // if (this.inputMode === 'Controller') {
-          // this.renderer.scene.addNode(this.reticle);
+        //   this.mainRenderPass.addDrawable(this.reticle, 'reticle');
         // }
 
-        this.characterChangeCallback(this.participants.activeActor);
+        if (this.characterChangeCallback) {
+          this.characterChangeCallback(this.participants.activeActor);
+        }
       }
 
       this.participants.activeActor.startTurn();
@@ -158,7 +133,7 @@ class Game implements WorldInterface {
     }
   }
 
-  async endTurn2(actor: CreatureActorInterface) {
+  endTurn2(actor: CreatureActorInterface) {
     if (this.participants.activeActor && this.participants.activeActor === actor) {
       this.participants.activeActor.endTurn();
 
@@ -181,16 +156,16 @@ class Game implements WorldInterface {
       }
 
       this.participants.turn = (this.participants.turn + 1) % this.participants.turns.length;
-      await this.startTurn();
+      this.startTurn();
 
       // Cause the focus information to update.
       this.updateFocus = true;
     }
   }
 
-  async endTurn() {
+  endTurn() {
     if (!this.participants.activeActor.automated) {
-      await this.endTurn2(this.participants.activeActor);
+      this.endTurn2(this.participants.activeActor);
     }
   }
 
@@ -230,25 +205,6 @@ class Game implements WorldInterface {
     this.removeActors = [];
   }
 
-  focusCallback(focusInfo: FocusInfo | null) {
-    addFocusedStatus(focusInfo, this.renderer.scene2d)
-  }
-
-  messages: { id: number, message: string }[] = []
-
-  loggerCallback(message: string) {
-    this.messages = [
-      ...this.messages,
-      {
-        id: this.messages.length === 0 ? 0 : this.messages[this.messages.length - 1].id + 1,
-        message,
-      }
-    ]
-    .slice(-4)
-
-    addMessages(this.messages, this.renderer.scene2d)
-  }
-
   async prepareTeams() {
     // Remove any current participants
     for (const actor of this.participants.turns) {
@@ -277,9 +233,9 @@ class Game implements WorldInterface {
       this.actors.push(actor);
     }
 
-    this.renderer.scene.updateTransforms(undefined, this.renderer);
+    // this.renderer.scene.updateTransforms(undefined, this);
 
-    await this.startTurn();
+    this.startTurn();
   }
 
   updateFrame = async (timestamp: number) => {
@@ -344,6 +300,16 @@ class Game implements WorldInterface {
               }
             }
 
+            if (winningTeam !== null) {
+              const episode: EpisodeInfo = {
+                winningTeam,
+              }  
+
+              if (this.scoreCallback) {
+                this.scoreCallback(episode);
+              }  
+            }
+
             this.participants.state = ParticipantsState.needsPrep;
             this.endOfRound = false;
           }  
@@ -351,7 +317,7 @@ class Game implements WorldInterface {
           this.checkActorFocus();
         }
 
-        await this.renderer.drawScene(timestamp);
+        this.renderer.drawScene(timestamp);
 
         this.previousTimestamp = timestamp;
         this.framesRendered += 1;
@@ -382,12 +348,6 @@ class Game implements WorldInterface {
     if (this.inputMode === 'Mouse') {
       this.reticlePosition[0] = x;
       this.reticlePosition[1] = y;
-
-      const screen = this.renderer.scene2d.ndcToScreen(this.reticlePosition[0], this.reticlePosition[1])
-
-      this.reticle.style.left = screen[0];
-      this.reticle.style.top = screen[1];
-      this.renderer.scene2d.needsUpdate = true
 
       const { origin, ray } = this.renderer.camera.computeHitTestRay(this.reticlePosition[0], this.reticlePosition[1]);
 
@@ -511,30 +471,28 @@ class Game implements WorldInterface {
                 ...this.focused.character.influencingActions.map((c) => ({ name: c.name, duration: c.duration })),
                 ...this.focused.character.conditions.map((c) => ({ name: c, duration: 0 })),
               ]
-            })
+            })  
           }
           else {
             this.focusCallback(null);
           }
         }  
 
-        this.renderer.setOutlineMesh(this.focused?.sceneObject.sceneNode ?? null)
-
         if (
           !activeActor.automated
           && activeActor.state !== States.scripting
         ) {
+    
           const action = activeActor.getAction();
 
-          if (action?.action) {
-            await action.action.prepareInteraction(actor ?? null, point ?? null)            
+          if (action) {
+            await action.prepareInteraction(actor ?? null, point ?? null)            
           }
         }
       }
     } else if (this.focused) {
       // this.mainRenderPass.removeDrawables(this.focused.sceneNode);
       this.focused = null;
-      this.renderer.setOutlineMesh(null)
 
       if (this.focusCallback) {
         this.focusCallback(null);
@@ -550,32 +508,7 @@ class Game implements WorldInterface {
     this.renderer.camera.moveDirection = direction;
   }
 
-  actionInfoCallback(actionInfo: ActionInfo | null) {
-    if (actionInfo === null) {
-      this.reticle.nodes = this.reticle.nodes.slice(0, 1)
-    }
-    else {
-      const element = UI.render(UI.createElement(
-        '',
-        { style: { margin: { top: 16 }, flexDirection: 'column' } },
-        actionInfo.action,
-        actionInfo.percentSuccess ? `${actionInfo?.percentSuccess ?? 0}%` : null,
-        actionInfo.description ? actionInfo.description : null,
-      ), this.renderer.scene2d)
-
-      if (element) {
-        this.reticle.nodes[1] = element
-      }
-    }
-
-    this.renderer.scene2d.needsUpdate = true;
-  }
-
   async interact() {
-    if (this.renderer.scene2d.click(this.reticlePosition[0], this.reticlePosition[1])) {
-      return
-    }
-
     if (
       this.participants.activeActor
       && !this.participants.activeActor.automated
@@ -586,21 +519,17 @@ class Game implements WorldInterface {
 
       const action = activeActor.getAction();
 
-      if (action?.action) {
-        if (await action.action.interact(script)) {
+      if (action) {
+        if (await action.interact(script)) {
           if (action.time === 'Action') {
-            runInAction(() => {
-              if (activeActor.character.actionsLeft > 0) {
-                activeActor.character.actionsLeft -= 1;
-              }
-            })
+            if (activeActor.character.actionsLeft > 0) {
+              activeActor.character.actionsLeft -= 1;
+            }
           }
           else if (action.time === 'Bonus') {
-            runInAction(() => {
-              if (activeActor.character.bonusActionsLeft > 0) {
-                activeActor.character.bonusActionsLeft -= 1;
-              }  
-            })
+            if (activeActor.character.bonusActionsLeft > 0) {
+              activeActor.character.bonusActionsLeft -= 1;
+            }
           }
 
           activeActor.setAction(null);
@@ -631,6 +560,22 @@ class Game implements WorldInterface {
     }
   }
 
+  centerOn(x: number, y: number) {
+    this.reticlePosition[0] = x;
+    this.reticlePosition[1] = y;
+
+    let { actor, point } = this.cameraHitTest();
+
+    if (actor) {
+      point = actor.getWorldPosition();
+    }
+
+    if (point) {
+      this.renderer.camera.moveCameraTo = point;
+      this.renderer.camera.moveCameraStartTime = null;
+    }
+  }
+
   toggleInputMode() {
     this.inputMode = this.inputMode === 'Mouse' ? 'Controller' : 'Mouse';
 
@@ -654,6 +599,26 @@ class Game implements WorldInterface {
   zoomIn() {
     this.renderer.camera.offset -= 1;
     this.renderer.camera.rotateX += 1;
+  }
+
+  setScoreCallback(callback: (episode: EpisodeInfo) => void) {
+    this.scoreCallback = callback;
+  }
+
+  setLoggerCallback(callback: (message: string) => void) {
+    this.loggerCallback = callback;
+  }
+
+  setFocusCallback(callback: (focusInfo: FocusInfo | null) => void) {
+    this.focusCallback = callback;
+  }
+
+  setActionInfoCallback(callback: (actionInfo: ActionInfo | null) => void) {
+    this.actionInfoCallback = callback;
+  }
+
+  setCharacterChangeCallback(callback: (actor: CreatureActorInterface | null) => void) {
+    this.characterChangeCallback = callback;
   }
 
   setParties(parties: Party[]) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './ActionBar.module.scss';
-import { rangeAttack } from '../../Character/Actions/RangeAttack';
+import RangeAttack from '../../Character/Actions/RangeAttack';
 import { CreatureActorInterface } from '../../types';
 
 type PropsType = {
@@ -16,7 +16,7 @@ const RangeAction: React.FC<PropsType> = ({
 
   const handleClick = () => {
     if (isAvailable()) {
-      actor.setAction(rangeAttack);
+      actor.setAction(new RangeAttack(actor));
     }
 
     actor.character.primaryWeapon = 'Range';

@@ -2,7 +2,6 @@ import { Vec4 } from "wgpu-matrix";
 import Script from "../../../Script/Script";
 import { CreatureActorInterface, SpellInterface, TimeType } from '../../../types'
 import Action from "../Action";
-import { runInAction } from "mobx";
 
 class Spell extends Action implements SpellInterface {
   level: number;
@@ -57,13 +56,7 @@ class Spell extends Action implements SpellInterface {
     }
 
     if (this.level >= 1 && this.actor.character.spellSlots[this.level - 1] > 0) {
-      runInAction(() => {
-        this.actor.character.spellSlots = [
-          ...this.actor.character.spellSlots.slice(0, this.level - 1),
-          this.actor.character.spellSlots[this.level - 1] - 1,
-          ...this.actor.character.spellSlots.slice(this.level - 1),
-        ]  
-      })
+      this.actor.character.spellSlots[this.level - 1] -= 1;
     }
 
     return true;

@@ -4,7 +4,12 @@ import { game } from '../Main';
 import { vec4 } from 'wgpu-matrix';
 import DefineParties from './DefineParty';
 import { restoreParties, storeParties } from '../Character/CharacterStorage';
-import { Party } from '../types';
+import { WorkerMessage, worker, workerQueue } from '../WorkerQueue';
+import Messages from './Messages';
+import ActionBar from './Actions/ActionBar';
+import StatusBar from './StatusBar/StatusBar';
+import Focused from './Focused';
+import { ActionInfo, CreatureActorInterface, FocusInfo, Party } from '../types';
 import { gpu } from "../Renderer/Gpu";
 
 type DiretionKeys = {
@@ -15,6 +20,7 @@ type DiretionKeys = {
 }
 
 function App() {
+  const [hasFocus, setHasFocus] = React.useState<boolean>(false); 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const movement = React.useRef<DiretionKeys>({
     left: 0,
@@ -22,8 +28,6 @@ function App() {
     forward: 0,
     backward: 0,
   })
-
-  const [pointerLocked, setPointerLocked] = React.useState<boolean>(false)
 
   React.useEffect(() => {
     const element = canvasRef.current;
@@ -33,54 +37,134 @@ function App() {
 
       (async () => {
         await game.setCanvas(element);
-      })()
-
-      const lockChange = () => {
-        setPointerLocked(document.pointerLockElement === element)
-      }
-
-      document.addEventListener('pointerlockchange', lockChange, )
-
-      return (() => {
-        document.removeEventListener('pointerlockchange', lockChange)
-      })
+      })()  
     }
   }, [])
+
+  const [rewards, setRewards] = React.useState<unknown[]>([["episode", "max", "mean", "min"]]);
+
+  const [messages, setMessages] = React.useState<{ id: number, message: string }[]>([]);
+
+  const loggerCallback = React.useCallback((message: string) => {
+    setMessages((prev) => (
+      [
+        ...prev,
+        {
+          id: prev.length === 0 ? 0 : prev[prev.length - 1].id + 1,
+          message,
+        }
+      ]
+      .slice(-4)
+    ));  
+  }, [])
+
+  const [focus, setFocus] = React.useState<FocusInfo | null>(null);
+
+  const focusCallback = React.useCallback((focusInfo: FocusInfo | null) => {
+    setFocus(focusInfo);
+  }, [])
+
+  const [actionInfoStyle, setActionInfoStyle] = React.useState<React.CSSProperties>({});
+  const [actionInfo, setActionInfo] = React.useState<ActionInfo | null>(null);
+
+  const actionInfoCallback = React.useCallback((actionInfo: ActionInfo | null) => {
+    setActionInfo(actionInfo);
+  }, [])
+
+  const [actor, setActor] = React.useState<CreatureActorInterface | null>(null);
+
+  const characterChangeCallback = React.useCallback((actor: CreatureActorInterface | null) => {
+    setActor(actor)
+  }, [])
+
+  React.useEffect(() => {
+    const listener = (evt: MessageEvent<WorkerMessage>) => {
+      if (evt.data.type === 'Rewards' && evt.data.rewards) {
+        const newRewards = evt.data.rewards;
+
+        type Stats = {
+          min: number | null,
+          max: number | null,
+          sum: number,
+        }
+
+        const stats = newRewards.reduce<Stats>((stats, value) => {
+          if (stats.max === null || stats.max < value[1]) {
+            stats.max = value[1];
+          }
+
+          if (stats.min === null || stats.min > value[1]) {
+            stats.min = value[1];
+          }
+
+          stats.sum += value[1];
+
+          return stats;
+        }, { min: null, max: null, sum: 0});
+
+        setRewards((prev) => {
+          let rewards = [
+            ...prev,
+            [newRewards[0][0], stats.max, stats.sum / newRewards.length, stats.min],
+          ];
+
+          const maxLength = 1001; // Number of entries plus one for titles.
+
+          if (rewards.length > maxLength) {
+            rewards = [
+              rewards[0],
+              ...rewards.slice(rewards.length - maxLength + 2)
+            ]
+          }
+
+          return rewards;
+        })
+      }
+      else if (evt.data.type === 'Finished') {
+        workerQueue.finished();
+      }
+    }
+
+    worker.addEventListener("message", listener);
+    
+    return (() => {
+      worker.removeEventListener('message', listener);
+    })
+  }, []);
 
   React.useEffect(() => {
     const element = canvasRef.current;
 
     if (element) {
       element.focus();
+      (async () => {
+        game.setLoggerCallback(loggerCallback);
+        game.setFocusCallback(focusCallback);
+        game.setActionInfoCallback(actionInfoCallback)
+        game.setCharacterChangeCallback(characterChangeCallback)
+      })()  
     }
-  }, [])
+  }, [loggerCallback, focusCallback, characterChangeCallback, actionInfoCallback])
 
   const handlePointerDown: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
 
     if (element) {
-      // element.setPointerCapture(event.pointerId);
-      if (!pointerLocked) {
-        element.requestPointerLock()
+      element.setPointerCapture(event.pointerId);
+      const rect = element.getBoundingClientRect();
+
+      const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
+      const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
+      // game?.pointerDown(clipX, clipY);
+
+      if (event.metaKey) {
+        game?.centerOn(clipX, clipY)
       }
-      else {
-        // const rect = element.getBoundingClientRect();
-
-        // const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
-        // const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-        // game?.pointerDown(clipX, clipY);
-
-        if (event.metaKey) {
-          // game?.centerOn(clipX, clipY)
-        }
-        else if (!event.ctrlKey) {
-          game?.interact()
-        }
+      else if (!event.ctrlKey) {
+        game?.interact()
       }
     }
   }
-
-  const [pointerPosition, setPointerPosition] = React.useState<{ x: number, y: number }>({ x: 0, y: 0})
 
   const handlePointerMove: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     const element = canvasRef.current;
@@ -88,25 +172,10 @@ function App() {
     if (element) {
       const rect = element.getBoundingClientRect();
 
-      if (!pointerLocked) {
-        setPointerPosition({ x: event.clientX, y: event.clientY })
-
-        const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
-        const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
-        game?.pointerMove(clipX, clipY);  
-      }
-      else {
-        setPointerPosition((prev) => {
-          const newPoint = { x: prev.x + event.movementX, y: prev.y + event.movementY}
-
-          const clipX = ((newPoint.x - rect.left) / element.clientWidth) * 2 - 1;
-          const clipY = 1 - ((newPoint.y - rect.top) / element.clientHeight) * 2;  
-
-          game?.pointerMove(clipX, clipY);  
-  
-          return newPoint
-        })
-      }
+      setActionInfoStyle({ left: event.clientX + 10, top: event.clientY + 10 })
+      const clipX = ((event.clientX - rect.left) / element.clientWidth) * 2 - 1;
+      const clipY = 1 - ((event.clientY - rect.top) / element.clientHeight) * 2;
+      game?.pointerMove(clipX, clipY);
     }
   }
 
@@ -149,13 +218,6 @@ function App() {
           const canvas = entry.target as HTMLCanvasElement;
           canvas.width = Math.max(1, Math.min(width, gpu.device.limits.maxTextureDimension2D ?? 1));
           canvas.height = Math.max(1, Math.min(height, gpu?.device.limits.maxTextureDimension2D ?? 1));
-
-          const scaleX = canvas.width / entry.contentRect.width * window.devicePixelRatio
-          const scaleY = canvas.height / entry.contentRect.height * window.devicePixelRatio
-
-          // console.log(visualViewport?.scale)
-          // console.log(`inner: ${window.innerWidth}, ${window.innerHeight}, canvas ${canvas.width}, ${canvas.height}, content: ${entry.contentRect.width}, ${entry.contentRect.height}`)
-          game?.renderer.canvasResize(canvas.width, canvas.height, scaleX, scaleY, entry.contentRect.width, entry.contentRect.height)
         }
       })
 
@@ -296,8 +358,11 @@ function App() {
           </button>
         </div>
       </div>
-      <div className="upper-center" />
-      <div className="upper-right" />
+      <div className="upper-center">
+        <Focused focused={focus} />
+      </div>
+      <div className="upper-right">
+      </div>
       {
         showPartyDefs
           ? (
@@ -308,16 +373,88 @@ function App() {
       <canvas
         ref={canvasRef}
         tabIndex={0}
-        autoFocus
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerLeave}
         onWheel={handleWheel}
       />
-      <div className="lower-left" />
-      <div className="lower-center" />
-      <div className="lower-right" />
+      <div className={`action`} style={actionInfoStyle}>
+        <div>
+          <div>
+            {
+              actionInfo
+                ? actionInfo.action
+                : null
+            }
+          </div>
+          <div>
+            {
+              (actionInfo?.percentSuccess ?? null) !== null
+                ? `${actionInfo?.percentSuccess ?? 0}%`
+                : null
+            }
+          </div>
+        </div>
+        {
+          actionInfo?.description
+            ? actionInfo.description
+            : null
+        }
+      </div>
+      <div className="lower-left">
+        {
+          actor
+            ? actor.character.influencingActions.map((c) => (
+              <div>{`${c.name} (${c.duration / 6})`}</div>
+            ))
+            : null
+        }
+        {
+          actor
+            ? actor.character.conditions.map((c) => (
+              <div>{c}</div>
+            ))
+            : null
+        }
+        {
+          actor?.character.concentration
+            ? <div>{`Concetrating: ${actor.character.concentration.name} (${actor.character.concentration.duration / 6})`}</div>
+            : null
+        }
+        {
+          actor?.character
+            ? (
+              <div>
+                <div>{actor.character.name}</div>
+                {`${actor.character.hitPoints}/${actor.character.maxHitPoints}`}
+                {
+                  actor.character.temporaryHitPoints
+                    ? ` + ${actor.character.temporaryHitPoints}`
+                    : ''
+                }
+              </div>
+            )
+            : null
+        }
+      </div>
+      <div
+        className="lower-center"
+      >
+        {
+          actor
+            ? (
+              <div>
+                <StatusBar character={actor.character} />
+                <ActionBar actor={actor} />
+              </div>
+            )
+            : null
+        }
+      </div>
+      <div className="lower-right">
+        <Messages messages={messages} />
+      </div>
     </div>
   );
 }

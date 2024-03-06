@@ -1,6 +1,6 @@
 import { Abilities } from "./Abilities";
 import { abilityModifier } from "../../Dice";
-import { AbilityScores, ActionFactory, ActionInterface, CharacterClassInterface } from "../../types";
+import { A, AbilityScores, ActionInterface, CharacterClassInterface } from "../../types";
 import { Armor } from "../Equipment/Armor";
 import { Weapon, WeaponProficiencies, WeaponType } from "../Equipment/Types";
 
@@ -17,7 +17,7 @@ class CharacterClass implements CharacterClassInterface {
 
   weaponProficiencies: WeaponProficiencies[];
 
-  actions: ActionFactory<ActionInterface>[];
+  actions: A<ActionInterface>[];
 
   constructor(
     name: string,
@@ -26,7 +26,7 @@ class CharacterClass implements CharacterClassInterface {
     primaryAbilities: Abilities[],
     savingThrowsProficiencies: Abilities[],
     weaponProficiencies: WeaponProficiencies[],
-    actions?: ActionFactory<ActionInterface>[]
+    actions?: A<ActionInterface>[]
   ) {
     this.name = name;
     this.hitDice = hitDice;
