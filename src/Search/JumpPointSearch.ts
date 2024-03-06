@@ -77,6 +77,7 @@ class JumpPointSearch extends UniformGridSearch {
             path = this.smoothPath(path);
 
             if (path.length === l) {
+              // No points were removed so we are done.
               break;
             }
           }
@@ -130,16 +131,17 @@ class JumpPointSearch extends UniformGridSearch {
     return [];
   }
 
-  trimPath(path: Vec2[], g: Vec2, goalRadius: number) {
+  trimPath(path: Vec2[], goal: Vec2, goalRadius: number) {
     for (;;) {
       if (path.length < 2) {
         console.log('path is too short')
         break;
       }
 
-      const result = lineCircleIntersection(g, goalRadius, path[0], path[1]);
+      const result = lineCircleIntersection(goal, goalRadius, path[0], path[1]);
 
       if (result === null || result.length === 1) {
+        // line either does not intersect or is a tangent.
         break;
       }
 
