@@ -1,9 +1,9 @@
 import React from 'react';
-import { R, SpellInterface } from '../../types';
+import { SpellFactory, SpellInterface } from '../../types';
 
 export type KnownSpell = {
   prepared: boolean,
-  spell: R<SpellInterface>,
+  spell: SpellFactory<SpellInterface>,
 }
 
 type PropsType = {
