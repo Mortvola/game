@@ -30,6 +30,8 @@ function App() {
     backward: 0,
   })
 
+  const [pointerLocked, setPointerLocked] = React.useState<boolean>(false)
+
   React.useEffect(() => {
     const element = canvasRef.current;
 
@@ -38,7 +40,17 @@ function App() {
 
       (async () => {
         await game.setCanvas(element);
-      })()  
+      })()
+
+      const lockChange = () => {
+        setPointerLocked(document.pointerLockElement === element)
+      }
+
+      document.addEventListener('pointerlockchange', lockChange, )
+
+      return (() => {
+        document.removeEventListener('pointerlockchange', lockChange)
+      })
     }
   }, [])
 
@@ -408,6 +420,7 @@ function App() {
       <canvas
         ref={canvasRef}
         tabIndex={0}
+        autoFocus
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
