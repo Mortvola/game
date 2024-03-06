@@ -1,4 +1,3 @@
-import { debug } from "console";
 import { Vec2, Vec4, vec2 } from "wgpu-matrix";
 import { Occupant } from "../Workers/PathPlannerTypes";
 import { GridNode } from "./GridNode";
@@ -143,7 +142,6 @@ class UniformGridSearch {
         }
   
         if (slopeError > 0) {
-          console.log(`slopeError: ${slopeError}, ${dx}, ${dy}`)
           y += s;
           slopeError -= 2 * dx
         }
