@@ -7,7 +7,7 @@ import { downloadFbx } from "./Fbx/LoadFbx";
 import ContainerNode from "./Renderer/Drawables/SceneNodes/ContainerNode";
 import { gpu } from "./Renderer/Gpu";
 import { FbxNodeInterface, isFbxContainerNode, isFbxGeometryNode } from "./Fbx/types";
-import { GameObjectRecord, ModelItem, SceneNodeInterface } from "./Renderer/types";
+import { GameObjectRecord, ModelItem, ParticleItem, SceneNodeInterface } from "./Renderer/types";
 import { MaterialDescriptor } from "./Renderer/Materials/MaterialDescriptor";
 import { MaterialRecord, NodeMaterials } from "./game-common/types";
 import Http from "./Http/src";
@@ -94,7 +94,7 @@ class SceneObjectManager {
 
     for (const item of object.object.items) {
       if (item.type === 'model') {
-        const fbxModel = await this.loadFbx(item.item.id);
+        const fbxModel = await this.loadFbx((item.item as ModelItem).id);
 
         if (fbxModel) {
           let node = await this.parseFbxModel(fbxModel, object.name, (item.item as ModelItem).materials)
@@ -105,7 +105,7 @@ class SceneObjectManager {
         }
       }
       else if (item.type === 'particle') {
-        const particleSystem = await particleSystemManager.getParticleSystem(item.item.id)
+        const particleSystem = await particleSystemManager.getParticleSystem((item.item as ParticleItem).id)
 
         if (particleSystem) {
           particleSystem.reset()
