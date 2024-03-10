@@ -628,6 +628,10 @@ class Game implements WorldInterface {
   setParties(parties: Party[]) {
     this.participants.setParties(parties);
   }
+
+  toggleDebugView() {
+    this.renderer.toggleDebugView();
+  }
 }
 
 export default Game;

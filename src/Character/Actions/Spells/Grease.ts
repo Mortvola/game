@@ -10,6 +10,7 @@ import Logger from "../../../Script/Logger";
 import Circle from "../../../Renderer/Drawables/Circle";
 import DrawableNode from "../../../Renderer/Drawables/SceneNodes/DrawableNode";
 import { CreatureActorInterface } from "../../../types";
+import { sceneObjectlManager } from "../../../SceneObjectManager";
 
 class Grease extends AreaSpell {
   constructor(actor: CreatureActorInterface) {
@@ -18,14 +19,11 @@ class Grease extends AreaSpell {
 
   async cast(script: Script): Promise<boolean> {
     if (this.center) {
-      const obj = await DrawableNode.create(new Circle(this.radius, this.radius, vec4.create(0.2, 0.2, 0.2, 1)))
-      obj.translate = vec3.create(this.center[0], 0, this.center[1])
+      const obj = await sceneObjectlManager.getSceneObject('Grease', this.actor.world);      
+      obj.sceneNode.translate = vec3.create(this.center[0], 0, this.center[1])
   
-      this.world.renderer.scene.addNode(obj);
+      this.world.renderer.scene.addNode(obj.sceneNode);
   
-      const q = quat.fromEuler(degToRad(270), 0, 0, "xyz");
-      obj.postTransforms.push(mat4.fromQuat(q));  
-
       const occupant: Occupant = {
         id: getActorId(),
         center: this.center,

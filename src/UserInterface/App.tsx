@@ -318,6 +318,9 @@ function App() {
       case 'ARROWUP':
         game.zoomIn();
         break;
+      case 'V':
+        game.toggleDebugView();
+        break;
     }
   }, [updateDirection])
 

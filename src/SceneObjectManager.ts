@@ -1,4 +1,4 @@
-import { vec4 } from "wgpu-matrix";
+import { vec3, vec4 } from "wgpu-matrix";
 import Mesh from "./Renderer/Drawables/Mesh";
 import { box } from "./Renderer/Drawables/Shapes/box";
 import DrawableNode from "./Renderer/Drawables/SceneNodes/DrawableNode";
@@ -7,7 +7,7 @@ import { downloadFbx } from "./Fbx/LoadFbx";
 import ContainerNode from "./Renderer/Drawables/SceneNodes/ContainerNode";
 import { gpu } from "./Renderer/Gpu";
 import { FbxNodeInterface, isFbxContainerNode, isFbxGeometryNode } from "./Fbx/types";
-import { GameObjectRecord, ModelItem, ParticleItem, SceneNodeInterface } from "./Renderer/types";
+import { DecalItem, GameObjectRecord, ModelItem, ParticleItem, SceneNodeInterface } from "./Renderer/types";
 import { MaterialDescriptor } from "./Renderer/Materials/MaterialDescriptor";
 import { MaterialRecord, NodeMaterials } from "./game-common/types";
 import Http from "./Http/src";
@@ -113,7 +113,16 @@ class SceneObjectManager {
         }
       }
       else if (item.type === 'decal') {
+        const decal = item.item as DecalItem;
 
+        const drawable = await DrawableNode.create(
+          await Mesh.create(box(1, 1, 1)),
+          decal.materialId,
+        )
+
+        drawable.scale = vec3.create(decal.width ?? 1, 1, decal.height ?? 1)
+
+        sceneObject.sceneNode.addNode(drawable)
       }
     }
 
