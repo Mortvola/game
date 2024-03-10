@@ -26,7 +26,11 @@ class Material implements MaterialInterface {
 
   fragBindings: MaterialBindings | null = null;
 
+  lit: boolean;
+
   transparent: boolean;
+
+  decal: boolean;
 
   private constructor(
     shaderDescriptor: ShaderDescriptor | null,
@@ -42,6 +46,8 @@ class Material implements MaterialInterface {
     this.color[2] = shaderDescriptor?.color ? shaderDescriptor.color[2] : 0.5;
     this.color[3] = shaderDescriptor?.color ? shaderDescriptor.color[3] : 1;
     
+    this.decal = shaderDescriptor?.type === 'Decal'
+    this.lit = shaderDescriptor?.lit ?? false;
     this.transparent = shaderDescriptor?.transparent ?? false;
 
     if (pipeline.vertexStageBindings) {
@@ -101,7 +107,15 @@ class Material implements MaterialInterface {
     if (pipeline.fragmentStageBindings) {
       for (const property of pipeline.fragmentStageBindings.properties) {
         if (property.value.dataType === 'texture2D') {
-          const textureId = property.value.value as number;
+          let textureId = property.value.value as number;
+
+          if (materialDescriptor?.properties) {
+            const prop = materialDescriptor.properties.find((p) => p.name === property.name)
+
+            if (prop && prop.value.dataType === 'texture2D') {
+              textureId = prop.value.value as number;
+            }
+          }
 
           let flipY = false;
 
