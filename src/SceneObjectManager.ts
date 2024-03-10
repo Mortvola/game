@@ -45,7 +45,7 @@ class SceneObjectManager {
         let mesh = this.meshes.get(name);
 
         if (!mesh) {
-          mesh = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)));
+          mesh = await Mesh.create(box(0.25, 0.25, 0.25, vec4.create(1, 1, 0, 1)), 1);
           this.meshes.set(name, mesh)
         }
 
@@ -116,7 +116,7 @@ class SceneObjectManager {
         const decal = item.item as DecalItem;
 
         const drawable = await DrawableNode.create(
-          await Mesh.create(box(1, 1, 1)),
+          await Mesh.create(box(1, 1, 1), 1),
           decal.materialId,
         )
 
@@ -175,7 +175,7 @@ class SceneObjectManager {
 
       if (!mesh) {
         // No, create the mesh now.
-        mesh = new Mesh(node.mesh, node.vertices, node.normals, node.texcoords, node.indices);
+        mesh = new Mesh(node.mesh, node.vertices, node.normals, node.texcoords, node.indices, 1);
 
         this.meshes.set(`${name}:${node.name}`, mesh)
       }
