@@ -18,7 +18,7 @@ const SpellSlots: React.FC<PropsType> = ({ character }) => {
     const maxSlots = character.getMaxSpellSlots(level + 1)
 
     levels.push(
-      <SpellLevelSlots level={actionSpellLevel} maxSpellSlots={maxSlots} available={available} />
+      <SpellLevelSlots key={level} level={actionSpellLevel} maxSpellSlots={maxSlots} available={available} />
     )
   }
 

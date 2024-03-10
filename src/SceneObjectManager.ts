@@ -51,7 +51,7 @@ class SceneObjectManager {
 
         const node = await DrawableNode.create(mesh);
 
-        sceneObject = new SceneObject(world)
+        sceneObject = new SceneObject()
         sceneObject.sceneNode.addNode(node);
 
         break;
@@ -75,7 +75,7 @@ class SceneObjectManager {
     return sceneObject;
   }
 
-  async loadFbx(id: number): Promise<FbxNodeInterface | undefined> {
+  private async loadFbx(id: number): Promise<FbxNodeInterface | undefined> {
     let model: FbxNodeInterface | undefined = this.fbxModels.get(id.toString());
 
     if (!model) {
@@ -89,8 +89,8 @@ class SceneObjectManager {
     return model;
   }
 
-  async loadObject(object: GameObjectRecord, world: WorldInterface): Promise<SceneObject | undefined> {
-    const sceneObject = new SceneObject(world);
+  private async loadObject(object: GameObjectRecord, world: WorldInterface): Promise<SceneObject | undefined> {
+    const sceneObject = new SceneObject();
 
     for (const item of object.object.items) {
       if (item.type === 'model') {
@@ -112,6 +112,9 @@ class SceneObjectManager {
           sceneObject.particleSystems.push(particleSystem);
         }
       }
+      else if (item.type === 'decal') {
+
+      }
     }
 
     return sceneObject;
@@ -125,7 +128,7 @@ class SceneObjectManager {
 
   shaderMap: Map<number, ShaderDescriptor> = new Map();
 
-  async parseFbxModel(
+  private async parseFbxModel(
     node: FbxNodeInterface,
     name: string,
     nodeMaterials?: NodeMaterials,
@@ -186,7 +189,7 @@ class SceneObjectManager {
     }
   }
 
-  async getMaterial(id: number): Promise<MaterialDescriptor | undefined> {
+  private async getMaterial(id: number): Promise<MaterialDescriptor | undefined> {
     let material = this.materialDescrMap.get(id);
 
     if (!material) {

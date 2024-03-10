@@ -21,17 +21,17 @@ const Actions: React.FC<PropsType> = ({
     <div className={styles.actionList}>
       {
         actor.character.spells.map((s) => (
-          <SpellAction actor={actor} spell={s} />
+          <SpellAction key={s.name} actor={actor} spell={s} />
         ))
       }
       {
         actor.character.cantrips.map((s) => (
-          <SpellAction actor={actor} spell={s} />
+          <SpellAction key={s.name} actor={actor} spell={s} />
         ))
       }
       {
         actor.character.charClass.actions.map((a) => (
-          <Action actor={actor} action={a} />
+          <Action key={a.name} actor={actor} action={a} />
         ))
       }
     </div>

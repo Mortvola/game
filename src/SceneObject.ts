@@ -1,6 +1,6 @@
 import ContainerNode from "./Renderer/Drawables/SceneNodes/ContainerNode";
 import { ParticleSystemInterface } from "./Renderer/types";
-import { SceneObjectInterface, WorldInterface } from "./types";
+import { SceneObjectInterface } from "./types";
 
 class SceneObject implements SceneObjectInterface {
   particleSystems: ParticleSystemInterface[] = []
@@ -8,12 +8,6 @@ class SceneObject implements SceneObjectInterface {
   children: SceneObject[] = []
 
   sceneNode = new ContainerNode()
-
-  world: WorldInterface
-
-  constructor(world: WorldInterface) {
-    this.world = world
-  }
 
   async update(time: number, elapsedTime: number): Promise<void> {
     for (const ps of this.particleSystems) {
