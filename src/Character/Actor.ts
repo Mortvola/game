@@ -15,11 +15,12 @@ import { meleeAttack } from "./Actions/MeleeAttack";
 import { rangeAttack } from "./Actions/RangeAttack";
 import { sceneObjectlManager } from "../SceneObjectManager";
 import { PathPoint } from "../Workers/PathPlannerTypes";
-import { ActionFactory, ActionInterface, CharacterInterface, CreatureActorInterface, SceneObjectInterface, ShotData, States, WorldInterface } from "../types";
+import { ActionFactory, ActionInterface, CharacterInterface, CreatureActorInterface, ShotData, States, WorldInterface } from "../types";
 import { DamageType, Weapon, WeaponType } from "./Equipment/Types";
 import MoveAction from "./Actions/MoveAction";
 import { makeObservable, observable, runInAction } from "mobx";
 import RangeCircle from "../Renderer/Drawables/RangeCircle";
+import { SceneObjectInterface } from "../Renderer/types";
 
 export const pathFinder: UniformGridSearch = new JumpPointSearch(512, 512, 16);
 

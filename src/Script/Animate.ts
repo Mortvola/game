@@ -1,7 +1,7 @@
 import { isContainerNode } from "../Renderer/Drawables/SceneNodes/ContainerNode";
 import { isDrawableNode } from "../Renderer/Drawables/SceneNodes/utils";
-import { SceneNodeInterface } from "../Renderer/types";
-import { ActorInterface, SceneObjectInterface, WorldInterface } from "../types";
+import { SceneNodeInterface, SceneObjectInterface } from "../Renderer/types";
+import { ActorInterface, WorldInterface } from "../types";
 
 class Animate implements ActorInterface {
   startTime: number | null = null;

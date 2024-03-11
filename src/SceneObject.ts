@@ -1,6 +1,5 @@
 import ContainerNode from "./Renderer/Drawables/SceneNodes/ContainerNode";
-import { ParticleSystemInterface } from "./Renderer/types";
-import { SceneObjectInterface } from "./types";
+import { ParticleSystemInterface, SceneObjectInterface } from "./Renderer/types";
 
 class SceneObject implements SceneObjectInterface {
   particleSystems: ParticleSystemInterface[] = []
