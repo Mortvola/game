@@ -2,31 +2,39 @@ import { bloom } from "../RenderSetings";
 import RenderPass from "./RenderPass";
 
 class ForwardRenderPass extends RenderPass {
+  label: string
+
+  constructor(label: string) {
+    super()
+    this.label = label;
+  }
+
   getDescriptor(
     view: GPUTextureView,
-    bright: GPUTextureView,
+    bloom: GPUTextureView,
+    loadBloom: boolean,
     depthView: GPUTextureView | null,
   ): GPURenderPassDescriptor {
     const colorAttachments: GPURenderPassColorAttachment[] = [
       {
         view,
         clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
-        loadOp: "load" as GPULoadOp,
-        storeOp: "store" as GPUStoreOp,
+        loadOp: "load",
+        storeOp: "store",
       },
     ]
 
     if (bloom) {
       colorAttachments.push({
-        view: bright,
+        view: bloom,
         clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
-        loadOp: "load" as GPULoadOp,
-        storeOp: "store" as GPUStoreOp,
+        loadOp: loadBloom ? "load" : "clear",
+        storeOp: "store",
       })
     }
 
     const descriptor: GPURenderPassDescriptor = {
-      label: 'forward render pass',
+      label: this.label,
       colorAttachments,
     };
 
@@ -34,8 +42,8 @@ class ForwardRenderPass extends RenderPass {
       descriptor.depthStencilAttachment = {
         view: depthView,
         depthClearValue: 1.0,
-        depthLoadOp: "load" as GPULoadOp,
-        depthStoreOp: "store" as GPUStoreOp,
+        depthLoadOp: "load",
+        depthStoreOp: "store",
       };
     }
 
@@ -44,12 +52,13 @@ class ForwardRenderPass extends RenderPass {
 
   render(
     view: GPUTextureView,
-    bright: GPUTextureView,
+    bloom: GPUTextureView,
+    loadBloom: boolean,
     depthView: GPUTextureView | null,
     commandEncoder: GPUCommandEncoder,
     frameBindGroup: GPUBindGroup,
   ) {
-    const passEncoder = commandEncoder.beginRenderPass(this.getDescriptor(view, bright, depthView!));
+    const passEncoder = commandEncoder.beginRenderPass(this.getDescriptor(view, bloom, loadBloom, depthView!));
 
     passEncoder.setBindGroup(0, frameBindGroup);
 

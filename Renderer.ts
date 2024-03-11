@@ -52,8 +52,6 @@ type BindGroup = {
 }
 
 class Renderer implements RendererInterface {
-  initialized = false;
-
   frameBindGroup: BindGroup | null = null;
 
   render = true;
@@ -96,9 +94,9 @@ class Renderer implements RendererInterface {
 
   combinePass: CombinePass | null = null;
 
-  unlitRenderPass: ForwardRenderPass | null = new ForwardRenderPass();
+  unlitRenderPass: ForwardRenderPass | null = new ForwardRenderPass('Unlit Render Pass');
 
-  transparentPass: ForwardRenderPass | null = new ForwardRenderPass();
+  transparentPass: ForwardRenderPass | null = new ForwardRenderPass('Transparent Render Pass');
 
   renderPass2D = new RenderPass2D();
 
@@ -117,6 +115,8 @@ class Renderer implements RendererInterface {
   particleSystems: ParticleSystemInterface[] = [];
 
   timeBuffer = new Float32Array(1)
+
+  debugView = false;
 
   constructor(frameBindGroupLayout: GPUBindGroupLayout, cartesianAxes: DrawableNode, floor?: SceneNodeInterface) {
     this.createCameraBindGroups(frameBindGroupLayout);
@@ -151,7 +151,7 @@ class Renderer implements RendererInterface {
 
     this.lights.push(light)
 
-    this.scene.updateTransforms(this);
+    this.scene.updateTransforms(null);
   }
 
   static async create() {
@@ -160,7 +160,7 @@ class Renderer implements RendererInterface {
 
     const cartesianAxes = await DrawableNode.create(new CartesianAxes(), { shaderDescriptor: lineMaterial })
     
-    const quad = await Mesh.create(plane(50, 50, [1, 1, 1, 1]))
+    const quad = await Mesh.create(plane(50, 50, [1, 1, 1, 1]), 0)
     const floor = await DrawableNode.create(quad, { shaderDescriptor: { lit: true }})
     floor.postTransforms.push(mat4.fromQuat(quat.fromEuler(degToRad(270), 0, 0, "xyz")))
 
@@ -188,8 +188,6 @@ class Renderer implements RendererInterface {
     this.camera.computeViewTransform();
 
     this.scene2d.setCanvasDimensions(canvas.width, canvas.height);
-
-    this.initialized = true;
   }
 
   createCameraBindGroups(frameBindGroupLayout: GPUBindGroupLayout) {
@@ -484,38 +482,45 @@ class Renderer implements RendererInterface {
         this.frameBindGroup.bindGroup,
       );
 
-      this.decalPass!.render(this.decalView!, this.depthTextureView!, commandEncoder, this.frameBindGroup.bindGroup)
-
-      this.combinePass!.render(
-        this.screenTextureView!,
-        commandEncoder,
-        this.frameBindGroup.bindGroup,
-      )
-
-      const bloomView = this.bloomPass?.bloomTextureView
-
-      this.unlitRenderPass!.render(
-        this.screenTextureView!,
-        bloomView!,
-        this.depthTextureView!,
-        commandEncoder,
-        this.frameBindGroup.bindGroup,
-      )
-
-      this.transparentPass!.render(
-        this.screenTextureView!,
-        bloomView!,
-        this.depthTextureView!,
-        commandEncoder,
-        this.frameBindGroup.bindGroup,
-      )
-
-      if (this.bloomPass) {
-        this.bloomPass.render(canvasView, commandEncoder);      
+      if (this.debugView) {
+        this.decalPass!.render(canvasView, this.depthTextureView!, commandEncoder, this.frameBindGroup.bindGroup)
       }
+      else {
+        this.decalPass!.render(this.decalView!, this.depthTextureView!, commandEncoder, this.frameBindGroup.bindGroup)
 
-      if (this.outlinePass && this.outlineMesh) {
-        this.outlinePass.render(canvasView, this.frameBindGroup.bindGroup, this.outlineMesh, commandEncoder)
+        this.combinePass!.render(
+          this.screenTextureView!,
+          commandEncoder,
+          this.frameBindGroup.bindGroup,
+        )
+
+        const bloomView = this.bloomPass?.bloomTextureView
+
+        this.unlitRenderPass!.render(
+          this.screenTextureView!,
+          bloomView!,
+          false,
+          this.depthTextureView!,
+          commandEncoder,
+          this.frameBindGroup.bindGroup,
+        )
+
+        this.transparentPass!.render(
+          this.screenTextureView!,
+          bloomView!,
+          true,
+          this.depthTextureView!,
+          commandEncoder,
+          this.frameBindGroup.bindGroup,
+        )
+
+        if (this.bloomPass) {
+          this.bloomPass.render(canvasView, commandEncoder);      
+        }
+
+        if (this.outlinePass && this.outlineMesh) {
+          this.outlinePass.render(canvasView, this.frameBindGroup.bindGroup, this.outlineMesh, commandEncoder)
+        }
       }
 
       // this.renderPass2D.render(canvasView, this.depthTextureView!, commandEncoder, this.frameBindGroup.bindGroup, this.scene2d);
@@ -584,6 +589,10 @@ class Renderer implements RendererInterface {
 
   canvasResize(width: number, height: number, scaleX: number, scaleY: number, viewportWidth: number, viewportHeight: number) {
     this.scene2d.setCanvasDimensions(width, height, scaleX, scaleY, viewportWidth, viewportHeight)
+  }
+
+  toggleDebugView() {
+    this.debugView = !this.debugView;
   }
 }
 
