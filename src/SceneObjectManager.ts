@@ -7,7 +7,7 @@ import { downloadFbx } from "./Fbx/LoadFbx";
 import ContainerNode from "./Renderer/Drawables/SceneNodes/ContainerNode";
 import { gpu } from "./Renderer/Gpu";
 import { FbxNodeInterface, isFbxContainerNode, isFbxGeometryNode } from "./Fbx/types";
-import { DecalItem, GameObjectRecord, ModelItem, ParticleItem, SceneNodeInterface } from "./Renderer/types";
+import { DecalItem, GameObjectRecord, LightItem, ModelItem, ParticleItem, SceneNodeInterface } from "./Renderer/types";
 import { MaterialDescriptor } from "./Renderer/Materials/MaterialDescriptor";
 import { MaterialRecord, NodeMaterials } from "./game-common/types";
 import Http from "./Http/src";
@@ -15,6 +15,7 @@ import { ShaderDescriptor } from "./Renderer/shaders/ShaderDescriptor";
 import { particleSystemManager } from "./Renderer/ParticleSystemManager";
 import SceneObject from "./SceneObject";
 import { WorldInterface } from "./types";
+import Light from "./Renderer/Drawables/Light";
 
 class SceneObjectManager {
   meshes: Map<string, Drawable> = new Map();
@@ -123,6 +124,23 @@ class SceneObjectManager {
         drawable.scale = vec3.create(decal.width ?? 1, 1, decal.height ?? 1)
 
         sceneObject.sceneNode.addNode(drawable)
+      }
+      else if (item.type === 'light') {
+        const lightItem = item.item as LightItem
+
+        const light = new Light()
+
+        light.lightColor[0] = lightItem.color[0];
+        light.lightColor[1] = lightItem.color[1];
+        light.lightColor[2] = lightItem.color[2];
+        light.lightColor[3] = lightItem.color[3];
+        
+        light.constant = lightItem.constant;
+        light.linear = lightItem.linear;
+        light.quadratic = lightItem.quadratic;
+        
+        sceneObject.sceneNode.addNode(light)    
+
       }
     }
 
